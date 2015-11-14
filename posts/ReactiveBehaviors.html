@@ -91,9 +91,20 @@
                         <div class="container">
                                 <div class="row">
                                         <div class="col-md-12">
-                                                        <div class="site-heading">
-                                                                <h1>Reactive Behaviors</h1>
-                                                        </div>
+
+    <div class="post-heading">
+        <h1>Reactive Behaviors</h1>
+            <h2 class="subheading">Encapsulating discreet behaviors with Rx</h2>
+        <div class="meta">
+                Published on 14 November 2015<br>
+                    </div>
+            <div class="tags">
+
+<a role="button" href="/tags/bdd" class="btn btn-default btn-sm"> BDD</a>
+<a role="button" href="/tags/behavioral" class="btn btn-default btn-sm"> Behavioral</a>
+<a role="button" href="/tags/reactive" class="btn btn-default btn-sm"> Reactive</a>
+<a role="button" href="/tags/rx" class="btn btn-default btn-sm"> Rx</a>            </div>
+    </div>
                                         </div>
                                 </div>
                         </div>
@@ -103,7 +114,12 @@
                 <div class="container">
                         <div class="row">
                                 <div class="col-md-12">
-                                        <p>I am a firm believer in the notion &quot;<a href="http://slides.com/robwormald/everything-is-a-stream#/" title="Everything is a stream - Rob Wormald">Everything</a> <a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754" title="The introduction to Reactive Programming you've been missing - andrestaltz">is</a> <a href="http://weareadaptive.com/blog/2014/05/05/everything-is-a-stream/" title="Reactive Trader 2: Everything is a Stream - Matt Barrett">a</a> <a href="http://colintheshots.com/blog/?p=85" title="Be Reactive - Colintheshots">stream</a>&quot;. After all, at it's root what is a computer program but a stream of instructions toggling the state of transistors on the CPU die. As such, I have been gradually moving away from traditional imperative coding and embracing a declarative approach to implementing behavior.</p>
+                                        
+
+
+
+
+<p>I am a firm believer in the notion &quot;<a href="http://slides.com/robwormald/everything-is-a-stream#/" title="Everything is a stream - Rob Wormald">Everything</a> <a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754" title="The introduction to Reactive Programming you've been missing - andrestaltz">is</a> <a href="http://weareadaptive.com/blog/2014/05/05/everything-is-a-stream/" title="Reactive Trader 2: Everything is a Stream - Matt Barrett">a</a> <a href="http://colintheshots.com/blog/?p=85" title="Be Reactive - Colintheshots">stream</a>&quot;. After all, at it's root what is a computer program but a stream of instructions toggling the state of transistors on the CPU die. As such, I have been gradually moving away from traditional imperative coding and embracing a declarative approach to implementing behavior.</p>
 <p>Starting with the UI, my <a href="https://github.com/ibebbs/Caliburn.Micro.Reactive.Extensions" title="Caliburn.Micro.Reactive.Extensions Github Repository">Reactive Extensions for Caliburn Micro</a> allowed me to escape the scourge of state variables and property change non-sense and have read-model changes update the view or user input changes update the view model in a declarative fashion.</p>
 <p>With this in place, I sort of stumbled onto a pattern I quite liked and gradually developed into a pattern I am now referring to as &quot;Reactive Behaviors&quot;. To explain this pattern, lets take a basic example of a log in page for an application.</p>
 <p>Traditionally, in WPF MVVM parlance, the view model for the log in page might look something like this:</p>
@@ -352,6 +368,30 @@
 <p>While this example targets the UI and leverages Caliburn Micro with Reactive Extensions for projection to IObservable<T> instances (and property change notification), this pattern can be employed across any class which treats inputs and outputs as a stream.</p>
 <p>I have been employing this pattern very successfully across a variety of functional layers for quite some time now. I'd be really interested to hear your thoughts.</p>
 
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    /*
+    var disqus_config = function () {
+        this.page.url = 'http://www.ian.bebbs.co.uk/posts/ReactiveBehaviors';  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = ReactiveBehaviors; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+        var d = document, s = d.createElement('script');
+
+        s.src = '//ibebbs.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
 
                                 </div>
                         </div>
