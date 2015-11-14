@@ -1,0 +1,415 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+	<title>Ian Bebbington - Reactive Behaviors</title>
+        <meta name="description" content="The personal blog of Ian Bebbington" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+        <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
+
+        <link href="/Content/bootstrap/bootstrap.css" rel="stylesheet" />
+        <link href="/Content/prettify.css" rel="stylesheet">
+        <link href="/Content/github.css" rel="stylesheet">
+        <link href="/Content/clean-blog.css" rel="stylesheet" />
+        <link href="/Content/master.css" rel="stylesheet" />
+        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Reactive Behaviors" />
+        
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/ReactiveBehaviors" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/Scripts/jquery-2.1.1.min.js"></script>
+        <script src="/Scripts/bootstrap.min.js"></script>
+        <script src="/Scripts/prettify.js"></script>
+        <script src="/Scripts/clean-blog.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="/Scripts/trianglify.min.js"></script>
+        <script src="/Scripts/Please-compressed.js"></script>
+        </script>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+                <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+	</head>
+	<body onload="prettyPrint()">
+
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                <li><a href="https://github.com/ibebbs">Github</a></li>
+                                                <li><a class="hidden-xs">|</a><a class="visible-xs-block">-</a></li>
+                                                <li><a href="/about">About</a></li>
+                                                <li><a href="/posts">Archive</a></li>
+                                                <li><a href="/tags">Tags</a></li>
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+                                                        <div class="site-heading">
+                                                                <h1>Reactive Behaviors</h1>
+                                                        </div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div class="col-md-12">
+                                        <p>I am a firm believer in the notion &quot;<a href="http://slides.com/robwormald/everything-is-a-stream#/" title="Everything is a stream - Rob Wormald">Everything</a> <a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754" title="The introduction to Reactive Programming you've been missing - andrestaltz">is</a> <a href="http://weareadaptive.com/blog/2014/05/05/everything-is-a-stream/" title="Reactive Trader 2: Everything is a Stream - Matt Barrett">a</a> <a href="http://colintheshots.com/blog/?p=85" title="Be Reactive - Colintheshots">stream</a>&quot;. After all, at it's root what is a computer program but a stream of instructions toggling the state of transistors on the CPU die. As such, I have been gradually moving away from traditional imperative coding and embracing a declarative approach to implementing behavior.</p>
+<p>Starting with the UI, my <a href="https://github.com/ibebbs/Caliburn.Micro.Reactive.Extensions" title="Caliburn.Micro.Reactive.Extensions Github Repository">Reactive Extensions for Caliburn Micro</a> allowed me to escape the scourge of state variables and property change non-sense and have read-model changes update the view or user input changes update the view model in a declarative fashion.</p>
+<p>With this in place, I sort of stumbled onto a pattern I quite liked and gradually developed into a pattern I am now referring to as &quot;Reactive Behaviors&quot;. To explain this pattern, lets take a basic example of a log in page for an application.</p>
+<p>Traditionally, in WPF MVVM parlance, the view model for the log in page might look something like this:</p>
+<pre class="prettyprint"><code>public class LogInPageViewModel : Screen, ILogInPageViewModel
+{
+    private readonly IAuthenticationService _authenticationService;
+
+    private readonly DelegateCommand _logInCommand;
+    private readonly DelegateCommand _cancelCommand;
+
+    private CancellationTokenSource _cts;
+
+    private string _username;
+    private string _password;
+    private string _error;
+
+    public LogInPageViewModel(IAuthenticationService authenticationService)
+    {
+        _authenticationService = authenticationService;
+
+        _cts = new CancellationTokenSource();
+        _logInCommand = new DelegateCommand(CanLogIn, PerformLogIn);
+        _cancelCommand = new DelegateCommand(_ =&gt; true, CancelLogIn);
+    }
+
+    public void Dispose()
+    {
+        if (_cts != null)
+        {
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = null;
+        }
+    }
+
+    private bool CanLogIn(object parameter)
+    {
+        return (!string.IsNullOrWhiteSpace(_username) &amp;&amp; !string.IsNullOrWhiteSpace(_password));
+    }
+
+    private async void PerformLogIn(object parameter)
+    {
+        AuthenticationResponse response = await _authenticationService.AuthenticateAsync(new AuthenticationRequest(_username, _password), _cts.Token);
+
+        if (response.Successful)
+        {
+            TryClose(true);
+        }
+        else
+        {
+            Error = response.Error.Message;
+        }
+    }
+
+    private void CancelLogIn(object parameter)
+    {
+        TryClose(false);
+    }
+
+    public string Username
+    {
+        get { return _username; }
+        set
+        {
+            if (!string.Equals(value, _username))
+            {
+                _username = value;
+
+                NotifyOfPropertyChange(() =&gt; Username);
+
+                _logInCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public string Password
+    {
+        get { return _password; }
+        set
+        {
+            if (!string.Equals(value, _password))
+            {
+                _password = value;
+
+                NotifyOfPropertyChange(() =&gt; Password);
+
+                _logInCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public string Error
+    {
+        get { return _error; }
+        private set
+        {
+            if (!string.Equals(value, _error))
+            {
+                _error = value;
+
+                NotifyOfPropertyChange(() =&gt; Error);
+            }
+        }
+    }
+
+    public ICommand LogInCommand
+    {
+        get { return _logInCommand; }
+    }
+}
+
+</code></pre>
+<p>As we can see, we have a bunch of state variables that are updated from property setters and when certain state variables are updated we need to perform specific actions. Now, can you quickly identify all the behaviors of this view model?</p>
+<p>Well, it's not a complicated view model so it'll probably just take a few minutes to work out the behaviors. To summarize, they are:</p>
+<ul>
+<li>When the user has entered a value in both the user name and password text boxes then enable the &quot;Log in&quot; button</li>
+<li>When the user clicks the &quot;Log in&quot; button, asynchronously attempt to log in with the supplied credentials.</li>
+<li>When a successful login attempt is made, close the dialog</li>
+<li>When an unsuccessful login attempt is made, display an error</li>
+<li>When the user clicks the &quot;Cancel&quot; button, close the dialog</li>
+</ul>
+<p>But that took a few minutes of scanning back and forth over the class right? Also, while we have been good developers and applied DRY by centralizing the logic to determine when the log in button should be enabled, in order to know under what circumstances the logic will be called, we need to perform a &quot;Find References&quot; on the method. The cause and effect of this behavior are <strong>disassociated</strong>. In fact, in this instance it's event worse, as this method is only passed to the <code>DelegateCommand</code> instance, we have to <em>know</em> that the <code>DelegateCommand</code> will invoke this method everytime the <code>RaiseCanExecuteChanged</code> is called <em>and then</em> perform another &quot;Find References&quot; to find all the locations <code>RaiseCanExecuteChanged</code> is called. Phew!</p>
+<p>Wouldn't it be better if we could somehow centralize this logic in discreet methods with names that describe exactly the behavior of the class? Ladies and gentlemen, I present to you the same class re-written using &quot;Reactive Behaviors&quot;:</p>
+<pre class="prettyprint"><code>public class LogInPageViewModel : Screen, ILogInPageViewModel
+{
+    private readonly IAuthenticationService _authenticationService;
+
+    private ObservableProperty&lt;string&gt; _username;
+    private ObservableProperty&lt;string&gt; _password;
+    private ObservableProperty&lt;string&gt; _error;
+    private ObservableCommand _logInCommand;
+    private ObservableCommand _cancelCommand;
+
+    private Subject&lt;AuthenticationResponse&gt; _logInResponse;
+
+    private IDisposable _behaviors;
+
+    public LogInPageViewModel(IAuthenticationService authenticationService)
+    {
+        _authenticationService = authenticationService;
+
+        _username = new ObservableProperty&lt;string&gt;(this, () =&gt; Username);
+        _password = new ObservableProperty&lt;string&gt;(this, () =&gt; Password);
+        _error = new ObservableProperty&lt;string&gt;(this, () =&gt; Error);
+        _logInCommand = new ObservableCommand();
+        _cancelCommand = new ObservableCommand();
+
+        _logInResponse = new Subject&lt;AuthenticationResponse&gt;();
+
+        _behaviors = new CompositeDisposable(
+            WhenTheUserHasEnteredBothUsernameAndPasswordThenEnableLogInButton(),
+            WhenTheUserClicksTheLogInButtonAttemptToLogIn(),
+            WhenASuccessfulLogInAttemptIsMadeCloseTheDialog(),
+            WhenAnUnsuccessfulLogInAttemptIsMadeDisplayTheError(),
+            WhenTheUserClicksTheCancelButtonCloseTheDialog()
+        );
+    }
+
+    public void Dispose()
+    {
+        if (_behaviors != null)
+        {
+            _behaviors.Dispose();
+            _behaviors = null;
+        }
+    }
+
+    private IDisposable WhenTheUserHasEnteredBothUsernameAndPasswordThenEnableLogInButton()
+    {
+        return Observable
+            .CombineLatest(_username, _password, (username, password) =&gt; !string.IsNullOrWhiteSpace(username) &amp;&amp; !string.IsNullOrWhiteSpace(password))
+            .Subscribe(_logInCommand);
+    }
+
+    private IDisposable WhenTheUserClicksTheLogInButtonAttemptToLogIn()
+    {
+        return _logInCommand
+            .SelectMany(_ =&gt; Observable.CombineLatest(_username, _password, (username, password) =&gt; new AuthenticationRequest(username, password)).Take(1))
+            .SelectMany(request =&gt; _authenticationService.AuthenticateAsync(request))
+            .Subscribe(_logInResponse);
+    }
+
+    private IDisposable WhenASuccessfulLogInAttemptIsMadeCloseTheDialog()
+    {
+        return _logInResponse
+            .Where(response =&gt; response.Successful)
+            .Subscribe(response =&gt; TryClose(true));
+    }
+
+    private IDisposable WhenAnUnsuccessfulLogInAttemptIsMadeDisplayTheError()
+    {
+        return _logInResponse
+            .Where(response =&gt; !response.Successful)
+            .Select(response =&gt; response.Error.Message)
+            .Subscribe(_error);
+    }
+
+    private IDisposable WhenTheUserClicksTheCancelButtonCloseTheDialog()
+    {
+        return _cancelCommand
+            .Subscribe(_ =&gt; TryClose(false));
+    }
+
+    public string Username
+    {
+        get { return _username.Get(); }
+        set { _username.Set(value); }
+    }
+
+    public string Password
+    {
+        get { return _password.Get(); }
+        set { _password.Set(value); }
+    }
+
+    public string Error
+    {
+        get { return _error.Get(); }
+    }
+
+    public ICommand LogInCommand
+    {
+        get { return _logInCommand; }
+    }
+
+    public ICommand CancelCommand
+    {
+        get { return _cancelCommand; }
+    }
+}
+</code></pre>
+<p>As shown, the constructor instantiates a <code>CompositeDisposable</code> containing calls to methods implementing the behavior of the class and which return an <code>IDisposable</code> that, when disposed, will tear down the behavior. Each method is named after exactly one desired behavior and comprises a subscription to all the required inputs for the behavior, a series of projections which implement the behavior and, finally, a subscription which surfaces the result of the behavior.</p>
+<p>Lets take the example of the <code>WhenTheUserHasEnteredBothUsernameAndPasswordThenEnableLogInButton</code> method. Here we subscribe to both the <code>_username</code> and <code>_password</code> properties, and use a selector function to return a boolean indicating whether they're both populated. The <code>_logInCommand</code> subscribes to the result which will enable or disable the command (by raising CanExecuteChanged events) appropriately.</p>
+<p>Furthermore, by leveraging Observables we become thread safe. It doesn't matter on which thread the source properties are updated from, the behavior will be performed and output applied without the risk of missing values or race-conditions between updates to the appropriate inputs.</p>
+<p>With behaviors implemented in this fashion, behavioral unit testing becomes incredibly obvious. Simply copy the behavior method names into your test fixture and assert that it performs as expected.</p>
+<p>I believe this pattern provides numerous benefits:</p>
+<ul>
+<li>Promotes behavior driven development and unit testing.</li>
+<li>Promotes functional and thread safe programming practises.</li>
+<li>Reduces the risk off (and if done well, can eliminate) side effects as specific behaviors are isolated in a single well named method.</li>
+<li>Stops 'code rot' as all behavior is encapsulated within specifically named methods. Want new behaviour? Add a new method. Don't want a specific behavior anymore? Just removed it. Want a specific behavior to change? Change the one method and know that you haven't broken anything else.</li>
+<li>Provides concise mechanisms for aggregating multiple inputs and promotes asynchronous processes to first-class status.</li>
+<li>Reduces the need for utility classes as data can be passed through the pipeline as strongly typed anonymous classes.</li>
+<li>Prevents memory leaks as all behaviors return a disposable that when disposed removes all subscriptions and disposed all managed resources.</li>
+</ul>
+<p>While this example targets the UI and leverages Caliburn Micro with Reactive Extensions for projection to IObservable<T> instances (and property change notification), this pattern can be employed across any class which treats inputs and outputs as a stream.</p>
+<p>I have been employing this pattern very successfully across a variety of functional layers for quite some time now. I'd be really interested to hear your thoughts.</p>
+
+
+                                </div>
+                        </div>
+                </div>
+
+                <hr>
+
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+                                        <ul class="list-inline text-center">
+                                                <li>
+                                                <a href="https://twitter.com/ibebbs">
+                                                        <span class="fa-stack fa-lg">
+                                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                                        <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                                                        </span>
+                                                </a>
+                                                </li>
+                                                <li>
+                                                <a href="https://github.com/ibebbs">
+                                                        <span class="fa-stack fa-lg">
+                                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                                        </span>
+                                                </a>
+                                                </li>
+                                        </ul>
+                                        <p class="copyright text-muted">
+                                                Copyright © 2015 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                                <br />
+                                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                                <br />
+                                                <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
+                                        </p>
+                                        </div>
+                                </div>
+                        </div>
+                </footer>
+
+                <script type="text/javascript">
+                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+                        var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
+
+                        /* * * DON'T EDIT BELOW THIS LINE * * */
+                        (function () {
+                                var s = document.createElement('script'); s.async = true;
+                                s.type = 'text/javascript';
+                                s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+                                (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+                        }());
+
+                        // Background
+                        var header = document.getElementById("intro-header");
+
+                        header.setAttribute('style', 'background-image: ' + '/Content/posts/header-stripe.png');
+                </script>
+        </body>
+</html>
