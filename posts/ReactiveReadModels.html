@@ -1,0 +1,362 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+	<title>Ian Bebbington - Reactive ReadModels</title>
+        <meta name="description" content="The personal blog of Ian Bebbington" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+        <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
+
+        <link href="/Content/bootstrap/bootstrap.css" rel="stylesheet" />
+        <link href="/Content/prettify.css" rel="stylesheet">
+        <link href="/Content/github.css" rel="stylesheet">
+        <link href="/Content/clean-blog.css" rel="stylesheet" />
+        <link href="/Content/master.css" rel="stylesheet" />
+        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Reactive ReadModels" />
+        
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/ReactiveReadModels" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/Scripts/jquery-2.1.1.min.js"></script>
+        <script src="/Scripts/bootstrap.min.js"></script>
+        <script src="/Scripts/prettify.js"></script>
+        <script src="/Scripts/clean-blog.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="/Scripts/trianglify.min.js"></script>
+        <script src="/Scripts/Please-compressed.js"></script>
+        </script>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+                <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+	</head>
+	<body onload="prettyPrint()">
+
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                <li><a href="https://github.com/ibebbs">Github</a></li>
+                                                <li><a class="hidden-xs">|</a><a class="visible-xs-block">-</a></li>
+                                                <li><a href="/about">About</a></li>
+                                                <li><a href="/posts">Archive</a></li>
+                                                <li><a href="/tags">Tags</a></li>
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    <div class="post-heading">
+        <h1>Reactive ReadModels</h1>
+            <h2 class="subheading">A functional approach to building ReadModels with Rx</h2>
+        <div class="meta">
+                Published on 23 November 2015<br>
+                    </div>
+            <div class="tags">
+
+<a role="button" href="/tags/events" class="btn btn-default btn-sm"> Events</a>
+<a role="button" href="/tags/eventsourcing" class="btn btn-default btn-sm"> EventSourcing</a>
+<a role="button" href="/tags/reactive" class="btn btn-default btn-sm"> Reactive</a>
+<a role="button" href="/tags/rx" class="btn btn-default btn-sm"> Rx</a>            </div>
+    </div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div class="col-md-12">
+                                        
+
+
+
+
+<p>If you're starting out with <a href="http://docs.geteventstore.com/introduction/event-sourcing-basics/" title="Event Sourcing Basics at GetEventStore">Event Sourcing</a> you're probably looking for the ability to project events into <a href="http://cqrs.nu/tutorial/cs/03-read-models" title="CQRS tutorial - Read Models">read models</a> that can be used by the views in your application. Today I'd like to share a neat little mechanism I've established for building read model in C# by employing a strongly typed yet functional approach.</p>
+<p>Starting with infrastructure, you probably have some form event distribution mechanism, normally a pub/sub style bus. From this bus you need to be able to selectively subscribe to all the events you need to collate the information required by your read model. Furthermore, you will often need to initialize the read model with information from a persistent store - often this is a persistent store of the read model itself but this isn't necessarily the case. Lastly, your application must be able to request a specific read model and receive notifications when the read model changes.</p>
+<p>To illustrate how this might be achieved, I have written a small sample project following the traditional Account/Order model that features the following components:</p>
+<p><img src="/Content/posts/ReactiveReadModels-SampleComponents.png" alt="Sample Components" class="img-responsive" style="margin-left: auto; margin-right: auto; margin-top: 4px; margin-bottom: 4px"></p>
+<p>In this system, the application is able to request a stream of read models from a repository. The repository will retrieve initial read model state from a persistence service and then subscribe to events from an event bus to continually update and publish the read model. Only read models the application needs should be published and only events the read model requires should be processed.</p>
+<p>By leveraging Rx we're able to implement a stub of the repository very easily as follows:</p>
+<pre class="prettyprint"><code>public class Repository
+{
+    private readonly Service.IAccountService _accountService;
+    private readonly IEventAggregator _bus;
+
+    public Repository(Service.IAccountService accountService, IEventAggregator bus)
+    {
+        _accountService = accountService;
+        _bus = bus;
+    }
+
+    public IObservable&lt;ReadModel&gt; For(Guid id)
+    {
+        if (id == null) throw new ArgumentNullException(&quot;id&quot;);
+
+        return Observable.Create&lt;ReadModel&gt;(
+            async observer =&gt;
+            {
+                Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
+
+                ReadModel readModel = accountInfo.ToReadModel();
+
+                // Subscribe to events and apply to read model
+
+                return Observable.StartWith(readModel).Subscribe(observer);
+            }
+        );
+    }
+}
+</code></pre>
+<p>This code is written such that, when an observer <em>subscribes</em> to the <code>IObservable&lt;ReadModel&gt;</code> returned from the <code>For</code> method, an asynchronous request will be made to the <code>IAccountService</code> for the initial state of the read model, a <code>ReadModel</code> instance will be constructed from the information returned by the  service and finally the <code>ReadModel</code> will be emitted to the subscriber. Note that the observable is deliberately left incomplete to indicate the further <code>ReadModel</code> instances might be emitted.</p>
+<p>Now we have the current read model, we need to subscribe to events from the event bus that represent changes pertinent to the read model and, when received, modify and emit the read model so that the subscriber is always up to date.</p>
+<p>To do this, we might think to write something like this:</p>
+<pre class="prettyprint"><code>public IObservable&lt;ReadModel&gt; For(Guid id)
+{
+    if (id == null) throw new ArgumentNullException(&quot;id&quot;);
+
+    return Observable.Create&lt;ReadModel&gt;(
+        async observer =&gt;
+        {
+            Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
+
+            ReadModel readModel = accountInfo.ToReadModel();
+
+            return new CompositeDisposable(
+                _bus.GetEvent&lt;Event.AccountNameChanged&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Select(@event =&gt; readModel.WithAccountName(@event.AccountName)).Subscribe(observer),
+                _bus.GetEvent&lt;Event.AddBillingAddress&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Select(@event =&gt; readModel.WithBillingAddress(new Address(@event.AddressName))).Subscribe(observer),
+                _bus.GetEvent&lt;Event.RemoveBillingAddress&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Select(@event =&gt; readModel.WithoutBillingAddress(@event.AddressName)).Subscribe(observer),
+                _bus.GetEvent&lt;Event.OrderInvoiced&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Select(@event =&gt; readModel.WithCurrentOrder(new Order(@event.OrderId))).Subscribe(observer),
+                _bus.GetEvent&lt;Event.OrderDispatched&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Select(@event =&gt; readModel.WithCompletedOrder(@event.OrderId)).Subscribe(observer)
+            );
+        }
+    );
+}
+</code></pre>
+<p>While this code looks sensible, we'll very quickly run into problems with it. Firstly and primarily each subscription is only ever modifying the initial <code>readModel</code> instance meaning changes are not cumulative. Secondly, if we somehow overcame the initial issue, because we're maintaining a series of subscriptions here, changes are not thread safe nor deterministic.</p>
+<p>No, what we need is a way of writing the effect of these changes into a common read model instance, aggregating those changes across multiple events and emitting the new read model each time it is updated. Fortunately, Rx has <strong>exactly</strong> the operator we need for this: <code>IObservable&lt;TAccumulate&gt; Scan&lt;TSource, TAccumulate&gt;(this IObservable&lt;TSource&gt; source, TAccumulate seed, Func&lt;TAccumulate, TSource, TAccumulate&gt; accumulator)</code></p>
+<p>This operator takes an initial <code>TAccumulate</code> seed and applies each item emitted from the <code>IObservable&lt;TSource&gt;</code> source to the accumulator by invoking a function that takes the current accumulator value and the emitted item and returning a new accumulator value. Each of these new accumulator values are then emitted as an <code>IObservable&lt;TAccumulate&gt;</code> instances to the subscriber.</p>
+<p>Great, so it's pretty obvious here that our accumulator should be our read model, but how do we subscribe to all the different message types and apply a different modifications to the read model for each type of  message received when the <code>Scan</code> function only allows for a single <code>TSource</code> type. We need to somehow homogenise the source stream to a single type. Often this is done with inheritance but, as there's no common base type for each of these messages, we'd have to write something like this:</p>
+<pre class="prettyprint"><code>public IObservable&lt;ReadModel&gt; For(Guid id)
+{
+    if (id == null) throw new ArgumentNullException(&quot;id&quot;);
+
+    return Observable.Create&lt;ReadModel&gt;(
+        async observer =&gt;
+        {
+            Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
+
+            ReadModel readModel = accountInfo.ToReadModel();
+
+            IObservable&lt;object&gt; events = Observable.Merge(
+                _bus.GetEvent&lt;Event.AccountNameChanged&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Cast&lt;object&gt;(),
+                _bus.GetEvent&lt;Event.AddBillingAddress&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Cast&lt;object&gt;(),
+                _bus.GetEvent&lt;Event.RemoveBillingAddress&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Cast&lt;object&gt;(),
+                _bus.GetEvent&lt;Event.OrderInvoiced&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Cast&lt;object&gt;(),
+                _bus.GetEvent&lt;Event.OrderDispatched&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Cast&lt;object&gt;()
+            );
+
+            return events.Scan(readModel,
+                (readModel, @event) =&gt;
+                {
+                    if (@event is Event.AccountNameChanged)
+                    {
+                        return readModel.WithAccountName(((Event.AccountNameChanged)@event).AccountName);
+                    }
+                    else if (@event is Event.AddBillingAddress)
+                    {
+                        ...
+                    }
+                    ...
+                    else
+                    {
+                        throw new ArgumentException(&quot;Unknown message type&quot;);
+                    }
+                }
+            );
+        }
+    );
+}
+</code></pre>
+<p>... which is not type safe, has very little compile time checking, requires a fall-through exception and, quite frankly, is horrible. I'm sure with Rx we can do something better.</p>
+<p>Well, lets look at this from a functional perspective. The action we want to perform when receiving each type of event can be considered to be a function in the form of <code>Func&lt;TReadModel, TEvent, TReadModel&gt;</code>. This is very similar to the third parameter of the <code>Observable.Scan</code> function with the problem being that we have multiple types of <code>TEvent</code>. If only there was a way to produce a generic function that would operate correctly across all the event types.</p>
+<p>Well, by leaning on a concept from functional languages, this might be possible. <a href="https://en.wikipedia.org/wiki/Partial_application" title="Partial Application definition from wikipedia">Partial application</a> has been available in C# - via <a href="http://csharpindepth.com/Articles/Chapter5/Closures.aspx" title="C# in Depth - The Beauty Of Closures">closures</a> - since lambdas were introduced and allows you to:</p>
+<blockquote>
+<p>fix a number of arguments to a function, producing another function of smaller arity. Given a function f:(X * Y * Z) -&gt; N , we might fix (or 'bind') the first argument, producing a function of type (f){partial}:(Y * Z) -&gt; N . Evaluation of this function might be represented as f{partial}(2, 3). Note that the result of partial function application in this case is a function that takes two arguments</p>
+</blockquote>
+<p>So is there some way we can leverage this to remove the <code>TEvent</code> argument from the function? Absolutely, by making the observable emit a <em>stream of partial functions</em> in the form <code>Func&lt;ReadModel,ReadModel&gt;</code> which can then be applied to the read model as follows:</p>
+<pre class="prettyprint"><code>public IObservable&lt;ReadModel&gt; For(Guid id)
+{
+    if (id == null) throw new ArgumentNullException(&quot;id&quot;);
+
+    return Observable.Create&lt;ReadModel&gt;(
+        async observer =&gt;
+        {
+            Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
+
+            IObservable&lt;Func&lt;ReadModel, ReadModel&gt;&gt; mutators = Observable.Merge(
+                _bus.GetEvent&lt;Event.AccountNameChanged&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Select(Functions.Apply),
+                _bus.GetEvent&lt;Event.AddBillingAddress&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Select(Functions.Apply),
+                _bus.GetEvent&lt;Event.RemoveBillingAddress&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Select(Functions.Apply),
+                _bus.GetEvent&lt;Event.OrderInvoiced&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Select(Functions.Apply),
+                _bus.GetEvent&lt;Event.OrderDispatched&gt;().Where(@event =&gt; id.Equals(@event.AccountId)).Select(Functions.Apply)
+            );
+
+            return mutators.Scan(accountInfo.ToReadModel(), (readModel, mutator) =&gt; mutator(readModel)).Subscribe(observer);
+        }
+    );
+}
+</code></pre>
+<p>Here the <code>Functions.Apply</code> is an overloaded method for each of the event types. For example, the method for <code>Event.AccountNameChanged</code> is implemented as follows:</p>
+<pre class="prettyprint"><code>public static Func&lt;ReadModel, ReadModel&gt; Apply(Event.AccountNameChanged @event)
+{
+    return readModel =&gt; readModel.WithAccountName(@event.AccountName);
+}
+</code></pre>
+<p>This method takes the event to be processed as a parameter and returns a function in the form <code>Func&lt;ReadModel,ReadModel&gt;</code> that closes over the parameter and calls the <code>WithAccountName</code> extension method when executed. A similar pattern is followed for all the other event types.</p>
+<p>Once we have projected and merged all the event streams into a single <code>IObservable&lt;Func&lt;ReadModel, ReadModel&gt;&gt;</code> we can use the scan function to iteratively apply each function to the cumulative read model instance and emit the result after each event.</p>
+<p>Pretty neat huh!</p>
+
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    /*
+    var disqus_config = function () {
+        this.page.url = 'http://www.ian.bebbs.co.uk/posts/ReactiveReadModels';  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = ReactiveReadModels; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+        var d = document, s = d.createElement('script');
+
+        s.src = '//ibebbs.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+                                </div>
+                        </div>
+                </div>
+
+                <hr>
+
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+                                        <ul class="list-inline text-center">
+                                                <li>
+                                                <a href="https://twitter.com/ibebbs">
+                                                        <span class="fa-stack fa-lg">
+                                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                                        <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                                                        </span>
+                                                </a>
+                                                </li>
+                                                <li>
+                                                <a href="https://github.com/ibebbs">
+                                                        <span class="fa-stack fa-lg">
+                                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                                        </span>
+                                                </a>
+                                                </li>
+                                        </ul>
+                                        <p class="copyright text-muted">
+                                                Copyright © 2015 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                                <br />
+                                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                                <br />
+                                                <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
+                                        </p>
+                                        </div>
+                                </div>
+                        </div>
+                </footer>
+
+                <script>
+                  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+                  ga('create', 'UA-70151903-1', 'auto');
+                  ga('send', 'pageview');
+
+                </script>
+
+                <script type="text/javascript">
+                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+                        var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
+
+                        /* * * DON'T EDIT BELOW THIS LINE * * */
+                        (function () {
+                                var s = document.createElement('script'); s.async = true;
+                                s.type = 'text/javascript';
+                                s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+                                (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+                        }());
+
+                        // Background
+                        var header = document.getElementById("intro-header");
+
+                        header.setAttribute('style', 'background-image: ' + '/Content/posts/header-stripe.png');
+                </script>
+        </body>
+</html>
