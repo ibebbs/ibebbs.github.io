@@ -7,7 +7,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
 
-	<title>Ian Bebbington - Wyam</title>
+	<title>Ian Bebbington - On the perils of traversing parallel universes</title>
         <meta name="description" content="The personal blog of Ian Bebbington" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -32,10 +32,10 @@
         <meta name="msapplication-tooltip" content="Ian Bebbington" />
         <meta name="msapplication-starturl" content="/" />
 
-        <meta property="og:title" content="Ian Bebbington - Wyam" />
+        <meta property="og:title" content="Ian Bebbington - On the perils of traversing parallel universes" />
         
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="http://ian.bebbs.co.uk/tags/index" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/RxVsTpl" />
         <!-- TODO: More social graph meta tags -->
 
         <script src="/Scripts/jquery-2.1.1.min.js"></script>
@@ -91,9 +91,20 @@
                         <div class="container">
                                 <div class="row">
                                         <div class="col-md-12">
-                                                        <div class="site-heading">
-                                                                <h1>Wyam</h1>
-                                                        </div>
+
+    <div class="post-heading">
+        <h1>On the perils of traversing parallel universes</h1>
+            <h2 class="subheading">Or, why you shouldn&#39;t mix Rx and TPL if you want to write testable code</h2>
+        <div class="meta">
+                Published on 01 February 2016<br>
+                    </div>
+            <div class="tags">
+
+<a role="button" href="/tags/reactive" class="btn btn-default btn-sm"> Reactive</a>
+<a role="button" href="/tags/rx" class="btn btn-default btn-sm"> Rx</a>
+<a role="button" href="/tags/testing" class="btn btn-default btn-sm"> Testing</a>
+<a role="button" href="/tags/tpl" class="btn btn-default btn-sm"> TPL</a>            </div>
+    </div>
                                         </div>
                                 </div>
                         </div>
@@ -107,34 +118,45 @@
 
 
 
-<div class="container-sm-height">
- <div class="row row-sm-height">
-  <div class="col-sm-8 right-border col-sm-height">
-        <div class="post-list">
-            <a href="/posts/NewBlogUsingWyam">
-                <h3 class="post-title">Using Wyam</h3>
-                    <h4 class="post-subtitle">A new static-site blog using Wyam</h4>
-            </a>
-            <p class="post-meta">Posted on 09 November 2015</p>            
-        </div>   
-                <hr class="visible-xs-block" />
-</div>
-  <div class="col-sm-4 col-sm-height">
-   <a role="button" href="/tags/bdd" class="btn btn-default btn-xs"> BDD <span class='badge'>1</span></a>
-   <a role="button" href="/tags/behavioral" class="btn btn-default btn-xs"> Behavioral <span class='badge'>1</span></a>
-   <a role="button" href="/tags/blog" class="btn btn-default btn-xs"> Blog <span class='badge'>2</span></a>
-   <a role="button" href="/tags/events" class="btn btn-default btn-xs"> Events <span class='badge'>1</span></a>
-   <a role="button" href="/tags/eventsourcing" class="btn btn-default btn-xs"> EventSourcing <span class='badge'>1</span></a>
-   <a role="button" href="/tags/parenthood" class="btn btn-default btn-xs"> Parenthood <span class='badge'>1</span></a>
-   <a role="button" href="/tags/productivity" class="btn btn-default btn-xs"> Productivity <span class='badge'>1</span></a>
-   <a role="button" href="/tags/reactive" class="btn btn-default btn-xs"> Reactive <span class='badge'>3</span></a>
-   <a role="button" href="/tags/rx" class="btn btn-default btn-xs"> Rx <span class='badge'>3</span></a>
-   <a role="button" href="/tags/testing" class="btn btn-default btn-xs"> Testing <span class='badge'>1</span></a>
-   <a role="button" href="/tags/tpl" class="btn btn-default btn-xs"> TPL <span class='badge'>1</span></a>
-   <a role="button" href="/tags/wyam" class="btn btn-primary btn-xs"> Wyam <span class='badge'>1</span></a>
-  </div>
- </div>
-</div>
+
+<p>Despite taking some poetic license with the title of this post, the dramatics are not without merit. I have spent a significant portion of the last three days trying to write a series of tests around some asynchronous code to prove it managed - or, more specifically, limited - concurrency as intended. This code, while mainly Rx based, made calls to TPL methods and needed to wait, without blocking, for a result to be returned prior to allowing subsequent calls to be made. In short it mixed Rx and TPL to implement a multi-procuder / single consumer concurrency pattern, and this mix proved to be the source of much (much, much!) frustration.</p>
+<p>While I don't necessarily believe that <a href="https://code.google.com/archive/p/fakeiteasy/issues/31">threading should be avoided in unit tests</a> I do, as much as possible, endeavour to keep tests synchronous. Obviously this can be tricky when you're <a href="http://stackoverflow.com/questions/20861305/should-i-unit-test-concurrency">specifically</a> <a href="http://stackoverflow.com/questions/12159/how-should-i-unit-test-threaded-code">testing</a>  <a href="http://stackoverflow.com/questions/1226779/how-to-run-concurrency-unit-test">concurrency</a> but, fortunately, this has become immeasurably easier since Rx introduced testing in <a href="http://blogs.msdn.com/b/rxteam/archive/2012/06/14/testing-rx-queries-using-virtual-time-scheduling.aspx">virtual time</a> via the <a href="http://www.introtorx.com/content/v1.0.10621.0/16_TestingRx.html">TestScheduler</a>.</p>
+<p>So, with this magical mechanism for manipulating the motion of time in my mitts, I proceeded to write the test <code>ShouldOnlySendASingleCommandAtATime</code>... which promptly failed. And I'm not talking the good, red-green kinda failure. Nooo, this was an old school <em>&quot;I've written the code, better make sure it works... oh, that's weird!&quot;</em> kinda failure.</p>
+<p>Assertions on calls to faked objects were failing and, after a lot of digging I finally found out why: Despite diligently injecting and using a <code>TestScheduler</code> through my Rx code and mocking calls to TPL code such that they returned <code>TaskCompletionSource&lt;T&gt;</code> instances, I was still seeing my unit tests start a <strong>second worker thread</strong>!</p>
+<p>Weird indeed.</p>
+<p>After a lot of hacking around with my code and other <a href="http://www.theallium.com/engineering/computer-programming-to-be-officially-renamed-googling-stackoverflow/">&quot;computer programming&quot;</a> type activities, I finally happened upon this <a href="http://stackoverflow.com/questions/28183473/executing-tpl-code-in-a-reactive-pipeline-and-controlling-execution-via-test-sch/28236216#28236216">curiously titled question</a>. The question very closely reflected what I was trying to achieve and was fortunately followed by an incredibly detailed answer by <a href="http://stackoverflow.com/users/87427/james-world">James World</a>. Of particular note was this paragraph:</p>
+<blockquote>
+<p>One particular pain point of Rx that leaves many testers scratching their heads, is the fact that the TPL -&gt; Rx family of conversions introduce concurrency. e.g. ToObservable, SelectMany's overload accepting Task<T> etc. don't provide overloads with a scheduler and insidiously force you off the TestScheduler thread, even if mocking with TCS</p>
+</blockquote>
+<p>Bingo! Exactly the issue I was experiencing. James also provided a link to the following <a href="https://github.com/Reactive-Extensions/Rx.NET/issues/21">bug report for Rx</a> validating his answer and vindicating my confusion. This epiphany lead me to rewrite the interfaces to my dependencies such that they were Rx rather than TPL based. After which, lo and behold, my unit tests started passing.</p>
+<p>Phew!</p>
+<p>In conclusion, I guess the physicists are right: <a href="https://www.newscientist.com/article/dn11745-could-black-holes-be-portals-to-other-universes/">If you want to move between parallel universes, be prepared to fall into a black hole!</a></p>
+
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    /*
+    var disqus_config = function () {
+        this.page.url = 'http://www.ian.bebbs.co.uk/posts/RxVsTpl';  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = RxVsTpl; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+        var d = document, s = d.createElement('script');
+
+        s.src = '//ibebbs.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
                                 </div>
                         </div>
                 </div>
