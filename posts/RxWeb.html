@@ -7,7 +7,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
 
-	<title>Ian Bebbington - Using Wyam</title>
+	<title>Ian Bebbington - Using Rx on the Web</title>
         <meta name="description" content="The personal blog of Ian Bebbington" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -32,10 +32,10 @@
         <meta name="msapplication-tooltip" content="Ian Bebbington" />
         <meta name="msapplication-starturl" content="/" />
 
-        <meta property="og:title" content="Ian Bebbington - Using Wyam" />
+        <meta property="og:title" content="Ian Bebbington - Using Rx on the Web" />
         
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/NewBlogUsingWyam" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/RxWeb" />
         <!-- TODO: More social graph meta tags -->
 
         <script src="/Scripts/jquery-2.1.1.min.js"></script>
@@ -93,15 +93,20 @@
                                         <div class="col-md-12">
 
     <div class="post-heading">
-        <h1>Using Wyam</h1>
-            <h2 class="subheading">A new static-site blog using Wyam</h2>
+        <h1>Using Rx on the Web</h1>
+            <h2 class="subheading">Getting to grips with WebRx in Visual Studio</h2>
         <div class="meta">
-                Published on 09 November 2015<br>
+                Published on 04 March 2016<br>
                     </div>
             <div class="tags">
 
-<a role="button" href="/tags/blog" class="btn btn-default btn-sm"> Blog</a>
-<a role="button" href="/tags/wyam" class="btn btn-default btn-sm"> Wyam</a>            </div>
+<a role="button" href="/tags/client-side-framework" class="btn btn-default btn-sm"> Client-Side Framework</a>
+<a role="button" href="/tags/javascript" class="btn btn-default btn-sm"> JavaScript</a>
+<a role="button" href="/tags/js" class="btn btn-default btn-sm"> Js</a>
+<a role="button" href="/tags/reactive" class="btn btn-default btn-sm"> Reactive</a>
+<a role="button" href="/tags/rx" class="btn btn-default btn-sm"> Rx</a>
+<a role="button" href="/tags/visual-studio" class="btn btn-default btn-sm"> Visual Studio</a>
+<a role="button" href="/tags/webrx" class="btn btn-default btn-sm"> WebRx</a>            </div>
     </div>
                                         </div>
                                 </div>
@@ -117,16 +122,57 @@
 
 
 
-<p>I've been meaning to create a blog for a <strong>long</strong> time but never found a system with the right combination of features (power vs flexibility vs learning curve, cost, technology stack, etc). CMSs (Wordpress, Drupal, etc) were always way too much faff and most static site generators required the installation of numerous languages / run-times / sdks, etc.</p>
-<p>Then I found <a href="http://wyam.io/" title="Wyam Homepage">Wyam</a>.</p>
-<p>Being .NET based it could be used from my day-to-day development machine and, by cleverly leveraging the  Roslyn compiler platform, can be set up to be as simple or flexible as desired. A quick flick through the module and API pages and I knew I'd found a potential candidate for my statically generated blog.</p>
-<p>Being a... ahem... pragmatic developer with somewhat dated web skills I decided to take the path of least resistance and copy someone else's blog layout. Afterall, imitation is the sincerest form of flattery, right? As such, I contacted Dave Glick - the most-excellent author of Wyam - to see if he would mind me 'borrowing' the layout he used for <a href="http://daveaglick.com/" title="Dave Glick's blog">his blog</a>. He quickly replied to my cheeky request and said he didn't mind at all if used his layout, even refusing my offer of attribution (which I hope this blog post somewhat makes up for).</p>
-<p>With the all clear, I <a href="https://github.com/Wyamio/Wyam/releases/tag/v0.10.0-beta" title="download page for Wyam version 0.10.0-beta">downloaded the latest version of Wyam</a>, cloned the <a href="https://github.com/Wyamio/Wyam" title="Github repository for Wyam ">Wyam repository</a>, invoked Wyam to generate an <a href="https://github.com/Wyamio/Wyam/tree/develop/Examples" title="Wyam Example sites in Github repository">example site</a>... and got an exception.</p>
-<p>Another quick chat with Mr. Glick revealed that the project is iterating quickly and currently in a &quot;move fast and break things&quot; mode. Fortunately the issue was already resolved in the development branch so, after local build of Wyam, I managed to successfully generate the example sites.</p>
-<p>&quot;Now for some blatant plagiarism with his blog&quot; I thought to myself but again, after cloning his (generously shared and CC licensed) <a href="https://github.com/daveaglick/daveaglick" title="Github repository for Dave Glick's blog">blog</a>, asking Wyam to generate the site threw an exception. This time, a <a href="https://github.com/Wyamio/Wyam/issues/112#issuecomment-155165316" title="Wyam PostFile issue comment on Github">short bit of call-stack sleuthing</a> revealed another breaking change which was easily resolved by examining the <a href="http://wyam.io/modules/" title="Module documentation for Wyam">Wyam module documentation</a>.</p>
-<p>Once more with feeling and ét voila, a MVB (Minimal Viable Blog).</p>
-<p>All in all, not a bad experience with an early beta of a very clever project. Moving forward, I actually hope to do very little with Wyam other than post blog entries but will certainly endeavour to keep up to date with Wyam and share my experiences here.</p>
-<p>If you're looking for a flexible yet powerful .NET based static-site generator, go check out <a href="http://wyam.io/" title="Wyam Homepage">Wyam</a>. If you experience any problems with it I'd definitely recommend posting an issue on Github, Dave seems to be very on the ball responding to issues (and extremely friendly to boot).</p>
+<h2>Finding a framework</h2>
+<p>So, I have recently found myself with a need to dive into the depths of modern web-development and, as I am currently looking to write a highly interactive single-page web application, the first thing to decide on was a client side framework to use. You won't have to read too many of my blog posts to realise that I'm a big fan of <a href="https://msdn.microsoft.com/en-us/data/gg577609.aspx?f=255&amp;MSPPError=-2147217396">Rx</a>. I am also keen on the MVVM approach to separating concerns when writing user interfaces. Therefore, during my research of modern web UI frameworks, I was extremely interested when I came across <a href="http://webrxjs.org/">WebRx</a> .</p>
+<p>Billed as &quot;a browser-based MVVM-Framework that combines functional-reactive programming with declarative Data-Binding, Templating and Client-Side Routing&quot; it struck a chord with my UI development style. In fact, it elevates <a href="http://reactivex.io/documentation/observable.html">Observables</a> to a first class concept in a manner eerily similar to the ObservableProperty/ObservableCommand classes I wrote for my <a href="https://github.com/ibebbs/Caliburn.Micro.Reactive.Extensions">Caliburn.Micro.Reactive.Extensions</a> package.</p>
+<p>Unfortunately, as a framework, WebRx seems to be struggling to achieve critical mass and therefore there was very limited information available when I decided to attempt to implement the <a href="http://webrxjs.org/docs/getting-started.html">WebRx &quot;Hello World&quot;</a> example using Visual Studio. As is almost par for the course when using a new framework, I fell at a frustratingly early hurdle and, given the lack of info (seriously, only one tagged post on <a href="https://stackoverflow.com/questions/tagged/webrx">stackoverflow</a>!), I had to work through the problem 'old-skool'... ya'know, by actually finding and solving the problem rather than just googling a solution.</p>
+<p>Anyway, I thought I'd put together a post outlining how to get started with this framework in Visual Studio in an attempt to start addressing the lack of info regarding this promising framework.</p>
+<h2>The name is Bart Simpson</h2>
+<p>Rather than the traditional 'Hello World' app, WebRx's 'Getting Started' guide displays a page stating 'The name is Bart Simpson'. This is done in order to demonstrates the MVVM separation of concerns through the use of a view bound to an underlying view model which provides the name 'Bart Simpson'.</p>
+<p>I don't intend to cover the entirety of the getting started guide here, merely the additional/different steps needed to get the project work from Visual Studio. As such, I suggest <a href="http://webrxjs.org/docs/getting-started.html">opening the guide</a> in a browser and leaving it open while working through the steps below as I will be referring to it extensively.</p>
+<p>First up, open Visual Studio. Pretty much any modern version is fine, I am using Visual Studio 2015 Professional. Start a new project and select 'ASP.NET Web Application'</p>
+<p><img src="/Content/RxWeb/NewAspWebApplication.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="New ASP.NET Web Application"></p>
+<p>In the following dialog, select an empty ASP.NET Template and click ok.</p>
+<p><img src="/Content/RxWeb/EmptyAsp452Project.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Empty ASP.NET Template"></p>
+<p>Now we have a web project, lets add a reference to WebRx. This can be done using either the Package Manager Console using the command <code>Install-Package WebRx</code> or via the visual Nuget package manager as shown below:</p>
+<p><img src="/Content/RxWeb/InstallWebRxPackage.png" class="img-responsive" style="margin: auto; width:66%; margin-top: 6px; margin-bottom: 6px;" alt="Install WebRx Package"></p>
+<p>Regardless of how you add the reference to WebRx, you will be asked whether you wish to 'Search for TypeScript Typings' as shown below. Just click 'Yes'.</p>
+<p><img src="/Content/RxWeb/AddTypeScriptTypings.png" class="img-responsive" style="margin: auto; width:300px; margin-top: 6px; margin-bottom: 6px;" alt="Add TypeScript Typings"></p>
+<p>You will also be prompted to accept the license aggrement for a number of RxJs packages which WebRx depends upon; you should accept these too.</p>
+<p>One the reference is added, you should find that a Scripts directory has been added to your solution and which contains a number of 'ts' and 'js' files for both WebRx and RxJs. With this in place, we can then continue with the getting started guide by adding an 'index.html' file to the project and copy pasting the sample 'index.html' file from the WebRx <a href="http://webrxjs.org/docs/getting-started.html">getting started guide</a>. It should look something like this:</p>
+<p><img src="/Content/RxWeb/CopyPasteIndexFromGettingStarted.png" class="img-responsive" style="margin: auto; width:400px; margin-top: 6px; margin-bottom: 6px;" alt="Copy Paste Index From Getting Started"></p>
+<p>At this point the eagle-eyed amongst you will notice three things:</p>
+<ol>
+<li>Our scripts are now in a 'bower_modules' directory<br />
+As we used Nuget and not bower to install our WebRx dependencies, the script references should be changed to refer to the Scripts directory</li>
+<li>Our scripts directory does not contain a rx.all.js file.<br />
+For some reason, WebRx depends on a version of RxJs that does not include an rx.all.js file. To resolve this, simply upgrade to the latest version of RxJs-All, as shown below:
+<img src="/Content/RxWeb/UpgradeRxJsAll.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Upgrade RxJs All"></li>
+<li>We don't have a 'js' folder containing an 'app.js' file.<br />
+Because we've not got to that bit yet.</li>
+</ol>
+<p>Now add a 'js' folder to the solution and add a 'app.js' to it. In this file copy the full 'app.js' sample from the WebRx  <a href="http://webrxjs.org/docs/getting-started.html">getting started guide</a> as shown below:</p>
+<pre class="prettyprint"><code>wx.app.component('hello', {
+  viewModel: function() {
+    this.firstName = 'Bart';
+    this.lastName = 'Simpson';
+  },
+  template: 'The name is &lt;span data-bind=&quot;text: firstName + \' \' + lastName&quot;&gt;&lt;/span&gt;'
+});
+
+wx.router.state({
+  name: &quot;$&quot;,
+  views: { 'main': &quot;hello&quot; }
+});
+
+wx.router.reload();
+
+wx.applyBindings();
+</code></pre>
+<p>Save all, set 'index.html' as the start page and hit F5. If everything went as planned you should now see 'The name is Bart Simpson' displayed in your default browser:</p>
+<p><img src="/Content/RxWeb/TheNameIsBartSimpson.png" class="img-responsive" style="margin: auto; width:400px; margin-top: 6px; margin-bottom: 6px;" alt="The Name Is Bart Simpson"></p>
+<p>And that's it. While the getting started example doesn't seem very complex, it does show a separation of view and view model. I'm very much looking forward to digging into the details of this very promising framework.</p>
+<p>The <a href="https://github.com/ibebbs/BlogProjects/tree/master/WebRxWithAsp4">completed project</a> for this post can be found in my <a href="https://github.com/ibebbs/BlogProjects">BlogProjects repository</a> on <a href="https://github.com/ibebbs">Github</a></p>
 
 
 
@@ -138,8 +184,8 @@
      */
     /*
     var disqus_config = function () {
-        this.page.url = 'http://www.ian.bebbs.co.uk/posts/NewBlogUsingWyam';  // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = NewBlogUsingWyam; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+        this.page.url = 'http://www.ian.bebbs.co.uk/posts/RxWeb';  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = RxWeb; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
     };
     */
     (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
