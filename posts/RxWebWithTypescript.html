@@ -7,7 +7,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
 
-	<title>Ian Bebbington - WebRx &amp; Typescript</title>
+	<title>Ian Bebbington - WebRx and Typescript</title>
         <meta name="description" content="The personal blog of Ian Bebbington" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -32,7 +32,7 @@
         <meta name="msapplication-tooltip" content="Ian Bebbington" />
         <meta name="msapplication-starturl" content="/" />
 
-        <meta property="og:title" content="Ian Bebbington - WebRx &amp; Typescript" />
+        <meta property="og:title" content="Ian Bebbington - WebRx and Typescript" />
         
         <meta property="og:type" content="website" />
         <meta property="og:url" content="http://ian.bebbs.co.uk/posts/RxWebWithTypescript" />
@@ -93,7 +93,7 @@
                                         <div class="col-md-12">
 
     <div class="post-heading">
-        <h1>WebRx &amp; Typescript</h1>
+        <h1>WebRx and Typescript</h1>
             <h2 class="subheading">Part 2 in the WebRx series</h2>
         <div class="meta">
                 Published on 08 March 2016<br>
@@ -169,7 +169,7 @@ WebRx requires that you add an explicit reference to <code>rx.all.d.ts</code> pr
 </code></pre>
 </li>
 <li>Implement view / view model code<br />
-You can now re-implement the code from <code>app.js</code> as TypeScript virtually verbatim but do note how you get Intellisense for all the methods and properties of wx module.</li>
+You can now re-implement the code from <code>app.js</code> as TypeScript virtually verbatim but do note how you get Intellisense for all the methods and properties of <code>wx</code> module.</li>
 <li>Fix compilation error with call to <code>wx.applyBindings</code><br />
 The <code>wx.applyBindings</code> method <em>requires</em> a <code>model</code> parameter which, in JavaScript, is defaulted but in TypeScript causes a compilation error. To resolve this, simply pass an empty object to the method.</li>
 <li>Your <code>app.ts</code> file should now look like this:
