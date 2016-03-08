@@ -7,7 +7,7 @@
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
 
-	<title>Ian Bebbington - Parenthood</title>
+	<title>Ian Bebbington - WebRx &amp; Typescript</title>
         <meta name="description" content="The personal blog of Ian Bebbington" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -32,10 +32,10 @@
         <meta name="msapplication-tooltip" content="Ian Bebbington" />
         <meta name="msapplication-starturl" content="/" />
 
-        <meta property="og:title" content="Ian Bebbington - Parenthood" />
+        <meta property="og:title" content="Ian Bebbington - WebRx &amp; Typescript" />
         
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="http://ian.bebbs.co.uk/tags/index" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/RxWebWithTypescript" />
         <!-- TODO: More social graph meta tags -->
 
         <script src="/Scripts/jquery-2.1.1.min.js"></script>
@@ -91,9 +91,23 @@
                         <div class="container">
                                 <div class="row">
                                         <div class="col-md-12">
-                                                        <div class="site-heading">
-                                                                <h1>Parenthood</h1>
-                                                        </div>
+
+    <div class="post-heading">
+        <h1>WebRx &amp; Typescript</h1>
+            <h2 class="subheading">Part 2 in the WebRx series</h2>
+        <div class="meta">
+                Published on 08 March 2016<br>
+                    </div>
+            <div class="tags">
+
+<a role="button" href="/tags/client-side-framework" class="btn btn-default btn-sm"> Client-Side Framework</a>
+<a role="button" href="/tags/javascript" class="btn btn-default btn-sm"> JavaScript</a>
+<a role="button" href="/tags/reactive" class="btn btn-default btn-sm"> Reactive</a>
+<a role="button" href="/tags/rx" class="btn btn-default btn-sm"> Rx</a>
+<a role="button" href="/tags/typescript" class="btn btn-default btn-sm"> TypeScript</a>
+<a role="button" href="/tags/visual-studio" class="btn btn-default btn-sm"> Visual Studio</a>
+<a role="button" href="/tags/webrx" class="btn btn-default btn-sm"> WebRx</a>            </div>
+    </div>
                                         </div>
                                 </div>
                         </div>
@@ -107,40 +121,112 @@
 
 
 
-<div class="container-sm-height">
- <div class="row row-sm-height">
-  <div class="col-sm-8 right-border col-sm-height">
-        <div class="post-list">
-            <a href="/posts/OnTheImportanceOfDoingSomething">
-                <h3 class="post-title">On The Importance of Doing Something</h3>
-                    <h4 class="post-subtitle">Being productive when time is short</h4>
-            </a>
-            <p class="post-meta">Posted on 16 November 2015</p>            
-        </div>   
-                <hr class="visible-xs-block" />
-</div>
-  <div class="col-sm-4 col-sm-height">
-   <a role="button" href="/tags/bdd" class="btn btn-default btn-xs"> BDD <span class='badge'>1</span></a>
-   <a role="button" href="/tags/behavioral" class="btn btn-default btn-xs"> Behavioral <span class='badge'>1</span></a>
-   <a role="button" href="/tags/blog" class="btn btn-default btn-xs"> Blog <span class='badge'>2</span></a>
-   <a role="button" href="/tags/client-side-framework" class="btn btn-default btn-xs"> Client-Side Framework <span class='badge'>2</span></a>
-   <a role="button" href="/tags/events" class="btn btn-default btn-xs"> Events <span class='badge'>1</span></a>
-   <a role="button" href="/tags/eventsourcing" class="btn btn-default btn-xs"> EventSourcing <span class='badge'>1</span></a>
-   <a role="button" href="/tags/javascript" class="btn btn-default btn-xs"> JavaScript <span class='badge'>2</span></a>
-   <a role="button" href="/tags/js" class="btn btn-default btn-xs"> Js <span class='badge'>1</span></a>
-   <a role="button" href="/tags/parenthood" class="btn btn-primary btn-xs"> Parenthood <span class='badge'>1</span></a>
-   <a role="button" href="/tags/productivity" class="btn btn-default btn-xs"> Productivity <span class='badge'>1</span></a>
-   <a role="button" href="/tags/reactive" class="btn btn-default btn-xs"> Reactive <span class='badge'>5</span></a>
-   <a role="button" href="/tags/rx" class="btn btn-default btn-xs"> Rx <span class='badge'>5</span></a>
-   <a role="button" href="/tags/testing" class="btn btn-default btn-xs"> Testing <span class='badge'>1</span></a>
-   <a role="button" href="/tags/tpl" class="btn btn-default btn-xs"> TPL <span class='badge'>1</span></a>
-   <a role="button" href="/tags/typescript" class="btn btn-default btn-xs"> TypeScript <span class='badge'>1</span></a>
-   <a role="button" href="/tags/visual-studio" class="btn btn-default btn-xs"> Visual Studio <span class='badge'>2</span></a>
-   <a role="button" href="/tags/webrx" class="btn btn-default btn-xs"> WebRx <span class='badge'>2</span></a>
-   <a role="button" href="/tags/wyam" class="btn btn-default btn-xs"> Wyam <span class='badge'>1</span></a>
-  </div>
- </div>
-</div>
+
+<h1>Continuing with WebRx</h1>
+<p>In <a href="./RxWeb">part 1</a> of this series I showed how to set up a project structure that allows you to start using WebRx from within Visual Studio. While fairly simple, the example provides a great illustration of you how WebRx allows you to separate your view and view model.</p>
+<p>In this article I further develop the structure to allow you to develop your application using Typescript.</p>
+<h1>From 'app.js' to 'app.ts'</h1>
+<p>Previously we copied a chunk of JavaScript from the WebRx <a href="http://webrxjs.org/docs/getting-started.html">getting started guide</a> into an <code>app.js</code> script that was directly used from within the <code>index.html</code> file. We now want to <a href="https://en.wikipedia.org/wiki/Source-to-source_compiler"><em>transpile</em></a> the <code>app.js</code> script from a Typescript file so that we can further develop the application in a structured and type-safe manner.</p>
+<p>To do this simply follow the following steps:</p>
+<ol>
+<li>Delete the existing <code>app.js</code> file leaving the <code>js</code> folder empty.</li>
+<li>Add and configure a <code>TypeScript JSON Configuration File</code>.</li>
+</ol>
+<ul>
+<li>Add a <code>TypeScript JSON Configuration File</code> to the solution as shown below<br />
+<img src="/Content/RxWebWithTypescript/AddTypeScriptJsonConfigurationFile.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Add TypeScript Json Configuration File"></li>
+<li>Replace the <code>node_modules</code> exclusion with <code>Scripts</code><br />
+By default Visual Studio (or, more acurately, the TypeScript transpiler) with pick up all <code>ts</code> files in the solution. As we don't want to attempt to re-transpile all the referenced typescript files we add <code>Scripts</code> to the exclusion list. Further, as we added a reference to <code>WebRx</code> via Nuget, our references are in the <code>Scripts</code> folder, not <code>node_modules</code>, so this exclusion can be removed.</li>
+<li>Add an <code>outDir</code> setting to transpile to the <code>js</code> folder<br />
+This setting will force the TypeScript transpiler to output the transpiled JavaScript files to the <code>js</code> folder where they can be used by the client browser.</li>
+<li>You should now have a <code>tsconfig.json</code> file that looks like this:
+<pre class="prettyprint"><code>{
+  &quot;compilerOptions&quot;: {
+    &quot;noImplicitAny&quot;: false,
+    &quot;noEmitOnError&quot;: true,
+    &quot;removeComments&quot;: false,
+    &quot;sourceMap&quot;: true,
+    &quot;target&quot;: &quot;es5&quot;,
+    &quot;outDir&quot;: &quot;js&quot;
+  },
+  &quot;exclude&quot;: [
+    &quot;Scripts&quot;,
+    &quot;wwwroot&quot;
+  ]
+}
+</code></pre>
+</li>
+</ul>
+<ol start="3">
+<li>Add a <code>ts</code> folder to the solution.</li>
+<li>Add an <code>app.ts</code> typescript file to the <code>ts</code> folder.</li>
+</ol>
+<ul>
+<li>Add references to Rx and WebRx to the <code>app.ts</code> file.<br />
+WebRx requires that you add an explicit reference to <code>rx.all.d.ts</code> prior to the reference to <code>web.rx.d.ts</code> in order for the Rx module to be brought into scope. The references should therefore be added like this:
+<pre class="prettyprint"><code>/// &lt;reference path=&quot;../Scripts/rx.all.d.ts&quot;/&gt;
+/// &lt;reference path=&quot;../Scripts/typings/web.rx.d.ts&quot; /&gt;
+</code></pre>
+</li>
+<li>Implement view / view model code<br />
+You can now re-implement the code from <code>app.js</code> as TypeScript virtually verbatim but do note how you get Intellisense for all the methods and properties of wx module.</li>
+<li>Fix compilation error with call to <code>wx.applyBindings</code><br />
+The <code>wx.applyBindings</code> method <em>requires</em> a <code>model</code> parameter which, in JavaScript, is defaulted but in TypeScript causes a compilation error. To resolve this, simply pass an empty object to the method.</li>
+<li>Your <code>app.ts</code> file should now look like this:
+<pre class="prettyprint"><code>/// &lt;reference path=&quot;../Scripts/rx.all.d.ts&quot;/&gt;
+/// &lt;reference path=&quot;../Scripts/typings/web.rx.d.ts&quot; /&gt;
+
+wx.app.component('hello', {
+    viewModel: function () {
+        this.firstName = 'Bart';
+        this.lastName = 'Simpson';
+    },
+    template: 'The name is &lt;span data-bind=&quot;text: firstName + \' \' + lastName&quot;&gt;&lt;/span&gt;'
+});
+
+wx.router.state({
+    name: &quot;$&quot;,
+    views: { 'main': &quot;hello&quot; }
+});
+
+wx.router.reload();
+
+wx.applyBindings({});
+</code></pre>
+</li>
+</ul>
+<ol start="5">
+<li>Compile the project and include the generated <code>js/app.js</code> and <code>js/app.js.map</code> files into the project.</li>
+<li>Hit F5 and you should again see the message 'The name is Bart Simpson' displayed in your default browser.</li>
+</ol>
+<p>Congratulations, you're now ready to develop your application using full Intellisense and in the comfort of the knowledge that the compiler (well, transpiler) will pick up any syntactic bugs you may inadvertently create.</p>
+<p>As always, the completed <a href="https://github.com/ibebbs/BlogProjects/tree/master/WebRxWithTypeScript">source code for this post</a> can be found in the <a href="https://github.com/ibebbs/BlogProjects">BlogProjects repository</a> on <a href="https://github.com/ibebbs">Github</a></p>
+
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    /*
+    var disqus_config = function () {
+        this.page.url = 'http://www.ian.bebbs.co.uk/posts/RxWebWithTypescript';  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = RxWebWithTypescript; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+        var d = document, s = d.createElement('script');
+
+        s.src = '//ibebbs.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
                                 </div>
                         </div>
                 </div>
