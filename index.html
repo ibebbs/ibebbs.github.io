@@ -111,6 +111,15 @@
 
 <div class="row">
  <div class="col-sm-8 right-border">            <div class="post-preview">
+                <a href="/posts/HomeNetworkMonitoring-PartII">
+                    <h2 class="post-title">Home Network Monitoring - Part II</h2>
+                        <h3 class="post-subtitle">Using free and open-source tools to monitor your home network</h3>
+                </a>
+                <p class="post-meta">Posted on 10 April 2016</p>
+                <p>In part one of this series I set up my home router to send a variety of Syslog messages to LogStash which then forwarded these messages to ElasticSearch for indexing and querying by Kibana in a simplistic dashboard. In this post, I'm going to start parsing out some of the details of the Syslog messages to start giving us a clearer idea about which devices on my local network are opening sessions with remote servers.</p>
+            </div>
+                <hr />
+            <div class="post-preview">
                 <a href="/posts/HomeNetworkMonitoring-PartI">
                     <h2 class="post-title">Home Network Monitoring - Part I</h2>
                         <h3 class="post-subtitle">Using free and open-source tools to monitor your home network</h3>
@@ -127,15 +136,6 @@
                 <p class="post-meta">Posted on 08 March 2016</p>
                 <p>In <a href="./posts/RxWeb">part 1</a> of this series I showed how to set up a project structure that allows you to start using WebRx from within Visual Studio. While fairly simple, the example provides a great illustration of you how WebRx allows you to separate your view and view model.</p>
             </div>
-                <hr />
-            <div class="post-preview">
-                <a href="/posts/RxWeb">
-                    <h2 class="post-title">Using Rx on the Web</h2>
-                        <h3 class="post-subtitle">Getting to grips with WebRx in Visual Studio</h3>
-                </a>
-                <p class="post-meta">Posted on 04 March 2016</p>
-                <p>So, I have recently found myself with a need to dive into the depths of modern web-development and, as I am currently looking to write a highly interactive single-page web application, the first thing to decide on was a client side framework to use. You won't have to read too many of my blog posts to realise that I'm a big fan of <a href="https://msdn.microsoft.com/en-us/data/gg577609.aspx?f=255&amp;MSPPError=-2147217396">Rx</a>. I am also keen on the MVVM approach to separating concerns when writing user interfaces. Therefore, during my research of modern web UI frameworks, I was extremely interested when I came across <a href="http://webrxjs.org/">WebRx</a> .</p>
-            </div>
 </div>
  <div class="col-sm-4 sidebar">        <hr class="visible-xs-block" />
         <h5>Tags</h5>
@@ -146,8 +146,6 @@
 
   <a role="button" href="/tags/rx" class="btn btn-default btn-sm"> Rx <span class='badge'>5</span></a><br>
 
-  <a role="button" href="/tags/blog" class="btn btn-default btn-sm"> Blog <span class='badge'>2</span></a><br>
-
   <a role="button" href="/tags/webrx" class="btn btn-default btn-sm"> WebRx <span class='badge'>2</span></a><br>
 
   <a role="button" href="/tags/javascript" class="btn btn-default btn-sm"> JavaScript <span class='badge'>2</span></a><br>
@@ -156,11 +154,13 @@
 
   <a role="button" href="/tags/visual-studio" class="btn btn-default btn-sm"> Visual Studio <span class='badge'>2</span></a><br>
 
-  <a role="button" href="/tags/wyam" class="btn btn-default btn-sm"> Wyam <span class='badge'>1</span></a><br>
+  <a role="button" href="/tags/networking" class="btn btn-default btn-sm"> Networking <span class='badge'>2</span></a><br>
 
-  <a role="button" href="/tags/eventsourcing" class="btn btn-default btn-sm"> EventSourcing <span class='badge'>1</span></a><br>
+  <a role="button" href="/tags/monitoring" class="btn btn-default btn-sm"> Monitoring <span class='badge'>2</span></a><br>
 
-  <a role="button" href="/tags/events" class="btn btn-default btn-sm"> Events <span class='badge'>1</span></a><br>
+  <a role="button" href="/tags/elasticsearch" class="btn btn-default btn-sm"> ElasticSearch <span class='badge'>2</span></a><br>
+
+  <a role="button" href="/tags/kibana" class="btn btn-default btn-sm"> Kibana <span class='badge'>2</span></a><br>
         </div>
         <ul class="pager">
             <li class="next">
@@ -182,10 +182,10 @@
         <h5>Older Posts</h5>
 
   <ul class="list-unstyled">
+   <li><a href="/posts/RxWeb">Using Rx on the Web</a></li>
    <li><a href="/posts/RxVsTpl">On the perils of traversing parallel universes</a></li>
    <li><a href="/posts/EndOfStreak">Breaking News - Forgot to commit</a></li>
    <li><a href="/posts/ReactiveReadModels">Reactive ReadModels</a></li>
-   <li><a href="/posts/OnTheImportanceOfDoingSomething">On The Importance of Doing Something</a></li>
   </ul>        <ul class="pager">
             <li class="next">
                 <a href="/posts">Archive &rarr;</a>
