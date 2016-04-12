@@ -1,0 +1,461 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+	<title>Ian Bebbington - Home Network Monitoring - Part III</title>
+        <meta name="description" content="The personal blog of Ian Bebbington" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+        <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+        <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
+
+        <link href="/Content/bootstrap/bootstrap.css" rel="stylesheet" />
+        <link href="/Content/prettify.css" rel="stylesheet">
+        <link href="/Content/github.css" rel="stylesheet">
+        <link href="/Content/clean-blog.css" rel="stylesheet" />
+        <link href="/Content/master.css" rel="stylesheet" />
+        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Home Network Monitoring - Part III" />
+        
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartIII" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/Scripts/jquery-2.1.1.min.js"></script>
+        <script src="/Scripts/bootstrap.min.js"></script>
+        <script src="/Scripts/prettify.js"></script>
+        <script src="/Scripts/clean-blog.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="/Scripts/trianglify.min.js"></script>
+        <script src="/Scripts/Please-compressed.js"></script>
+        </script>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+                <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+	</head>
+	<body onload="prettyPrint()">
+
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                <li><a href="https://github.com/ibebbs">Github</a></li>
+                                                <li><a class="hidden-xs">|</a><a class="visible-xs-block">-</a></li>
+                                                <li><a href="/about">About</a></li>
+                                                <li><a href="/posts">Archive</a></li>
+                                                <li><a href="/tags">Tags</a></li>
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    <div class="post-heading">
+        <h1>Home Network Monitoring - Part III</h1>
+            <h2 class="subheading">Using free and open-source tools to monitor your home network</h2>
+        <div class="meta">
+                Published on 12 April 2016<br>
+                    </div>
+            <div class="tags">
+
+<a role="button" href="/tags/elastic-stack" class="btn btn-default btn-sm"> Elastic Stack</a>
+<a role="button" href="/tags/elasticsearch" class="btn btn-default btn-sm"> ElasticSearch</a>
+<a role="button" href="/tags/kibana" class="btn btn-default btn-sm"> Kibana</a>
+<a role="button" href="/tags/logstash" class="btn btn-default btn-sm"> LogStash</a>
+<a role="button" href="/tags/monitoring" class="btn btn-default btn-sm"> Monitoring</a>
+<a role="button" href="/tags/networking" class="btn btn-default btn-sm"> Networking</a>
+<a role="button" href="/tags/syslog" class="btn btn-default btn-sm"> Syslog</a>            </div>
+    </div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div class="col-md-12">
+                                        
+
+
+
+
+<p>In the last post, I configured Logstash to extracted source and destination address information from the &quot;Client Access Log&quot; Syslog messages sent by my router and added a number of visualizations to my Kibana dashboard which allow me to explore which local devices are access which remote servers.</p>
+<p>While this is already very useful, it's almost impossible to remember which devices relate to which IP addresses on the local network, let alone the on the internet. As such, I really want the ability to translate the IP addresses (and, ideally, port numbers) into device, host or protocol names.</p>
+<h1>translating remote ip addresses to host names</h1>
+<p>When a local device accesses a remote server it will, ordinarily, do so by resolving an IP address for a host name, for example 'google.com' resolves to the address '216.58.213.110'. On my network, my router acts as a DNS server, resolving names it knows and forwarding unresolved names to Googles DNS servers. A the results of the host name to IP address lookup are cached in the DNS server (e.g. my router) I can perform a <a href="https://en.wikipedia.org/wiki/Reverse_DNS_lookup">reverse DNS lookup</a> at very little processing cost and without consuming any WAN bandwidth.</p>
+<p>As usual, Logstash comes with a filter that is able to perform this operation called, unsurprisingly, 'dns'. However, to provide a consistent set of fields to Kibana, it requires a couple of additional steps to ensure it functions consistently. Here is the amended <code>syslog.config</code> with the reverse DNS lookup in place.</p>
+<pre class="prettyprint"><code>input {
+  tcp {
+    port =&gt; 5000
+    type =&gt; syslog
+  }
+  udp {
+    port =&gt; 5000
+    type =&gt; syslog
+  }
+}
+
+filter {
+    grok {
+        match =&gt; [ &quot;message&quot;, &quot;&lt;%{POSINT:syslog_pri}&gt;%{SYSLOGTIMESTAMP:syslog_timestamp} Vigor\: Local User \(MAC=%{MAC:source_mac}\): %{IP:source_address}(?::%{POSINT:source_port})? -&gt; %{IP:destination_address}(?::%{POSINT:destination_port})? \((?&lt;protocol&gt;TCP|UDP)\)&quot; ]
+        add_tag =&gt; &quot;access&quot;
+    }
+    if &quot;access&quot; in [tags] {
+        mutate {
+            add_field =&gt; {
+              &quot;destination_host&quot; =&gt; &quot;%{[destination_address]}&quot;
+            }
+        }
+        dns {
+            reverse =&gt; [ &quot;destination_host&quot; ]
+            action =&gt; &quot;replace&quot;
+            nameserver =&gt; &quot;192.168.1.1&quot;
+        }
+    }
+}
+
+output {
+  elasticsearch {
+    hosts =&gt; [&quot;192.168.1.30:9200&quot;]
+    index =&gt; &quot;syslog-%{+YYYY.MM.dd}&quot;
+  }
+}
+</code></pre>
+<p>Note that, when an 'access' message is successfully grokked, I add a tag to the tags array field of the message called &quot;access&quot;. If another type of message has been received (i.e. a DNS lookup) then the grok pattern won't match and the 'access' tag will not be added to tags.</p>
+<p>After the <code>grok</code> filter, I check to see if the tags field contains the 'access' tag and, if so, use the <code>mutate</code> filter to copy the 'destination_address' field value into a 'destination_host' field. This is done as the <code>dns</code> filter will replace the field value if a successful reverse DNS lookup is performed but will leave the original value (i.e. the IP address) if a reverse DNS could not be performed. This way we either get the host name or IP address in the 'destination_host' field and it's never empty.</p>
+<p>With the changes to configuration in place, I restart Logstash. Then, in Kibana, I refresh the field list for the 'syslog-*' index, add 'destination_host' to the 'Syslog Messages' saved search, load 'Access By Destination Address' visualization and modify it to use 'destination_host' rather than the 'destination_address' field; and get the following:</p>
+<p><img src="/Content/HomeNetworkMonitoring/Kibana-AccessByDestinationHostAnalysedVisualization.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Access By Destination Host Analysed Visualization"></p>
+<p>While initially it looks promising, a quick look at the list of hosts being accessed shows something peculiar: the domain names have been split into their component parts.</p>
+<h1>analysis, mappings and templates</h1>
+<p>The reason for the host names being split is because, by default, ElasticSearch performs 'analysis' on text strings. This analysis involves splitting the strings into discrete words which can be indexed more efficiently. Some strings however, for example domain names, should be treated as a single word and as such we need to prevent ElasticSearch from performing the analysis.</p>
+<p>How ElasticSearch treats various fields within a message can be controlled by modifying the index mapping. The current mapping for the 'syslog' index can be retrieved by a REST call to the address 'http://[ElasticSearchHost]:9200/syslog-2016.04.12/_mapping'. This returns:</p>
+<pre class="prettyprint"><code>{
+    &quot;syslog-2016.04.12&quot;: {
+        &quot;mappings&quot;: {
+            &quot;syslog&quot;: {
+                &quot;properties&quot;: {
+                    &quot;@timestamp&quot;: {
+                        &quot;type&quot;: &quot;date&quot;,
+                        &quot;format&quot;: &quot;strict_date_optional_time||epoch_millis&quot;
+                    },
+                    &quot;@version&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;destination_address&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;destination_host&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;destination_port&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;host&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;message&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;protocol&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;source_address&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;source_mac&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;source_port&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;syslog_pri&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;syslog_timestamp&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;tags&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;type&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    }
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<p>In order to prevent ElasticSearch from analysing the 'destination_host' field, we need to add an 'index' key with the value 'not_analyzed'. Even though things have been mostly working correctly so far, I can save quite a bit of storage and processing time by marking almost all of the string fields as 'not_analyzed'. This is shown below:</p>
+<pre class="prettyprint"><code>{
+    &quot;syslog-2016.04.12&quot;: {
+        &quot;mappings&quot;: {
+            &quot;syslog&quot;: {
+                &quot;properties&quot;: {
+                    &quot;@timestamp&quot;: {
+                        &quot;type&quot;: &quot;date&quot;,
+                        &quot;format&quot;: &quot;strict_date_optional_time||epoch_millis&quot;
+                    },
+                    &quot;@version&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;destination_address&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;destination_host&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;destination_port&quot;: {
+                        &quot;type&quot;: &quot;integer&quot;
+                    },
+                    &quot;host&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;message&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;protocol&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;source_address&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;source_mac&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;source_port&quot;: {
+                        &quot;type&quot;: &quot;integer&quot;
+                    },
+                    &quot;syslog_pri&quot;: {
+                        &quot;type&quot;: &quot;integer&quot;
+                    },
+                    &quot;syslog_timestamp&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;tags&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;type&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    }
+                }
+            }
+        }
+    }
+}
+</code></pre>
+<p>Now, while I could write this mapping directly to the ElasticSearch index, as the index is date-based, I'd have to resend the mapping manually everyday. Instead, I am going to create a mapping template that will match an index name based on pattern and automatically apply the template. This is done by crafting a PUT call to the ElasticSearch '_template' endpoint with the specific template name. In short, the following mapping template is posted to <code>http://[ElasticSearch:9200]/_templates/syslog_template</code></p>
+<pre class="prettyprint"><code>{
+        &quot;template&quot;: &quot;syslog-*&quot;,
+        &quot;mappings&quot;: {
+            &quot;syslog&quot;: {
+                &quot;properties&quot;: {
+                    &quot;@timestamp&quot;: {
+                        &quot;type&quot;: &quot;date&quot;,
+                        &quot;format&quot;: &quot;strict_date_optional_time||epoch_millis&quot;
+                    },
+                    &quot;@version&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;destination_address&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;destination_host&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;destination_port&quot;: {
+                        &quot;type&quot;: &quot;integer&quot;
+                    },
+                    &quot;host&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;message&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;protocol&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;source_address&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;source_mac&quot;: {
+                        &quot;type&quot;: &quot;string&quot;,
+                        &quot;index&quot; : &quot;not_analyzed&quot;
+                    },
+                    &quot;source_port&quot;: {
+                        &quot;type&quot;: &quot;integer&quot;
+                    },
+                    &quot;syslog_pri&quot;: {
+                        &quot;type&quot;: &quot;integer&quot;
+                    },
+                    &quot;syslog_timestamp&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;tags&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    },
+                    &quot;type&quot;: {
+                        &quot;type&quot;: &quot;string&quot;
+                    }
+                }
+            }
+        }
+}
+</code></pre>
+<p>With this in place I need to delete todays syslog index so that it is recreated, using the mapping above, when the first syslog message is received. Once this has been done, the visualization looks like this:</p>
+<p><img src="/Content/HomeNetworkMonitoring/Kibana-AccessByDestinationHostNotAnalysedVisualization.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Access By Destination Host Not-Analysed Visualization"></p>
+<p>Nice!</p>
+<h1>summary</h1>
+<p>In this post, I showed how to display host names for accessed servers rather than IP addresses. I also covered how to update ElasticSearch mapping such that field 'analysis' can be prevented and host names kept together.</p>
+<p>In the next post, I'll show how to translate local device IP addresses in to device names.</p>
+
+
+
+<div id="disqus_thread"></div>
+<script>
+    /**
+     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
+     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
+     */
+    /*
+    var disqus_config = function () {
+        this.page.url = 'http://www.ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartIII';  // Replace PAGE_URL with your page's canonical URL variable
+        this.page.identifier = HomeNetworkMonitoring-PartIII; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
+    };
+    */
+    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
+        var d = document, s = d.createElement('script');
+
+        s.src = '//ibebbs.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
+
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
+
+                                </div>
+                        </div>
+                </div>
+
+                <hr>
+
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+                                        <ul class="list-inline text-center">
+                                                <li>
+                                                <a href="https://twitter.com/ibebbs">
+                                                        <span class="fa-stack fa-lg">
+                                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                                        <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                                                        </span>
+                                                </a>
+                                                </li>
+                                                <li>
+                                                <a href="https://github.com/ibebbs">
+                                                        <span class="fa-stack fa-lg">
+                                                        <i class="fa fa-circle fa-stack-2x"></i>
+                                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                                        </span>
+                                                </a>
+                                                </li>
+                                        </ul>
+                                        <p class="copyright text-muted">
+                                                Copyright © 2016 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                                <br />
+                                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                                <br />
+                                                <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
+                                        </p>
+                                        </div>
+                                </div>
+                        </div>
+                </footer>
+
+                <script>
+                  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+                  ga('create', 'UA-70151903-1', 'auto');
+                  ga('send', 'pageview');
+
+                </script>
+
+                <script type="text/javascript">
+                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+                        var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
+
+                        /* * * DON'T EDIT BELOW THIS LINE * * */
+                        (function () {
+                                var s = document.createElement('script'); s.async = true;
+                                s.type = 'text/javascript';
+                                s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+                                (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+                        }());
+
+                        // Background
+                        var header = document.getElementById("intro-header");
+
+                        header.setAttribute('style', 'background-image: ' + '/Content/posts/header-stripe.png');
+                </script>
+        </body>
+</html>
