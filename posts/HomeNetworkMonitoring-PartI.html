@@ -1,28 +1,25 @@
 
 
-
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-	<meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
 
-	<title>Ian Bebbington - Home Network Monitoring - Part I</title>
-        <meta name="description" content="The personal blog of Ian Bebbington" />
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ian Bebbington - Home Network Monitoring - Part I</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
         <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
         <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
-        <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
-        <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
 
-        <link href="/Content/bootstrap/bootstrap.css" rel="stylesheet" />
-        <link href="/Content/prettify.css" rel="stylesheet">
-        <link href="/Content/github.css" rel="stylesheet">
-        <link href="/Content/clean-blog.css" rel="stylesheet" />
-        <link href="/Content/master.css" rel="stylesheet" />
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/prettify.css" rel="stylesheet">
+        <link href="/assets/css/github.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
         <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
         <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
         <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
@@ -38,14 +35,13 @@
         <meta property="og:url" content="http://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartI" />
         <!-- TODO: More social graph meta tags -->
 
-        <script src="/Scripts/jquery-2.1.1.min.js"></script>
-        <script src="/Scripts/bootstrap.min.js"></script>
-        <script src="/Scripts/prettify.js"></script>
-        <script src="/Scripts/clean-blog.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="/assets/js/prettify.js"></script>
+        <script src="/assets/js/clean-blog.js"></script>
         <script src="http://d3js.org/d3.v3.min.js"></script>
-        <script src="/Scripts/trianglify.min.js"></script>
-        <script src="/Scripts/Please-compressed.js"></script>
-        </script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
 
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -54,8 +50,8 @@
                 <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
         <![endif]-->
 
-	</head>
-	<body onload="prettyPrint()">
+        </head>
+        <body onload="prettyPrint()">
 
                 <!-- Navigation -->
                 <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
@@ -74,11 +70,10 @@
                                 <!-- Collect the nav links, forms, and other content for toggling -->
                                 <div class="collapse navbar-collapse" id="navbar-collapse">
                                         <ul class="nav navbar-nav navbar-right">
-                                                <li><a href="https://github.com/ibebbs">Github</a></li>
-                                                <li><a class="hidden-xs">|</a><a class="visible-xs-block">-</a></li>
-                                                <li><a href="/about">About</a></li>
-                                                <li><a href="/posts">Archive</a></li>
-                                                <li><a href="/tags">Tags</a></li>
+                                                        <li><a href="/about">About Me</a></li>
+        <li><a href="/tags">All Tags</a></li>
+        <li><a href="/posts">Archive</a></li>
+
                                         </ul>
                                 </div>
                                 <!-- /.navbar-collapse -->
@@ -87,27 +82,30 @@
                 </nav>
 
                 <!-- Page Header -->
+
                 <header class="intro-header" id="intro-header">
                         <div class="container">
                                 <div class="row">
                                         <div class="col-md-12">
 
-    <div class="post-heading">
-        <h1>Home Network Monitoring - Part I</h1>
-            <h2 class="subheading">Using free and open-source tools to monitor my home network</h2>
-        <div class="meta">
-                Published on 08 April 2016<br>
-                    </div>
-            <div class="tags">
+    
 
-<a role="button" href="/tags/elastic-stack" class="btn btn-default btn-sm"> Elastic Stack</a>
-<a role="button" href="/tags/elasticsearch" class="btn btn-default btn-sm"> ElasticSearch</a>
-<a role="button" href="/tags/kibana" class="btn btn-default btn-sm"> Kibana</a>
-<a role="button" href="/tags/logstash" class="btn btn-default btn-sm"> LogStash</a>
-<a role="button" href="/tags/monitoring" class="btn btn-default btn-sm"> Monitoring</a>
-<a role="button" href="/tags/networking" class="btn btn-default btn-sm"> Networking</a>
-<a role="button" href="/tags/syslog" class="btn btn-default btn-sm"> Syslog</a>            </div>
+<div class="post-heading">
+    <h1>Home Network Monitoring - Part I</h1>
+        <h2 class="subheading">Using free and open-source tools to monitor my home network</h2>
+    <div class="meta">        
+            Published on 08 April 2016<br>
     </div>
+        <div class="tags">
+                    <a role="button" href="/tags/elastic-stack" class="btn btn-default btn-xs">Elastic Stack</a>
+                    <a role="button" href="/tags/elasticsearch" class="btn btn-default btn-xs">ElasticSearch</a>
+                    <a role="button" href="/tags/kibana" class="btn btn-default btn-xs">Kibana</a>
+                    <a role="button" href="/tags/logstash" class="btn btn-default btn-xs">LogStash</a>
+                    <a role="button" href="/tags/monitoring" class="btn btn-default btn-xs">Monitoring</a>
+                    <a role="button" href="/tags/networking" class="btn btn-default btn-xs">Networking</a>
+                    <a role="button" href="/tags/syslog" class="btn btn-default btn-xs">Syslog</a>
+        </div>     
+</div>
                                         </div>
                                 </div>
                         </div>
@@ -116,10 +114,8 @@
                 <!-- Main Content -->
                 <div class="container">
                         <div class="row">
-                                <div class="col-md-12">
+                                <div id="content" class="col-md-12">
                                         
-
-
 
 
 <p>Home networks are becoming increasingly complex. It is no longer just geeks and techies who have pervasive WiFi through-out their home to which a myriad of devices connect and communicate. When things go wrong or, worse still, the network is compromised by rouge hardware or software it's extremely difficult to work out what has happened and where to start troubleshooting the issue.</p>
@@ -145,7 +141,7 @@
 <h1>the router</h1>
 <p>At the core of my solution is a router that supports writing <a href="https://en.wikipedia.org/wiki/Syslog">Syslog</a> messages to a Syslog server. While once a rarity, this functionality is becoming increasingly prevalent in home / SOHO routers. Personally I use a <a href="http://www.draytek.co.uk/products/business/vigor-2830">DrayTek Vigor 2830</a>, a versatile and - most importantly - extremely reliable router that can be purchased for just over £100 in the UK.</p>
 <p>From the router administration web interface, you can set the router to write a variety of Syslog messages to a Syslog server by specifying the servers IP address. This can be seen below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/DrayTek-Syslog.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="DrayTek Vigor Syslog Settings"></p>
+<img src="/Content/HomeNetworkMonitoring/DrayTek-Syslog.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="DrayTek Vigor Syslog Settings">
 <p>I simply tick all the boxes and add the IP address of the PC hosting the Syslog server.</p>
 <h1>the syslog server</h1>
 <p>Now we have a router that is sending connectivity information via Syslog, we need a service running on a server that is capable of receiving these messages. For this I am using Elastic's <a href="https://www.elastic.co/products/logstash">Logstash</a> to receive the syslog messages and enrich them before forwarding them to an indexed store.</p>
@@ -270,69 +266,46 @@ yellow to green - Kibana index ready
 <p>NOTE: If you are connected to Kibana from another PC, you will need to open firewall port 5602 on the server to allow connections to Kibana.</p>
 </blockquote>
 <p>After a short pause while Kibana is initialised, you should see the following screen:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-InitialIndex.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Initial Index Settings"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-InitialIndex.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Initial Index Settings">
 <p>This screen allows you to add an index to Kibana that it can query messages in order to discover, visualise and ultimately produce a dashboard from information stored in the index. It is currently set to examine an index called <code>logstash-*</code> and shows a disable button at the bottom of the screen containing the text 'Unable to fetch mapping. Do you have indices matching the pattern' as we do not have a logstash index stored in ElasticSearch. We want Kibana to query our Syslog index so we change the 'Index name or pattern' to <code>Syslog-*</code> and, shortly after changing this value, we should see the button at the bottom change to 'Create' as shown here:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-SyslogIndex.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Syslog Index Settings"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-SyslogIndex.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Syslog Index Settings">
 <p>As Kibana has defaulted to the correct timestamp field (more on this later) you can simply click the 'Create' button to add the index to Kibana.</p>
 <p>After creating the index, you are taken to a screen that allows you modify how Kibana displays the fields within the index as shown below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-SyslogIndexMapping.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Syslog Index Mapping"></p>
+ <img src="/Content/HomeNetworkMonitoring/Kibana-SyslogIndexMapping.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Syslog Index Mapping">
 <p>We do not need to change anything here so can immediately start 'discovering' information in our Syslog index by clicking the 'Discover' tab as shown below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-DiscoverSyslog.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Discover Syslog"></p>
+ <img src="/Content/HomeNetworkMonitoring/Kibana-DiscoverSyslog.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Discover Syslog">
 <p>Here we're able to see the detail of the Syslog messages stored within the Syslog index on ElasticSearch. However, for now the messages are just strings so there's not a great deal we can do with them other than count them to produce a histogram of messages over time. To do this, we
 first want to add the fields of the index we're interested in (just timestamp, host, message and type for now) to the selected fields area as shown below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-SelectSyslogFields.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Select Syslog Fields"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-SelectSyslogFields.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Select Syslog Fields">
 <p>Once we have the fields we're interested in selected, we save them as a new search by clicking the 'Save Search' button in the top right of the window as shown below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-SaveSyslogSearch.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Save Syslog Search"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-SaveSyslogSearch.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Save Syslog Search">
 <p>Once the search is saved, we can proceed straight to the 'Visualise' tab to create the histogram as shown below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-VisualiseSyslogAsVerticalBarChart.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Visualise Syslog As Vertical Bar Chart"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-VisualiseSyslogAsVerticalBarChart.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Visualise Syslog As Vertical Bar Chart">
 <p>To create a histogram, we use a &quot;Vertical bar chart&quot;. Note it's description:</p>
 <blockquote>
 <p>The goto chart for oh-so-many needs. Great for time and non-time data. Stacked or grouped, exact numbers or percentages. If you are not sure which chart you need, you could do worse than to start here.</p>
 </blockquote>
 <p>So lets start here by clicking this option and selecting 'From a saved search' as shown below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-VisualiseFromSavedSearch.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Visualise From Saved Search"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-VisualiseFromSavedSearch.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Visualise From Saved Search">
 <p>Once you select the 'Syslog Messages' save search you will immediately be taken to the Visualization screen with a vertical bar chart showing a single bar with the total count of all messages. Here we want to customise the visualisation to display the count of messages over time so we first need to define the X-axis as a 'Date Histogram' as shown below.</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-VisualiseDateHistogram.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Visualise Date Histogram"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-VisualiseDateHistogram.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Visualise Date Histogram">
 <p>With these settings in place, click the 'Apply Changes' button and you should immediately see a chart of the count of syslog messages over time. Note that Kibana has automatically selected an appropriate resolution of column grouping (messages 'per 30 seconds' in the example above) but that this can be changed later if required.</p>
 <p>For now, we want to add this chart to a new dashboard so we can have it available to us at a moments notice. To do this, we first save our visualization by clicking the 'Save Visuaization' button as shown below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-VisualiseSaveSyslogMessagesOverTime.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Visualise Save Syslog Messages Over Time"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-VisualiseSaveSyslogMessagesOverTime.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Visualise Save Syslog Messages Over Time">
 <p>Next we navigate to the 'Dashboard' tab and click the '+' button as prompted. Again, we selected the visualization we just saved as shown below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-DashboardAddVisualization.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard Add Visualization"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-DashboardAddVisualization.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard Add Visualization">
 <p>With the &quot;Syslog Messages Over Time&quot; visualization added, we make it a usable size by dragging the resize control (button right corner of the visualization) to extend the visualization across the width of the window as shown below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-DashboardSizeVisualization.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard Size Visualization"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-DashboardSizeVisualization.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard Size Visualization">
 <p>Finally, to make it easier to see the messages the histogram refers to, we'll add a table of related Syslog messages onto our dashboard below the histogram. To do this, click the '+' button, selected 'Searches' and then our 'Syslog Messages' search. When the table is added to the dashboard, make it a similar size as the histogram as shown below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-DashboardWithSearch.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard With Search"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-DashboardWithSearch.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard With Search">
 <p>Once done, we need to save the dashboard so we can reload it any time we need it. Simply click the 'Save Dashboard' button as shown below:</p>
-<p><img src="/Content/HomeNetworkMonitoring/Kibana-DashboardSaveSyslogMessages.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard Save Syslog Messages"></p>
+<img src="/Content/HomeNetworkMonitoring/Kibana-DashboardSaveSyslogMessages.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard Save Syslog Messages">
 <p>Once saved you can bookmark the page and get back to your dashboard any time you like. Furthermore, once saved, you can monkey with the dashboard (explore the data by highlighting various areas of the chart, change time frames, set autorefresh etc) as much as you like knowing you can return to saved version any time.</p>
 <h1>summary</h1>
 <p>In this post, I have outlined how to use a Syslog capable router to send Syslog messages to Logstash and have Logstash store these messages in ElasticSearch for querying. Furthermore we then created a dashboard in which we can explore the number of Syslog messages we received over various timeframes.</p>
 <p>In the next post we'll increase the granularity of the messages we store so that we can start creating more interesting dashboard.</p>
 
 
-
-<div id="disqus_thread"></div>
-<script>
-    /**
-     *  RECOMMENDED CONFIGURATION VARIABLES: EDIT AND UNCOMMENT THE SECTION BELOW TO INSERT DYNAMIC VALUES FROM YOUR PLATFORM OR CMS.
-     *  LEARN WHY DEFINING THESE VARIABLES IS IMPORTANT: https://disqus.com/admin/universalcode/#configuration-variables
-     */
-    /*
-    var disqus_config = function () {
-        this.page.url = 'http://www.ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartI';  // Replace PAGE_URL with your page's canonical URL variable
-        this.page.identifier = HomeNetworkMonitoring-PartI; // Replace PAGE_IDENTIFIER with your page's unique identifier variable
-    };
-    */
-    (function() {  // REQUIRED CONFIGURATION VARIABLE: EDIT THE SHORTNAME BELOW
-        var d = document, s = d.createElement('script');
-
-        s.src = '//ibebbs.disqus.com/embed.js';  // IMPORTANT: Replace EXAMPLE with your forum shortname!
-
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript" rel="nofollow">comments powered by Disqus.</a></noscript>
 
                                 </div>
                         </div>
@@ -343,65 +316,62 @@ first want to add the fields of the index we're interested in (just timestamp, h
                 <!-- Footer -->
                 <footer>
                         <div class="container">
-                                <div class="row">
-                                        <div class="col-md-12">
-                                        <ul class="list-inline text-center">
-                                                <li>
-                                                <a href="https://twitter.com/ibebbs">
-                                                        <span class="fa-stack fa-lg">
-                                                        <i class="fa fa-circle fa-stack-2x"></i>
-                                                        <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
-                                                        </span>
-                                                </a>
-                                                </li>
-                                                <li>
-                                                <a href="https://github.com/ibebbs">
-                                                        <span class="fa-stack fa-lg">
-                                                        <i class="fa fa-circle fa-stack-2x"></i>
-                                                        <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-                                                        </span>
-                                                </a>
-                                                </li>
-                                        </ul>
-                                        <p class="copyright text-muted">
-                                                Copyright © 2016 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
-                                                <br />
-                                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
-                                                <br />
-                                                <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
-                                        </p>
-                                        </div>
-                                </div>
-                        </div>
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <ul class="list-inline text-center">
+        <li>
+          <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+      </ul>
+      <p class="copyright text-muted">
+        Copyright © 2016 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/">"Creative Commons Attribution 4.0 International License"</a>
+        <br />
+        <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+        <br />
+        <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
+      </p>
+    </div>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-70151903-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+    <script type="text/javascript">
+            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+            var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
+
+            /* * * DON'T EDIT BELOW THIS LINE * * */
+            (function () {
+                    var s = document.createElement('script'); s.async = true;
+                    s.type = 'text/javascript';
+                    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+                    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+            }());
+    </script>
+</div>
+
                 </footer>
 
-                <script>
-                  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-                  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-                  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-                  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-                  ga('create', 'UA-70151903-1', 'auto');
-                  ga('send', 'pageview');
-
-                </script>
-
-                <script type="text/javascript">
-                        /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-                        var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
-
-                        /* * * DON'T EDIT BELOW THIS LINE * * */
-                        (function () {
-                                var s = document.createElement('script'); s.async = true;
-                                s.type = 'text/javascript';
-                                s.src = '//' + disqus_shortname + '.disqus.com/count.js';
-                                (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
-                        }());
-
-                        // Background
-                        var header = document.getElementById("intro-header");
-
-                        header.setAttribute('style', 'background-image: ' + '/Content/posts/header-stripe.png');
-                </script>
+                
         </body>
 </html>
