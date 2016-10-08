@@ -1,0 +1,204 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - 3D Printing with the CEL Robox</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+        <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/prettify.css" rel="stylesheet">
+        <link href="/assets/css/github.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - 3D Printing with the CEL Robox" />
+        
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/3DPrintingWithTheCelRobox" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="/assets/js/prettify.js"></script>
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+                <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        </head>
+        <body onload="prettyPrint()">
+
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/about">About Me</a></li>
+        <li><a href="/tags">All Tags</a></li>
+        <li><a href="/posts">Archive</a></li>
+
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+
+                <!-- Page Header -->
+
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+
+<div class="post-heading">
+    <h1>3D Printing with the CEL Robox</h1>
+        <h2 class="subheading">A review by a 3D printing newb</h2>
+    <div class="meta">        
+            Published on 07 October 2016<br>
+    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/3d-printing" class="btn btn-default btn-xs">3D Printing</a>
+                    <a role="button" href="/tags/maplin" class="btn btn-default btn-xs">Maplin</a>
+                    <a role="button" href="/tags/robox" class="btn btn-default btn-xs">Robox</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+
+<p>So, I've wanted a 3D printer for a while and recently a perfect storm of events meant I finally took the plunge.</p>
+<p>I had hit a wall in my MonsterPi project trying to mount a RaspberryPi in a constrained space (more on this in a subsequent post). Most of my usual hacks (you'd be amazed what you can do with a sheet of acrylic and a Meccano set) simply wouldn't cut it and I was considering abandoning the project. Without intentionally meaning to, I found myself looking at 3D printers on <a href="http://www.maplin.co.uk/c/gadgets-toys-and-hobbies/3d-printers">Maplin's website</a> and saw that they were selling 'used' 3D printers at quite a discount.</p>
+<p>After a quick look around for reviews I found that one of the models Maplin were selling - the <a href="http://www.maplin.co.uk/p/cel-robox-3d-printer-used-b81qq">CEL Robox</a> - was listed as one of the best &quot;Plug 'n' play&quot; printers on <a href="https://www.3dhubs.com/best-3d-printer-guide#plugnplay-cel-robox">3D Hubs</a>. Moreover, my local (well, 15 miles away) Maplin's store had one in stock. But there was that 'used' thing. From what I'd gathered, getting a 3D printer to print reliably is tricky at the best of times, and I was thinking of buying one that had already been used and returned or worse, didn't even work in the first place.</p>
+<p>Too intrigued not to dig a little deeper, I gave Maplin a call. Now experience has lead me not to expect too much from Maplin's employees - at best they're well meaning but witless, at worst they think you are -  but this time proved to be an exception. The guy who answered the phone was superb (note to self: must tweet Maplin about how great this guy is). Although he initially seemed confused about not having a used model of the 3D printer in store, he checked the website to confirm availability then the store stock levels to work out what was going on. Turns out the 'used' printer they had was actually the display model and after noting that he was unsure of the history of the printer he offered to make a couple of calls to other staff to find out the condition and how much it had been used then call me back; as I said, he was excellent. As promised, he called back in 15 minutes or so having confirmed that the printer had only been used to print a few example models and had otherwise sat idle for almost a year. Unfortunately in that time it had garnered a few scratches and lost it's box and support material but, having talked to his manager, he would be able to offer a further discount on the used price if I wanted to come in a take a look at it.</p>
+<p>At the store an hour later it turned out that the guy I had talked to was actually the store manager and was really going the extra mile. By the time I had turned up, he had collated replacement components (power lead, usb lead, brushes, etc) from store stock and had the printer out ready for me to inspect. Amusingly, he had his staff so well organised that, seeing a few components laying around, they had actually put them all back on the shelves so he had to go collect them all again - but I couldn't help but be impressed. Anyway, the scratches turned out to be superfluous, the offer of an additional discount very attractive and the store manager's assurances that should anything be wrong with the unit he'd ensure it was replaced no questions asked very persuasive.</p>
+<p>So I bought it, brought it home and, once the baby was safely ensconced at nursery the next day, set it up and set about calibrating it. The unit itself is a thing of beauty. Bold lines and colours with smooth, solid feeling mechanical components and a general air of quality; not at all what I've come to expect from a <a href="https://www.kickstarter.com/projects/robox/robox-desktop-3d-printer-and-micro-manufacturing-p">Kickstarter funded project</a>. While I was initially wary of buying a 3D printer that used a proprietary &quot;chipped&quot; spool for fear of a lock-in to an expensive source of filament, the integrated nature of the spool into the body of the unit and the intelligence it provides to the software - everything from how much spool is left to how much a particular model will cost to print - is fantastic. Far from other &quot;hobbyist&quot; 3D printers where filament projects precariously around the unit, the feed of filament to the head is completely hidden from view and loading of filament completely automated.</p>
+<p>Unfortunately calibration wasn't quite as smooth and it took a long time to get the printer ready to actually try printing a model. In fact, despite repeatedly trying and following all suggestions, one of the calibration tests - the needle valve opening calibration for the fill nozzle - stoically refused to run successfully. This may have been the result of the unit sitting idle for so long or simply me not setting it up right but the failure to pass this test was extremely worrisome. Even the 'purge' material test (used to completely empty the print heads when you're planning on changing material) failed to lay down material as it should but this was mostly resolved by vigorously cleaning the print bed with the isopropyl alcohol.</p>
+<p>Anyway, despite the needle valve opening calibration still failing, I decided to print a model to see how it would perform before deciding whether or not to return the unit. From CEL's downloadable samples, I decided to try printing the 'cargo-box' as it didn't seem to require too much filament and a small container is always useful for something. Actually loading and starting to print a model using CEL's <a href="http://www.cel-robox.com/downloads/">AutoMaker</a> software is ludicrously simple: start a new layout, load a model, choose the granularity of the print, go.</p>
+<p><strong>Watching a 3D model being printed is really something to behold. Despite it taking hours &quot;like watching a 3D printer fabricate&quot; should really become the metaphorical antonym to &quot;like watching paint dry&quot;; from the initial outline of the print being laid on the print bed, to seeing a solid object emerge, the process is fascinating. Taking a virtual object modelled on your computer and seeing that object take shape and become a physical object in the real world is thrilling, with innumerable possibilities opening up with every layer of filament laid down.</strong></p>
+<p>In short order (well, actually 'long order' but it certainly didn't feel that way) and with much amazement and relief, the print was finished perfectly. A 1.5&quot; square, green plastic cargo-box sat inside the Robox; I had fabricated a solid object from - seemingly - nothing. Once the unit had cooled the heated print-bed and unlocked the door, I tried removing the box, entirely expecting to have to lever and peel the plastic off the bed. To my surprise it moved easily, seemingly held to the bed by nothing more than a static charge. I was further surprised by the strength of the box; given it was made from nothing more than melted strands of plastic, I absolutely expected the fabricated object to have the tensile strength of a faberge egg. Yet it was incredibly rigid and inflexible, only the tell-tale layering giving away the fact that it had been 3D printer rather than cast in an industrial manufacturing plant.</p>
+<p>Now it was time to see if I could use the printer for the purpose I bought it: fabricating custom components for other projects. First up was a bracket to hold a RaspberryPi and other components in a very specific configuration. <a href="http://www.sketchup.com/products/sketchup-pro/new-in-2016?gclid=CIK4ks2Cy88CFc0y0wodZmwHaQ">SketchUp</a> has been my go-to 3D modelling software of choice since being bought and given away by Google. It is amazingly quick and easy to use for almost everything except extremely precise components with low tolerances; i.e. exactly the kind of thing I needed to do. So I went about looking for alternatives and quickly settled on the free version of <a href="https://www.rs-online.com/designspark/mechanical-software">DesignSpark Mechanical from RS Components</a>. Despite some quirkiness in it's UI, it provides most of the features and ease of use of SketchUp with several digits of precision for designed components. Indeed, instead of using a mouse to try to get the exact length of an edge, you can simply enter the length you want on the keyboard; precisely the functionality I thought was missing from SketchUp.</p>
+<p>It took several hours to complete the 3D model for the bracket I needed - somewhat due to DesignSpark's learning curve but mostly the precise measurements and imprecise iteration required to design a bracket that would hold all the components just so - but eventually it was ready to print. Again, friction from design software to print ready was minimal. DesignSpark is able to export in the standard STL format and AutoMaker loaded the model and positioned it on the print-bed automatically, promising to fabricate me a completely custom component for just £1.48's worth of material.</p>
+<p>I set the print going but was quickly dismayed that the first layer of the print wasn't being laid properly at the far corners of the bed, mostly due to the fact that the corners of the bed away from the tabs that hold it in place had risen slightly. Regardless, I decided to let the print continue and see if subsequent layers would adhere to the small smudge of material the print head had managed to deposit. This turned out to be the right choice as by layer three the base of the bracket was fully formed and the printer had started using the &quot;fill&quot; nozzle to quickly start filling out further layers.</p>
+<p>It took about three hours to design and an hour and forty minutes to fabricate, but the bracket fitted perfectly and was easily strong enough to hold all the components in the configuration I needed. I was a very happy boy and immediately starting to design a subsequent bracket I needed for the same project and plan for a load of other custom bits.</p>
+<p>In summary, if you're thinking of buying a 3D printer and can afford what is - regardless of the heavy discount - an expensive bit of technology, I would absolutely recommend going for it. The possibilities of what you can create are mind-boggling and the sensation of watching them come into existence exhilarating. Being able to fabricate components I previously had to hack together from off the shelf bits is tremendously empowering and I can unashamedly say that I am completely hooked on 3D printing.</p>
+<p>Furthermore, while I have no direct experience of other 3D printers, I wouldn't hesitate to recommend CEL's Robox printer as - despite still failing the nozzle calibration - it has yet to fail a print and the software is remarkably straight forward and easy to use.</p>
+<p>Watch this space for more adventures in 3D printing as I integrate my new found fabrication abilities into my innumerable ongoing projects. First up: MonsterPi.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+
+                <hr>
+
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <ul class="list-inline text-center">
+        <li>
+          <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+      </ul>
+      <p class="copyright text-muted">
+        Copyright © 2016 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/">"Creative Commons Attribution 4.0 International License"</a>
+        <br />
+        <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+        <br />
+        <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
+      </p>
+    </div>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-70151903-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+    <script type="text/javascript">
+            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+            var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
+
+            /* * * DON'T EDIT BELOW THIS LINE * * */
+            (function () {
+                    var s = document.createElement('script'); s.async = true;
+                    s.type = 'text/javascript';
+                    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+                    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+            }());
+    </script>
+</div>
+
+                </footer>
+
+                
+        </body>
+</html>

@@ -5,194 +5,8 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2016</copyright>
-		<pubDate>Thu, 01 Sep 2016 20:48:06 GMT</pubDate>
-		<lastBuildDate>Thu, 01 Sep 2016 20:48:06 GMT</lastBuildDate>
-		<item>
-			<title>Reactive ReadModels</title>
-			<link>http://ian.bebbs.co.uk/posts/ReactiveReadModels</link>
-			<description>&lt;p&gt;If you're starting out with &lt;a href="http://docs.geteventstore.com/introduction/event-sourcing-basics/" title="Event Sourcing Basics at GetEventStore"&gt;Event Sourcing&lt;/a&gt; you're probably looking for the ability to project events into &lt;a href="http://cqrs.nu/tutorial/cs/03-read-models" title="CQRS tutorial - Read Models"&gt;read models&lt;/a&gt; that can be used by the views in your application. Today I'd like to share a neat little mechanism I've established for building read model in C# by employing a strongly typed yet functional approach.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/ReactiveReadModels</guid>
-			<pubDate>Mon, 23 Nov 2015 00:00:00 GMT</pubDate>
-			<content:encoded>
-                                        
-
-
-&lt;p&gt;If you're starting out with &lt;a href="http://docs.geteventstore.com/introduction/event-sourcing-basics/" title="Event Sourcing Basics at GetEventStore"&gt;Event Sourcing&lt;/a&gt; you're probably looking for the ability to project events into &lt;a href="http://cqrs.nu/tutorial/cs/03-read-models" title="CQRS tutorial - Read Models"&gt;read models&lt;/a&gt; that can be used by the views in your application. Today I'd like to share a neat little mechanism I've established for building read model in C# by employing a strongly typed yet functional approach.&lt;/p&gt;
-&lt;p&gt;Starting with infrastructure, you probably have some form event distribution mechanism, normally a pub/sub style bus. From this bus you need to be able to selectively subscribe to all the events you need to collate the information required by your read model. Furthermore, you will often need to initialize the read model with information from a persistent store - often this is a persistent store of the read model itself but this isn't necessarily the case. Lastly, your application must be able to request a specific read model and receive notifications when the read model changes.&lt;/p&gt;
-&lt;p&gt;To illustrate how this might be achieved, I have written a &lt;a href="https://github.com/ibebbs/Blog.ReactiveReadModels" title="ReactiveReadModels repository on Github"&gt;small sample project&lt;/a&gt; following the traditional Account/Order model that features the following components:&lt;/p&gt;
-&lt;img src="/Content/posts/ReactiveReadModels-SampleComponents.png" alt="Sample Components" class="img-responsive" style="margin-left: auto; margin-right: auto; margin-top: 4px; margin-bottom: 4px"&gt;
-&lt;p&gt;In this system, the application is able to request a stream of read models from a repository. The repository will retrieve initial read model state from a persistence service and then subscribe to events from an event bus to continually update and publish the read model. Only read models the application needs should be published and only events the read model requires should be processed.&lt;/p&gt;
-&lt;p&gt;By leveraging Rx we're able to implement a stub of the repository very easily as follows:&lt;/p&gt;
-&lt;pre class="prettyprint"&gt;&lt;code&gt;public class Repository
-{
-    private readonly Service.IAccountService _accountService;
-    private readonly IEventAggregator _bus;
-
-    public Repository(Service.IAccountService accountService, IEventAggregator bus)
-    {
-        _accountService = accountService;
-        _bus = bus;
-    }
-
-    public IObservable&amp;lt;ReadModel&amp;gt; For(Guid id)
-    {
-        if (id == null) throw new ArgumentNullException("id");
-
-        return Observable.Create&amp;lt;ReadModel&amp;gt;(
-            async observer =&amp;gt;
-            {
-                Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
-
-                ReadModel readModel = accountInfo.ToReadModel();
-
-                // Subscribe to events and apply to read model
-
-                return Observable.StartWith(readModel).Subscribe(observer);
-            }
-        );
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This code is written such that, when an observer &lt;em&gt;subscribes&lt;/em&gt; to the &lt;code&gt;IObservable&amp;lt;ReadModel&amp;gt;&lt;/code&gt; returned from the &lt;code&gt;For&lt;/code&gt; method, an asynchronous request will be made to the &lt;code&gt;IAccountService&lt;/code&gt; for the initial state of the read model, a &lt;code&gt;ReadModel&lt;/code&gt; instance will be constructed from the information returned by the  service and finally the &lt;code&gt;ReadModel&lt;/code&gt; will be emitted to the subscriber. Note that the observable is deliberately left incomplete to indicate the further &lt;code&gt;ReadModel&lt;/code&gt; instances might be emitted.&lt;/p&gt;
-&lt;p&gt;Now we have the current read model, we need to subscribe to events from the event bus that represent changes pertinent to the read model and, when received, modify and emit the read model so that the subscriber is always up to date.&lt;/p&gt;
-&lt;p&gt;To do this, we might think to write something like this:&lt;/p&gt;
-&lt;pre class="prettyprint"&gt;&lt;code&gt;public IObservable&amp;lt;ReadModel&amp;gt; For(Guid id)
-{
-    if (id == null) throw new ArgumentNullException("id");
-
-    return Observable.Create&amp;lt;ReadModel&amp;gt;(
-        async observer =&amp;gt;
-        {
-            Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
-
-            ReadModel readModel = accountInfo.ToReadModel();
-
-            return new CompositeDisposable(
-                _bus.GetEvent&amp;lt;Event.AccountNameChanged&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(@@event =&amp;gt; readModel.WithAccountName(@@event.AccountName)).Subscribe(observer),
-                _bus.GetEvent&amp;lt;Event.AddBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(@@event =&amp;gt; readModel.WithBillingAddress(new Address(@@event.AddressName))).Subscribe(observer),
-                _bus.GetEvent&amp;lt;Event.RemoveBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(@@event =&amp;gt; readModel.WithoutBillingAddress(@@event.AddressName)).Subscribe(observer),
-                _bus.GetEvent&amp;lt;Event.OrderInvoiced&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(@@event =&amp;gt; readModel.WithCurrentOrder(new Order(@@event.OrderId))).Subscribe(observer),
-                _bus.GetEvent&amp;lt;Event.OrderDispatched&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(@@event =&amp;gt; readModel.WithCompletedOrder(@@event.OrderId)).Subscribe(observer)
-            );
-        }
-    );
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;While this code looks sensible, we'll very quickly run into problems with it. Firstly and primarily each subscription is only ever modifying the initial &lt;code&gt;readModel&lt;/code&gt; instance meaning changes are not cumulative. Secondly, if we somehow overcame the initial issue, because we're maintaining a series of subscriptions here, changes are not thread safe nor deterministic.&lt;/p&gt;
-&lt;p&gt;No, what we need is a way of writing the effect of these changes into a common read model instance, aggregating those changes across multiple events and emitting the new read model each time it is updated. Fortunately, Rx has &lt;strong&gt;exactly&lt;/strong&gt; the operator we need for this: &lt;code&gt;IObservable&amp;lt;TAccumulate&amp;gt; Scan&amp;lt;TSource, TAccumulate&amp;gt;(this IObservable&amp;lt;TSource&amp;gt; source, TAccumulate seed, Func&amp;lt;TAccumulate, TSource, TAccumulate&amp;gt; accumulator)&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;This operator takes an initial &lt;code&gt;TAccumulate&lt;/code&gt; seed and applies each item emitted from the &lt;code&gt;IObservable&amp;lt;TSource&amp;gt;&lt;/code&gt; source to the accumulator by invoking a function that takes the current accumulator value and the emitted item and returning a new accumulator value. Each of these new accumulator values are then emitted as an &lt;code&gt;IObservable&amp;lt;TAccumulate&amp;gt;&lt;/code&gt; instances to the subscriber.&lt;/p&gt;
-&lt;p&gt;Great, so it's pretty obvious here that our accumulator should be our read model, but how do we subscribe to all the different message types and apply a different modifications to the read model for each type of  message received when the &lt;code&gt;Scan&lt;/code&gt; function only allows for a single &lt;code&gt;TSource&lt;/code&gt; type. We need to somehow homogenise the source stream to a single type. Often this is done with inheritance but, as there's no common base type for each of these messages, we'd have to write something like this:&lt;/p&gt;
-&lt;pre class="prettyprint"&gt;&lt;code&gt;public IObservable&amp;lt;ReadModel&amp;gt; For(Guid id)
-{
-    if (id == null) throw new ArgumentNullException("id");
-
-    return Observable.Create&amp;lt;ReadModel&amp;gt;(
-        async observer =&amp;gt;
-        {
-            Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
-
-            ReadModel readModel = accountInfo.ToReadModel();
-
-            IObservable&amp;lt;object&amp;gt; events = Observable.Merge(
-                _bus.GetEvent&amp;lt;Event.AccountNameChanged&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Cast&amp;lt;object&amp;gt;(),
-                _bus.GetEvent&amp;lt;Event.AddBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Cast&amp;lt;object&amp;gt;(),
-                _bus.GetEvent&amp;lt;Event.RemoveBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Cast&amp;lt;object&amp;gt;(),
-                _bus.GetEvent&amp;lt;Event.OrderInvoiced&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Cast&amp;lt;object&amp;gt;(),
-                _bus.GetEvent&amp;lt;Event.OrderDispatched&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Cast&amp;lt;object&amp;gt;()
-            );
-
-            return events.Scan(readModel,
-                (readModel, @@event) =&amp;gt;
-                {
-                    if (@@event is Event.AccountNameChanged)
-                    {
-                        return readModel.WithAccountName(((Event.AccountNameChanged)@@event).AccountName);
-                    }
-                    else if (@@event is Event.AddBillingAddress)
-                    {
-                        ...
-                    }
-                    ...
-                    else
-                    {
-                        throw new ArgumentException("Unknown message type");
-                    }
-                }
-            );
-        }
-    );
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;... which is not type safe, has very little compile time checking, requires a fall-through exception and, quite frankly, is horrible. I'm sure with Rx we can do something better.&lt;/p&gt;
-&lt;p&gt;Well, lets look at this from a functional perspective. The action we want to perform when receiving each type of event can be considered to be a function in the form of &lt;code&gt;Func&amp;lt;TReadModel, TEvent, TReadModel&amp;gt;&lt;/code&gt;. This is very similar to the third parameter of the &lt;code&gt;Observable.Scan&lt;/code&gt; function with the problem being that we have multiple types of &lt;code&gt;TEvent&lt;/code&gt;. If only there was a way to produce a generic function that would operate correctly across all the event types.&lt;/p&gt;
-&lt;p&gt;Well, by leaning on a concept from functional languages, this might be possible. &lt;a href="https://en.wikipedia.org/wiki/Partial_application" title="Partial Application definition from wikipedia"&gt;Partial application&lt;/a&gt; has been available in C# - via &lt;a href="http://csharpindepth.com/Articles/Chapter5/Closures.aspx" title="C# in Depth - The Beauty Of Closures"&gt;closures&lt;/a&gt; - since lambdas were introduced and allows you to:&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;fix a number of arguments to a function, producing another function of smaller arity. Given a function f:(X * Y * Z) -&amp;gt; N , we might fix (or 'bind') the first argument, producing a function of type (f){partial}:(Y * Z) -&amp;gt; N . Evaluation of this function might be represented as f{partial}(2, 3). Note that the result of partial function application in this case is a function that takes two arguments&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;So is there some way we can leverage this to remove the &lt;code&gt;TEvent&lt;/code&gt; argument from the function? Absolutely, by making the observable emit a &lt;em&gt;stream of partial functions&lt;/em&gt; in the form &lt;code&gt;Func&amp;lt;ReadModel,ReadModel&amp;gt;&lt;/code&gt; which can then be applied to the read model as follows:&lt;/p&gt;
-&lt;pre class="prettyprint"&gt;&lt;code&gt;public IObservable&amp;lt;ReadModel&amp;gt; For(Guid id)
-{
-    if (id == null) throw new ArgumentNullException("id");
-
-    return Observable.Create&amp;lt;ReadModel&amp;gt;(
-        async observer =&amp;gt;
-        {
-            Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
-
-            IObservable&amp;lt;Func&amp;lt;ReadModel, ReadModel&amp;gt;&amp;gt; mutators = Observable.Merge(
-                _bus.GetEvent&amp;lt;Event.AccountNameChanged&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(Functions.Apply),
-                _bus.GetEvent&amp;lt;Event.AddBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(Functions.Apply),
-                _bus.GetEvent&amp;lt;Event.RemoveBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(Functions.Apply),
-                _bus.GetEvent&amp;lt;Event.OrderInvoiced&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(Functions.Apply),
-                _bus.GetEvent&amp;lt;Event.OrderDispatched&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(Functions.Apply)
-            );
-
-            return mutators.Scan(accountInfo.ToReadModel(), (readModel, mutator) =&amp;gt; mutator(readModel)).Subscribe(observer);
-        }
-    );
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Here the &lt;code&gt;Functions.Apply&lt;/code&gt; is an overloaded method for each of the event types. For example, the method for &lt;code&gt;Event.AccountNameChanged&lt;/code&gt; is implemented as follows:&lt;/p&gt;
-&lt;pre class="prettyprint"&gt;&lt;code&gt;public static Func&amp;lt;ReadModel, ReadModel&amp;gt; Apply(Event.AccountNameChanged @@event)
-{
-    return readModel =&amp;gt; readModel.WithAccountName(@@event.AccountName);
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This method takes the event to be processed as a parameter and returns a function in the form &lt;code&gt;Func&amp;lt;ReadModel,ReadModel&amp;gt;&lt;/code&gt; that closes over the parameter and calls the &lt;code&gt;WithAccountName&lt;/code&gt; extension method when executed. A similar pattern is followed for all the other event types.&lt;/p&gt;
-&lt;p&gt;Once we have projected and merged all the event streams into a single &lt;code&gt;IObservable&amp;lt;Func&amp;lt;ReadModel, ReadModel&amp;gt;&amp;gt;&lt;/code&gt; we can use the scan function to iteratively apply each function to the cumulative read model instance and emit the result after each event.&lt;/p&gt;
-&lt;p&gt;Pretty neat huh!&lt;/p&gt;
-
-
-
-                                </content:encoded>
-		</item>
-		<item>
-			<title>Using a Hyperlink in MVVM</title>
-			<link>http://ian.bebbs.co.uk/posts/UsingHyperlinkInMVVM</link>
-			<description>&lt;p&gt;The XAML (i.e. WPF, WinRT, UWP family) &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.documents.hyperlink.aspx"&gt;Hyperlink&lt;/a&gt; is a terrific little control (ok, it's not actually a &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.controls.control.aspx"&gt;Control&lt;/a&gt; - it's a &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.contentelement.aspx"&gt;ContentElement&lt;/a&gt; - but it does allow interaction hence using the term control here). It follows the current environment's theme such that the user naturally knows it's a link that can be clicked and it can be embedded inside &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.controls.textblock.aspx"&gt;TextBlock&lt;/a&gt; elements so that it naturally flows with the other content.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/UsingHyperlinkInMVVM</guid>
-			<pubDate>Wed, 17 Aug 2016 00:00:00 GMT</pubDate>
-			<content:encoded>
-                                        
-
-
-&lt;p&gt;The XAML (i.e. WPF, WinRT, UWP family) &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.documents.hyperlink.aspx"&gt;Hyperlink&lt;/a&gt; is a terrific little control (ok, it's not actually a &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.controls.control.aspx"&gt;Control&lt;/a&gt; - it's a &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.contentelement.aspx"&gt;ContentElement&lt;/a&gt; - but it does allow interaction hence using the term control here). It follows the current environment's theme such that the user naturally knows it's a link that can be clicked and it can be embedded inside &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.controls.textblock.aspx"&gt;TextBlock&lt;/a&gt; elements so that it naturally flows with the other content.&lt;/p&gt;
-&lt;p&gt;For example:&lt;/p&gt;
-&lt;script src="https://gist.github.com/ibebbs/f3b4efb09f9b0ea36397a9ab462823df.js"&gt;&lt;/script&gt;
-&lt;p&gt;However, out of the box, this control's functionality is somewhat limited. As standard, it is simply able to perform navigation on any &lt;a href="https://msdn.microsoft.com/library/windows/apps/br242682"&gt;Frame&lt;/a&gt; element the control is hosted within. Any other type of behavior requires the developer to subscribe to the control's &lt;code&gt;OnHyperlinkClicked&lt;/code&gt; event and perform the required operations from code-behind.&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;Unfortunately, neither of these approaches work for 'ViewModel First' &lt;a href="https://msdn.microsoft.com/en-gb/library/hh848246.aspx"&gt;MVVM&lt;/a&gt;, which, after many years employing MVVM is by far my favoured approach.&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;In a project I've been working on which employs this pattern, a state-machine is used to track application state and each transition between states causing a navigation to be performed in the UI. In one view within the application, there was a desire to instigate a state-machine transition by clicking on a &lt;code&gt;Hyperlink&lt;/code&gt; embedded within some text. Ideally, when clicked, the &lt;code&gt;Hyperlink&lt;/code&gt; would execute an &lt;code&gt;ICommand&lt;/code&gt; instance data-bound to the view from the view-model. Obviously this wasn't possible as standard so I started thinking through alternatives.&lt;/p&gt;
-&lt;p&gt;My first inclination was to restyle a &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.controls.button.aspx"&gt;Button&lt;/a&gt; to look like a Hyperlink. This would, ostensibly, be fairly straight forward and naturally provided a Command &lt;code&gt;DependencyProperty&lt;/code&gt; to bind to. However, keeping the hyperlink styled as per the current system theme would be arduous to say the least.&lt;/p&gt;
-&lt;p&gt;Putting this aside, I came across &lt;a href="http://stackoverflow.com/a/11433814"&gt;this post&lt;/a&gt; which employed an attached property to start a process (normally a browser to display external content) on the host PC. Realising this approach could be extended to accomplish my goals I refactored it to the following:&lt;/p&gt;
-&lt;script src="https://gist.github.com/ibebbs/654f519eec134135f7f9469150b07438.js"&gt;&lt;/script&gt;
-&lt;p&gt;Which can be used as follows:&lt;/p&gt;
-&lt;script src="https://gist.github.com/ibebbs/0ae7c2e0ed3c531858f5ee01c16157b8.js"&gt;&lt;/script&gt;
-&lt;p&gt;Et voilá, a &lt;code&gt;Hyperlink&lt;/code&gt; control which is able to execute a data-bound &lt;code&gt;ICommand&lt;/code&gt; instance. Obviously it could be extended further to disable the hyperlink when the command reports execution is disabled (via &lt;code&gt;CanExecuteChanged&lt;/code&gt;) and provide a CommandParamter binding for passing additional information through to the command execution, but in a lot of instances - and certainly for me in this scenario - &lt;a href="https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it"&gt;YAGNI&lt;/a&gt;.&lt;/p&gt;
-
-
-
-                                </content:encoded>
-		</item>
+		<pubDate>Sat, 08 Oct 2016 11:42:55 GMT</pubDate>
+		<lastBuildDate>Sat, 08 Oct 2016 11:42:55 GMT</lastBuildDate>
 		<item>
 			<title>Breaking News - Forgot to commit</title>
 			<link>http://ian.bebbs.co.uk/posts/EndOfStreak</link>
@@ -211,25 +25,160 @@
                                 </content:encoded>
 		</item>
 		<item>
-			<title>Using Wyam</title>
-			<link>http://ian.bebbs.co.uk/posts/NewBlogUsingWyam</link>
-			<description>&lt;p&gt;I've been meaning to create a blog for a &lt;strong&gt;long&lt;/strong&gt; time but never found a system with the right combination of features (power vs flexibility vs learning curve, cost, technology stack, etc). CMSs (Wordpress, Drupal, etc) were always way too much faff and most static site generators required the installation of numerous languages / run-times / sdks, etc.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/NewBlogUsingWyam</guid>
-			<pubDate>Mon, 09 Nov 2015 00:00:00 GMT</pubDate>
+			<title>WebRx and Typescript</title>
+			<link>http://ian.bebbs.co.uk/posts/RxWebWithTypescript</link>
+			<description>&lt;p&gt;In &lt;a href="./posts/RxWeb"&gt;part 1&lt;/a&gt; of this series I showed how to set up a project structure that allows you to start using WebRx from within Visual Studio. While fairly simple, the example provides a great illustration of you how WebRx allows you to separate your view and view model.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/RxWebWithTypescript</guid>
+			<pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
 			<content:encoded>
                                         
 
 
-&lt;p&gt;I've been meaning to create a blog for a &lt;strong&gt;long&lt;/strong&gt; time but never found a system with the right combination of features (power vs flexibility vs learning curve, cost, technology stack, etc). CMSs (Wordpress, Drupal, etc) were always way too much faff and most static site generators required the installation of numerous languages / run-times / sdks, etc.&lt;/p&gt;
-&lt;p&gt;Then I found &lt;a href="http://wyam.io/" title="Wyam Homepage"&gt;Wyam&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Being .NET based it could be used from my day-to-day development machine and, by cleverly leveraging the  Roslyn compiler platform, can be set up to be as simple or flexible as desired. A quick flick through the module and API pages and I knew I'd found a potential candidate for my statically generated blog.&lt;/p&gt;
-&lt;p&gt;Being a... ahem... pragmatic developer with somewhat dated web skills I decided to take the path of least resistance and copy someone else's blog layout. Afterall, imitation is the sincerest form of flattery, right? As such, I contacted Dave Glick - the most-excellent author of Wyam - to see if he would mind me 'borrowing' the layout he used for &lt;a href="http://daveaglick.com/" title="Dave Glick's blog"&gt;his blog&lt;/a&gt;. He quickly replied to my cheeky request and said he didn't mind at all if used his layout, even refusing my offer of attribution (which I hope this blog post somewhat makes up for).&lt;/p&gt;
-&lt;p&gt;With the all clear, I &lt;a href="https://github.com/Wyamio/Wyam/releases/tag/v0.10.0-beta" title="download page for Wyam version 0.10.0-beta"&gt;downloaded the latest version of Wyam&lt;/a&gt;, cloned the &lt;a href="https://github.com/Wyamio/Wyam" title="Github repository for Wyam "&gt;Wyam repository&lt;/a&gt;, invoked Wyam to generate an &lt;a href="https://github.com/Wyamio/Wyam/tree/develop/Examples" title="Wyam Example sites in Github repository"&gt;example site&lt;/a&gt;... and got an exception.&lt;/p&gt;
-&lt;p&gt;Another quick chat with Mr. Glick revealed that the project is iterating quickly and currently in a "move fast and break things" mode. Fortunately the issue was already resolved in the development branch so, after local build of Wyam, I managed to successfully generate the example sites.&lt;/p&gt;
-&lt;p&gt;"Now for some blatant plagiarism with his blog" I thought to myself but again, after cloning his (generously shared and CC licensed) &lt;a href="https://github.com/daveaglick/daveaglick" title="Github repository for Dave Glick's blog"&gt;blog&lt;/a&gt;, asking Wyam to generate the site threw an exception. This time, a &lt;a href="https://github.com/Wyamio/Wyam/issues/112#issuecomment-155165316" title="Wyam PostFile issue comment on Github"&gt;short bit of call-stack sleuthing&lt;/a&gt; revealed another breaking change which was easily resolved by examining the &lt;a href="http://wyam.io/modules/" title="Module documentation for Wyam"&gt;Wyam module documentation&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Once more with feeling and ét voila, a MVB (Minimal Viable Blog).&lt;/p&gt;
-&lt;p&gt;All in all, not a bad experience with an early beta of a very clever project. Moving forward, I actually hope to do very little with Wyam other than post blog entries but will certainly endeavour to keep up to date with Wyam and share my experiences here.&lt;/p&gt;
-&lt;p&gt;If you're looking for a flexible yet powerful .NET based static-site generator, go check out &lt;a href="http://wyam.io/" title="Wyam Homepage"&gt;Wyam&lt;/a&gt;. If you experience any problems with it I'd definitely recommend posting an issue on Github, Dave seems to be very on the ball responding to issues (and extremely friendly to boot).&lt;/p&gt;
+&lt;h1&gt;Continuing with WebRx&lt;/h1&gt;
+&lt;p&gt;In &lt;a href="./posts/RxWeb"&gt;part 1&lt;/a&gt; of this series I showed how to set up a project structure that allows you to start using WebRx from within Visual Studio. While fairly simple, the example provides a great illustration of you how WebRx allows you to separate your view and view model.&lt;/p&gt;
+&lt;p&gt;In this article I further develop the structure to allow you to develop your application using Typescript.&lt;/p&gt;
+&lt;h1&gt;From 'app.js' to 'app.ts'&lt;/h1&gt;
+&lt;p&gt;Previously we copied a chunk of JavaScript from the WebRx &lt;a href="http://webrxjs.org/docs/getting-started.html"&gt;getting started guide&lt;/a&gt; into an &lt;code&gt;app.js&lt;/code&gt; script that was directly used from within the &lt;code&gt;index.html&lt;/code&gt; file. We now want to &lt;a href="https://en.wikipedia.org/wiki/Source-to-source_compiler"&gt;&lt;em&gt;transpile&lt;/em&gt;&lt;/a&gt; the &lt;code&gt;app.js&lt;/code&gt; script from a Typescript file so that we can further develop the application in a structured and type-safe manner.&lt;/p&gt;
+&lt;p&gt;To do this simply follow the following steps:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Delete the existing &lt;code&gt;app.js&lt;/code&gt; file leaving the &lt;code&gt;js&lt;/code&gt; folder empty.&lt;/li&gt;
+&lt;li&gt;Add and configure a &lt;code&gt;TypeScript JSON Configuration File&lt;/code&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;Add a &lt;code&gt;TypeScript JSON Configuration File&lt;/code&gt; to the solution as shown below&lt;br&gt;
+&lt;img src="/Content/RxWebWithTypescript/AddTypeScriptJsonConfigurationFile.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Add TypeScript Json Configuration File"&gt;&lt;/li&gt;
+&lt;li&gt;Replace the &lt;code&gt;node_modules&lt;/code&gt; exclusion with &lt;code&gt;Scripts&lt;/code&gt;&lt;br&gt;
+By default Visual Studio (or, more acurately, the TypeScript transpiler) with pick up all &lt;code&gt;ts&lt;/code&gt; files in the solution. As we don't want to attempt to re-transpile all the referenced typescript files we add &lt;code&gt;Scripts&lt;/code&gt; to the exclusion list. Further, as we added a reference to &lt;code&gt;WebRx&lt;/code&gt; via Nuget, our references are in the &lt;code&gt;Scripts&lt;/code&gt; folder, not &lt;code&gt;node_modules&lt;/code&gt;, so this exclusion can be removed.&lt;/li&gt;
+&lt;li&gt;Add an &lt;code&gt;outDir&lt;/code&gt; setting to transpile to the &lt;code&gt;js&lt;/code&gt; folder&lt;br&gt;
+This setting will force the TypeScript transpiler to output the transpiled JavaScript files to the &lt;code&gt;js&lt;/code&gt; folder where they can be used by the client browser.&lt;/li&gt;
+&lt;li&gt;You should now have a &lt;code&gt;tsconfig.json&lt;/code&gt; file that looks like this:
+&lt;pre class="prettyprint"&gt;&lt;code&gt;{
+  "compilerOptions": {
+    "noImplicitAny": false,
+    "noEmitOnError": true,
+    "removeComments": false,
+    "sourceMap": true,
+    "target": "es5",
+    "outDir": "js"
+  },
+  "exclude": [
+    "Scripts",
+    "wwwroot"
+  ]
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start="3"&gt;
+&lt;li&gt;Add a &lt;code&gt;ts&lt;/code&gt; folder to the solution.&lt;/li&gt;
+&lt;li&gt;Add an &lt;code&gt;app.ts&lt;/code&gt; typescript file to the &lt;code&gt;ts&lt;/code&gt; folder.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ul&gt;
+&lt;li&gt;Add references to Rx and WebRx to the &lt;code&gt;app.ts&lt;/code&gt; file.&lt;br&gt;
+WebRx requires that you add an explicit reference to &lt;code&gt;rx.all.d.ts&lt;/code&gt; prior to the reference to &lt;code&gt;web.rx.d.ts&lt;/code&gt; in order for the Rx module to be brought into scope. The references should therefore be added like this:
+&lt;pre class="prettyprint"&gt;&lt;code&gt;/// &amp;lt;reference path="../Scripts/rx.all.d.ts"/&amp;gt;
+/// &amp;lt;reference path="../Scripts/typings/web.rx.d.ts" /&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;Implement view / view model code&lt;br&gt;
+You can now re-implement the code from &lt;code&gt;app.js&lt;/code&gt; as TypeScript virtually verbatim but do note how you get Intellisense for all the methods and properties of &lt;code&gt;wx&lt;/code&gt; module.&lt;/li&gt;
+&lt;li&gt;Fix compilation error with call to &lt;code&gt;wx.applyBindings&lt;/code&gt;&lt;br&gt;
+The &lt;code&gt;wx.applyBindings&lt;/code&gt; method &lt;em&gt;requires&lt;/em&gt; a &lt;code&gt;model&lt;/code&gt; parameter which, in JavaScript, is defaulted but in TypeScript causes a compilation error. To resolve this, simply pass an empty object to the method.&lt;/li&gt;
+&lt;li&gt;Your &lt;code&gt;app.ts&lt;/code&gt; file should now look like this:
+&lt;pre class="prettyprint"&gt;&lt;code&gt;/// &amp;lt;reference path="../Scripts/rx.all.d.ts"/&amp;gt;
+/// &amp;lt;reference path="../Scripts/typings/web.rx.d.ts" /&amp;gt;
+
+wx.app.component('hello', {
+    viewModel: function () {
+        this.firstName = 'Bart';
+        this.lastName = 'Simpson';
+    },
+    template: 'The name is &amp;lt;span data-bind="text: firstName + \' \' + lastName"&amp;gt;&amp;lt;/span&amp;gt;'
+});
+
+wx.router.state({
+    name: "$",
+    views: { 'main': "hello" }
+});
+
+wx.router.reload();
+
+wx.applyBindings({});
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;ol start="5"&gt;
+&lt;li&gt;Compile the project and include the generated &lt;code&gt;js/app.js&lt;/code&gt; and &lt;code&gt;js/app.js.map&lt;/code&gt; files into the project.&lt;/li&gt;
+&lt;li&gt;Hit F5 and you should again see the message 'The name is Bart Simpson' displayed in your default browser.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Congratulations, you're now ready to develop your application using full Intellisense and in the comfort of the knowledge that the compiler (well, transpiler) will pick up any syntactic bugs you may inadvertently create.&lt;/p&gt;
+&lt;p&gt;As always, the completed &lt;a href="https://github.com/ibebbs/BlogProjects/tree/master/WebRxWithTypeScript"&gt;source code for this post&lt;/a&gt; can be found in the &lt;a href="https://github.com/ibebbs/BlogProjects"&gt;BlogProjects repository&lt;/a&gt; on &lt;a href="https://github.com/ibebbs"&gt;Github&lt;/a&gt;&lt;/p&gt;
+
+
+
+                                </content:encoded>
+		</item>
+		<item>
+			<title>Using Rx on the Web</title>
+			<link>http://ian.bebbs.co.uk/posts/RxWeb</link>
+			<description>&lt;p&gt;So, I have recently found myself with a need to dive into the depths of modern web-development and, as I am currently looking to write a highly interactive single-page web application, the first thing to decide on was a client side framework to use. You won't have to read too many of my blog posts to realise that I'm a big fan of &lt;a href="https://msdn.microsoft.com/en-us/data/gg577609.aspx?f=255&amp;amp;MSPPError=-2147217396"&gt;Rx&lt;/a&gt;. I am also keen on the MVVM approach to separating concerns when writing user interfaces. Therefore, during my research of modern web UI frameworks, I was extremely interested when I came across &lt;a href="http://webrxjs.org/"&gt;WebRx&lt;/a&gt; .&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/RxWeb</guid>
+			<pubDate>Fri, 04 Mar 2016 00:00:00 GMT</pubDate>
+			<content:encoded>
+                                        
+
+
+&lt;h2&gt;Finding a framework&lt;/h2&gt;
+&lt;p&gt;So, I have recently found myself with a need to dive into the depths of modern web-development and, as I am currently looking to write a highly interactive single-page web application, the first thing to decide on was a client side framework to use. You won't have to read too many of my blog posts to realise that I'm a big fan of &lt;a href="https://msdn.microsoft.com/en-us/data/gg577609.aspx?f=255&amp;amp;MSPPError=-2147217396"&gt;Rx&lt;/a&gt;. I am also keen on the MVVM approach to separating concerns when writing user interfaces. Therefore, during my research of modern web UI frameworks, I was extremely interested when I came across &lt;a href="http://webrxjs.org/"&gt;WebRx&lt;/a&gt; .&lt;/p&gt;
+&lt;p&gt;Billed as "a browser-based MVVM-Framework that combines functional-reactive programming with declarative Data-Binding, Templating and Client-Side Routing" it struck a chord with my UI development style. In fact, it elevates &lt;a href="http://reactivex.io/documentation/observable.html"&gt;Observables&lt;/a&gt; to a first class concept in a manner eerily similar to the ObservableProperty/ObservableCommand classes I wrote for my &lt;a href="https://github.com/ibebbs/Caliburn.Micro.Reactive.Extensions"&gt;Caliburn.Micro.Reactive.Extensions&lt;/a&gt; package.&lt;/p&gt;
+&lt;p&gt;Unfortunately, as a framework, WebRx seems to be struggling to achieve critical mass and therefore there was very limited information available when I decided to attempt to implement the &lt;a href="http://webrxjs.org/docs/getting-started.html"&gt;WebRx "Hello World"&lt;/a&gt; example using Visual Studio. As is almost par for the course when using a new framework, I fell at a frustratingly early hurdle and, given the lack of info (seriously, only one tagged post on &lt;a href="https://stackoverflow.com/questions/tagged/webrx"&gt;stackoverflow&lt;/a&gt;!), I had to work through the problem 'old-skool'... ya'know, by actually finding and solving the problem rather than just googling a solution.&lt;/p&gt;
+&lt;p&gt;Anyway, I thought I'd put together a post outlining how to get started with this framework in Visual Studio in an attempt to start addressing the lack of info regarding this promising framework.&lt;/p&gt;
+&lt;h2&gt;The name is Bart Simpson&lt;/h2&gt;
+&lt;p&gt;Rather than the traditional 'Hello World' app, WebRx's 'Getting Started' guide displays a page stating 'The name is Bart Simpson'. This is done in order to demonstrates the MVVM separation of concerns through the use of a view bound to an underlying view model which provides the name 'Bart Simpson'.&lt;/p&gt;
+&lt;p&gt;I don't intend to cover the entirety of the getting started guide here, merely the additional/different steps needed to get the project work from Visual Studio. As such, I suggest &lt;a href="http://webrxjs.org/docs/getting-started.html"&gt;opening the guide&lt;/a&gt; in a browser and leaving it open while working through the steps below as I will be referring to it extensively.&lt;/p&gt;
+&lt;p&gt;First up, open Visual Studio. Pretty much any modern version is fine, I am using Visual Studio 2015 Professional. Start a new project and select 'ASP.NET Web Application'&lt;/p&gt;
+&lt;img src="/Content/RxWeb/NewAspWebApplication.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="New ASP.NET Web Application"&gt;
+&lt;p&gt;In the following dialog, select an empty ASP.NET Template and click ok.&lt;/p&gt;
+&lt;img src="/Content/RxWeb/EmptyAsp452Project.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Empty ASP.NET Template"&gt;
+&lt;p&gt;Now we have a web project, lets add a reference to WebRx. This can be done using either the Package Manager Console using the command &lt;code&gt;Install-Package WebRx&lt;/code&gt; or via the visual Nuget package manager as shown below:&lt;/p&gt;
+&lt;img src="/Content/RxWeb/InstallWebRxPackage.png" class="img-responsive" style="margin: auto; width:66%; margin-top: 6px; margin-bottom: 6px;" alt="Install WebRx Package"&gt;
+&lt;p&gt;Regardless of how you add the reference to WebRx, you will be asked whether you wish to 'Search for TypeScript Typings' as shown below. Just click 'Yes'.&lt;/p&gt;
+&lt;img src="/Content/RxWeb/AddTypeScriptTypings.png" class="img-responsive" style="margin: auto; width:300px; margin-top: 6px; margin-bottom: 6px;" alt="Add TypeScript Typings"&gt;
+&lt;p&gt;You will also be prompted to accept the license aggrement for a number of RxJs packages which WebRx depends upon; you should accept these too.&lt;/p&gt;
+&lt;p&gt;One the reference is added, you should find that a Scripts directory has been added to your solution and which contains a number of 'ts' and 'js' files for both WebRx and RxJs. With this in place, we can then continue with the getting started guide by adding an 'index.html' file to the project and copy pasting the sample 'index.html' file from the WebRx &lt;a href="http://webrxjs.org/docs/getting-started.html"&gt;getting started guide&lt;/a&gt;. It should look something like this:&lt;/p&gt;
+&lt;img src="/Content/RxWeb/CopyPasteIndexFromGettingStarted.png" class="img-responsive" style="margin: auto; width:400px; margin-top: 6px; margin-bottom: 6px;" alt="Copy Paste Index From Getting Started"&gt;
+&lt;p&gt;At this point the eagle-eyed amongst you will notice three things:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Our scripts are now in a 'bower_modules' directory&lt;br&gt;
+As we used Nuget and not bower to install our WebRx dependencies, the script references should be changed to refer to the Scripts directory&lt;/li&gt;
+&lt;li&gt;Our scripts directory does not contain a rx.all.js file.&lt;br&gt;
+For some reason, WebRx depends on a version of RxJs that does not include an rx.all.js file. To resolve this, simply upgrade to the latest version of RxJs-All, as shown below:
+&lt;img src="/Content/RxWeb/UpgradeRxJsAll.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Upgrade RxJs All"&gt;&lt;/li&gt;
+&lt;li&gt;We don't have a 'js' folder containing an 'app.js' file.&lt;br&gt;
+Because we've not got to that bit yet.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Now add a 'js' folder to the solution and add a 'app.js' to it. In this file copy the full 'app.js' sample from the WebRx  &lt;a href="http://webrxjs.org/docs/getting-started.html"&gt;getting started guide&lt;/a&gt; as shown below:&lt;/p&gt;
+&lt;pre class="prettyprint"&gt;&lt;code&gt;wx.app.component('hello', {
+  viewModel: function() {
+    this.firstName = 'Bart';
+    this.lastName = 'Simpson';
+  },
+  template: 'The name is &amp;lt;span data-bind="text: firstName + \' \' + lastName"&amp;gt;&amp;lt;/span&amp;gt;'
+});
+
+wx.router.state({
+  name: "$",
+  views: { 'main': "hello" }
+});
+
+wx.router.reload();
+
+wx.applyBindings();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Save all, set 'index.html' as the start page and hit F5. If everything went as planned you should now see 'The name is Bart Simpson' displayed in your default browser:&lt;/p&gt;
+&lt;img src="/Content/RxWeb/TheNameIsBartSimpson.png" class="img-responsive" style="margin: auto; width:400px; margin-top: 6px; margin-bottom: 6px;" alt="The Name Is Bart Simpson"&gt;
+&lt;p&gt;And that's it. While the getting started example doesn't seem very complex, it does show a separation of view and view model. I'm very much looking forward to digging into the details of this very promising framework.&lt;/p&gt;
+&lt;p&gt;The &lt;a href="https://github.com/ibebbs/BlogProjects/tree/master/WebRxWithAsp4"&gt;completed project&lt;/a&gt; for this post can be found in my &lt;a href="https://github.com/ibebbs/BlogProjects"&gt;BlogProjects repository&lt;/a&gt; on &lt;a href="https://github.com/ibebbs"&gt;Github&lt;/a&gt;&lt;/p&gt;
 
 
 
@@ -491,6 +440,304 @@ output {
                                 </content:encoded>
 		</item>
 		<item>
+			<title>On The Importance of Doing Something</title>
+			<link>http://ian.bebbs.co.uk/posts/OnTheImportanceOfDoingSomething</link>
+			<description>&lt;p&gt;I've just become a father. It's amazing and I'm loving every day, from waking up in the morning and being greeted by huge grin from my little girl to putting her to bed in the evening when she can barely keep her eyes open. My baby instantaneously became priority number one and has left little time for other passions like home programming projects.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/OnTheImportanceOfDoingSomething</guid>
+			<pubDate>Mon, 16 Nov 2015 00:00:00 GMT</pubDate>
+			<content:encoded>
+                                        
+
+
+&lt;p&gt;I've just become a father. It's amazing and I'm loving every day, from waking up in the morning and being greeted by huge grin from my little girl to putting her to bed in the evening when she can barely keep her eyes open. My baby instantaneously became priority number one and has left little time for other passions like home programming projects.&lt;/p&gt;
+&lt;p&gt;Yet, simultaneously, I have found the time since my baby was born to be some of the most productive time of my life. Since she her birth, I've spent every hour possible with her, worked regular hours - and been productive during those hours - at my day job, got an unexpectedly healthy amount of sleep and still managed to complete a significant amount of work on personal projects as well as creating and writing this blog.&lt;/p&gt;
+&lt;p&gt;While reflecting on why this might be, I came up with one simple, inescapable conclusion: &lt;a href="https://github.com/ibebbs" title="ibebbs Github Profile"&gt;my Github profile&lt;/a&gt;. More specifically the "Current Streak" of contributions. You see, I am a sucker for gamification and seeing that "Current Streak" increase each day is remarkably rewarding. As such, I am finding time each day - no matter how little - to do &lt;em&gt;something&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;Previously, I'd get home in the evening, think about the projects I had to work on, realise that there probably wouldn't be enough time to make significant progress and procrastinate about it until I had more time available to "get things done properly" - which was happening increasingly rarely. Now, instead of focusing on some distant goal, I simply think about finding &lt;em&gt;something&lt;/em&gt; I can do and publish to Github in whatever time I have available. It really doesn't matter what it is, as long as I get the &lt;a href="https://www.microsoft.com/surface/en-gb/devices/surface-pro-4" title="Microsoft Surface Pro 4"&gt;Surface&lt;/a&gt; out and start. Almost always, once I've started something, I get engrossed in it and am able to spend way more time than I thought might be available on it.&lt;/p&gt;
+&lt;p&gt;For example, I'm writing this post from the sofa in my front room having spent a wonderful evening with my other half and little girl. Not having had time to make a commit today, I decided not to get an early night and instead tucked them into their respective beds before heading back down stairs to get a start on this post. Initially I had planned simply jot down a few ideas and possibly write a sentence or two before committing to Github and retiring for the evening. Yet here I am still writing after several paragraphs (and &lt;a href="https://music.microsoft.com/album/london-grammar/if-you-wait-deluxe-edition/bz.EE99E107-0100-11DB-89CA-0019B92A3933?action=play" title="London Grammar on Groove Music"&gt;one very enjoyable album&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;I probably won't finish tonight, and definitely won't publish this post until I've had time to re-read and edit it. But I've got my commit for the day and made an unexpected amount of progress on a blog post about making an unexpected amount of progress. In short, I got &lt;em&gt;something&lt;/em&gt; done and that feels good.&lt;/p&gt;
+&lt;p&gt;Night!&lt;/p&gt;
+
+
+
+                                </content:encoded>
+		</item>
+		<item>
+			<title>Home Network Monitoring - Part II</title>
+			<link>http://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartII</link>
+			<description>&lt;p&gt;In part one of this series I set up my home router to send a variety of Syslog messages to LogStash which then forwarded these messages to ElasticSearch for indexing and querying by Kibana in a simplistic dashboard. In this post, I'm going to start parsing out some of the details of the Syslog messages to start giving us a clearer idea about which devices on my local network are opening sessions with remote servers.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartII</guid>
+			<pubDate>Sun, 10 Apr 2016 00:00:00 GMT</pubDate>
+			<content:encoded>
+                                        
+
+
+&lt;p&gt;In part one of this series I set up my home router to send a variety of Syslog messages to LogStash which then forwarded these messages to ElasticSearch for indexing and querying by Kibana in a simplistic dashboard. In this post, I'm going to start parsing out some of the details of the Syslog messages to start giving us a clearer idea about which devices on my local network are opening sessions with remote servers.&lt;/p&gt;
+&lt;h1&gt;message types&lt;/h1&gt;
+&lt;p&gt;My router sends a number of different messages types; everything from router/dsl bandwidth information to the firewall log as can be seen below:&lt;/p&gt;
+&lt;img src="/Content/HomeNetworkMonitoring/DrayTek-Syslog.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="DrayTek Syslog Administration"&gt;
+&lt;p&gt;For now, I'm really only interested in the 'User Access Log' which tells us when a local device resolves an IP address for a domain name or accesses a remote server. This log constitutes a number of message types such as:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;TCP / UDP access
+This message is sent by the router when a device on the local network accesses a remote server via TCP or UDP. It looks like this: &lt;code&gt;&amp;lt;150&amp;gt;Apr 10 16:55:38 Vigor: Local User (MAC=00-00-00-00-00-00): 192.168.1.205:64281 -&amp;gt; 5.10.110.36:80 (TCP)Web&lt;/code&gt;. From this type of message I am interested in parsing out:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Syslog timestamp&lt;/li&gt;
+&lt;li&gt;Syslog username&lt;/li&gt;
+&lt;li&gt;Source Mac Address&lt;/li&gt;
+&lt;li&gt;Source IP Address&lt;/li&gt;
+&lt;li&gt;Destination IP Address&lt;/li&gt;
+&lt;li&gt;Protocol&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;DNS lookup
+This message is sent by the router when a device on the local network resolves an IP address for a remote server DNS nane. It looks like this: &lt;code&gt;&amp;lt;150&amp;gt;Apr 10 18:52:49 Vigor: Local User (MAC=00-00-00-00-00-00): 192.168.1.62 DNS -&amp;gt; 192.168.1.1 inquire a.root-servers.net&lt;/code&gt;. From this type of message I am interested in parsing out:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Syslog timestamp&lt;/li&gt;
+&lt;li&gt;Syslog username&lt;/li&gt;
+&lt;li&gt;Source Mac Address&lt;/li&gt;
+&lt;li&gt;Source IP Address&lt;/li&gt;
+&lt;li&gt;Domain being resolved&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;In this post I'll focus on enriching the incoming message with information from the access message but will move on to parsing multiple message types in a future post.&lt;/p&gt;
+&lt;h1&gt;parsing access messages&lt;/h1&gt;
+&lt;p&gt;Logstash provides a great tool for parsing messages: the 'grok' filter. As explained in &lt;a href="https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html"&gt;the documentation&lt;/a&gt; 'grok' allows you to 'Parse arbitrary text and structure it. This tool is perfect for syslog logs, apache and other webserver logs, mysql logs, and in general, any log format that is generally written for humans and not computer consumption.'&lt;/p&gt;
+&lt;p&gt;This filter applies a regular expression like patterns to a field in the incoming message and, if matched successfully, adds each matched expression to the message being processed as a new field. The fields to capture are defined in the format &lt;code&gt;%{SYNTAX:SEMANTIC}&lt;/code&gt; where the &lt;code&gt;SYNTAX&lt;/code&gt; element is a known pattern (see below) or a regular expression and the &lt;code&gt;SEMANTIC&lt;/code&gt; is a name of the field to capture.&lt;/p&gt;
+&lt;p&gt;Logstash ships with over 120 known &lt;code&gt;SYNTAX&lt;/code&gt; patterns and these patterns can be supplemented by adding new pattern files to a specific directory. However, the default patterns supplied cover nearly all common scenarios and allow almost all the pertinent information in the TCP access message above to be parsed.&lt;/p&gt;
+&lt;p&gt;So, by just using the default patterns, I can write the expression&lt;/p&gt;
+&lt;pre class="prettyprint"&gt;&lt;code&gt;&amp;lt;%{POSINT:syslog_pri}&amp;gt;%{SYSLOGTIMESTAMP:syslog_timestamp} Vigor\: Local User \(MAC=%{MAC:source_mac}\): %{IP:source_address}(?::%{POSINT:source_port})? -&amp;gt; %{IP:destination_address}(?::%{POSINT:destination_port})?
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Which gives us the following additional fields in the message:&lt;/p&gt;
+&lt;p&gt;|field|value|
+|-----|-----|
+|source_address|192.168.1.205|
+|source_port|64281|
+|source_mac|00-00-00-00-00-00|
+|syslog_pri|150|
+|syslog_timestamp|Apr·10·16:55:38|
+|destination_address|5.10.110.36|
+|destination_port|80|&lt;/p&gt;
+&lt;p&gt;Neat huh! I'd also like to know whether the access message is TCP or UDP so I'm going to add a custom regular expression to the end of the pattern to parse the protocol string out of the message. In full the pattern is now:&lt;/p&gt;
+&lt;pre class="prettyprint"&gt;&lt;code&gt;&amp;lt;%{POSINT:syslog_pri}&amp;gt;%{SYSLOGTIMESTAMP:syslog_timestamp} Vigor\: Local User \(MAC=%{MAC:source_mac}\): %{IP:source_address}(?::%{POSINT:source_port})? -&amp;gt; %{IP:destination_address}(?::%{POSINT:destination_port})? \((?&amp;lt;protocol&amp;gt;TCP|UDP)\)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This would result in the following fields available in the message:&lt;/p&gt;
+&lt;p&gt;|field|value|
+|-----|-----|
+|source_address|192.168.1.205|
+|source_port|64281|
+|source_mac|00-00-00-00-00-00|
+|syslog_pri|150|
+|syslog_timestamp|Apr·10·16:55:38|
+|destination_address|5.10.110.36|
+|destination_port|80|
+|&lt;strong&gt;protocol&lt;/strong&gt;|&lt;strong&gt;TCP&lt;/strong&gt;|&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;NOTE: You can use &lt;a href="http://grokconstructor.appspot.com/"&gt;Grok Constructor&lt;/a&gt; to help you perfect your grok expressions prior to trying them in Logstash&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h1&gt;adding the grok filter to logstash&lt;/h1&gt;
+&lt;p&gt;So, now I know how to extract all the information I'm interested in from the access message, I need to get Logstash to actually do it. This is done by adding a &lt;code&gt;grok&lt;/code&gt; filter to the &lt;code&gt;filter { }&lt;/code&gt; section of the &lt;code&gt;syslog.config&lt;/code&gt; file authored in the previous post as shown here:&lt;/p&gt;
+&lt;pre class="prettyprint"&gt;&lt;code&gt;input {
+  tcp {
+    port =&amp;gt; 5000
+    type =&amp;gt; syslog
+  }
+  udp {
+    port =&amp;gt; 5000
+    type =&amp;gt; syslog
+  }
+}
+
+filter {
+    grok {
+      match =&amp;gt; [ "message", "&amp;lt;%{POSINT:syslog_pri}&amp;gt;%{SYSLOGTIMESTAMP:syslog_timestamp} Vigor\: Local User \(MAC=%{MAC:source_mac}\): %{IP:source_address}(?::%{POSINT:source_port})? -&amp;gt; %{IP:destination_address}(?::%{POSINT:destination_port})? \((?&amp;lt;protocol&amp;gt;TCP|UDP)\)" ]
+    }
+}
+
+output {
+  elasticsearch {
+    hosts =&amp;gt; ["192.168.1.30:9200"]
+    index =&amp;gt; "syslog-%{+YYYY.MM.dd}"
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Notice the grok section in which we specify a 'match' field. This field takes an array of two strings; the first string is the field containing the text to match and the second is the pattern to match the text to.&lt;/p&gt;
+&lt;p&gt;Once this is added to the &lt;code&gt;syslog.config&lt;/code&gt; file and Logstash restarted, these new fields should be being written to ElasticSearch. The easiest way to see if this is working is to return to Kibana and, from the 'Settings/Indices' area, click the 'syslog-*' pattern on the left and then click the orange 'Refresh field list' button and the field list appears like this:&lt;/p&gt;
+&lt;img src="/Content/HomeNetworkMonitoring/Kibana-RefreshSyslogIndex.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Refresh Syslog Index"&gt;
+&lt;h1&gt;exploring network access information&lt;/h1&gt;
+&lt;p&gt;Now the additional fields are available to Kibana, I can start exploring the data to learn about which devices on my network are access which remote servers.&lt;/p&gt;
+&lt;p&gt;To do this I first need to add the new fields to the 'Syslog Messages' saved search. This can be done by navigating to the 'Discover' page, loading the 'Syslog Messages' search (using the 'Load Saved Search' button in the top right of the screen), adding the new fields and re-saving it. This is shown below:&lt;/p&gt;
+&lt;img src="/Content/HomeNetworkMonitoring/Kibana-AddingNewFieldsToSyslogMessagesSavedSearch.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Adding New Fields To Syslog Messages Saved Search"&gt;
+&lt;p&gt;I'm now able to add some very interesting new visualizations to our dashboard such as:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Number of access by each local device&lt;/li&gt;
+&lt;li&gt;Number of access by port&lt;/li&gt;
+&lt;li&gt;Number of access to each remote server&lt;/li&gt;
+&lt;li&gt;Number of access by protocol&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;I'll only run through adding the first visualization is they're all very similar.&lt;/p&gt;
+&lt;p&gt;First, I navigate to the 'Visualization' area and click the 'New Visualization' button. I want to see the number of accesses being made by each device as a fraction of the whole so will use a donut chart. This is done by selecting 'Pie chart' from the "Create new Visualization" menu and selecting our 'Syslog Messages' saved search in the "Select a search source" menu. Once this is done, I get a pie chart with a single section as shown here:&lt;/p&gt;
+&lt;img src="/Content/HomeNetworkMonitoring/Kibana-NewPieChartVisualization.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana New Pie Chart Visualization"&gt;
+&lt;p&gt;I then need to select the 'Split Slices' bucket type, choose 'Terms' as the aggregation type and finally select 'source_address' as the field on which to aggregate (i.e. count) unique terms. Applying this to the pie-chart (using the 'Apply' button) results in the following:&lt;/p&gt;
+&lt;img src="/Content/HomeNetworkMonitoring/Kibana-SplitSlicePieChartUsingSourceAddress.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Split Slice Pie Chart Using Source  ddres s"&gt;
+&lt;p&gt;I'll  then  turn  this into a donut chart by ticking the 'Donut' check box from the 'Options' area as shown below:&lt;/p&gt;
+&lt;img src="/Content/HomeNetworkMonitoring/Kibana-SplitSliceDonutChartUsingSourceAddress.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Split Slice Donut Chart Using Source Address"&gt;
+&lt;p&gt;Now I'll use the same process for adding donut charts for each of the other metrics outlined above and add all the charts to my dashboard giving me the following:&lt;/p&gt;
+&lt;img src="/Content/HomeNetworkMonitoring/Kibana-DashboardWithAccessCharts.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard With Access Charts"&gt;
+&lt;h1&gt;summary&lt;/h1&gt;
+&lt;p&gt;In this post, I showed how to extract structured information from unstructured text data in our source message. I then showed how this can be used within Kibana to highlight which devices on the local network are accessing which remote servers, on which ports and using which protocols.&lt;/p&gt;
+&lt;p&gt;In the next post, I'll examine how to further enhance the information we've extracted from the access messages to make it easier to relate ip address to actual devices on the network and out in the world.&lt;/p&gt;
+
+
+
+                                </content:encoded>
+		</item>
+		<item>
+			<title>Using Wyam</title>
+			<link>http://ian.bebbs.co.uk/posts/NewBlogUsingWyam</link>
+			<description>&lt;p&gt;I've been meaning to create a blog for a &lt;strong&gt;long&lt;/strong&gt; time but never found a system with the right combination of features (power vs flexibility vs learning curve, cost, technology stack, etc). CMSs (Wordpress, Drupal, etc) were always way too much faff and most static site generators required the installation of numerous languages / run-times / sdks, etc.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/NewBlogUsingWyam</guid>
+			<pubDate>Mon, 09 Nov 2015 00:00:00 GMT</pubDate>
+			<content:encoded>
+                                        
+
+
+&lt;p&gt;I've been meaning to create a blog for a &lt;strong&gt;long&lt;/strong&gt; time but never found a system with the right combination of features (power vs flexibility vs learning curve, cost, technology stack, etc). CMSs (Wordpress, Drupal, etc) were always way too much faff and most static site generators required the installation of numerous languages / run-times / sdks, etc.&lt;/p&gt;
+&lt;p&gt;Then I found &lt;a href="http://wyam.io/" title="Wyam Homepage"&gt;Wyam&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Being .NET based it could be used from my day-to-day development machine and, by cleverly leveraging the  Roslyn compiler platform, can be set up to be as simple or flexible as desired. A quick flick through the module and API pages and I knew I'd found a potential candidate for my statically generated blog.&lt;/p&gt;
+&lt;p&gt;Being a... ahem... pragmatic developer with somewhat dated web skills I decided to take the path of least resistance and copy someone else's blog layout. Afterall, imitation is the sincerest form of flattery, right? As such, I contacted Dave Glick - the most-excellent author of Wyam - to see if he would mind me 'borrowing' the layout he used for &lt;a href="http://daveaglick.com/" title="Dave Glick's blog"&gt;his blog&lt;/a&gt;. He quickly replied to my cheeky request and said he didn't mind at all if used his layout, even refusing my offer of attribution (which I hope this blog post somewhat makes up for).&lt;/p&gt;
+&lt;p&gt;With the all clear, I &lt;a href="https://github.com/Wyamio/Wyam/releases/tag/v0.10.0-beta" title="download page for Wyam version 0.10.0-beta"&gt;downloaded the latest version of Wyam&lt;/a&gt;, cloned the &lt;a href="https://github.com/Wyamio/Wyam" title="Github repository for Wyam "&gt;Wyam repository&lt;/a&gt;, invoked Wyam to generate an &lt;a href="https://github.com/Wyamio/Wyam/tree/develop/Examples" title="Wyam Example sites in Github repository"&gt;example site&lt;/a&gt;... and got an exception.&lt;/p&gt;
+&lt;p&gt;Another quick chat with Mr. Glick revealed that the project is iterating quickly and currently in a "move fast and break things" mode. Fortunately the issue was already resolved in the development branch so, after local build of Wyam, I managed to successfully generate the example sites.&lt;/p&gt;
+&lt;p&gt;"Now for some blatant plagiarism with his blog" I thought to myself but again, after cloning his (generously shared and CC licensed) &lt;a href="https://github.com/daveaglick/daveaglick" title="Github repository for Dave Glick's blog"&gt;blog&lt;/a&gt;, asking Wyam to generate the site threw an exception. This time, a &lt;a href="https://github.com/Wyamio/Wyam/issues/112#issuecomment-155165316" title="Wyam PostFile issue comment on Github"&gt;short bit of call-stack sleuthing&lt;/a&gt; revealed another breaking change which was easily resolved by examining the &lt;a href="http://wyam.io/modules/" title="Module documentation for Wyam"&gt;Wyam module documentation&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Once more with feeling and ét voila, a MVB (Minimal Viable Blog).&lt;/p&gt;
+&lt;p&gt;All in all, not a bad experience with an early beta of a very clever project. Moving forward, I actually hope to do very little with Wyam other than post blog entries but will certainly endeavour to keep up to date with Wyam and share my experiences here.&lt;/p&gt;
+&lt;p&gt;If you're looking for a flexible yet powerful .NET based static-site generator, go check out &lt;a href="http://wyam.io/" title="Wyam Homepage"&gt;Wyam&lt;/a&gt;. If you experience any problems with it I'd definitely recommend posting an issue on Github, Dave seems to be very on the ball responding to issues (and extremely friendly to boot).&lt;/p&gt;
+
+
+
+                                </content:encoded>
+		</item>
+		<item>
+			<title>Home Network Monitoring - Part IV</title>
+			<link>http://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartIV</link>
+			<description>&lt;p&gt;In the last post, I used the Logstash &lt;code&gt;dns&lt;/code&gt; filter to translate remote server IP addresses into recognisable domain names. In this post, I will look to perform a similar operation for local IP addresses in order to translate them into recognisable device names.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartIV</guid>
+			<pubDate>Sat, 16 Apr 2016 00:00:00 GMT</pubDate>
+			<content:encoded>
+                                        
+
+
+&lt;p&gt;In the last post, I used the Logstash &lt;code&gt;dns&lt;/code&gt; filter to translate remote server IP addresses into recognisable domain names. In this post, I will look to perform a similar operation for local IP addresses in order to translate them into recognisable device names.&lt;/p&gt;
+&lt;h1&gt;translating local ip addresses to device names&lt;/h1&gt;
+&lt;p&gt;While in the last post we could use the &lt;code&gt;dns&lt;/code&gt; filter to perform a reverse dns lookup to resolve a remote domain name for an IP address, this is not possible with local IP addresses. Fortunately, I have two key tools that I can use to perform a similar operation:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;While my router behaves as a DHCP server, it has a feature that allows it to always allocate the same IP address to a given MAC address. Therefore I know a given device will always have a specific IP address.&lt;/li&gt;
+&lt;li&gt;Logstash provides the &lt;code&gt;translate&lt;/code&gt; filter which allows you to map from one value to another via a dictionary lookup.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;With my routers "Bind IP to MAC" function set up, I will author a new &lt;code&gt;yaml&lt;/code&gt; file that meets the specifications outlined in the &lt;code&gt;translate&lt;/code&gt; filter &lt;a href="https://www.elastic.co/guide/en/logstash/current/plugins-filters-translate.html#plugins-filters-translate-destination"&gt;documentation&lt;/a&gt;. It looks like this:&lt;/p&gt;
+&lt;pre class="prettyprint"&gt;&lt;code&gt;192.168.1.3: TPLink Range Extender
+192.168.1.9: Ricoh Printer
+192.168.1.10: Server A
+192.168.1.21: PC A
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I'll name this file &lt;code&gt;IPLookup.yaml&lt;/code&gt; and save it besides the &lt;code&gt;syslog.config&lt;/code&gt; file. Next I need to add additional filters to &lt;code&gt;syslog.config&lt;/code&gt; which now looks as follows:&lt;/p&gt;
+&lt;pre class="prettyprint"&gt;&lt;code&gt;input {
+  tcp {
+    port =&amp;gt; 5000
+    type =&amp;gt; syslog
+  }
+  udp {
+    port =&amp;gt; 5000
+    type =&amp;gt; syslog
+  }
+}
+
+filter {
+    grok {
+        match =&amp;gt; [ "message", "&amp;lt;%{POSINT:syslog_pri}&amp;gt;%{SYSLOGTIMESTAMP:syslog_timestamp} Vigor\: Local User \(MAC=%{MAC:source_mac}\): %{IP:source_address}(?::%{POSINT:source_port})? -&amp;gt; %{IP:destination_address}(?::%{POSINT:destination_port})? \((?&amp;lt;protocol&amp;gt;TCP|UDP)\)" ]
+        add_tag =&amp;gt; "access"
+    }
+    if "access" in [tags] {
+        mutate {
+            add_field =&amp;gt; {
+              "source_host" =&amp;gt; "%{[source_address]}"
+              "destination_host" =&amp;gt; "%{[destination_address]}"
+            }
+        }
+        dns {
+            reverse =&amp;gt; [ "destination_host" ]
+            action =&amp;gt; "replace"
+            nameserver =&amp;gt; "192.168.1.1"
+        }
+        translate {
+            destination =&amp;gt; "source_host"
+            dictionary_path =&amp;gt; "config\IPLookup.yaml"
+            fallback =&amp;gt; "%{source_address}"
+            field =&amp;gt; "source_address"      
+            override =&amp;gt; true   
+        }
+    }
+}
+
+output {
+  elasticsearch {
+    hosts =&amp;gt; ["192.168.1.30:9200"]
+    index =&amp;gt; "syslog-%{+YYYY.MM.dd}"
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note the &lt;code&gt;translate&lt;/code&gt; filter where I lookup the &lt;code&gt;source_address&lt;/code&gt; field in the &lt;code&gt;IPLookup.yaml&lt;/code&gt; file and put the result in the &lt;code&gt;source_host&lt;/code&gt; field. If not found, the &lt;code&gt;fallback&lt;/code&gt; value instructs the filter to output the &lt;code&gt;source_address&lt;/code&gt; into the &lt;code&gt;source_host&lt;/code&gt; field. The &lt;code&gt;override&lt;/code&gt; value is set to true as the &lt;code&gt;source_host&lt;/code&gt; field is added in the &lt;code&gt;mutate&lt;/code&gt; filter above as a fail-safe.&lt;/p&gt;
+&lt;p&gt;With the changes to configuration in place, I once again restart Logstash. Once a syslog message has been received, I get the mapping from ElasticSearch and update it to mark the &lt;code&gt;local_host&lt;/code&gt; field as &lt;code&gt;not_analyzed&lt;/code&gt;. Then, in Kibana, I refresh the field list for the 'syslog-*' index, add 'local_host' to the 'Syslog Messages' saved search, load 'Access By Local Address' visualization and modify it to use 'local_host' rather than the 'local_address' field and save it as 'Access By Local Host'. Finally, I replace this visualization on my dashboard and get the following:&lt;/p&gt;
+&lt;img src="/Content/HomeNetworkMonitoring/Kibana-DashboardWithAccessByLocalHost.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard With Access By Local Host"&gt;
+&lt;h1&gt;further mappings&lt;/h1&gt;
+&lt;p&gt;Now I've got the translation of local IP addresses to names working, I'm going to add a few more translations for:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;IP Address to Operating System&lt;/li&gt;
+&lt;li&gt;IP Address to Wired/WiFi connection&lt;/li&gt;
+&lt;li&gt;TCP and UDP Port to Protocol (using a &lt;a href="http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml"&gt;CSV from IANA&lt;/a&gt;)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;With these in place, the dashboard is starting to come together:&lt;/p&gt;
+&lt;img src="/Content/HomeNetworkMonitoring/Kibana-DashboardWithLocalPortAndOsLookups.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard With Local Port And Os Lookups"&gt;
+&lt;h1&gt;summary&lt;/h1&gt;
+&lt;p&gt;In this post, I showed how to display local device names rather than IP addresses by using LogStash's &lt;code&gt;translate&lt;/code&gt; filter. I then used this filter to provide further information about local device and protocols.&lt;/p&gt;
+&lt;p&gt;In the next post, I'll show how to add some variation to the dashboard by mapping destination locations.&lt;/p&gt;
+
+
+
+                                </content:encoded>
+		</item>
+		<item>
+			<title>3D Printing with the CEL Robox</title>
+			<link>http://ian.bebbs.co.uk/posts/3DPrintingWithTheCelRobox</link>
+			<description>&lt;p&gt;So, I've wanted a 3D printer for a while and recently a perfect storm of events meant I finally took the plunge.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/3DPrintingWithTheCelRobox</guid>
+			<pubDate>Fri, 07 Oct 2016 00:00:00 GMT</pubDate>
+			<content:encoded>
+                                        
+
+
+&lt;p&gt;So, I've wanted a 3D printer for a while and recently a perfect storm of events meant I finally took the plunge.&lt;/p&gt;
+&lt;p&gt;I had hit a wall in my MonsterPi project trying to mount a RaspberryPi in a constrained space (more on this in a subsequent post). Most of my usual hacks (you'd be amazed what you can do with a sheet of acrylic and a Meccano set) simply wouldn't cut it and I was considering abandoning the project. Without intentionally meaning to, I found myself looking at 3D printers on &lt;a href="http://www.maplin.co.uk/c/gadgets-toys-and-hobbies/3d-printers"&gt;Maplin's website&lt;/a&gt; and saw that they were selling 'used' 3D printers at quite a discount.&lt;/p&gt;
+&lt;p&gt;After a quick look around for reviews I found that one of the models Maplin were selling - the &lt;a href="http://www.maplin.co.uk/p/cel-robox-3d-printer-used-b81qq"&gt;CEL Robox&lt;/a&gt; - was listed as one of the best "Plug 'n' play" printers on &lt;a href="https://www.3dhubs.com/best-3d-printer-guide#plugnplay-cel-robox"&gt;3D Hubs&lt;/a&gt;. Moreover, my local (well, 15 miles away) Maplin's store had one in stock. But there was that 'used' thing. From what I'd gathered, getting a 3D printer to print reliably is tricky at the best of times, and I was thinking of buying one that had already been used and returned or worse, didn't even work in the first place.&lt;/p&gt;
+&lt;p&gt;Too intrigued not to dig a little deeper, I gave Maplin a call. Now experience has lead me not to expect too much from Maplin's employees - at best they're well meaning but witless, at worst they think you are -  but this time proved to be an exception. The guy who answered the phone was superb (note to self: must tweet Maplin about how great this guy is). Although he initially seemed confused about not having a used model of the 3D printer in store, he checked the website to confirm availability then the store stock levels to work out what was going on. Turns out the 'used' printer they had was actually the display model and after noting that he was unsure of the history of the printer he offered to make a couple of calls to other staff to find out the condition and how much it had been used then call me back; as I said, he was excellent. As promised, he called back in 15 minutes or so having confirmed that the printer had only been used to print a few example models and had otherwise sat idle for almost a year. Unfortunately in that time it had garnered a few scratches and lost it's box and support material but, having talked to his manager, he would be able to offer a further discount on the used price if I wanted to come in a take a look at it.&lt;/p&gt;
+&lt;p&gt;At the store an hour later it turned out that the guy I had talked to was actually the store manager and was really going the extra mile. By the time I had turned up, he had collated replacement components (power lead, usb lead, brushes, etc) from store stock and had the printer out ready for me to inspect. Amusingly, he had his staff so well organised that, seeing a few components laying around, they had actually put them all back on the shelves so he had to go collect them all again - but I couldn't help but be impressed. Anyway, the scratches turned out to be superfluous, the offer of an additional discount very attractive and the store manager's assurances that should anything be wrong with the unit he'd ensure it was replaced no questions asked very persuasive.&lt;/p&gt;
+&lt;p&gt;So I bought it, brought it home and, once the baby was safely ensconced at nursery the next day, set it up and set about calibrating it. The unit itself is a thing of beauty. Bold lines and colours with smooth, solid feeling mechanical components and a general air of quality; not at all what I've come to expect from a &lt;a href="https://www.kickstarter.com/projects/robox/robox-desktop-3d-printer-and-micro-manufacturing-p"&gt;Kickstarter funded project&lt;/a&gt;. While I was initially wary of buying a 3D printer that used a proprietary "chipped" spool for fear of a lock-in to an expensive source of filament, the integrated nature of the spool into the body of the unit and the intelligence it provides to the software - everything from how much spool is left to how much a particular model will cost to print - is fantastic. Far from other "hobbyist" 3D printers where filament projects precariously around the unit, the feed of filament to the head is completely hidden from view and loading of filament completely automated.&lt;/p&gt;
+&lt;p&gt;Unfortunately calibration wasn't quite as smooth and it took a long time to get the printer ready to actually try printing a model. In fact, despite repeatedly trying and following all suggestions, one of the calibration tests - the needle valve opening calibration for the fill nozzle - stoically refused to run successfully. This may have been the result of the unit sitting idle for so long or simply me not setting it up right but the failure to pass this test was extremely worrisome. Even the 'purge' material test (used to completely empty the print heads when you're planning on changing material) failed to lay down material as it should but this was mostly resolved by vigorously cleaning the print bed with the isopropyl alcohol.&lt;/p&gt;
+&lt;p&gt;Anyway, despite the needle valve opening calibration still failing, I decided to print a model to see how it would perform before deciding whether or not to return the unit. From CEL's downloadable samples, I decided to try printing the 'cargo-box' as it didn't seem to require too much filament and a small container is always useful for something. Actually loading and starting to print a model using CEL's &lt;a href="http://www.cel-robox.com/downloads/"&gt;AutoMaker&lt;/a&gt; software is ludicrously simple: start a new layout, load a model, choose the granularity of the print, go.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Watching a 3D model being printed is really something to behold. Despite it taking hours "like watching a 3D printer fabricate" should really become the metaphorical antonym to "like watching paint dry"; from the initial outline of the print being laid on the print bed, to seeing a solid object emerge, the process is fascinating. Taking a virtual object modelled on your computer and seeing that object take shape and become a physical object in the real world is thrilling, with innumerable possibilities opening up with every layer of filament laid down.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;In short order (well, actually 'long order' but it certainly didn't feel that way) and with much amazement and relief, the print was finished perfectly. A 1.5" square, green plastic cargo-box sat inside the Robox; I had fabricated a solid object from - seemingly - nothing. Once the unit had cooled the heated print-bed and unlocked the door, I tried removing the box, entirely expecting to have to lever and peel the plastic off the bed. To my surprise it moved easily, seemingly held to the bed by nothing more than a static charge. I was further surprised by the strength of the box; given it was made from nothing more than melted strands of plastic, I absolutely expected the fabricated object to have the tensile strength of a faberge egg. Yet it was incredibly rigid and inflexible, only the tell-tale layering giving away the fact that it had been 3D printer rather than cast in an industrial manufacturing plant.&lt;/p&gt;
+&lt;p&gt;Now it was time to see if I could use the printer for the purpose I bought it: fabricating custom components for other projects. First up was a bracket to hold a RaspberryPi and other components in a very specific configuration. &lt;a href="http://www.sketchup.com/products/sketchup-pro/new-in-2016?gclid=CIK4ks2Cy88CFc0y0wodZmwHaQ"&gt;SketchUp&lt;/a&gt; has been my go-to 3D modelling software of choice since being bought and given away by Google. It is amazingly quick and easy to use for almost everything except extremely precise components with low tolerances; i.e. exactly the kind of thing I needed to do. So I went about looking for alternatives and quickly settled on the free version of &lt;a href="https://www.rs-online.com/designspark/mechanical-software"&gt;DesignSpark Mechanical from RS Components&lt;/a&gt;. Despite some quirkiness in it's UI, it provides most of the features and ease of use of SketchUp with several digits of precision for designed components. Indeed, instead of using a mouse to try to get the exact length of an edge, you can simply enter the length you want on the keyboard; precisely the functionality I thought was missing from SketchUp.&lt;/p&gt;
+&lt;p&gt;It took several hours to complete the 3D model for the bracket I needed - somewhat due to DesignSpark's learning curve but mostly the precise measurements and imprecise iteration required to design a bracket that would hold all the components just so - but eventually it was ready to print. Again, friction from design software to print ready was minimal. DesignSpark is able to export in the standard STL format and AutoMaker loaded the model and positioned it on the print-bed automatically, promising to fabricate me a completely custom component for just £1.48's worth of material.&lt;/p&gt;
+&lt;p&gt;I set the print going but was quickly dismayed that the first layer of the print wasn't being laid properly at the far corners of the bed, mostly due to the fact that the corners of the bed away from the tabs that hold it in place had risen slightly. Regardless, I decided to let the print continue and see if subsequent layers would adhere to the small smudge of material the print head had managed to deposit. This turned out to be the right choice as by layer three the base of the bracket was fully formed and the printer had started using the "fill" nozzle to quickly start filling out further layers.&lt;/p&gt;
+&lt;p&gt;It took about three hours to design and an hour and forty minutes to fabricate, but the bracket fitted perfectly and was easily strong enough to hold all the components in the configuration I needed. I was a very happy boy and immediately starting to design a subsequent bracket I needed for the same project and plan for a load of other custom bits.&lt;/p&gt;
+&lt;p&gt;In summary, if you're thinking of buying a 3D printer and can afford what is - regardless of the heavy discount - an expensive bit of technology, I would absolutely recommend going for it. The possibilities of what you can create are mind-boggling and the sensation of watching them come into existence exhilarating. Being able to fabricate components I previously had to hack together from off the shelf bits is tremendously empowering and I can unashamedly say that I am completely hooked on 3D printing.&lt;/p&gt;
+&lt;p&gt;Furthermore, while I have no direct experience of other 3D printers, I wouldn't hesitate to recommend CEL's Robox printer as - despite still failing the nozzle calibration - it has yet to fail a print and the software is remarkably straight forward and easy to use.&lt;/p&gt;
+&lt;p&gt;Watch this space for more adventures in 3D printing as I integrate my new found fabrication abilities into my innumerable ongoing projects. First up: MonsterPi.&lt;/p&gt;
+
+
+
+                                </content:encoded>
+		</item>
+		<item>
 			<title>Achievement Unlocked!</title>
 			<link>http://ian.bebbs.co.uk/posts/AcheivementUnlocked</link>
 			<description>&lt;p&gt;So, I'm currently working on a project in which I've decided to employ the &lt;a href="http://martinfowler.com/bliki/CQRS.html"&gt;CQRS&lt;/a&gt;/&lt;a href="http://martinfowler.com/eaaDev/EventNarrative.html"&gt;ES&lt;/a&gt; architectural combo. Given the system is event sourced, I required read models built from the domain events and, conveniently, had blogged about doing this as one of my &lt;a href="http://ian.bebbs.co.uk/posts/ReactiveReadModels"&gt;first posts&lt;/a&gt; on this blog.&lt;/p&gt;</description>
@@ -508,94 +755,41 @@ output {
                                 </content:encoded>
 		</item>
 		<item>
-			<title>WebRx and Typescript</title>
-			<link>http://ian.bebbs.co.uk/posts/RxWebWithTypescript</link>
-			<description>&lt;p&gt;In &lt;a href="./posts/RxWeb"&gt;part 1&lt;/a&gt; of this series I showed how to set up a project structure that allows you to start using WebRx from within Visual Studio. While fairly simple, the example provides a great illustration of you how WebRx allows you to separate your view and view model.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/RxWebWithTypescript</guid>
-			<pubDate>Tue, 08 Mar 2016 00:00:00 GMT</pubDate>
+			<title>Wot No Blog Posts?</title>
+			<link>http://ian.bebbs.co.uk/posts/WotNoBlogPosts</link>
+			<description>&lt;p&gt;Yes, it's been over three months since my last blog post. "What have you been doing?" I hear you (the hypothetical reader) ask. Well... well I'll tell you.&lt;/p&gt;</description>
+			<enclosure url="http://ian.bebbs.co.uk/y3mKlqOBjK9u-QOTjr8e6t2pOev7BN2vWZHyEDf2l27_HhaNgR_aVCXi2-GJh_KZMQV-naegShjBydS0blOk2kSndI2eTXnRhuqA5Ry0VYn8a0HdOEj_RvSUJ8uVdzsiDmcn4XRkyaAn7kScarmtvlf5nua4L9lkP_bWrKG5Ai7JdQ%253Fwidth=660&amp;height=371&amp;cropmode=none" length="0" type="image" />
+			<guid>http://ian.bebbs.co.uk/posts/WotNoBlogPosts</guid>
+			<pubDate>Tue, 26 Jul 2016 00:00:00 GMT</pubDate>
 			<content:encoded>
                                         
 
 
-&lt;h1&gt;Continuing with WebRx&lt;/h1&gt;
-&lt;p&gt;In &lt;a href="./posts/RxWeb"&gt;part 1&lt;/a&gt; of this series I showed how to set up a project structure that allows you to start using WebRx from within Visual Studio. While fairly simple, the example provides a great illustration of you how WebRx allows you to separate your view and view model.&lt;/p&gt;
-&lt;p&gt;In this article I further develop the structure to allow you to develop your application using Typescript.&lt;/p&gt;
-&lt;h1&gt;From 'app.js' to 'app.ts'&lt;/h1&gt;
-&lt;p&gt;Previously we copied a chunk of JavaScript from the WebRx &lt;a href="http://webrxjs.org/docs/getting-started.html"&gt;getting started guide&lt;/a&gt; into an &lt;code&gt;app.js&lt;/code&gt; script that was directly used from within the &lt;code&gt;index.html&lt;/code&gt; file. We now want to &lt;a href="https://en.wikipedia.org/wiki/Source-to-source_compiler"&gt;&lt;em&gt;transpile&lt;/em&gt;&lt;/a&gt; the &lt;code&gt;app.js&lt;/code&gt; script from a Typescript file so that we can further develop the application in a structured and type-safe manner.&lt;/p&gt;
-&lt;p&gt;To do this simply follow the following steps:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Delete the existing &lt;code&gt;app.js&lt;/code&gt; file leaving the &lt;code&gt;js&lt;/code&gt; folder empty.&lt;/li&gt;
-&lt;li&gt;Add and configure a &lt;code&gt;TypeScript JSON Configuration File&lt;/code&gt;.&lt;/li&gt;
-&lt;/ol&gt;
+&lt;p&gt;Yes, it's been over three months since my last blog post. "What have you been doing?" I hear you (the hypothetical reader) ask. Well... well I'll tell you.&lt;/p&gt;
+&lt;p&gt;Having left my previous permanent position in January, I decided the time was right for a &lt;strong&gt;career break&lt;/strong&gt;. Having been &lt;a href="https://www.ted.com/talks/stefan_sagmeister_the_power_of_time_off?language=en"&gt;inspired to take a career break&lt;/a&gt; some six years ago, I knew how rejuvenating time off work can be and how reinvigorating it is when you finally have some time to pick and choose what it is you want to do and, more importantly, how. Indeed, last time I took a career break I ended up founding a company which - while not successful enough to prevent me having to return to employment - was massively educational, incredibly liberating and a whole lot of fun.&lt;/p&gt;
+&lt;p&gt;However, my motivations for this career break are vastly different to those of six years ago. At that time I had just emerged from a somewhat turbulent relationship and was looking to - &lt;em&gt;sorry for the cliché&lt;/em&gt; - "re-find" myself; this time I am in a stable and happy relationship with my partner who last year gave birth to our little baby girl. And while, six years ago, I could - and was happy to - survive on very meagre savings, I am now lucky enough to be in a position where financial pressures are not an issue, at least in the short-term. Finally, while I had very little idea of what I was going to do during my last career break (which itself was extremely liberating in that you are suddenly open to being able to say "yes" to pretty much anything) this time I have a much more developed concept of how I want to use this opportunity.&lt;/p&gt;
+&lt;p&gt;While my motivations and desires for the coming months will be the subject of future blog posts, I have started putting together a &lt;a href="https://trello.com/b/KoTWuFUi/public-board"&gt;public Trello board&lt;/a&gt; of ideas/projects I want to undertake. It's just a start and by no means comprehensive but I thought some transparency around my ideas and goals (not to mention progress!) would be good for me.&lt;/p&gt;
+&lt;p&gt;For now though I want to share what I've been doing - and why there have been no blog posts - for the last three months. You see, a primary motivation for taking time out of my career now was to spend time with my young family and maximise the use of my partner's remaining maternity leave. To this end, shortly after leaving my previous job, my partner and I decided to &lt;strong&gt;take our baby on a road trip around Europe&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;The timing really couldn't have been better; my partner still had a few months of maternity leave remaining, the baby was still happy to have long naps in the back of the car whenever we drove anywhere and I was still keen on buying a day-van (it's been a &lt;em&gt;thing&lt;/em&gt; with me for a while now). So in February we started planning and looking for a motor that could comfortably cart the three of us around Europe and by mid March we'd bought an imported Nissan Elgrand E51 Ryder Autech.&lt;/p&gt;
+&lt;img src="https://zdfcta.dm2302.livefilestore.com/y3mRDVqstf6XsjN73biGoYnN5s-SzVcHx9pEdYl2S_wM803HpiosWK5Skxm-kskeHTMkahk_PIdejAp70x14KCaOwmZb6OvAvAig8uqI4bdBs2Pb_lAUsm-O_2lO8krW_18ReDVMLXqVkJWUGUSJ-d80bOIi8ciWIgyxDzL5fw4qF4?width=1796&amp;amp;height=1347&amp;amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="My other baby"&gt;
+&lt;p&gt;Now the Elgrand is an MPV and not a campervan (a mostly pragmatic decision based on the fact we could use it on a daily basis after the trip and only a little bit due to "love at first drive") so there was a lot of work to do in order to prepare it for such a long journey. Therefore, between March and May, I researched, built and installed a bunch of modifications for the Elgrand to support us on our adventure. This included a custom built leisure battery / charging system enclosure, custom built frame to mount the electrical systems and luggage, routing of cabling around the Elgrand and several internal modifications for enhancing the navigation / ICE systems.&lt;/p&gt;
+&lt;p&gt;I documented these modifications on the &lt;a href="http://elgrandoc.uk/"&gt;Elgrand Owners Club website&lt;/a&gt;. This site proved invaluable in terms of information about working on the Elgrand and I wanted to give something back to the active and very helpful community there. Due to limitations in the website's forum, the details had to be split across five posts which - if you're interested - can be found here: &lt;a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-i.3311/"&gt;Part I&lt;/a&gt;, &lt;a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-ii.3312/"&gt;Part II&lt;/a&gt;, &lt;a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-iii.3313/"&gt;Part III&lt;/a&gt;, &lt;a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-iv.3314/"&gt;Part IV&lt;/a&gt;, &lt;a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-v.3315/"&gt;Part V&lt;/a&gt;. After just a couple of days these posts have already garnered significant praise and numerous follow on questions so I feel pretty good about having spent the time writing these posts.&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;As an aside, it occurred to me that this work could almost have been a case-study in Agile development. Not being a carpenter or mechanic and my work on cars to date having been pretty much limited to topping up the oil, I started this project from an absolute level of maximum ignorance. Fortunately as both a stake holder and engineer, it was easy to outline use-cases for the work which, while I didn't actually document them at the time, would have included some choice ones such as:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;Add a &lt;code&gt;TypeScript JSON Configuration File&lt;/code&gt; to the solution as shown below&lt;br&gt;
-&lt;img src="/Content/RxWebWithTypescript/AddTypeScriptJsonConfigurationFile.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Add TypeScript Json Configuration File"&gt;&lt;/li&gt;
-&lt;li&gt;Replace the &lt;code&gt;node_modules&lt;/code&gt; exclusion with &lt;code&gt;Scripts&lt;/code&gt;&lt;br&gt;
-By default Visual Studio (or, more acurately, the TypeScript transpiler) with pick up all &lt;code&gt;ts&lt;/code&gt; files in the solution. As we don't want to attempt to re-transpile all the referenced typescript files we add &lt;code&gt;Scripts&lt;/code&gt; to the exclusion list. Further, as we added a reference to &lt;code&gt;WebRx&lt;/code&gt; via Nuget, our references are in the &lt;code&gt;Scripts&lt;/code&gt; folder, not &lt;code&gt;node_modules&lt;/code&gt;, so this exclusion can be removed.&lt;/li&gt;
-&lt;li&gt;Add an &lt;code&gt;outDir&lt;/code&gt; setting to transpile to the &lt;code&gt;js&lt;/code&gt; folder&lt;br&gt;
-This setting will force the TypeScript transpiler to output the transpiled JavaScript files to the &lt;code&gt;js&lt;/code&gt; folder where they can be used by the client browser.&lt;/li&gt;
-&lt;li&gt;You should now have a &lt;code&gt;tsconfig.json&lt;/code&gt; file that looks like this:
-&lt;pre class="prettyprint"&gt;&lt;code&gt;{
-  "compilerOptions": {
-    "noImplicitAny": false,
-    "noEmitOnError": true,
-    "removeComments": false,
-    "sourceMap": true,
-    "target": "es5",
-    "outDir": "js"
-  },
-  "exclude": [
-    "Scripts",
-    "wwwroot"
-  ]
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/li&gt;
+&lt;li&gt;"As a driver I need a non-Japanese navigation system so I know where the smeg I'm supposed to be going!",&lt;/li&gt;
+&lt;li&gt;"As a parent I need a fridge in the van so that we can keep food for the baby food fresh and - hopefully - the baby healthy" and,&lt;/li&gt;
+&lt;li&gt;"As a caffeine junkie I need a means of making coffee in the van so that I don't murder everyone the morning after we spend a night in it!"&lt;/li&gt;
 &lt;/ul&gt;
-&lt;ol start="3"&gt;
-&lt;li&gt;Add a &lt;code&gt;ts&lt;/code&gt; folder to the solution.&lt;/li&gt;
-&lt;li&gt;Add an &lt;code&gt;app.ts&lt;/code&gt; typescript file to the &lt;code&gt;ts&lt;/code&gt; folder.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;ul&gt;
-&lt;li&gt;Add references to Rx and WebRx to the &lt;code&gt;app.ts&lt;/code&gt; file.&lt;br&gt;
-WebRx requires that you add an explicit reference to &lt;code&gt;rx.all.d.ts&lt;/code&gt; prior to the reference to &lt;code&gt;web.rx.d.ts&lt;/code&gt; in order for the Rx module to be brought into scope. The references should therefore be added like this:
-&lt;pre class="prettyprint"&gt;&lt;code&gt;/// &amp;lt;reference path="../Scripts/rx.all.d.ts"/&amp;gt;
-/// &amp;lt;reference path="../Scripts/typings/web.rx.d.ts" /&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/li&gt;
-&lt;li&gt;Implement view / view model code&lt;br&gt;
-You can now re-implement the code from &lt;code&gt;app.js&lt;/code&gt; as TypeScript virtually verbatim but do note how you get Intellisense for all the methods and properties of &lt;code&gt;wx&lt;/code&gt; module.&lt;/li&gt;
-&lt;li&gt;Fix compilation error with call to &lt;code&gt;wx.applyBindings&lt;/code&gt;&lt;br&gt;
-The &lt;code&gt;wx.applyBindings&lt;/code&gt; method &lt;em&gt;requires&lt;/em&gt; a &lt;code&gt;model&lt;/code&gt; parameter which, in JavaScript, is defaulted but in TypeScript causes a compilation error. To resolve this, simply pass an empty object to the method.&lt;/li&gt;
-&lt;li&gt;Your &lt;code&gt;app.ts&lt;/code&gt; file should now look like this:
-&lt;pre class="prettyprint"&gt;&lt;code&gt;/// &amp;lt;reference path="../Scripts/rx.all.d.ts"/&amp;gt;
-/// &amp;lt;reference path="../Scripts/typings/web.rx.d.ts" /&amp;gt;
-
-wx.app.component('hello', {
-    viewModel: function () {
-        this.firstName = 'Bart';
-        this.lastName = 'Simpson';
-    },
-    template: 'The name is &amp;lt;span data-bind="text: firstName + \' \' + lastName"&amp;gt;&amp;lt;/span&amp;gt;'
-});
-
-wx.router.state({
-    name: "$",
-    views: { 'main': "hello" }
-});
-
-wx.router.reload();
-
-wx.applyBindings({});
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;ol start="5"&gt;
-&lt;li&gt;Compile the project and include the generated &lt;code&gt;js/app.js&lt;/code&gt; and &lt;code&gt;js/app.js.map&lt;/code&gt; files into the project.&lt;/li&gt;
-&lt;li&gt;Hit F5 and you should again see the message 'The name is Bart Simpson' displayed in your default browser.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;Congratulations, you're now ready to develop your application using full Intellisense and in the comfort of the knowledge that the compiler (well, transpiler) will pick up any syntactic bugs you may inadvertently create.&lt;/p&gt;
-&lt;p&gt;As always, the completed &lt;a href="https://github.com/ibebbs/BlogProjects/tree/master/WebRxWithTypeScript"&gt;source code for this post&lt;/a&gt; can be found in the &lt;a href="https://github.com/ibebbs/BlogProjects"&gt;BlogProjects repository&lt;/a&gt; on &lt;a href="https://github.com/ibebbs"&gt;Github&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;These could then be naturally prioritized and, where possible, undertaken concurrently by my partner and I. If something went well, we could close it off and move onto the next thing; if it didn't we could reevaluate it's value / priority in light of what we had. This way we managed to hit our deadline (the ferry departure - which we put off "committing" to until as late as possible) with as much high value work done as possible. More importantly, at departure (aka deployment) time, we had a significantly lower level of ignorance such that, should anything go wrong while we were "live", we'd actually stand a chance of fixing it without having to - possibly literally - "roll back" to England.&lt;/p&gt;
+&lt;p&gt;Yes, yes, some of this terminology is undoubtedly tenuous but, having had hours and hours to reflect on this work while driving around Europe, it was rewarding to see how much more effective an iterative approach to problem solving can be. Who knows if we'd ever have got away if we'd tried to plan &lt;em&gt;everything&lt;/em&gt; up front.&lt;/p&gt;
+&lt;hr&gt;
+&lt;p&gt;Anyway, we departed England in mid-May and returned mid-July and had a truly fantastic adventure. In &lt;strong&gt;58 days&lt;/strong&gt; we travelled &lt;strong&gt;7912 miles&lt;/strong&gt; and visited &lt;strong&gt;20 countries&lt;/strong&gt;. Along the way we met a number of old friends, made a lot of new friends and saw some amazing sites and scenery. We learned a lot, not only about the various cultures / histories around Europe but also about ourselves and our daughter. And we laughed a lot, mostly about the quirks of the various cultures we were experiencing but also - in retrospect at least - about some of the challenges we faced along the way; like having to park up in a field at a border crossing in order to buy the vignette that would allow us to drive the car in the country we were about to cross in to, and getting visited by both a swarm of monstrously huge locust type insects and a heavily armed and somewhat suspicious (the Elgrand has very dark privacy glass) border guard.&lt;/p&gt;
+&lt;p&gt;We really did experience so much that I frequently find myself remembering something from the trip that a) I had somehow already forgotten and b) seems like both a lifetime &lt;em&gt;and&lt;/em&gt; just a few days ago. Fortunately my partner kept a very detailed (and anonymised) blog of our journey in which she does an terrific job of capturing the fun and freedom we enjoyed while away. Should you be interested, you can read it &lt;a href="https://bigspune.wordpress.com/"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;And now we're home. The baby has started nursery and my partner is returning to work. While I'm still having to consciously work out where I am when I wake up in the night (seriously, after two months of staying somewhere different every night, this seems to be a thing at the moment) and we're still trying to get the house back into some semblance of order, life is returning to our own special approximation of normality.&lt;/p&gt;
+&lt;p&gt;For four days a week and for the foreseeable future, I will have pretty much all day to do... well, pretty much anything I want. It's an exciting time in the world of .NET given the recent release of .NET Core and Microsoft's assimilation of Xamarin. Graph and document data stores (aka NoSQL) continue to make inroads on the traditional strong holds of legacy relational databases. And there are some profound changes in the broader world of software development such as the continuing move towards containerized deployment and cloud infrastructures. I'm very much looking forward to investigating / leveraging all these in the months to come.&lt;/p&gt;
+&lt;p&gt;Who knows where it will lead. I will certainly be keeping my ear to the ground should an exciting job/contract come around. Ideally I'd want something remote / freelance which I could do on my terms and, should the right opportunity drop in my lap, I'd certainly be open to it. That said, what I'd really like to do is resurrect my company and see where I can take it. I have a couple of ideas with potential but will hold off on developing them until I've refamiliarised myself with the current trends in software development because, even though it's only been a few months, it feels like I've been out of the game for years.&lt;/p&gt;
+&lt;p&gt;Well, game on.&lt;/p&gt;
 
 
 
@@ -803,47 +997,6 @@ first want to add the fields of the index we're interested in (just timestamp, h
                                 </content:encoded>
 		</item>
 		<item>
-			<title>Wot No Blog Posts?</title>
-			<link>http://ian.bebbs.co.uk/posts/WotNoBlogPosts</link>
-			<description>&lt;p&gt;Yes, it's been over three months since my last blog post. "What have you been doing?" I hear you (the hypothetical reader) ask. Well... well I'll tell you.&lt;/p&gt;</description>
-			<enclosure url="http://ian.bebbs.co.uk/y3mKlqOBjK9u-QOTjr8e6t2pOev7BN2vWZHyEDf2l27_HhaNgR_aVCXi2-GJh_KZMQV-naegShjBydS0blOk2kSndI2eTXnRhuqA5Ry0VYn8a0HdOEj_RvSUJ8uVdzsiDmcn4XRkyaAn7kScarmtvlf5nua4L9lkP_bWrKG5Ai7JdQ%253Fwidth=660&amp;height=371&amp;cropmode=none" length="0" type="image" />
-			<guid>http://ian.bebbs.co.uk/posts/WotNoBlogPosts</guid>
-			<pubDate>Tue, 26 Jul 2016 00:00:00 GMT</pubDate>
-			<content:encoded>
-                                        
-
-
-&lt;p&gt;Yes, it's been over three months since my last blog post. "What have you been doing?" I hear you (the hypothetical reader) ask. Well... well I'll tell you.&lt;/p&gt;
-&lt;p&gt;Having left my previous permanent position in January, I decided the time was right for a &lt;strong&gt;career break&lt;/strong&gt;. Having been &lt;a href="https://www.ted.com/talks/stefan_sagmeister_the_power_of_time_off?language=en"&gt;inspired to take a career break&lt;/a&gt; some six years ago, I knew how rejuvenating time off work can be and how reinvigorating it is when you finally have some time to pick and choose what it is you want to do and, more importantly, how. Indeed, last time I took a career break I ended up founding a company which - while not successful enough to prevent me having to return to employment - was massively educational, incredibly liberating and a whole lot of fun.&lt;/p&gt;
-&lt;p&gt;However, my motivations for this career break are vastly different to those of six years ago. At that time I had just emerged from a somewhat turbulent relationship and was looking to - &lt;em&gt;sorry for the cliché&lt;/em&gt; - "re-find" myself; this time I am in a stable and happy relationship with my partner who last year gave birth to our little baby girl. And while, six years ago, I could - and was happy to - survive on very meagre savings, I am now lucky enough to be in a position where financial pressures are not an issue, at least in the short-term. Finally, while I had very little idea of what I was going to do during my last career break (which itself was extremely liberating in that you are suddenly open to being able to say "yes" to pretty much anything) this time I have a much more developed concept of how I want to use this opportunity.&lt;/p&gt;
-&lt;p&gt;While my motivations and desires for the coming months will be the subject of future blog posts, I have started putting together a &lt;a href="https://trello.com/b/KoTWuFUi/public-board"&gt;public Trello board&lt;/a&gt; of ideas/projects I want to undertake. It's just a start and by no means comprehensive but I thought some transparency around my ideas and goals (not to mention progress!) would be good for me.&lt;/p&gt;
-&lt;p&gt;For now though I want to share what I've been doing - and why there have been no blog posts - for the last three months. You see, a primary motivation for taking time out of my career now was to spend time with my young family and maximise the use of my partner's remaining maternity leave. To this end, shortly after leaving my previous job, my partner and I decided to &lt;strong&gt;take our baby on a road trip around Europe&lt;/strong&gt;.&lt;/p&gt;
-&lt;p&gt;The timing really couldn't have been better; my partner still had a few months of maternity leave remaining, the baby was still happy to have long naps in the back of the car whenever we drove anywhere and I was still keen on buying a day-van (it's been a &lt;em&gt;thing&lt;/em&gt; with me for a while now). So in February we started planning and looking for a motor that could comfortably cart the three of us around Europe and by mid March we'd bought an imported Nissan Elgrand E51 Ryder Autech.&lt;/p&gt;
-&lt;img src="https://zdfcta.dm2302.livefilestore.com/y3mRDVqstf6XsjN73biGoYnN5s-SzVcHx9pEdYl2S_wM803HpiosWK5Skxm-kskeHTMkahk_PIdejAp70x14KCaOwmZb6OvAvAig8uqI4bdBs2Pb_lAUsm-O_2lO8krW_18ReDVMLXqVkJWUGUSJ-d80bOIi8ciWIgyxDzL5fw4qF4?width=1796&amp;amp;height=1347&amp;amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="My other baby"&gt;
-&lt;p&gt;Now the Elgrand is an MPV and not a campervan (a mostly pragmatic decision based on the fact we could use it on a daily basis after the trip and only a little bit due to "love at first drive") so there was a lot of work to do in order to prepare it for such a long journey. Therefore, between March and May, I researched, built and installed a bunch of modifications for the Elgrand to support us on our adventure. This included a custom built leisure battery / charging system enclosure, custom built frame to mount the electrical systems and luggage, routing of cabling around the Elgrand and several internal modifications for enhancing the navigation / ICE systems.&lt;/p&gt;
-&lt;p&gt;I documented these modifications on the &lt;a href="http://elgrandoc.uk/"&gt;Elgrand Owners Club website&lt;/a&gt;. This site proved invaluable in terms of information about working on the Elgrand and I wanted to give something back to the active and very helpful community there. Due to limitations in the website's forum, the details had to be split across five posts which - if you're interested - can be found here: &lt;a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-i.3311/"&gt;Part I&lt;/a&gt;, &lt;a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-ii.3312/"&gt;Part II&lt;/a&gt;, &lt;a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-iii.3313/"&gt;Part III&lt;/a&gt;, &lt;a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-iv.3314/"&gt;Part IV&lt;/a&gt;, &lt;a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-v.3315/"&gt;Part V&lt;/a&gt;. After just a couple of days these posts have already garnered significant praise and numerous follow on questions so I feel pretty good about having spent the time writing these posts.&lt;/p&gt;
-&lt;hr&gt;
-&lt;p&gt;As an aside, it occurred to me that this work could almost have been a case-study in Agile development. Not being a carpenter or mechanic and my work on cars to date having been pretty much limited to topping up the oil, I started this project from an absolute level of maximum ignorance. Fortunately as both a stake holder and engineer, it was easy to outline use-cases for the work which, while I didn't actually document them at the time, would have included some choice ones such as:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;"As a driver I need a non-Japanese navigation system so I know where the smeg I'm supposed to be going!",&lt;/li&gt;
-&lt;li&gt;"As a parent I need a fridge in the van so that we can keep food for the baby food fresh and - hopefully - the baby healthy" and,&lt;/li&gt;
-&lt;li&gt;"As a caffeine junkie I need a means of making coffee in the van so that I don't murder everyone the morning after we spend a night in it!"&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;These could then be naturally prioritized and, where possible, undertaken concurrently by my partner and I. If something went well, we could close it off and move onto the next thing; if it didn't we could reevaluate it's value / priority in light of what we had. This way we managed to hit our deadline (the ferry departure - which we put off "committing" to until as late as possible) with as much high value work done as possible. More importantly, at departure (aka deployment) time, we had a significantly lower level of ignorance such that, should anything go wrong while we were "live", we'd actually stand a chance of fixing it without having to - possibly literally - "roll back" to England.&lt;/p&gt;
-&lt;p&gt;Yes, yes, some of this terminology is undoubtedly tenuous but, having had hours and hours to reflect on this work while driving around Europe, it was rewarding to see how much more effective an iterative approach to problem solving can be. Who knows if we'd ever have got away if we'd tried to plan &lt;em&gt;everything&lt;/em&gt; up front.&lt;/p&gt;
-&lt;hr&gt;
-&lt;p&gt;Anyway, we departed England in mid-May and returned mid-July and had a truly fantastic adventure. In &lt;strong&gt;58 days&lt;/strong&gt; we travelled &lt;strong&gt;7912 miles&lt;/strong&gt; and visited &lt;strong&gt;20 countries&lt;/strong&gt;. Along the way we met a number of old friends, made a lot of new friends and saw some amazing sites and scenery. We learned a lot, not only about the various cultures / histories around Europe but also about ourselves and our daughter. And we laughed a lot, mostly about the quirks of the various cultures we were experiencing but also - in retrospect at least - about some of the challenges we faced along the way; like having to park up in a field at a border crossing in order to buy the vignette that would allow us to drive the car in the country we were about to cross in to, and getting visited by both a swarm of monstrously huge locust type insects and a heavily armed and somewhat suspicious (the Elgrand has very dark privacy glass) border guard.&lt;/p&gt;
-&lt;p&gt;We really did experience so much that I frequently find myself remembering something from the trip that a) I had somehow already forgotten and b) seems like both a lifetime &lt;em&gt;and&lt;/em&gt; just a few days ago. Fortunately my partner kept a very detailed (and anonymised) blog of our journey in which she does an terrific job of capturing the fun and freedom we enjoyed while away. Should you be interested, you can read it &lt;a href="https://bigspune.wordpress.com/"&gt;here&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;And now we're home. The baby has started nursery and my partner is returning to work. While I'm still having to consciously work out where I am when I wake up in the night (seriously, after two months of staying somewhere different every night, this seems to be a thing at the moment) and we're still trying to get the house back into some semblance of order, life is returning to our own special approximation of normality.&lt;/p&gt;
-&lt;p&gt;For four days a week and for the foreseeable future, I will have pretty much all day to do... well, pretty much anything I want. It's an exciting time in the world of .NET given the recent release of .NET Core and Microsoft's assimilation of Xamarin. Graph and document data stores (aka NoSQL) continue to make inroads on the traditional strong holds of legacy relational databases. And there are some profound changes in the broader world of software development such as the continuing move towards containerized deployment and cloud infrastructures. I'm very much looking forward to investigating / leveraging all these in the months to come.&lt;/p&gt;
-&lt;p&gt;Who knows where it will lead. I will certainly be keeping my ear to the ground should an exciting job/contract come around. Ideally I'd want something remote / freelance which I could do on my terms and, should the right opportunity drop in my lap, I'd certainly be open to it. That said, what I'd really like to do is resurrect my company and see where I can take it. I have a couple of ideas with potential but will hold off on developing them until I've refamiliarised myself with the current trends in software development because, even though it's only been a few months, it feels like I've been out of the game for years.&lt;/p&gt;
-&lt;p&gt;Well, game on.&lt;/p&gt;
-
-
-
-                                </content:encoded>
-		</item>
-		<item>
 			<title>The absolute easiest way to use SVG icons in UWP apps</title>
 			<link>http://ian.bebbs.co.uk/posts/UsingSVGInUWP</link>
 			<description>&lt;p&gt;There are &lt;a href="http://stackoverflow.com/a/3528493/628821"&gt;many&lt;/a&gt; (&lt;a href="http://stackoverflow.com/a/22107360/628821"&gt;many&lt;/a&gt;, &lt;a href="http://blogs.u2u.be/diederik/post/2012/07/26/Transforming-SVG-graphics-to-XAML-Metro-Icons.aspx"&gt;many&lt;/a&gt;) ways to use SVG assets as icons in UWP / XAML apps, most requiring some form of DataTemplate or UserControl. While these approaches work &lt;em&gt;ok&lt;/em&gt; they're normally a pain to author and use, often requiring custom converters to be written if the asset is to be used via any form of data binding. Here I present an extremely flexible way of using these assets that requires nothing more than drag-and-drop.&lt;/p&gt;</description>
@@ -884,177 +1037,213 @@ first want to add the fields of the index we're interested in (just timestamp, h
                                 </content:encoded>
 		</item>
 		<item>
-			<title>On The Importance of Doing Something</title>
-			<link>http://ian.bebbs.co.uk/posts/OnTheImportanceOfDoingSomething</link>
-			<description>&lt;p&gt;I've just become a father. It's amazing and I'm loving every day, from waking up in the morning and being greeted by huge grin from my little girl to putting her to bed in the evening when she can barely keep her eyes open. My baby instantaneously became priority number one and has left little time for other passions like home programming projects.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/OnTheImportanceOfDoingSomething</guid>
-			<pubDate>Mon, 16 Nov 2015 00:00:00 GMT</pubDate>
+			<title>On the perils of traversing parallel universes</title>
+			<link>http://ian.bebbs.co.uk/posts/RxVsTpl</link>
+			<description>&lt;p&gt;Despite taking some poetic license with the title of this post, the dramatics are not without merit. I have spent a significant portion of the last three days trying to write a series of tests around some asynchronous code to prove it managed - or, more specifically, limited - concurrency as intended. This code, while mainly Rx based, made calls to TPL methods and needed to wait, without blocking, for a result to be returned prior to allowing subsequent calls to be made. In short it mixed Rx and TPL to implement a multi-procuder / single consumer concurrency pattern, and this mix proved to be the source of much (much, much!) frustration.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/RxVsTpl</guid>
+			<pubDate>Mon, 01 Feb 2016 00:00:00 GMT</pubDate>
 			<content:encoded>
                                         
 
 
-&lt;p&gt;I've just become a father. It's amazing and I'm loving every day, from waking up in the morning and being greeted by huge grin from my little girl to putting her to bed in the evening when she can barely keep her eyes open. My baby instantaneously became priority number one and has left little time for other passions like home programming projects.&lt;/p&gt;
-&lt;p&gt;Yet, simultaneously, I have found the time since my baby was born to be some of the most productive time of my life. Since she her birth, I've spent every hour possible with her, worked regular hours - and been productive during those hours - at my day job, got an unexpectedly healthy amount of sleep and still managed to complete a significant amount of work on personal projects as well as creating and writing this blog.&lt;/p&gt;
-&lt;p&gt;While reflecting on why this might be, I came up with one simple, inescapable conclusion: &lt;a href="https://github.com/ibebbs" title="ibebbs Github Profile"&gt;my Github profile&lt;/a&gt;. More specifically the "Current Streak" of contributions. You see, I am a sucker for gamification and seeing that "Current Streak" increase each day is remarkably rewarding. As such, I am finding time each day - no matter how little - to do &lt;em&gt;something&lt;/em&gt;.&lt;/p&gt;
-&lt;p&gt;Previously, I'd get home in the evening, think about the projects I had to work on, realise that there probably wouldn't be enough time to make significant progress and procrastinate about it until I had more time available to "get things done properly" - which was happening increasingly rarely. Now, instead of focusing on some distant goal, I simply think about finding &lt;em&gt;something&lt;/em&gt; I can do and publish to Github in whatever time I have available. It really doesn't matter what it is, as long as I get the &lt;a href="https://www.microsoft.com/surface/en-gb/devices/surface-pro-4" title="Microsoft Surface Pro 4"&gt;Surface&lt;/a&gt; out and start. Almost always, once I've started something, I get engrossed in it and am able to spend way more time than I thought might be available on it.&lt;/p&gt;
-&lt;p&gt;For example, I'm writing this post from the sofa in my front room having spent a wonderful evening with my other half and little girl. Not having had time to make a commit today, I decided not to get an early night and instead tucked them into their respective beds before heading back down stairs to get a start on this post. Initially I had planned simply jot down a few ideas and possibly write a sentence or two before committing to Github and retiring for the evening. Yet here I am still writing after several paragraphs (and &lt;a href="https://music.microsoft.com/album/london-grammar/if-you-wait-deluxe-edition/bz.EE99E107-0100-11DB-89CA-0019B92A3933?action=play" title="London Grammar on Groove Music"&gt;one very enjoyable album&lt;/a&gt;).&lt;/p&gt;
-&lt;p&gt;I probably won't finish tonight, and definitely won't publish this post until I've had time to re-read and edit it. But I've got my commit for the day and made an unexpected amount of progress on a blog post about making an unexpected amount of progress. In short, I got &lt;em&gt;something&lt;/em&gt; done and that feels good.&lt;/p&gt;
-&lt;p&gt;Night!&lt;/p&gt;
+&lt;p&gt;Despite taking some poetic license with the title of this post, the dramatics are not without merit. I have spent a significant portion of the last three days trying to write a series of tests around some asynchronous code to prove it managed - or, more specifically, limited - concurrency as intended. This code, while mainly Rx based, made calls to TPL methods and needed to wait, without blocking, for a result to be returned prior to allowing subsequent calls to be made. In short it mixed Rx and TPL to implement a multi-procuder / single consumer concurrency pattern, and this mix proved to be the source of much (much, much!) frustration.&lt;/p&gt;
+&lt;p&gt;While I don't necessarily believe that &lt;a href="https://code.google.com/archive/p/fakeiteasy/issues/31"&gt;threading should be avoided in unit tests&lt;/a&gt; I do, as much as possible, endeavour to keep tests synchronous. Obviously this can be tricky when you're &lt;a href="http://stackoverflow.com/questions/20861305/should-i-unit-test-concurrency"&gt;specifically&lt;/a&gt; &lt;a href="http://stackoverflow.com/questions/12159/how-should-i-unit-test-threaded-code"&gt;testing&lt;/a&gt;  &lt;a href="http://stackoverflow.com/questions/1226779/how-to-run-concurrency-unit-test"&gt;concurrency&lt;/a&gt; but, fortunately, this has become immeasurably easier since Rx introduced testing in &lt;a href="http://blogs.msdn.com/b/rxteam/archive/2012/06/14/testing-rx-queries-using-virtual-time-scheduling.aspx"&gt;virtual time&lt;/a&gt; via the &lt;a href="http://www.introtorx.com/content/v1.0.10621.0/16_TestingRx.html"&gt;TestScheduler&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;So, with this magical mechanism for manipulating the motion of time in my mitts, I proceeded to write the test &lt;code&gt;ShouldOnlySendASingleCommandAtATime&lt;/code&gt;... which promptly failed. And I'm not talking the good, red-green kinda failure. Nooo, this was an old school &lt;em&gt;"I've written the code, better make sure it works... oh, that's weird!"&lt;/em&gt; kinda failure.&lt;/p&gt;
+&lt;p&gt;Assertions on calls to faked objects were failing and, after a lot of digging I finally found out why: Despite diligently injecting and using a &lt;code&gt;TestScheduler&lt;/code&gt; through my Rx code and mocking calls to TPL code such that they returned &lt;code&gt;TaskCompletionSource&amp;lt;T&amp;gt;&lt;/code&gt; instances, I was still seeing my unit tests start a &lt;strong&gt;second worker thread&lt;/strong&gt;!&lt;/p&gt;
+&lt;p&gt;Weird indeed.&lt;/p&gt;
+&lt;p&gt;After a lot of hacking around with my code and other &lt;a href="http://www.theallium.com/engineering/computer-programming-to-be-officially-renamed-googling-stackoverflow/"&gt;"computer programming"&lt;/a&gt; type activities, I finally happened upon this &lt;a href="http://stackoverflow.com/questions/28183473/executing-tpl-code-in-a-reactive-pipeline-and-controlling-execution-via-test-sch/28236216#28236216"&gt;curiously titled question&lt;/a&gt;. The question very closely reflected what I was trying to achieve and was fortunately followed by an incredibly detailed answer by &lt;a href="http://stackoverflow.com/users/87427/james-world"&gt;James World&lt;/a&gt;. Of particular note was this paragraph:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;One particular pain point of Rx that leaves many testers scratching their heads, is the fact that the TPL -&amp;gt; Rx family of conversions introduce concurrency. e.g. ToObservable, SelectMany's overload accepting Task&lt;t&gt; etc. don't provide overloads with a scheduler and insidiously force you off the TestScheduler thread, even if mocking with TCS&lt;/t&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Bingo! Exactly the issue I was experiencing. James also provided a link to the following &lt;a href="https://github.com/Reactive-Extensions/Rx.NET/issues/21"&gt;bug report for Rx&lt;/a&gt; validating his answer and vindicating my confusion. This epiphany lead me to rewrite the interfaces to my dependencies such that they were Rx rather than TPL based. After which, lo and behold, my unit tests started passing.&lt;/p&gt;
+&lt;p&gt;Phew!&lt;/p&gt;
+&lt;p&gt;In conclusion, I guess the physicists are right: &lt;a href="https://www.newscientist.com/article/dn11745-could-black-holes-be-portals-to-other-universes/"&gt;If you want to move between parallel universes, be prepared to fall into a black hole!&lt;/a&gt;&lt;/p&gt;
 
 
 
                                 </content:encoded>
 		</item>
 		<item>
-			<title>Home Network Monitoring - Part IV</title>
-			<link>http://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartIV</link>
-			<description>&lt;p&gt;In the last post, I used the Logstash &lt;code&gt;dns&lt;/code&gt; filter to translate remote server IP addresses into recognisable domain names. In this post, I will look to perform a similar operation for local IP addresses in order to translate them into recognisable device names.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartIV</guid>
-			<pubDate>Sat, 16 Apr 2016 00:00:00 GMT</pubDate>
+			<title>Reactive ReadModels</title>
+			<link>http://ian.bebbs.co.uk/posts/ReactiveReadModels</link>
+			<description>&lt;p&gt;If you're starting out with &lt;a href="http://docs.geteventstore.com/introduction/event-sourcing-basics/" title="Event Sourcing Basics at GetEventStore"&gt;Event Sourcing&lt;/a&gt; you're probably looking for the ability to project events into &lt;a href="http://cqrs.nu/tutorial/cs/03-read-models" title="CQRS tutorial - Read Models"&gt;read models&lt;/a&gt; that can be used by the views in your application. Today I'd like to share a neat little mechanism I've established for building read model in C# by employing a strongly typed yet functional approach.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/ReactiveReadModels</guid>
+			<pubDate>Mon, 23 Nov 2015 00:00:00 GMT</pubDate>
 			<content:encoded>
                                         
 
 
-&lt;p&gt;In the last post, I used the Logstash &lt;code&gt;dns&lt;/code&gt; filter to translate remote server IP addresses into recognisable domain names. In this post, I will look to perform a similar operation for local IP addresses in order to translate them into recognisable device names.&lt;/p&gt;
-&lt;h1&gt;translating local ip addresses to device names&lt;/h1&gt;
-&lt;p&gt;While in the last post we could use the &lt;code&gt;dns&lt;/code&gt; filter to perform a reverse dns lookup to resolve a remote domain name for an IP address, this is not possible with local IP addresses. Fortunately, I have two key tools that I can use to perform a similar operation:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;While my router behaves as a DHCP server, it has a feature that allows it to always allocate the same IP address to a given MAC address. Therefore I know a given device will always have a specific IP address.&lt;/li&gt;
-&lt;li&gt;Logstash provides the &lt;code&gt;translate&lt;/code&gt; filter which allows you to map from one value to another via a dictionary lookup.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;With my routers "Bind IP to MAC" function set up, I will author a new &lt;code&gt;yaml&lt;/code&gt; file that meets the specifications outlined in the &lt;code&gt;translate&lt;/code&gt; filter &lt;a href="https://www.elastic.co/guide/en/logstash/current/plugins-filters-translate.html#plugins-filters-translate-destination"&gt;documentation&lt;/a&gt;. It looks like this:&lt;/p&gt;
-&lt;pre class="prettyprint"&gt;&lt;code&gt;192.168.1.3: TPLink Range Extender
-192.168.1.9: Ricoh Printer
-192.168.1.10: Server A
-192.168.1.21: PC A
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;I'll name this file &lt;code&gt;IPLookup.yaml&lt;/code&gt; and save it besides the &lt;code&gt;syslog.config&lt;/code&gt; file. Next I need to add additional filters to &lt;code&gt;syslog.config&lt;/code&gt; which now looks as follows:&lt;/p&gt;
-&lt;pre class="prettyprint"&gt;&lt;code&gt;input {
-  tcp {
-    port =&amp;gt; 5000
-    type =&amp;gt; syslog
-  }
-  udp {
-    port =&amp;gt; 5000
-    type =&amp;gt; syslog
-  }
-}
+&lt;p&gt;If you're starting out with &lt;a href="http://docs.geteventstore.com/introduction/event-sourcing-basics/" title="Event Sourcing Basics at GetEventStore"&gt;Event Sourcing&lt;/a&gt; you're probably looking for the ability to project events into &lt;a href="http://cqrs.nu/tutorial/cs/03-read-models" title="CQRS tutorial - Read Models"&gt;read models&lt;/a&gt; that can be used by the views in your application. Today I'd like to share a neat little mechanism I've established for building read model in C# by employing a strongly typed yet functional approach.&lt;/p&gt;
+&lt;p&gt;Starting with infrastructure, you probably have some form event distribution mechanism, normally a pub/sub style bus. From this bus you need to be able to selectively subscribe to all the events you need to collate the information required by your read model. Furthermore, you will often need to initialize the read model with information from a persistent store - often this is a persistent store of the read model itself but this isn't necessarily the case. Lastly, your application must be able to request a specific read model and receive notifications when the read model changes.&lt;/p&gt;
+&lt;p&gt;To illustrate how this might be achieved, I have written a &lt;a href="https://github.com/ibebbs/Blog.ReactiveReadModels" title="ReactiveReadModels repository on Github"&gt;small sample project&lt;/a&gt; following the traditional Account/Order model that features the following components:&lt;/p&gt;
+&lt;img src="/Content/posts/ReactiveReadModels-SampleComponents.png" alt="Sample Components" class="img-responsive" style="margin-left: auto; margin-right: auto; margin-top: 4px; margin-bottom: 4px"&gt;
+&lt;p&gt;In this system, the application is able to request a stream of read models from a repository. The repository will retrieve initial read model state from a persistence service and then subscribe to events from an event bus to continually update and publish the read model. Only read models the application needs should be published and only events the read model requires should be processed.&lt;/p&gt;
+&lt;p&gt;By leveraging Rx we're able to implement a stub of the repository very easily as follows:&lt;/p&gt;
+&lt;pre class="prettyprint"&gt;&lt;code&gt;public class Repository
+{
+    private readonly Service.IAccountService _accountService;
+    private readonly IEventAggregator _bus;
 
-filter {
-    grok {
-        match =&amp;gt; [ "message", "&amp;lt;%{POSINT:syslog_pri}&amp;gt;%{SYSLOGTIMESTAMP:syslog_timestamp} Vigor\: Local User \(MAC=%{MAC:source_mac}\): %{IP:source_address}(?::%{POSINT:source_port})? -&amp;gt; %{IP:destination_address}(?::%{POSINT:destination_port})? \((?&amp;lt;protocol&amp;gt;TCP|UDP)\)" ]
-        add_tag =&amp;gt; "access"
+    public Repository(Service.IAccountService accountService, IEventAggregator bus)
+    {
+        _accountService = accountService;
+        _bus = bus;
     }
-    if "access" in [tags] {
-        mutate {
-            add_field =&amp;gt; {
-              "source_host" =&amp;gt; "%{[source_address]}"
-              "destination_host" =&amp;gt; "%{[destination_address]}"
+
+    public IObservable&amp;lt;ReadModel&amp;gt; For(Guid id)
+    {
+        if (id == null) throw new ArgumentNullException("id");
+
+        return Observable.Create&amp;lt;ReadModel&amp;gt;(
+            async observer =&amp;gt;
+            {
+                Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
+
+                ReadModel readModel = accountInfo.ToReadModel();
+
+                // Subscribe to events and apply to read model
+
+                return Observable.StartWith(readModel).Subscribe(observer);
             }
-        }
-        dns {
-            reverse =&amp;gt; [ "destination_host" ]
-            action =&amp;gt; "replace"
-            nameserver =&amp;gt; "192.168.1.1"
-        }
-        translate {
-            destination =&amp;gt; "source_host"
-            dictionary_path =&amp;gt; "config\IPLookup.yaml"
-            fallback =&amp;gt; "%{source_address}"
-            field =&amp;gt; "source_address"      
-            override =&amp;gt; true   
-        }
+        );
     }
 }
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This code is written such that, when an observer &lt;em&gt;subscribes&lt;/em&gt; to the &lt;code&gt;IObservable&amp;lt;ReadModel&amp;gt;&lt;/code&gt; returned from the &lt;code&gt;For&lt;/code&gt; method, an asynchronous request will be made to the &lt;code&gt;IAccountService&lt;/code&gt; for the initial state of the read model, a &lt;code&gt;ReadModel&lt;/code&gt; instance will be constructed from the information returned by the  service and finally the &lt;code&gt;ReadModel&lt;/code&gt; will be emitted to the subscriber. Note that the observable is deliberately left incomplete to indicate the further &lt;code&gt;ReadModel&lt;/code&gt; instances might be emitted.&lt;/p&gt;
+&lt;p&gt;Now we have the current read model, we need to subscribe to events from the event bus that represent changes pertinent to the read model and, when received, modify and emit the read model so that the subscriber is always up to date.&lt;/p&gt;
+&lt;p&gt;To do this, we might think to write something like this:&lt;/p&gt;
+&lt;pre class="prettyprint"&gt;&lt;code&gt;public IObservable&amp;lt;ReadModel&amp;gt; For(Guid id)
+{
+    if (id == null) throw new ArgumentNullException("id");
 
-output {
-  elasticsearch {
-    hosts =&amp;gt; ["192.168.1.30:9200"]
-    index =&amp;gt; "syslog-%{+YYYY.MM.dd}"
-  }
+    return Observable.Create&amp;lt;ReadModel&amp;gt;(
+        async observer =&amp;gt;
+        {
+            Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
+
+            ReadModel readModel = accountInfo.ToReadModel();
+
+            return new CompositeDisposable(
+                _bus.GetEvent&amp;lt;Event.AccountNameChanged&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(@@event =&amp;gt; readModel.WithAccountName(@@event.AccountName)).Subscribe(observer),
+                _bus.GetEvent&amp;lt;Event.AddBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(@@event =&amp;gt; readModel.WithBillingAddress(new Address(@@event.AddressName))).Subscribe(observer),
+                _bus.GetEvent&amp;lt;Event.RemoveBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(@@event =&amp;gt; readModel.WithoutBillingAddress(@@event.AddressName)).Subscribe(observer),
+                _bus.GetEvent&amp;lt;Event.OrderInvoiced&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(@@event =&amp;gt; readModel.WithCurrentOrder(new Order(@@event.OrderId))).Subscribe(observer),
+                _bus.GetEvent&amp;lt;Event.OrderDispatched&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(@@event =&amp;gt; readModel.WithCompletedOrder(@@event.OrderId)).Subscribe(observer)
+            );
+        }
+    );
 }
 &lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Note the &lt;code&gt;translate&lt;/code&gt; filter where I lookup the &lt;code&gt;source_address&lt;/code&gt; field in the &lt;code&gt;IPLookup.yaml&lt;/code&gt; file and put the result in the &lt;code&gt;source_host&lt;/code&gt; field. If not found, the &lt;code&gt;fallback&lt;/code&gt; value instructs the filter to output the &lt;code&gt;source_address&lt;/code&gt; into the &lt;code&gt;source_host&lt;/code&gt; field. The &lt;code&gt;override&lt;/code&gt; value is set to true as the &lt;code&gt;source_host&lt;/code&gt; field is added in the &lt;code&gt;mutate&lt;/code&gt; filter above as a fail-safe.&lt;/p&gt;
-&lt;p&gt;With the changes to configuration in place, I once again restart Logstash. Once a syslog message has been received, I get the mapping from ElasticSearch and update it to mark the &lt;code&gt;local_host&lt;/code&gt; field as &lt;code&gt;not_analyzed&lt;/code&gt;. Then, in Kibana, I refresh the field list for the 'syslog-*' index, add 'local_host' to the 'Syslog Messages' saved search, load 'Access By Local Address' visualization and modify it to use 'local_host' rather than the 'local_address' field and save it as 'Access By Local Host'. Finally, I replace this visualization on my dashboard and get the following:&lt;/p&gt;
-&lt;img src="/Content/HomeNetworkMonitoring/Kibana-DashboardWithAccessByLocalHost.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard With Access By Local Host"&gt;
-&lt;h1&gt;further mappings&lt;/h1&gt;
-&lt;p&gt;Now I've got the translation of local IP addresses to names working, I'm going to add a few more translations for:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;IP Address to Operating System&lt;/li&gt;
-&lt;li&gt;IP Address to Wired/WiFi connection&lt;/li&gt;
-&lt;li&gt;TCP and UDP Port to Protocol (using a &lt;a href="http://www.iana.org/assignments/service-names-port-numbers/service-names-port-numbers.xhtml"&gt;CSV from IANA&lt;/a&gt;)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;With these in place, the dashboard is starting to come together:&lt;/p&gt;
-&lt;img src="/Content/HomeNetworkMonitoring/Kibana-DashboardWithLocalPortAndOsLookups.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard With Local Port And Os Lookups"&gt;
-&lt;h1&gt;summary&lt;/h1&gt;
-&lt;p&gt;In this post, I showed how to display local device names rather than IP addresses by using LogStash's &lt;code&gt;translate&lt;/code&gt; filter. I then used this filter to provide further information about local device and protocols.&lt;/p&gt;
-&lt;p&gt;In the next post, I'll show how to add some variation to the dashboard by mapping destination locations.&lt;/p&gt;
+&lt;p&gt;While this code looks sensible, we'll very quickly run into problems with it. Firstly and primarily each subscription is only ever modifying the initial &lt;code&gt;readModel&lt;/code&gt; instance meaning changes are not cumulative. Secondly, if we somehow overcame the initial issue, because we're maintaining a series of subscriptions here, changes are not thread safe nor deterministic.&lt;/p&gt;
+&lt;p&gt;No, what we need is a way of writing the effect of these changes into a common read model instance, aggregating those changes across multiple events and emitting the new read model each time it is updated. Fortunately, Rx has &lt;strong&gt;exactly&lt;/strong&gt; the operator we need for this: &lt;code&gt;IObservable&amp;lt;TAccumulate&amp;gt; Scan&amp;lt;TSource, TAccumulate&amp;gt;(this IObservable&amp;lt;TSource&amp;gt; source, TAccumulate seed, Func&amp;lt;TAccumulate, TSource, TAccumulate&amp;gt; accumulator)&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;This operator takes an initial &lt;code&gt;TAccumulate&lt;/code&gt; seed and applies each item emitted from the &lt;code&gt;IObservable&amp;lt;TSource&amp;gt;&lt;/code&gt; source to the accumulator by invoking a function that takes the current accumulator value and the emitted item and returning a new accumulator value. Each of these new accumulator values are then emitted as an &lt;code&gt;IObservable&amp;lt;TAccumulate&amp;gt;&lt;/code&gt; instances to the subscriber.&lt;/p&gt;
+&lt;p&gt;Great, so it's pretty obvious here that our accumulator should be our read model, but how do we subscribe to all the different message types and apply a different modifications to the read model for each type of  message received when the &lt;code&gt;Scan&lt;/code&gt; function only allows for a single &lt;code&gt;TSource&lt;/code&gt; type. We need to somehow homogenise the source stream to a single type. Often this is done with inheritance but, as there's no common base type for each of these messages, we'd have to write something like this:&lt;/p&gt;
+&lt;pre class="prettyprint"&gt;&lt;code&gt;public IObservable&amp;lt;ReadModel&amp;gt; For(Guid id)
+{
+    if (id == null) throw new ArgumentNullException("id");
+
+    return Observable.Create&amp;lt;ReadModel&amp;gt;(
+        async observer =&amp;gt;
+        {
+            Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
+
+            ReadModel readModel = accountInfo.ToReadModel();
+
+            IObservable&amp;lt;object&amp;gt; events = Observable.Merge(
+                _bus.GetEvent&amp;lt;Event.AccountNameChanged&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Cast&amp;lt;object&amp;gt;(),
+                _bus.GetEvent&amp;lt;Event.AddBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Cast&amp;lt;object&amp;gt;(),
+                _bus.GetEvent&amp;lt;Event.RemoveBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Cast&amp;lt;object&amp;gt;(),
+                _bus.GetEvent&amp;lt;Event.OrderInvoiced&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Cast&amp;lt;object&amp;gt;(),
+                _bus.GetEvent&amp;lt;Event.OrderDispatched&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Cast&amp;lt;object&amp;gt;()
+            );
+
+            return events.Scan(readModel,
+                (readModel, @@event) =&amp;gt;
+                {
+                    if (@@event is Event.AccountNameChanged)
+                    {
+                        return readModel.WithAccountName(((Event.AccountNameChanged)@@event).AccountName);
+                    }
+                    else if (@@event is Event.AddBillingAddress)
+                    {
+                        ...
+                    }
+                    ...
+                    else
+                    {
+                        throw new ArgumentException("Unknown message type");
+                    }
+                }
+            );
+        }
+    );
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;... which is not type safe, has very little compile time checking, requires a fall-through exception and, quite frankly, is horrible. I'm sure with Rx we can do something better.&lt;/p&gt;
+&lt;p&gt;Well, lets look at this from a functional perspective. The action we want to perform when receiving each type of event can be considered to be a function in the form of &lt;code&gt;Func&amp;lt;TReadModel, TEvent, TReadModel&amp;gt;&lt;/code&gt;. This is very similar to the third parameter of the &lt;code&gt;Observable.Scan&lt;/code&gt; function with the problem being that we have multiple types of &lt;code&gt;TEvent&lt;/code&gt;. If only there was a way to produce a generic function that would operate correctly across all the event types.&lt;/p&gt;
+&lt;p&gt;Well, by leaning on a concept from functional languages, this might be possible. &lt;a href="https://en.wikipedia.org/wiki/Partial_application" title="Partial Application definition from wikipedia"&gt;Partial application&lt;/a&gt; has been available in C# - via &lt;a href="http://csharpindepth.com/Articles/Chapter5/Closures.aspx" title="C# in Depth - The Beauty Of Closures"&gt;closures&lt;/a&gt; - since lambdas were introduced and allows you to:&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;fix a number of arguments to a function, producing another function of smaller arity. Given a function f:(X * Y * Z) -&amp;gt; N , we might fix (or 'bind') the first argument, producing a function of type (f){partial}:(Y * Z) -&amp;gt; N . Evaluation of this function might be represented as f{partial}(2, 3). Note that the result of partial function application in this case is a function that takes two arguments&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So is there some way we can leverage this to remove the &lt;code&gt;TEvent&lt;/code&gt; argument from the function? Absolutely, by making the observable emit a &lt;em&gt;stream of partial functions&lt;/em&gt; in the form &lt;code&gt;Func&amp;lt;ReadModel,ReadModel&amp;gt;&lt;/code&gt; which can then be applied to the read model as follows:&lt;/p&gt;
+&lt;pre class="prettyprint"&gt;&lt;code&gt;public IObservable&amp;lt;ReadModel&amp;gt; For(Guid id)
+{
+    if (id == null) throw new ArgumentNullException("id");
+
+    return Observable.Create&amp;lt;ReadModel&amp;gt;(
+        async observer =&amp;gt;
+        {
+            Service.AccountInfo accountInfo = await _accountService.GetAccountInfoAsync(id);
+
+            IObservable&amp;lt;Func&amp;lt;ReadModel, ReadModel&amp;gt;&amp;gt; mutators = Observable.Merge(
+                _bus.GetEvent&amp;lt;Event.AccountNameChanged&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(Functions.Apply),
+                _bus.GetEvent&amp;lt;Event.AddBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(Functions.Apply),
+                _bus.GetEvent&amp;lt;Event.RemoveBillingAddress&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(Functions.Apply),
+                _bus.GetEvent&amp;lt;Event.OrderInvoiced&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(Functions.Apply),
+                _bus.GetEvent&amp;lt;Event.OrderDispatched&amp;gt;().Where(@@event =&amp;gt; id.Equals(@@event.AccountId)).Select(Functions.Apply)
+            );
+
+            return mutators.Scan(accountInfo.ToReadModel(), (readModel, mutator) =&amp;gt; mutator(readModel)).Subscribe(observer);
+        }
+    );
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here the &lt;code&gt;Functions.Apply&lt;/code&gt; is an overloaded method for each of the event types. For example, the method for &lt;code&gt;Event.AccountNameChanged&lt;/code&gt; is implemented as follows:&lt;/p&gt;
+&lt;pre class="prettyprint"&gt;&lt;code&gt;public static Func&amp;lt;ReadModel, ReadModel&amp;gt; Apply(Event.AccountNameChanged @@event)
+{
+    return readModel =&amp;gt; readModel.WithAccountName(@@event.AccountName);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This method takes the event to be processed as a parameter and returns a function in the form &lt;code&gt;Func&amp;lt;ReadModel,ReadModel&amp;gt;&lt;/code&gt; that closes over the parameter and calls the &lt;code&gt;WithAccountName&lt;/code&gt; extension method when executed. A similar pattern is followed for all the other event types.&lt;/p&gt;
+&lt;p&gt;Once we have projected and merged all the event streams into a single &lt;code&gt;IObservable&amp;lt;Func&amp;lt;ReadModel, ReadModel&amp;gt;&amp;gt;&lt;/code&gt; we can use the scan function to iteratively apply each function to the cumulative read model instance and emit the result after each event.&lt;/p&gt;
+&lt;p&gt;Pretty neat huh!&lt;/p&gt;
 
 
 
                                 </content:encoded>
 		</item>
 		<item>
-			<title>Using Rx on the Web</title>
-			<link>http://ian.bebbs.co.uk/posts/RxWeb</link>
-			<description>&lt;p&gt;So, I have recently found myself with a need to dive into the depths of modern web-development and, as I am currently looking to write a highly interactive single-page web application, the first thing to decide on was a client side framework to use. You won't have to read too many of my blog posts to realise that I'm a big fan of &lt;a href="https://msdn.microsoft.com/en-us/data/gg577609.aspx?f=255&amp;amp;MSPPError=-2147217396"&gt;Rx&lt;/a&gt;. I am also keen on the MVVM approach to separating concerns when writing user interfaces. Therefore, during my research of modern web UI frameworks, I was extremely interested when I came across &lt;a href="http://webrxjs.org/"&gt;WebRx&lt;/a&gt; .&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/RxWeb</guid>
-			<pubDate>Fri, 04 Mar 2016 00:00:00 GMT</pubDate>
+			<title>Using a Hyperlink in MVVM</title>
+			<link>http://ian.bebbs.co.uk/posts/UsingHyperlinkInMVVM</link>
+			<description>&lt;p&gt;The XAML (i.e. WPF, WinRT, UWP family) &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.documents.hyperlink.aspx"&gt;Hyperlink&lt;/a&gt; is a terrific little control (ok, it's not actually a &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.controls.control.aspx"&gt;Control&lt;/a&gt; - it's a &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.contentelement.aspx"&gt;ContentElement&lt;/a&gt; - but it does allow interaction hence using the term control here). It follows the current environment's theme such that the user naturally knows it's a link that can be clicked and it can be embedded inside &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.controls.textblock.aspx"&gt;TextBlock&lt;/a&gt; elements so that it naturally flows with the other content.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/UsingHyperlinkInMVVM</guid>
+			<pubDate>Wed, 17 Aug 2016 00:00:00 GMT</pubDate>
 			<content:encoded>
                                         
 
 
-&lt;h2&gt;Finding a framework&lt;/h2&gt;
-&lt;p&gt;So, I have recently found myself with a need to dive into the depths of modern web-development and, as I am currently looking to write a highly interactive single-page web application, the first thing to decide on was a client side framework to use. You won't have to read too many of my blog posts to realise that I'm a big fan of &lt;a href="https://msdn.microsoft.com/en-us/data/gg577609.aspx?f=255&amp;amp;MSPPError=-2147217396"&gt;Rx&lt;/a&gt;. I am also keen on the MVVM approach to separating concerns when writing user interfaces. Therefore, during my research of modern web UI frameworks, I was extremely interested when I came across &lt;a href="http://webrxjs.org/"&gt;WebRx&lt;/a&gt; .&lt;/p&gt;
-&lt;p&gt;Billed as "a browser-based MVVM-Framework that combines functional-reactive programming with declarative Data-Binding, Templating and Client-Side Routing" it struck a chord with my UI development style. In fact, it elevates &lt;a href="http://reactivex.io/documentation/observable.html"&gt;Observables&lt;/a&gt; to a first class concept in a manner eerily similar to the ObservableProperty/ObservableCommand classes I wrote for my &lt;a href="https://github.com/ibebbs/Caliburn.Micro.Reactive.Extensions"&gt;Caliburn.Micro.Reactive.Extensions&lt;/a&gt; package.&lt;/p&gt;
-&lt;p&gt;Unfortunately, as a framework, WebRx seems to be struggling to achieve critical mass and therefore there was very limited information available when I decided to attempt to implement the &lt;a href="http://webrxjs.org/docs/getting-started.html"&gt;WebRx "Hello World"&lt;/a&gt; example using Visual Studio. As is almost par for the course when using a new framework, I fell at a frustratingly early hurdle and, given the lack of info (seriously, only one tagged post on &lt;a href="https://stackoverflow.com/questions/tagged/webrx"&gt;stackoverflow&lt;/a&gt;!), I had to work through the problem 'old-skool'... ya'know, by actually finding and solving the problem rather than just googling a solution.&lt;/p&gt;
-&lt;p&gt;Anyway, I thought I'd put together a post outlining how to get started with this framework in Visual Studio in an attempt to start addressing the lack of info regarding this promising framework.&lt;/p&gt;
-&lt;h2&gt;The name is Bart Simpson&lt;/h2&gt;
-&lt;p&gt;Rather than the traditional 'Hello World' app, WebRx's 'Getting Started' guide displays a page stating 'The name is Bart Simpson'. This is done in order to demonstrates the MVVM separation of concerns through the use of a view bound to an underlying view model which provides the name 'Bart Simpson'.&lt;/p&gt;
-&lt;p&gt;I don't intend to cover the entirety of the getting started guide here, merely the additional/different steps needed to get the project work from Visual Studio. As such, I suggest &lt;a href="http://webrxjs.org/docs/getting-started.html"&gt;opening the guide&lt;/a&gt; in a browser and leaving it open while working through the steps below as I will be referring to it extensively.&lt;/p&gt;
-&lt;p&gt;First up, open Visual Studio. Pretty much any modern version is fine, I am using Visual Studio 2015 Professional. Start a new project and select 'ASP.NET Web Application'&lt;/p&gt;
-&lt;img src="/Content/RxWeb/NewAspWebApplication.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="New ASP.NET Web Application"&gt;
-&lt;p&gt;In the following dialog, select an empty ASP.NET Template and click ok.&lt;/p&gt;
-&lt;img src="/Content/RxWeb/EmptyAsp452Project.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Empty ASP.NET Template"&gt;
-&lt;p&gt;Now we have a web project, lets add a reference to WebRx. This can be done using either the Package Manager Console using the command &lt;code&gt;Install-Package WebRx&lt;/code&gt; or via the visual Nuget package manager as shown below:&lt;/p&gt;
-&lt;img src="/Content/RxWeb/InstallWebRxPackage.png" class="img-responsive" style="margin: auto; width:66%; margin-top: 6px; margin-bottom: 6px;" alt="Install WebRx Package"&gt;
-&lt;p&gt;Regardless of how you add the reference to WebRx, you will be asked whether you wish to 'Search for TypeScript Typings' as shown below. Just click 'Yes'.&lt;/p&gt;
-&lt;img src="/Content/RxWeb/AddTypeScriptTypings.png" class="img-responsive" style="margin: auto; width:300px; margin-top: 6px; margin-bottom: 6px;" alt="Add TypeScript Typings"&gt;
-&lt;p&gt;You will also be prompted to accept the license aggrement for a number of RxJs packages which WebRx depends upon; you should accept these too.&lt;/p&gt;
-&lt;p&gt;One the reference is added, you should find that a Scripts directory has been added to your solution and which contains a number of 'ts' and 'js' files for both WebRx and RxJs. With this in place, we can then continue with the getting started guide by adding an 'index.html' file to the project and copy pasting the sample 'index.html' file from the WebRx &lt;a href="http://webrxjs.org/docs/getting-started.html"&gt;getting started guide&lt;/a&gt;. It should look something like this:&lt;/p&gt;
-&lt;img src="/Content/RxWeb/CopyPasteIndexFromGettingStarted.png" class="img-responsive" style="margin: auto; width:400px; margin-top: 6px; margin-bottom: 6px;" alt="Copy Paste Index From Getting Started"&gt;
-&lt;p&gt;At this point the eagle-eyed amongst you will notice three things:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Our scripts are now in a 'bower_modules' directory&lt;br&gt;
-As we used Nuget and not bower to install our WebRx dependencies, the script references should be changed to refer to the Scripts directory&lt;/li&gt;
-&lt;li&gt;Our scripts directory does not contain a rx.all.js file.&lt;br&gt;
-For some reason, WebRx depends on a version of RxJs that does not include an rx.all.js file. To resolve this, simply upgrade to the latest version of RxJs-All, as shown below:
-&lt;img src="/Content/RxWeb/UpgradeRxJsAll.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Upgrade RxJs All"&gt;&lt;/li&gt;
-&lt;li&gt;We don't have a 'js' folder containing an 'app.js' file.&lt;br&gt;
-Because we've not got to that bit yet.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;Now add a 'js' folder to the solution and add a 'app.js' to it. In this file copy the full 'app.js' sample from the WebRx  &lt;a href="http://webrxjs.org/docs/getting-started.html"&gt;getting started guide&lt;/a&gt; as shown below:&lt;/p&gt;
-&lt;pre class="prettyprint"&gt;&lt;code&gt;wx.app.component('hello', {
-  viewModel: function() {
-    this.firstName = 'Bart';
-    this.lastName = 'Simpson';
-  },
-  template: 'The name is &amp;lt;span data-bind="text: firstName + \' \' + lastName"&amp;gt;&amp;lt;/span&amp;gt;'
-});
-
-wx.router.state({
-  name: "$",
-  views: { 'main': "hello" }
-});
-
-wx.router.reload();
-
-wx.applyBindings();
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Save all, set 'index.html' as the start page and hit F5. If everything went as planned you should now see 'The name is Bart Simpson' displayed in your default browser:&lt;/p&gt;
-&lt;img src="/Content/RxWeb/TheNameIsBartSimpson.png" class="img-responsive" style="margin: auto; width:400px; margin-top: 6px; margin-bottom: 6px;" alt="The Name Is Bart Simpson"&gt;
-&lt;p&gt;And that's it. While the getting started example doesn't seem very complex, it does show a separation of view and view model. I'm very much looking forward to digging into the details of this very promising framework.&lt;/p&gt;
-&lt;p&gt;The &lt;a href="https://github.com/ibebbs/BlogProjects/tree/master/WebRxWithAsp4"&gt;completed project&lt;/a&gt; for this post can be found in my &lt;a href="https://github.com/ibebbs/BlogProjects"&gt;BlogProjects repository&lt;/a&gt; on &lt;a href="https://github.com/ibebbs"&gt;Github&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;The XAML (i.e. WPF, WinRT, UWP family) &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.documents.hyperlink.aspx"&gt;Hyperlink&lt;/a&gt; is a terrific little control (ok, it's not actually a &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.controls.control.aspx"&gt;Control&lt;/a&gt; - it's a &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.contentelement.aspx"&gt;ContentElement&lt;/a&gt; - but it does allow interaction hence using the term control here). It follows the current environment's theme such that the user naturally knows it's a link that can be clicked and it can be embedded inside &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.controls.textblock.aspx"&gt;TextBlock&lt;/a&gt; elements so that it naturally flows with the other content.&lt;/p&gt;
+&lt;p&gt;For example:&lt;/p&gt;
+&lt;script src="https://gist.github.com/ibebbs/f3b4efb09f9b0ea36397a9ab462823df.js"&gt;&lt;/script&gt;
+&lt;p&gt;However, out of the box, this control's functionality is somewhat limited. As standard, it is simply able to perform navigation on any &lt;a href="https://msdn.microsoft.com/library/windows/apps/br242682"&gt;Frame&lt;/a&gt; element the control is hosted within. Any other type of behavior requires the developer to subscribe to the control's &lt;code&gt;OnHyperlinkClicked&lt;/code&gt; event and perform the required operations from code-behind.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;Unfortunately, neither of these approaches work for 'ViewModel First' &lt;a href="https://msdn.microsoft.com/en-gb/library/hh848246.aspx"&gt;MVVM&lt;/a&gt;, which, after many years employing MVVM is by far my favoured approach.&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;In a project I've been working on which employs this pattern, a state-machine is used to track application state and each transition between states causing a navigation to be performed in the UI. In one view within the application, there was a desire to instigate a state-machine transition by clicking on a &lt;code&gt;Hyperlink&lt;/code&gt; embedded within some text. Ideally, when clicked, the &lt;code&gt;Hyperlink&lt;/code&gt; would execute an &lt;code&gt;ICommand&lt;/code&gt; instance data-bound to the view from the view-model. Obviously this wasn't possible as standard so I started thinking through alternatives.&lt;/p&gt;
+&lt;p&gt;My first inclination was to restyle a &lt;a href="https://msdn.microsoft.com/en-us/library/system.windows.controls.button.aspx"&gt;Button&lt;/a&gt; to look like a Hyperlink. This would, ostensibly, be fairly straight forward and naturally provided a Command &lt;code&gt;DependencyProperty&lt;/code&gt; to bind to. However, keeping the hyperlink styled as per the current system theme would be arduous to say the least.&lt;/p&gt;
+&lt;p&gt;Putting this aside, I came across &lt;a href="http://stackoverflow.com/a/11433814"&gt;this post&lt;/a&gt; which employed an attached property to start a process (normally a browser to display external content) on the host PC. Realising this approach could be extended to accomplish my goals I refactored it to the following:&lt;/p&gt;
+&lt;script src="https://gist.github.com/ibebbs/654f519eec134135f7f9469150b07438.js"&gt;&lt;/script&gt;
+&lt;p&gt;Which can be used as follows:&lt;/p&gt;
+&lt;script src="https://gist.github.com/ibebbs/0ae7c2e0ed3c531858f5ee01c16157b8.js"&gt;&lt;/script&gt;
+&lt;p&gt;Et voilá, a &lt;code&gt;Hyperlink&lt;/code&gt; control which is able to execute a data-bound &lt;code&gt;ICommand&lt;/code&gt; instance. Obviously it could be extended further to disable the hyperlink when the command reports execution is disabled (via &lt;code&gt;CanExecuteChanged&lt;/code&gt;) and provide a CommandParamter binding for passing additional information through to the command execution, but in a lot of instances - and certainly for me in this scenario - &lt;a href="https://en.wikipedia.org/wiki/You_aren%27t_gonna_need_it"&gt;YAGNI&lt;/a&gt;.&lt;/p&gt;
 
 
 
@@ -1324,162 +1513,6 @@ wx.applyBindings();
 
                                 </content:encoded>
 		</item>
-		<item>
-			<title>Home Network Monitoring - Part II</title>
-			<link>http://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartII</link>
-			<description>&lt;p&gt;In part one of this series I set up my home router to send a variety of Syslog messages to LogStash which then forwarded these messages to ElasticSearch for indexing and querying by Kibana in a simplistic dashboard. In this post, I'm going to start parsing out some of the details of the Syslog messages to start giving us a clearer idea about which devices on my local network are opening sessions with remote servers.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartII</guid>
-			<pubDate>Sun, 10 Apr 2016 00:00:00 GMT</pubDate>
-			<content:encoded>
-                                        
-
-
-&lt;p&gt;In part one of this series I set up my home router to send a variety of Syslog messages to LogStash which then forwarded these messages to ElasticSearch for indexing and querying by Kibana in a simplistic dashboard. In this post, I'm going to start parsing out some of the details of the Syslog messages to start giving us a clearer idea about which devices on my local network are opening sessions with remote servers.&lt;/p&gt;
-&lt;h1&gt;message types&lt;/h1&gt;
-&lt;p&gt;My router sends a number of different messages types; everything from router/dsl bandwidth information to the firewall log as can be seen below:&lt;/p&gt;
-&lt;img src="/Content/HomeNetworkMonitoring/DrayTek-Syslog.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="DrayTek Syslog Administration"&gt;
-&lt;p&gt;For now, I'm really only interested in the 'User Access Log' which tells us when a local device resolves an IP address for a domain name or accesses a remote server. This log constitutes a number of message types such as:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;TCP / UDP access
-This message is sent by the router when a device on the local network accesses a remote server via TCP or UDP. It looks like this: &lt;code&gt;&amp;lt;150&amp;gt;Apr 10 16:55:38 Vigor: Local User (MAC=00-00-00-00-00-00): 192.168.1.205:64281 -&amp;gt; 5.10.110.36:80 (TCP)Web&lt;/code&gt;. From this type of message I am interested in parsing out:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Syslog timestamp&lt;/li&gt;
-&lt;li&gt;Syslog username&lt;/li&gt;
-&lt;li&gt;Source Mac Address&lt;/li&gt;
-&lt;li&gt;Source IP Address&lt;/li&gt;
-&lt;li&gt;Destination IP Address&lt;/li&gt;
-&lt;li&gt;Protocol&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;DNS lookup
-This message is sent by the router when a device on the local network resolves an IP address for a remote server DNS nane. It looks like this: &lt;code&gt;&amp;lt;150&amp;gt;Apr 10 18:52:49 Vigor: Local User (MAC=00-00-00-00-00-00): 192.168.1.62 DNS -&amp;gt; 192.168.1.1 inquire a.root-servers.net&lt;/code&gt;. From this type of message I am interested in parsing out:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Syslog timestamp&lt;/li&gt;
-&lt;li&gt;Syslog username&lt;/li&gt;
-&lt;li&gt;Source Mac Address&lt;/li&gt;
-&lt;li&gt;Source IP Address&lt;/li&gt;
-&lt;li&gt;Domain being resolved&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;In this post I'll focus on enriching the incoming message with information from the access message but will move on to parsing multiple message types in a future post.&lt;/p&gt;
-&lt;h1&gt;parsing access messages&lt;/h1&gt;
-&lt;p&gt;Logstash provides a great tool for parsing messages: the 'grok' filter. As explained in &lt;a href="https://www.elastic.co/guide/en/logstash/current/plugins-filters-grok.html"&gt;the documentation&lt;/a&gt; 'grok' allows you to 'Parse arbitrary text and structure it. This tool is perfect for syslog logs, apache and other webserver logs, mysql logs, and in general, any log format that is generally written for humans and not computer consumption.'&lt;/p&gt;
-&lt;p&gt;This filter applies a regular expression like patterns to a field in the incoming message and, if matched successfully, adds each matched expression to the message being processed as a new field. The fields to capture are defined in the format &lt;code&gt;%{SYNTAX:SEMANTIC}&lt;/code&gt; where the &lt;code&gt;SYNTAX&lt;/code&gt; element is a known pattern (see below) or a regular expression and the &lt;code&gt;SEMANTIC&lt;/code&gt; is a name of the field to capture.&lt;/p&gt;
-&lt;p&gt;Logstash ships with over 120 known &lt;code&gt;SYNTAX&lt;/code&gt; patterns and these patterns can be supplemented by adding new pattern files to a specific directory. However, the default patterns supplied cover nearly all common scenarios and allow almost all the pertinent information in the TCP access message above to be parsed.&lt;/p&gt;
-&lt;p&gt;So, by just using the default patterns, I can write the expression&lt;/p&gt;
-&lt;pre class="prettyprint"&gt;&lt;code&gt;&amp;lt;%{POSINT:syslog_pri}&amp;gt;%{SYSLOGTIMESTAMP:syslog_timestamp} Vigor\: Local User \(MAC=%{MAC:source_mac}\): %{IP:source_address}(?::%{POSINT:source_port})? -&amp;gt; %{IP:destination_address}(?::%{POSINT:destination_port})?
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Which gives us the following additional fields in the message:&lt;/p&gt;
-&lt;p&gt;|field|value|
-|-----|-----|
-|source_address|192.168.1.205|
-|source_port|64281|
-|source_mac|00-00-00-00-00-00|
-|syslog_pri|150|
-|syslog_timestamp|Apr·10·16:55:38|
-|destination_address|5.10.110.36|
-|destination_port|80|&lt;/p&gt;
-&lt;p&gt;Neat huh! I'd also like to know whether the access message is TCP or UDP so I'm going to add a custom regular expression to the end of the pattern to parse the protocol string out of the message. In full the pattern is now:&lt;/p&gt;
-&lt;pre class="prettyprint"&gt;&lt;code&gt;&amp;lt;%{POSINT:syslog_pri}&amp;gt;%{SYSLOGTIMESTAMP:syslog_timestamp} Vigor\: Local User \(MAC=%{MAC:source_mac}\): %{IP:source_address}(?::%{POSINT:source_port})? -&amp;gt; %{IP:destination_address}(?::%{POSINT:destination_port})? \((?&amp;lt;protocol&amp;gt;TCP|UDP)\)
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This would result in the following fields available in the message:&lt;/p&gt;
-&lt;p&gt;|field|value|
-|-----|-----|
-|source_address|192.168.1.205|
-|source_port|64281|
-|source_mac|00-00-00-00-00-00|
-|syslog_pri|150|
-|syslog_timestamp|Apr·10·16:55:38|
-|destination_address|5.10.110.36|
-|destination_port|80|
-|&lt;strong&gt;protocol&lt;/strong&gt;|&lt;strong&gt;TCP&lt;/strong&gt;|&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;NOTE: You can use &lt;a href="http://grokconstructor.appspot.com/"&gt;Grok Constructor&lt;/a&gt; to help you perfect your grok expressions prior to trying them in Logstash&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h1&gt;adding the grok filter to logstash&lt;/h1&gt;
-&lt;p&gt;So, now I know how to extract all the information I'm interested in from the access message, I need to get Logstash to actually do it. This is done by adding a &lt;code&gt;grok&lt;/code&gt; filter to the &lt;code&gt;filter { }&lt;/code&gt; section of the &lt;code&gt;syslog.config&lt;/code&gt; file authored in the previous post as shown here:&lt;/p&gt;
-&lt;pre class="prettyprint"&gt;&lt;code&gt;input {
-  tcp {
-    port =&amp;gt; 5000
-    type =&amp;gt; syslog
-  }
-  udp {
-    port =&amp;gt; 5000
-    type =&amp;gt; syslog
-  }
-}
-
-filter {
-    grok {
-      match =&amp;gt; [ "message", "&amp;lt;%{POSINT:syslog_pri}&amp;gt;%{SYSLOGTIMESTAMP:syslog_timestamp} Vigor\: Local User \(MAC=%{MAC:source_mac}\): %{IP:source_address}(?::%{POSINT:source_port})? -&amp;gt; %{IP:destination_address}(?::%{POSINT:destination_port})? \((?&amp;lt;protocol&amp;gt;TCP|UDP)\)" ]
-    }
-}
-
-output {
-  elasticsearch {
-    hosts =&amp;gt; ["192.168.1.30:9200"]
-    index =&amp;gt; "syslog-%{+YYYY.MM.dd}"
-  }
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Notice the grok section in which we specify a 'match' field. This field takes an array of two strings; the first string is the field containing the text to match and the second is the pattern to match the text to.&lt;/p&gt;
-&lt;p&gt;Once this is added to the &lt;code&gt;syslog.config&lt;/code&gt; file and Logstash restarted, these new fields should be being written to ElasticSearch. The easiest way to see if this is working is to return to Kibana and, from the 'Settings/Indices' area, click the 'syslog-*' pattern on the left and then click the orange 'Refresh field list' button and the field list appears like this:&lt;/p&gt;
-&lt;img src="/Content/HomeNetworkMonitoring/Kibana-RefreshSyslogIndex.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Refresh Syslog Index"&gt;
-&lt;h1&gt;exploring network access information&lt;/h1&gt;
-&lt;p&gt;Now the additional fields are available to Kibana, I can start exploring the data to learn about which devices on my network are access which remote servers.&lt;/p&gt;
-&lt;p&gt;To do this I first need to add the new fields to the 'Syslog Messages' saved search. This can be done by navigating to the 'Discover' page, loading the 'Syslog Messages' search (using the 'Load Saved Search' button in the top right of the screen), adding the new fields and re-saving it. This is shown below:&lt;/p&gt;
-&lt;img src="/Content/HomeNetworkMonitoring/Kibana-AddingNewFieldsToSyslogMessagesSavedSearch.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Adding New Fields To Syslog Messages Saved Search"&gt;
-&lt;p&gt;I'm now able to add some very interesting new visualizations to our dashboard such as:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Number of access by each local device&lt;/li&gt;
-&lt;li&gt;Number of access by port&lt;/li&gt;
-&lt;li&gt;Number of access to each remote server&lt;/li&gt;
-&lt;li&gt;Number of access by protocol&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;I'll only run through adding the first visualization is they're all very similar.&lt;/p&gt;
-&lt;p&gt;First, I navigate to the 'Visualization' area and click the 'New Visualization' button. I want to see the number of accesses being made by each device as a fraction of the whole so will use a donut chart. This is done by selecting 'Pie chart' from the "Create new Visualization" menu and selecting our 'Syslog Messages' saved search in the "Select a search source" menu. Once this is done, I get a pie chart with a single section as shown here:&lt;/p&gt;
-&lt;img src="/Content/HomeNetworkMonitoring/Kibana-NewPieChartVisualization.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana New Pie Chart Visualization"&gt;
-&lt;p&gt;I then need to select the 'Split Slices' bucket type, choose 'Terms' as the aggregation type and finally select 'source_address' as the field on which to aggregate (i.e. count) unique terms. Applying this to the pie-chart (using the 'Apply' button) results in the following:&lt;/p&gt;
-&lt;img src="/Content/HomeNetworkMonitoring/Kibana-SplitSlicePieChartUsingSourceAddress.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Split Slice Pie Chart Using Source  ddres s"&gt;
-&lt;p&gt;I'll  then  turn  this into a donut chart by ticking the 'Donut' check box from the 'Options' area as shown below:&lt;/p&gt;
-&lt;img src="/Content/HomeNetworkMonitoring/Kibana-SplitSliceDonutChartUsingSourceAddress.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Split Slice Donut Chart Using Source Address"&gt;
-&lt;p&gt;Now I'll use the same process for adding donut charts for each of the other metrics outlined above and add all the charts to my dashboard giving me the following:&lt;/p&gt;
-&lt;img src="/Content/HomeNetworkMonitoring/Kibana-DashboardWithAccessCharts.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Kibana Dashboard With Access Charts"&gt;
-&lt;h1&gt;summary&lt;/h1&gt;
-&lt;p&gt;In this post, I showed how to extract structured information from unstructured text data in our source message. I then showed how this can be used within Kibana to highlight which devices on the local network are accessing which remote servers, on which ports and using which protocols.&lt;/p&gt;
-&lt;p&gt;In the next post, I'll examine how to further enhance the information we've extracted from the access messages to make it easier to relate ip address to actual devices on the network and out in the world.&lt;/p&gt;
-
-
-
-                                </content:encoded>
-		</item>
-		<item>
-			<title>On the perils of traversing parallel universes</title>
-			<link>http://ian.bebbs.co.uk/posts/RxVsTpl</link>
-			<description>&lt;p&gt;Despite taking some poetic license with the title of this post, the dramatics are not without merit. I have spent a significant portion of the last three days trying to write a series of tests around some asynchronous code to prove it managed - or, more specifically, limited - concurrency as intended. This code, while mainly Rx based, made calls to TPL methods and needed to wait, without blocking, for a result to be returned prior to allowing subsequent calls to be made. In short it mixed Rx and TPL to implement a multi-procuder / single consumer concurrency pattern, and this mix proved to be the source of much (much, much!) frustration.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/RxVsTpl</guid>
-			<pubDate>Mon, 01 Feb 2016 00:00:00 GMT</pubDate>
-			<content:encoded>
-                                        
-
-
-&lt;p&gt;Despite taking some poetic license with the title of this post, the dramatics are not without merit. I have spent a significant portion of the last three days trying to write a series of tests around some asynchronous code to prove it managed - or, more specifically, limited - concurrency as intended. This code, while mainly Rx based, made calls to TPL methods and needed to wait, without blocking, for a result to be returned prior to allowing subsequent calls to be made. In short it mixed Rx and TPL to implement a multi-procuder / single consumer concurrency pattern, and this mix proved to be the source of much (much, much!) frustration.&lt;/p&gt;
-&lt;p&gt;While I don't necessarily believe that &lt;a href="https://code.google.com/archive/p/fakeiteasy/issues/31"&gt;threading should be avoided in unit tests&lt;/a&gt; I do, as much as possible, endeavour to keep tests synchronous. Obviously this can be tricky when you're &lt;a href="http://stackoverflow.com/questions/20861305/should-i-unit-test-concurrency"&gt;specifically&lt;/a&gt; &lt;a href="http://stackoverflow.com/questions/12159/how-should-i-unit-test-threaded-code"&gt;testing&lt;/a&gt;  &lt;a href="http://stackoverflow.com/questions/1226779/how-to-run-concurrency-unit-test"&gt;concurrency&lt;/a&gt; but, fortunately, this has become immeasurably easier since Rx introduced testing in &lt;a href="http://blogs.msdn.com/b/rxteam/archive/2012/06/14/testing-rx-queries-using-virtual-time-scheduling.aspx"&gt;virtual time&lt;/a&gt; via the &lt;a href="http://www.introtorx.com/content/v1.0.10621.0/16_TestingRx.html"&gt;TestScheduler&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;So, with this magical mechanism for manipulating the motion of time in my mitts, I proceeded to write the test &lt;code&gt;ShouldOnlySendASingleCommandAtATime&lt;/code&gt;... which promptly failed. And I'm not talking the good, red-green kinda failure. Nooo, this was an old school &lt;em&gt;"I've written the code, better make sure it works... oh, that's weird!"&lt;/em&gt; kinda failure.&lt;/p&gt;
-&lt;p&gt;Assertions on calls to faked objects were failing and, after a lot of digging I finally found out why: Despite diligently injecting and using a &lt;code&gt;TestScheduler&lt;/code&gt; through my Rx code and mocking calls to TPL code such that they returned &lt;code&gt;TaskCompletionSource&amp;lt;T&amp;gt;&lt;/code&gt; instances, I was still seeing my unit tests start a &lt;strong&gt;second worker thread&lt;/strong&gt;!&lt;/p&gt;
-&lt;p&gt;Weird indeed.&lt;/p&gt;
-&lt;p&gt;After a lot of hacking around with my code and other &lt;a href="http://www.theallium.com/engineering/computer-programming-to-be-officially-renamed-googling-stackoverflow/"&gt;"computer programming"&lt;/a&gt; type activities, I finally happened upon this &lt;a href="http://stackoverflow.com/questions/28183473/executing-tpl-code-in-a-reactive-pipeline-and-controlling-execution-via-test-sch/28236216#28236216"&gt;curiously titled question&lt;/a&gt;. The question very closely reflected what I was trying to achieve and was fortunately followed by an incredibly detailed answer by &lt;a href="http://stackoverflow.com/users/87427/james-world"&gt;James World&lt;/a&gt;. Of particular note was this paragraph:&lt;/p&gt;
-&lt;blockquote&gt;
-&lt;p&gt;One particular pain point of Rx that leaves many testers scratching their heads, is the fact that the TPL -&amp;gt; Rx family of conversions introduce concurrency. e.g. ToObservable, SelectMany's overload accepting Task&lt;t&gt; etc. don't provide overloads with a scheduler and insidiously force you off the TestScheduler thread, even if mocking with TCS&lt;/t&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Bingo! Exactly the issue I was experiencing. James also provided a link to the following &lt;a href="https://github.com/Reactive-Extensions/Rx.NET/issues/21"&gt;bug report for Rx&lt;/a&gt; validating his answer and vindicating my confusion. This epiphany lead me to rewrite the interfaces to my dependencies such that they were Rx rather than TPL based. After which, lo and behold, my unit tests started passing.&lt;/p&gt;
-&lt;p&gt;Phew!&lt;/p&gt;
-&lt;p&gt;In conclusion, I guess the physicists are right: &lt;a href="https://www.newscientist.com/article/dn11745-could-black-holes-be-portals-to-other-universes/"&gt;If you want to move between parallel universes, be prepared to fall into a black hole!&lt;/a&gt;&lt;/p&gt;
-
-
-
-                                </content:encoded>
-		</item>
 	</channel>
+</rss>nel>
 </rss>
