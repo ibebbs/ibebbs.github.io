@@ -6,7 +6,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
 
-        <title>Ian Bebbington - About Me</title>
+        <title>Ian Bebbington - Reactive State Machines</title>
         <meta name="description" content="IObservable&lt;Opinion&gt;" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -29,10 +29,10 @@
         <meta name="msapplication-tooltip" content="Ian Bebbington" />
         <meta name="msapplication-starturl" content="/" />
 
-        <meta property="og:title" content="Ian Bebbington - About Me" />
+        <meta property="og:title" content="Ian Bebbington - Reactive State Machines" />
         
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="http://ian.bebbs.co.uk/about" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/ReactiveStateMachines" />
         <!-- TODO: More social graph meta tags -->
 
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
@@ -87,9 +87,23 @@
                         <div class="container">
                                 <div class="row">
                                         <div class="col-md-12">
-<div class="site-heading">
-    <h1>About Me</h1>
-</div>                                            </div>
+
+    
+
+<div class="post-heading">
+    <h1>Reactive State Machines</h1>
+        <h2 class="subheading">Implementing a state machine as a &#39;stream of transitions&#39; in Rx</h2>
+    <div class="meta">        
+            Published on 09 November 2016<br>
+    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/patterns" class="btn btn-default btn-xs">Patterns</a>
+                    <a role="button" href="/tags/reactive" class="btn btn-default btn-xs">Reactive</a>
+                    <a role="button" href="/tags/rx" class="btn btn-default btn-xs">Rx</a>
+                    <a role="button" href="/tags/state-machines" class="btn btn-default btn-xs">State Machines</a>
+        </div>     
+</div>
+                                        </div>
                                 </div>
                         </div>
                 </header>
@@ -98,10 +112,114 @@
                 <div class="container">
                         <div class="row">
                                 <div id="content" class="col-md-12">
-                                        <p>Hello, my name is Ian Bebbington.</p>
-<p>I am a professional software engineer who, in my 20 year career, has worked in a variety of industry sectors including media, finance and sports. I currently specialise in .NET development, specifically C# and increasingly F#</p>
-<p>I am cofounder of Cogenity Ltd, a company that specialises in the application of bleeding edge technologies to deliver bespoke solutions to unique clients businesses across a broad number of industries.</p>
-<p>I am also founder of OneCog.Solutions. A startup focused on leveraging emerging technologies in the Internet of Things (IoT) space to realise new experiences and automate capabilities for individuals and industry.</p>
+                                        
+
+
+<p>Today I'd like to share an implementation I've recently been employing that leverages Rx to implement a <a href="https://en.wikipedia.org/wiki/Finite-state_machine">state-machine</a>.</p>
+<p><a href="http://www.martinfowler.com/dslCatalog/stateMachine.html">State-machines are a terrific pattern</a> that, when applied correctly, can greatly simplify the implementation, maintenance and extensibility of many types of functionality; from <a href="https://msdn.microsoft.com/en-gb/windows/uwp/launch-resume/app-lifecycle">application lifecycle management</a> to business process coordination. They're particularly helpful with long-running, asynchronous processes that need to behave differently at various stages of the process, especially when the process is message or event driven.</p>
+<p>Normally, state machines are defined by &quot;a list of its states, its initial state, and the triggering condition for each transition&quot;. However, when looked at from the point of view of &quot;<a href="http://slides.com/robwormald/everything-is-a-stream#/" title="Everything is a stream - Rob Wormald">everything</a> <a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754" title="The introduction to Reactive Programming you've been missing - andrestaltz">being</a> <a href="http://weareadaptive.com/blog/2014/05/05/everything-is-a-stream/" title="Reactive Trader 2: Everything is a Stream - Matt Barrett">a</a> <a href="http://colintheshots.com/blog/?p=85" title="Be Reactive - Colintheshots">stream</a>&quot;, they can also be viewed as a stream of transitions with states existing as the rest period between those transitions.</p>
+<p>In this mindset, a state can simply be defined as follows:</p>
+<pre class="prettyprint"><code>public interface IState
+{
+    IObservable&lt;ITransition&gt; Enter();
+}
+</code></pre>
+<p>In short, the result of entering a state is an observable of transitions away from the state.</p>
+<p>With this in hand, the state machine of, for example, a typical UWP app can be defined as follows:</p>
+<pre class="prettyprint"><code>public class StateMachine
+{        
+    private readonly IStateFactory _factory;
+    private readonly Subject&lt;IState&gt; _state;
+
+    public Machine(IStateFactory factory)
+    {
+        _factory = factory;
+
+        _state = new Subject&lt;IState&gt;();
+    }
+
+    public IDisposable Initialize()
+    {
+        // First create a stream of transitions by ...
+        IObservable&lt;ITransition&gt; transitions = _state
+            // ... starting from the initializing state ...
+            .StartWith(_factory.Initializing())
+            // ... enter the current state ...
+            .Select(state =&gt; state.Enter())
+            // ... subscribing to the transition observable ...
+            .Switch()
+            // ... and ensure only a single shared subscription is made to the transitions observable ...
+            .Publish()
+            // ... held until there are no more subscribers
+            .RefCount();
+
+        // Then, for each transition type, select the new state...
+        IObservable&lt;IState&gt; states = Observable.Merge(
+            states.OfType&lt;Transition.ToStarting&gt;().Select(transition =&gt; _factory.Starting()),
+            states.OfType&lt;Transition.ToResuming&gt;().Select(transition =&gt; _factory.Resuming()),
+            states.OfType&lt;Transition.ToRunning&gt;().Select(transition =&gt; _factory.Running()),
+            states.OfType&lt;Transition.ToSuspending&gt;().Select(transition =&gt; _factory.Suspending())
+        );
+
+        // Finally, subscribe to the state observable ...
+        return states
+            // ... ensuring all transitions are serialized ...
+            .ObserveOn(Scheduler.CurrentThread)
+            // ... back onto the source state observable
+            .Subscribe(_state);
+    }
+}
+</code></pre>
+<p>There are no constraints regarding which events/triggers each state uses to construct the observable of transitions returned when the Enter method is called, but they usually follow one of two patterns:</p>
+<ol>
+<li>Wait for an event/trigger to be received and transition to a new state based on the type of event/trigger received.</li>
+<li>Perform an asynchronous / long-running process and transition to another state when it completes.</li>
+</ol>
+<p>To illustrate this, the Initializing and Starting state definitions below can be considered to be examples of the former and latter patterns respectively.</p>
+<pre class="prettyprint"><code>internal class Initializing : IState
+{
+    private readonly IEventAggregator _bus;
+
+    public Initializing(IEventAggregator bus)
+    {
+        _bus = bus;
+    }
+
+    public IObservable&lt;ITransition&gt; Enter()
+    {
+        return Observable.Merge&lt;ITransition&gt;(
+            _bus.GetEvent&lt;Event.Start&gt;().Select(_ =&gt; new Transition.ToStarting()),
+            _bus.GetEvent&lt;Event.Resume&gt;().Select(_ =&gt; new Transition.ToResuming())
+        );
+    }
+}
+</code></pre>
+<pre class="prettyprint"><code>internal class Starting : IState
+{
+    private readonly DataStore.IContext _dataStoreContext;
+
+    public Starting(DataStore.IContext dataStoreContext)
+    {
+        _dataStoreContext = dataStoreContext;
+    }
+
+    public IObservable&lt;ITransition&gt; Enter()
+    {
+        return Observable.Create&lt;ITransition&gt;(
+            async observer =&gt;
+            {
+                await _dataStoreContext.InitializeAsync();
+
+                observer.OnNext(new Transition.ToRunning());
+            }
+        );
+    }
+}
+</code></pre>
+<p>As you can see, states can (and should!) be very small and easily testable. All together a complete, strongly typed, 'async' friendly state machine can be implemented with just a handful of classes containing minimal code.</p>
+<p>I have used this pattern on numerous occasions and enjoy the simplicity and extensibility it affords me when defining long-running process flows.</p>
+
+
 
                                 </div>
                         </div>
@@ -180,14 +298,6 @@
                     (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
             }());
     </script>
-</div>
-
-                </footer>
-
-                
-        </body>
-</html>
-pt>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
 </div>
 
                 </footer>
