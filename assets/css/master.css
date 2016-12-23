@@ -1,6 +1,9 @@
 #intro-header {
   background-color: #555555;
 }
+#horizontal_list div {
+  display: inline-block;
+}
 .intro-header .site-heading .subheading {
   line-height: 1.6;
 }

@@ -1,0 +1,275 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - CQRS/ES &amp; MVVM using RX, EF &amp; SQL in UWP &amp; PCL …</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+        <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/prettify.css" rel="stylesheet">
+        <link href="/assets/css/github.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/custom.css" rel="stylesheet" />
+        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - CQRS/ES &amp; MVVM using RX, EF &amp; SQL in UWP &amp; PCL …" />
+        
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/CqrsEsMvvmRxEfSqlUwpPcl" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="/assets/js/prettify.js"></script>
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+                <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        </head>
+        <body onload="prettyPrint()">
+
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/about">About Me</a></li>
+        <li><a href="/tags">All Tags</a></li>
+        <li><a href="/posts">Archive</a></li>
+
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+
+                <!-- Page Header -->
+
+                <header class="intro-header" id="intro-header" style="background-image: url(&quot;&quot;)">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+
+<div class="post-heading">
+    <h1>CQRS/ES &amp; MVVM using RX, EF &amp; SQL in UWP &amp; PCL …</h1>
+        <h2 class="subheading">...OMG right?!</h2>
+    <div class="meta">        
+            Published on 22 December 2016<br>
+    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/cqrs" class="btn btn-default btn-xs">CQRS</a>
+                    <a role="button" href="/tags/ef" class="btn btn-default btn-xs">EF</a>
+                    <a role="button" href="/tags/event-sourcing" class="btn btn-default btn-xs">Event Sourcing</a>
+                    <a role="button" href="/tags/littlelittle" class="btn btn-default btn-xs">LittleLittle</a>
+                    <a role="button" href="/tags/rx" class="btn btn-default btn-xs">Rx</a>
+                    <a role="button" href="/tags/sql" class="btn btn-default btn-xs">SQL</a>
+                    <a role="button" href="/tags/uwp" class="btn btn-default btn-xs">UWP</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+
+<p>So, while ToddlerBox is riding high, I'd like to share some thoughts about another app I have in the store; <a href="https://www.microsoft.com/en-gb/store/p/littlelittle/9nblggh51b1b">LittleLittle</a>. This app has been the subject of most of my efforts over the last few months and is significantly more complex (and, frustratingly, less successful!) than ToddlerBox.</p>
+<p>LittleLittle was started shortly after my baby girl started weaning and became constipated - apparently a very common occurrence. When we visited a paediatrician about it, they asked that we keep a record of her bowel movements so that we could track the condition to see if it was getting better or worse.</p>
+<p>&quot;I wonder if there's an app for that&quot;, I thought. And, of course, there was.</p>
+<h2>Opportunity and Methodology</h2>
+<p>However, while there are plenty of other baby tracking apps out there, very few work across platform (I use Windows Mobile while my partner uses Android) and even fewer work as I feel they should.</p>
+<p>Given the requirement to work across a variety of platforms, maximising code re-use was extremely desirable. As such, I decided that all of the core-logic for the app needed to be written in a PCL. Furthermore, particular care would be taken to observe a pure MVVM methodology so that ViewModels (an embodiment of the app's UX) could also be shared across platform.</p>
+<p>Finally, following some work in the CQRS/ES space at my previous employer, I wanted to write an app that used this methodology end-to-end. LittleLittle seemed a perfect opportunity to do so.</p>
+<h2>Technology and Platform</h2>
+<p>To partner the <a href="http://martinfowler.com/bliki/CQRS.html">CQRS</a>/<a href="http://martinfowler.com/eaaDev/EventSourcing.html">ES</a> methodology, I was keen to use <a href="https://msdn.microsoft.com/en-us/library/hh242985.aspx">Rx</a> as the driving technology for implementation. As readers of my blog will know, I am very much of the opinion that &quot;<a href="http://slides.com/robwormald/everything-is-a-stream#/" title="Everything is a stream - Rob Wormald">everything</a> <a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754" title="The introduction to Reactive Programming you've been missing - andrestaltz">is</a> <a href="http://weareadaptive.com/blog/2014/05/05/everything-is-a-stream/" title="Reactive Trader 2: Everything is a Stream - Matt Barrett">a</a> <a href="http://colintheshots.com/blog/?p=85" title="Be Reactive - Colintheshots">stream</a>&quot; and event sourcing from &quot;a stream of events&quot; seemed a perfect fit for Rx.</p>
+<p>Given that the Event Sourcing methodology - not to mention the nature of the app itself - required a persistence layer, I decided to use a recently new technology; <a href="https://docs.microsoft.com/en-us/ef/core/">Entity Framework Core</a>. I decided on EFCore simply because the tooling for the UWP platform was pretty good and I liked the 'code-first' approach to schema and migration generation. Coupled with this, I decided to use a <a href="https://docs.microsoft.com/en-us/ef/core/providers/sqlite/">SQLite</a> database as it was a proven data store for use with EFCore and across a variety of underlying platforms.</p>
+<p>Finally, when I started LittleLittle I was studying for the <a href="https://www.microsoft.com/en-us/learning/exam-70-357.aspx">Microsoft Beta Exam &quot;Developing Mobile Apps&quot;</a>. As such, while I was keen for the app to be cross-platform, the initial platform I wanted to support was UWP. I was - and still am - amazed by how, if you craft your code and views carefully, an application can run on an amazing number for platforms including RaspberryPi, Phone, Tablet, PC, Xbox and Hololens.</p>
+<h2>And here's one I made earlier…</h2>
+<p>After many weeks of work, innumerable iterations and much refactoring, I ended up with this:</p>
+  <div class="horizontal_list">
+    <div class="horizontal_list_item">
+      <img src="https://zuimew-dm2306.files.1drv.com/y3mcsjpC-olqYg0zbsOtSdJ1adHni1Apkeklf-2gzDpiB9ph_25HlwE5jeyMxex_1ryS-zVZxkMw0vtNsDCMrnzser84bs_zq9S75PZqddHWrRfMGfo3YbQhc-3ZwJGzjHMRuX_Ml0UQ_81MQnW4oOqva8Ap2jw2DIbULXOgc9ER7E?width=144&height=256&cropmode=none" class="img-responsive" style="margin: auto; width:256px; margin-top: 6px; margin-bottom: 6px;" alt="Splashscreen"/>
+    </div>
+    <div class="horizontal_list_item">
+      <img src="https://zuilew-dm2306.files.1drv.com/y3muwswRbqzTW9QY2Ms8LyW2AAl8vIDTt8DKl-lsB_0uqQvGZJDkqFRF1Jg151-YQzqyUxourRpTXaaHttLPaXkE3hXmavIZKYyI7isdayp_PLbXDVOKCX_u83bEdzFmsfPRAikqWEVteWkTaFnX1SH8YgEd4UABUffd5dVZ4QAkvM?width=144&height=256&cropmode=none" class="img-responsive" style="margin: auto; width:256px; margin-top: 6px; margin-bottom: 6px;" alt="Available actions"/>
+    </div>
+    <div class="horizontal_list_item">
+      <img src="https://zuikew-dm2306.files.1drv.com/y3mCHoxbDYsMkbkH-RQlFyxK5Y6zVhP_TU7JYj_MLCQrEfQsClKqlWoVqSsEt-ae7tYBvH89lvstPnIfhrA6MKPXNyjAp7O9EMy28Cof7nnc22DTFYs5FUECbQUEV_P8HxaVwWSFUyEN1MGAuWfY1x-36ZHviTEjqBOZM9m6pYm80Q?width=144&height=256&cropmode=none" class="img-responsive" style="margin: auto; width:256px; margin-top: 6px; margin-bottom: 6px;" alt="History"/>
+    </div>
+    <div class="horizontal_list_item">
+      <img src="https://zuiiew-dm2306.files.1drv.com/y3mz7gADh3Y09Fb6QuQ2CY35gjWD2T9KEY_oWWbcijxNl2URePlVW0IjLhEBWeIoPOR1a-gAhRyoYNTdtefVfe8vd6d-Lnq5Cq_rcXEt4HZ5kt-jxOsCPLkJCaJtnfi5P-dTVNtJhMBYNbOtfiHXiPd9HsZODdjUwX-LphBvBAl_98?width=144&height=256&cropmode=none" class="img-responsive" style="margin: auto; width:256px; margin-top: 6px; margin-bottom: 6px;" alt="Height and weight charts"/>
+    </div>
+    <div class="horizontal_list_item">
+      <img src="https://zeirew-dm2306.files.1drv.com/y3miUjsB3mUDyGdRCPudsd1I42ad9-MAI5JRV15z821gQAc7H_mqIgEeEDr1YWCvZh5AZOT6BAuAVSdMwz-Qnr6mG53KzP8xbeo2hinEJyplWnHoVs4FG7sbga6HMgLP6qd_x_mxRx2uqEVTfVAgXSOLMmHnQSpMxbV7DzQzPT1LXY?width=144&height=256&cropmode=none" class="img-responsive" style="margin: auto; width:256px; margin-top: 6px; margin-bottom: 6px;" alt="Sleep and excretion charts"/>
+    </div>
+    <div class="horizontal_list_item">
+      <img src="https://zeiqew-dm2306.files.1drv.com/y3m2ZYqI7vBDCM_Ptv8Xvgo-UeDhvqtKIh5cxNy40KinoCzXem7V_-gIOsrkYvWyOtI6dod-HgNweHuue9DUB9r2yvgPNNXVvkPkIJKshYS4z-M1Qts9DPdqobqwnfHpIjewlWDj_Z6sFFVgbRlvsySton_n_nQrk4buXjebRss5JQ?width=144&height=256&cropmode=none" class="img-responsive" style="margin: auto; width:256px; margin-top: 6px; margin-bottom: 6px;" alt="Sleep and excretion charts"/>
+    </div>
+  </div>
+<p>And I'm extremely happy with the result. CQRS/ES and Rx are a perfect match and the technology stack in general has been extremely productive.</p>
+<p>This morning I drew up a (retrospective) architecture to illustrate how much of the application is portable and how simple yet extensible it is.</p>
+<img src="https://bdliqq-dm2306.files.1drv.com/y3mdSQ-fHhXJWrDI-4wfqFoaso56RU_vCH51ognfdTMYlml6nEgxQHUJWgTgHg5fw4cAEwpaJM1GVookE2ok4HscXXmd-a6WAcU7Xd509Rdmb35JaS2-5Zzx5G_YiNpAoxLekZifHRzDQittyVv6rybVIp33YiqopFatHZVcND-lhY?width=1024&height=626&cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Architecture diagram">
+<h2>&quot;The proof is in the dog-fooding&quot;</h2>
+<p>Apologies for the mixed metaphors but, suffice to say, while the technology choices may be deemed to be a success, the app can only be consider to be so if it is fit for purpose. As such, I have been using LittleLittle everyday for the past several weeks - across a number of iterations and versions - and I'm very, very pleased with the result. The UI is fast and efficient to use and the app has yet to crash or lose any data (either at runtime or between versions).</p>
+<p>Indeed, a little while ago my other half took our baby to stay with her grandparents for a several days and agreed to keep LittleLittle up to date while she was away. She came back with a couple of small suggestions but overall very impressed by how fast and easy to use it was.</p>
+<p>While it has yet to see a significant number of Windows Store acquisitions, Store Analytics shows there are a few people actively using the app and, so far, I have yet to see any crashes or failures. I intend to leverage the success of ToddlerBox to promote LittleLittle in the near future so, fingers crossed, it'll start getting some serious use and useful feedback.</p>
+<h2>Moving forward</h2>
+<p>While I intend to put LittleLittle on hold for a little while in order to work on some other projects I've been meaning to look at, I very much intend to return to the project early in the new year. I have a backlog full of features I'd like to implement not to mention the need to write a version which runs on Android/iOS (which will probably be in Xamarin).</p>
+<p>In the mean time, I will be blogging about a few of the components in the architecture diagram above and sharing some of the approaches I have taken and successes (or problems!) I encountered.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+
+                <hr>
+
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <ul class="list-inline text-center">
+        <li>
+          <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="http://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="https://social.msdn.microsoft.com/profile/ian%20bebbington/">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-windows fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+      </ul>
+      <p class="copyright text-muted">
+        Copyright © 2016 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/">"Creative Commons Attribution 4.0 International License"</a>
+        <br />
+        <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+        <br />
+        <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
+      </p>
+    </div>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-70151903-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+    <script type="text/javascript">
+            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+            var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
+
+            /* * * DON'T EDIT BELOW THIS LINE * * */
+            (function () {
+                    var s = document.createElement('script'); s.async = true;
+                    s.type = 'text/javascript';
+                    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+                    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+            }());
+    </script>
+</div>
+
+                </footer>
+
+                
+        </body>
+</html>
+T EDIT BELOW THIS LINE * * */
+            (function () {
+                    var s = document.createElement('script'); s.async = true;
+                    s.type = 'text/javascript';
+                    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+                    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+            }());
+    </script>
+</div>
+
+                </footer>
+
+                
+        </body>
+</html>
+         }());
+    </script>
+</div>
+
+                </footer>
+
+                
+        </body>
+</html>
