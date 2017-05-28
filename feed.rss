@@ -855,7 +855,7 @@ wx.applyBindings();
 &lt;p&gt;You will need the following:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="http://code.visualstudio.com/Download"&gt;Visual Studio Code&lt;/a&gt; - obviously&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://marketplace.visualstudio.com/items?itemName=DanTup.dart-code"&gt;DartVS&lt;/a&gt; - the Dart language extension for Visual Studio Code&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://marketplace.visualstudio.com/items?itemName=DanTup.dart-code"&gt;Dart Code&lt;/a&gt; - the Dart language extension for Visual Studio Code&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://storage.googleapis.com/dart-archive/channels/stable/release/1.21.0/sdk/dartsdk-windows-x64-release.zip"&gt;The Dart SDK&lt;/a&gt; - the code Dart binaries and tools needed for dart development&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://storage.googleapis.com/dart-archive/channels/stable/release/latest/dartium/dartium-windows-ia32-release.zip"&gt;Dartium&lt;/a&gt; - a version of Chrome (even called "Chrome.exe") with a built in Dart runtime&lt;/li&gt;
 &lt;/ul&gt;
@@ -869,7 +869,7 @@ wx.applyBindings();
 &lt;/ol&gt;
 &lt;img src="https://plt6eg-dm2306.files.1drv.com/y3m_WQkZhj4Xo-vjZzyUVujyGYAM3lM7Gs84uuf59zCfPKJQzrT9d--PF8Ns9Gwm3qluxzW26f_H9OU5PZQEq37lEKy9aKY553bzGzZLNU_CBIRGUWA_9_QbE-a0WgQz284pvZY2-Voc83pjQc2h9iMUIzap8At--sCEdhJXyO6sXw?width=660&amp;amp;height=497&amp;amp;cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Empty Project"&gt;
 &lt;ol start="6"&gt;
-&lt;li&gt;If you haven't already, install the DartVS extension by hitting &lt;code&gt;Ctrl-Shift-X&lt;/code&gt; (the keyboard shortcut for "View-&amp;gt;Extensions") and type Dart in the search box. This should show the "Dart Code" extension by "Danny Tuppeny". Click install and reload the window when complete.&lt;/li&gt;
+&lt;li&gt;If you haven't already, install the Dart Code extension by hitting &lt;code&gt;Ctrl-Shift-X&lt;/code&gt; (the keyboard shortcut for "View-&amp;gt;Extensions") and type Dart in the search box. This should show the "Dart Code" extension by "Danny Tuppeny". Click install and reload the window when complete.&lt;/li&gt;
 &lt;li&gt;As we haven't elected to add the Dart SDK to the path, we need to tell the Dart extension where it can find the SDK. This is done by editing the User Settings (&lt;code&gt;File-&amp;gt;Preferences-&amp;gt;User Settings&lt;/code&gt;) and adding the following settings:&lt;/li&gt;
 &lt;/ol&gt;
 &lt;pre class="prettyprint"&gt;&lt;code&gt;    "dart.sdkPath": "C:\\Apps\\dart-sdk",
@@ -877,7 +877,7 @@ wx.applyBindings();
     "dart.debugExternalLibraries": false
 &lt;/code&gt;&lt;/pre&gt;
 &lt;ol start="8"&gt;
-&lt;li&gt;Back in the Explorer view (&lt;code&gt;Ctrl-Shift-E&lt;/code&gt;) add a new file to the &lt;code&gt;web&lt;/code&gt; directory named &lt;code&gt;main.dart&lt;/code&gt;. We'll populate this file shortly but, for now, it's just so that VSC (and DartVS) realises that this is a Dart project.&lt;/li&gt;
+&lt;li&gt;Back in the Explorer view (&lt;code&gt;Ctrl-Shift-E&lt;/code&gt;) add a new file to the &lt;code&gt;web&lt;/code&gt; directory named &lt;code&gt;main.dart&lt;/code&gt;. We'll populate this file shortly but, for now, it's just so that VSC (and Dart Code) realises that this is a Dart project.&lt;/li&gt;
 &lt;li&gt;Add another new file named &lt;code&gt;pubspec.yaml&lt;/code&gt; to the root directory. This file tells the Dart compiler (named &lt;code&gt;Pub&lt;/code&gt;) how to build your Dart project and follows a very &lt;a href="https://www.dartlang.org/tools/pub/pubspec"&gt;simply format&lt;/a&gt;. In this file add &lt;code&gt;name&lt;/code&gt;, &lt;code&gt;dependencies&lt;/code&gt; and &lt;code&gt;transformers&lt;/code&gt; as shown below:&lt;/li&gt;
 &lt;/ol&gt;
 &lt;pre class="prettyprint"&gt;&lt;code&gt;name: GettingStartedWithDart
@@ -885,7 +885,7 @@ dependencies:
 transformers:
 &lt;/code&gt;&lt;/pre&gt;
 &lt;ol start="10"&gt;
-&lt;li&gt;When you save this file, you should see the &lt;code&gt;Output&lt;/code&gt; panel appear showing the output of the &lt;code&gt;Pub&lt;/code&gt; command. This is a feature of the DartVS extension which runs a &lt;code&gt;pub get&lt;/code&gt; command whenever you save the &lt;code&gt;pubspec.yaml&lt;/code&gt; file. As you can probably guess from the output (shown below) the purpose of this command is to retrieve/update any dependencies you've declared in the &lt;code&gt;dependencies&lt;/code&gt; section. Also, once the &lt;code&gt;pub get&lt;/code&gt; command has run, you should see a new &lt;code&gt;pubspec.lock&lt;/code&gt; file appear in the root directory.&lt;/li&gt;
+&lt;li&gt;When you save this file, you should see the &lt;code&gt;Output&lt;/code&gt; panel appear showing the output of the &lt;code&gt;Pub&lt;/code&gt; command. This is a feature of the Dart Code extension which runs a &lt;code&gt;pub get&lt;/code&gt; command whenever you save the &lt;code&gt;pubspec.yaml&lt;/code&gt; file. As you can probably guess from the output (shown below) the purpose of this command is to retrieve/update any dependencies you've declared in the &lt;code&gt;dependencies&lt;/code&gt; section. Also, once the &lt;code&gt;pub get&lt;/code&gt; command has run, you should see a new &lt;code&gt;pubspec.lock&lt;/code&gt; file appear in the root directory.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;img src="https://plt5eg-dm2306.files.1drv.com/y3mCavvhl_SorCHUuY_oZ01TMQ9jkjpMy_I48Eotp3TlC5s-TRU0JaznDIYoihtHpfFj6A3Aqwu9eEKDhOQaK7jnEO7g6UscYBqeBp5yLg_PnzxGgWQpVTwgrxkJeOw8EUet6KhgGEn2Lkm3IYfP4-K-SEXXvKT4G64DcweiAsnQ-k?width=660&amp;amp;height=497&amp;amp;cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Get Dependencies"&gt;
 &lt;ol start="11"&gt;
