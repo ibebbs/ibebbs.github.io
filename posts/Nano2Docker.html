@@ -1,0 +1,272 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Nano2Docker</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+        <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/prettify.css" rel="stylesheet">
+        <link href="/assets/css/github.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/custom.css" rel="stylesheet" />
+        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Nano2Docker" />
+        
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/Nano2Docker" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="/assets/js/prettify.js"></script>
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+                <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        </head>
+        <body onload="prettyPrint()">
+
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/about">About Me</a></li>
+        <li><a href="/tags">All Tags</a></li>
+        <li><a href="/posts">Archive</a></li>
+
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+
+                <!-- Page Header -->
+
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+
+<div class="post-heading">
+    <h1>Nano2Docker</h1>
+        <h2 class="subheading">Using NanoServer to create a Docker Swarm for Windows Containers</h2>
+    <div class="meta">        
+    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/docker" class="btn btn-default btn-xs">Docker</a>
+                    <a role="button" href="/tags/nanoserver" class="btn btn-default btn-xs">NanoServer</a>
+                    <a role="button" href="/tags/powershell" class="btn btn-default btn-xs">Powershell</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+
+<h1>Deployment at last</h1>
+<p>While my current contract doesn't leave much time for personal projects, I have made some progress on my current project (details on exactly what this is to follow). In fact, some of the smaller, peripheral services have their primary use-cases functionally complete and are ready for deployment and I am now faced with the question: Deployment to where?</p>
+<h1>Fabric or Container</h1>
+<p>Given this project constitutes multiple micro-services using message based asynchronous communication with the potential to scale services horizontally, I required some form of elastic service fabric. Furthermore, I wanted a local development environment which would simulate a cluster of machines but with which I could monkey about as much as I liked without fear of accidentally incurring massive hosting fees in the cloud.</p>
+<p>As I had just upgraded my home server with plenty of memory, I decided to use one of more virtual machines running on this server to host the environment, but which technology to use?</p>
+<p>Initially I had intended to use a <a href="https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-get-started-with-a-local-cluster">local Service Fabric cluster</a>. However, upon further investigation I found that the SDK and API introduced significant friction to the development process (needing additional projects for supplying manifest / configuration data for services, overly complex deployment scripts, etc). Even the 'guest executable' approach seemed overly complex and I quickly went off this approach.</p>
+<p>My second thought was <a href="https://www.docker.com/">Docker</a>; specifically the creation of a local <a href="https://docs.docker.com/engine/swarm/">Docker Swarm</a> which I could deploy servies to with <a href="https://docs.docker.com/compose/">Docker Compose</a>. <a href="https://docs.docker.com/machine/">Docker Machine</a> made short work of provisioning Docker hosts in Hyper-V but with one caveat: it's <a href="http://boot2docker.io/">boot2docker</a> image would only run Linux based containers and, while many of the services I have written / will write run quite happily on .NET Core, some require packages that do not yet provide support for .NET Core / Standard.</p>
+<p>Given that a recent update made <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode">Swarm mode available to Windows Server 2016</a> host operating systems, I decided I would look into provisioning a series of Windows Server VM's with container support and configure Docker on these VM's to operate in swarm mode.</p>
+<h1>Using Nano Server as a Docker host</h1>
+<p>While I had previously used Microsoft Nano Server as a guest OS for containerized apps, I hadn't realised that it was possible to use it as a host OS for Docker until I came across <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/deploy-containers-on-nano">this article</a>. For those not familiar with Nano Server it is an extremely slimmed down (the OS image is less than 170Mb) and fast booting (5-10 seconds), headless version of Windows Server 2016 which, given it is capable of acting as a Docker host, makes it 'boot2docker' but for Windows containers.</p>
+<p>Nano Server is shipped with Windows Server 2016 and is accompanied by a Powershell module which provides some amazing facilities for working with Nano Server images. <a href="https://docs.microsoft.com/en-us/windows-server/get-started/deploy-nano-server">This document</a> shows how to use this Powershell module to create customised Nano Server images as either a '.wim', a '.iso' or - most interestingly for me - a '.vhdx'. In short, the following powershell command will create a virtual HD that you can directly attach to a virtual machine and will boot directly into Nano Server with support for (but no utilites to provide) containers:</p>
+<pre class="prettyprint"><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort
+</code></pre>
+<p>This command will also open <a href="https://msdn.microsoft.com/en-us/library/aa384426(v=vs.85).aspx">WinRM</a> ports on the Nano Server which allows you to use <a href="https://technet.microsoft.com/en-us/library/ff700227.aspx">PS Remoting</a> to remote into the virtual machine and examine it's state; indispensable for debugging purposes.</p>
+<h1>Installing Docker as part of a Nano Server image</h1>
+<p>Just like 'boot2docker' we want our Nano Server to be ready to host Windows Containers as soon as it's booted and without further manual configuration. To this end, I needed to find a way to install Docker as part of the deployment process. Fortunately the 'New-NanoServer' command provides a <code>-SetupCompleteCommand</code> argument which allows you to 'run custom commands as part of setupcomplete.cmd' (i.e. on first boot). Great, so now to prepare a script to deploy Docker which we can call via the <code>-SetupCompleteCommand</code> argument.</p>
+<p>Conveniently, Docker's <a href="https://docs.docker.com/docker-ee-for-windows/install/#using-a-script-to-install-docker-ee">documentation for installing Docker EE</a> (the version supported by Windows) provides exactly the script required, copied with some additional configuration copied from the 'Prepare Container Host' section of <a href="">'Deploy Containers on Nano'</a> article:</p>
+<pre class="prettyprint"><code># On an online machine, download the zip file
+Invoke-Webrequest -UseBasicparsing -Outfile docker.zip https://download.docker.com/components/engine/windows-server/17.03/docker-17.03.0-ee.zip
+
+# Extract the archive.
+Expand-Archive docker.zip -DestinationPath $Env:ProgramFiles
+
+# Clean up the zip file.
+Remove-Item -Force docker.zip
+
+# Install Docker. This will require rebooting.
+# This is not required as we have already prepared out image with container support
+# $null = Install-WindowsFeature containers
+
+# Add Docker to the path for the current session.
+$env:path += &quot;;$env:ProgramFiles\docker&quot;
+
+# Modify PATH to persist across sessions.
+# Note: Nano Server's SetEnvironmentVariable method does not take a scope parameter 
+[Environment]::SetEnvironmentVariable(&quot;PATH&quot;, $env:path)
+
+# Open an inbound port for the docker daemon  
+netsh advfirewall firewall add rule name=&quot;Docker daemon &quot; dir=in action=allow protocol=TCP localport=2375
+
+# Create and populate docker daemon's configuration file
+New-Item -Type File 'C:\ProgramData\docker\config\daemon.json' -Force
+Add-Content 'C:\programdata\docker\config\daemon.json' '{ &quot;hosts&quot;: [&quot;tcp://0.0.0.0:2375&quot;, &quot;npipe://&quot;] }'
+
+# Register the Docker daemon as a service.
+dockerd --register-service
+
+# Start the daemon.
+Start-Service docker
+</code></pre>
+<p>Now this script requires that the Nano Server be online when the script is run so that it can download the Docker binaries. Unfortunately, given that this script will run as part of the deployment process, this is unlikely to be the case. Instead, we'll need to lean on another feature of the <code>New-NanoServerImage</code>, <code>-CopyPath</code>. This argument allows you to specify one or more files to copy to the Nano Server image as part of it's creation and we'll use it to copy a pre-downloaded copy of the docker binaries (along with a copy of this script) to the root of the images C:\ drive, as shown here:</p>
+<pre class="prettyprint"><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort -CopyPath &#64;('&lt;path to deployment script&gt;\DeployDocker.ps1', '&lt;path in which docker is downloaded&gt;\docker.zip') -SetupCompleteCommand &#64;('Powershell.exe -Command .\DeployDocker.ps1') 
+</code></pre>
+<p>Great, now we can comment out the first line of the script above and it'll run fine, right? Unfortunately not. It seems that, at the stage of the boot process at which this script, powershell isn't quite ready to execute scripts. Fortunately, others have encountered this issue before and Sergey Babkin provides <a href="https://blogs.msdn.microsoft.com/sergey_babkins_blog/2017/01/05/how-to-run-powershell-from-setupcomplete-cmd/">this solution</a>, copied below with customisation for our requirements:</p>
+<pre class="prettyprint"><code>set LOCALAPPDATA=%USERPROFILE%\AppData\Local
+set PSExecutionPolicyPreference=Unrestricted
+Powershell -Command C:\DeployDocker.ps1
+</code></pre>
+<p>Ok, so we'll add and deploy this batch file as 'DeployDocker.bat' and then execute this instead of the powershell script as the <code>-SetupCompleteCommand</code>, as shown here:</p>
+<pre class="prettyprint"><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort -CopyPath &#64;('&lt;path to deployment batch file'\DeployDocker.bat', '&lt;path to deployment script&gt;\DeployDocker.ps1', '&lt;path in which docker is downloaded&gt;\docker.zip') -SetupCompleteCommand 'C:\DeployDocker.bat' 
+</code></pre>
+<p>If you now create a virtual machine with the 'NanoServer.vhdx' image as it's boot drive, you should find that, once it's booted you're able to communicate with the Docker daemon on the VM. For example:</p>
+<pre class="prettyprint"><code>docker -H &lt;IP Address of VM&gt; ps
+</code></pre>
+<p>Should return a (empty) list of containers present on the Nano Server host.</p>
+<h1>Scripting the creation of a VM</h1>
+<h1>Updating Nano Server</h1>
+<p>Referring back to the <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode">'Getting Started with Swarm Mode'</a> article, it became apparent that a <a href="https://support.microsoft.com/en-us/help/4015217/windows-10-update-kb4015217">relatively recent update</a> is required to run Docker Swarms on Windows Server 2016 based OS's.</p>
+<h1>Scripting the deployment of a Docker Swarm</h1>
+
+
+
+                                </div>
+                        </div>
+                </div>
+
+                <hr>
+
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <ul class="list-inline text-center">
+        <li>
+          <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="http://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="https://social.msdn.microsoft.com/profile/ian%20bebbington/">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-windows fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+      </ul>
+      <p class="copyright text-muted">
+        Copyright © 2017 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/">"Creative Commons Attribution 4.0 International License"</a>
+        <br />
+        <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+        <br />
+        <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
+      </p>
+    </div>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-70151903-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+    <script type="text/javascript">
+            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+            var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
+
+            /* * * DON'T EDIT BELOW THIS LINE * * */
+            (function () {
+                    var s = document.createElement('script'); s.async = true;
+                    s.type = 'text/javascript';
+                    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+                    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+            }());
+    </script>
+</div>
+
+                </footer>
+
+                
+        </body>
+</html>
