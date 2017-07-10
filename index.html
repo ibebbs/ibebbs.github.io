@@ -107,6 +107,15 @@
 <div class="row">
     <div class="col-sm-8 right-border">
                 <div class="post-preview">
+                    <a href="/posts/Nano2Docker">
+                        <h2 class="post-title">Nano2Docker</h2>
+                            <h3 class="post-subtitle">Using NanoServer to create a Docker Swarm for Windows Containers</h3>
+                    </a>
+                    <p class="post-meta">Posted on 10 July 2017</p>
+                    Jumping through all the hoops required to create new VMs to host windows containers can be arduous to say the least. In this post I discuss a powershell module I have written which provides the ability to quickly provision NanoServer VMs - that are immediately ready to host windows containers - in just a few steps.
+                </div>
+                    <hr />
+                <div class="post-preview">
                     <a href="/posts/RaspberryPiUnicornTwitterBot">
                         <h2 class="post-title">Unicorn Pi Tweet Bot</h2>
                             <h3 class="post-subtitle">An exhibit for International Women In Engineering Day</h3>
@@ -141,15 +150,6 @@
                     <p class="post-meta">Posted on 25 January 2017</p>
                     Synchronicity is a wonderful thing. Just this morning I was considering using the new SpeechSynthesizer capabilities of the UWP platform to add spoken language to my ToddlerBox app for Xbox. Then, I came across a post by Mike Taulty who was looking to do the same thing... but for different reasons.
                 </div>
-                    <hr />
-                <div class="post-preview">
-                    <a href="/posts/TheYearInReview">
-                        <h2 class="post-title">The Year In Review</h2>
-                            <h3 class="post-subtitle">A career-break retrospective</h3>
-                    </a>
-                    <p class="post-meta">Posted on 18 January 2017</p>
-                    Back in July, following an epic road-trip around Europe with my girls, I wrote a long blog post about the trip and my plans for the future. These plans centered on taking the rest of the year off as a career-break and using this time to support my family while investigating/evaluating emerging technologies in the .NET ecosystem. Now, six months on, it's time to look back at the last year and perform a retrospective; what went well, what could have been better and what should be changed moving forward.
-                </div>
 
     </div>
     <div class="col-sm-4 sidebar">
@@ -157,15 +157,15 @@
         <h5>Tags</h5>
         <div>
                 <a role="button" href="/tags/uwp" class="btn btn-default btn-sm"> UWP (8)</a>
-                <a role="button" href="/tags/reactive" class="btn btn-default btn-sm"> Reactive (7)</a>
                 <a role="button" href="/tags/rx" class="btn btn-default btn-sm"> Rx (7)</a>
-                <a role="button" href="/tags/logstash" class="btn btn-default btn-sm"> LogStash (4)</a>
+                <a role="button" href="/tags/reactive" class="btn btn-default btn-sm"> Reactive (7)</a>
+                <a role="button" href="/tags/monitoring" class="btn btn-default btn-sm"> Monitoring (4)</a>
                 <a role="button" href="/tags/syslog" class="btn btn-default btn-sm"> Syslog (4)</a>
-                <a role="button" href="/tags/networking" class="btn btn-default btn-sm"> Networking (4)</a>
                 <a role="button" href="/tags/elastic-stack" class="btn btn-default btn-sm"> Elastic Stack (4)</a>
+                <a role="button" href="/tags/networking" class="btn btn-default btn-sm"> Networking (4)</a>
+                <a role="button" href="/tags/logstash" class="btn btn-default btn-sm"> LogStash (4)</a>
                 <a role="button" href="/tags/elasticsearch" class="btn btn-default btn-sm"> ElasticSearch (4)</a>
                 <a role="button" href="/tags/kibana" class="btn btn-default btn-sm"> Kibana (4)</a>
-                <a role="button" href="/tags/monitoring" class="btn btn-default btn-sm"> Monitoring (4)</a>
         </div>
         <ul class="pager">
             <li class="next">
@@ -175,6 +175,7 @@
         <hr />
         <h5>Older Posts</h5>
         <ul class="list-unstyled">
+                <li><a href="/posts/ASentimentalAnalysisOfRedDwarf">A sentiment(al) analysis of why Red Dwarf is no longer funny</a></li>
                 <li><a href="/posts/CombiningUwpSpeechSynthesizerWithAudioGraph">Combining the UWP SpeechSynthesizer and AudioGraph APIs</a></li>
                 <li><a href="/posts/TheYearInReview">The Year In Review</a></li>
                 <li><a href="/posts/DartInVisualStudioCode">Dart web development with Visual Studio Code</a></li>
@@ -184,7 +185,6 @@
                 <li><a href="/posts/ARipStoringTime">A Rip Storing Time</a></li>
                 <li><a href="/posts/ToddlerBoxHitsOneThousandUsers">ToddlerBox Hits 1000 Users</a></li>
                 <li><a href="/posts/ToddlerBoxReleasedToStore">ToddlerBox Released to the XBox Store</a></li>
-                <li><a href="/posts/IContributedAndAllIGot">I contributed and all I got...</a></li>
         </ul>
         <ul class="pager">
             <li class="next">
@@ -271,6 +271,16 @@
                     s.type = 'text/javascript';
                     s.src = '//' + disqus_shortname + '.disqus.com/count.js';
                     (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+            }());
+    </script>
+</div>
+
+                </footer>
+
+                
+        </body>
+</html>
+ndChild(s);
             }());
     </script>
 </div>

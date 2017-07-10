@@ -95,6 +95,7 @@
     <h1>Nano2Docker</h1>
         <h2 class="subheading">Using NanoServer to create a Docker Swarm for Windows Containers</h2>
     <div class="meta">        
+            Published on 10 July 2017<br>
     </div>
         <div class="tags">
                     <a role="button" href="/tags/docker" class="btn btn-default btn-xs">Docker</a>
@@ -117,20 +118,23 @@
 <h1>Deployment at last</h1>
 <p>While my current contract doesn't leave much time for personal projects, I have made some progress on my current project (details on exactly what this is to follow). In fact, some of the smaller, peripheral services have their primary use-cases functionally complete and are ready for deployment and I am now faced with the question: Deployment to where?</p>
 <h1>Fabric or Container</h1>
-<p>Given this project constitutes multiple micro-services using message based asynchronous communication with the potential to scale services horizontally, I required some form of elastic service fabric. Furthermore, I wanted a local development environment which would simulate a cluster of machines but with which I could monkey about as much as I liked without fear of accidentally incurring massive hosting fees in the cloud.</p>
-<p>As I had just upgraded my home server with plenty of memory, I decided to use one of more virtual machines running on this server to host the environment, but which technology to use?</p>
+<p>Given this project constitutes multiple micro-services using message based, asynchronous communication with the potential to scale services horizontally, I required some form of elastic service fabric. Furthermore, I wanted a local development environment which would simulate a cluster of machines but with which I could monkey about as much as I liked without fear of accidentally incurring massive hosting fees in the cloud.</p>
+<p>As I had just upgraded my home server with plenty of memory, I decided to use one of more virtual machines running on this server to host the environment during development, but which technology to use?</p>
 <p>Initially I had intended to use a <a href="https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-get-started-with-a-local-cluster">local Service Fabric cluster</a>. However, upon further investigation I found that the SDK and API introduced significant friction to the development process (needing additional projects for supplying manifest / configuration data for services, overly complex deployment scripts, etc). Even the 'guest executable' approach seemed overly complex and I quickly went off this approach.</p>
 <p>My second thought was <a href="https://www.docker.com/">Docker</a>; specifically the creation of a local <a href="https://docs.docker.com/engine/swarm/">Docker Swarm</a> which I could deploy servies to with <a href="https://docs.docker.com/compose/">Docker Compose</a>. <a href="https://docs.docker.com/machine/">Docker Machine</a> made short work of provisioning Docker hosts in Hyper-V but with one caveat: it's <a href="http://boot2docker.io/">boot2docker</a> image would only run Linux based containers and, while many of the services I have written / will write run quite happily on .NET Core, some require packages that do not yet provide support for .NET Core / Standard.</p>
 <p>Given that a recent update made <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode">Swarm mode available to Windows Server 2016</a> host operating systems, I decided I would look into provisioning a series of Windows Server VM's with container support and configure Docker on these VM's to operate in swarm mode.</p>
 <h1>Using Nano Server as a Docker host</h1>
-<p>While I had previously used Microsoft Nano Server as a guest OS for containerized apps, I hadn't realised that it was possible to use it as a host OS for Docker until I came across <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/deploy-containers-on-nano">this article</a>. For those not familiar with Nano Server it is an extremely slimmed down (the OS image is less than 170Mb) and fast booting (5-10 seconds), headless version of Windows Server 2016 which, given it is capable of acting as a Docker host, makes it 'boot2docker' but for Windows containers.</p>
-<p>Nano Server is shipped with Windows Server 2016 and is accompanied by a Powershell module which provides some amazing facilities for working with Nano Server images. <a href="https://docs.microsoft.com/en-us/windows-server/get-started/deploy-nano-server">This document</a> shows how to use this Powershell module to create customised Nano Server images as either a '.wim', a '.iso' or - most interestingly for me - a '.vhdx'. In short, the following powershell command will create a virtual HD that you can directly attach to a virtual machine and will boot directly into Nano Server with support for (but no utilites to provide) containers:</p>
+<p>While I had previously used Microsoft Nano Server as a <a href="http://ian.bebbs.co.uk/posts/ASentimentalAnalysisOfRedDwarfPartII">guest OS</a> for <a href="http://ian.bebbs.co.uk/posts/DockerAndKafka">containerized apps</a>, I hadn't realised that it was possible to use it as a host OS for Docker until I came across <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/deploy-containers-on-nano">this article</a>. For those not familiar with Nano Server it is an extremely slimmed down (the OS image is less than 170Mb) and fast booting (5-10 seconds), headless version of Windows Server 2016 which, given it is capable of acting as a Docker host, effectively makes it 'boot2docker' but for Windows containers.</p>
+<p>Nano Server is shipped with Windows Server 2016 and is accompanied by a Powershell module which provides some terrific facilities for working with Nano Server images. <a href="https://docs.microsoft.com/en-us/windows-server/get-started/deploy-nano-server">This document</a> shows how to use this Powershell module to create customised Nano Server images as either <a href="https://en.wikipedia.org/wiki/Windows_Imaging_Format">'.wim'</a>, <a href="https://en.wikipedia.org/wiki/ISO_image">'.iso'</a> or - most interestingly for me -  <a href="https://technet.microsoft.com/en-us/library/hh831446(v=ws.11).aspx">'.vhdx'</a>. In short, the following powershell command will create a virtual HD that can be attached to a virtual machine and which will boot directly into Nano Server with support for - but no utilites to provide - containerization services:</p>
 <pre class="prettyprint"><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort
 </code></pre>
 <p>This command will also open <a href="https://msdn.microsoft.com/en-us/library/aa384426(v=vs.85).aspx">WinRM</a> ports on the Nano Server which allows you to use <a href="https://technet.microsoft.com/en-us/library/ff700227.aspx">PS Remoting</a> to remote into the virtual machine and examine it's state; indispensable for debugging purposes.</p>
+<h1>Updating Nano Server</h1>
+<p>Referring back to the <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode">'Getting Started with Swarm Mode'</a> article, it states that a <a href="https://support.microsoft.com/en-us/help/4015217/windows-10-update-kb4015217">relatively recent update</a> is required to run Docker Swarms on Windows Server 2016 based OS's. It is therefore necessary to ensure this update is applied to any NanoServer image we create for the purpose of running Docker, ideally during the creation of the image not a subsequent setup script.</p>
+<p>Well, those clever people at Microsoft thought of this too and provided a <code>-ServicingPackagePath</code> argument for the <code>New-NanoServerImage</code> command which takes a path to a cab update file and applies the update to the NanoServer OS during image creation. A mechanism for getting an update from Microsoft (as an *.msu) and extracting it into a (series of) cab-files for use in the <code>New-NanoServerImage</code> is provided by Thomas Maurer in <a href="http://www.thomasmaurer.ch/2016/10/how-to-install-updates-on-nano-server/">an excellent blog post here</a>.</p>
 <h1>Installing Docker as part of a Nano Server image</h1>
-<p>Just like 'boot2docker' we want our Nano Server to be ready to host Windows Containers as soon as it's booted and without further manual configuration. To this end, I needed to find a way to install Docker as part of the deployment process. Fortunately the 'New-NanoServer' command provides a <code>-SetupCompleteCommand</code> argument which allows you to 'run custom commands as part of setupcomplete.cmd' (i.e. on first boot). Great, so now to prepare a script to deploy Docker which we can call via the <code>-SetupCompleteCommand</code> argument.</p>
-<p>Conveniently, Docker's <a href="https://docs.docker.com/docker-ee-for-windows/install/#using-a-script-to-install-docker-ee">documentation for installing Docker EE</a> (the version supported by Windows) provides exactly the script required, copied with some additional configuration copied from the 'Prepare Container Host' section of <a href="">'Deploy Containers on Nano'</a> article:</p>
+<p>Now, just like 'boot2docker' we want our Nano Server to be ready to host Windows Containers as soon as it's booted and without further manual configuration. To this end, I needed to find a way to install Docker as part of the deployment process. Fortunately the 'New-NanoServer' command provides a <code>-SetupCompleteCommand</code> argument which allows you to 'run custom commands as part of setupcomplete.cmd' (i.e. on first boot). Great, so now to prepare a script to deploy Docker which we can call via the <code>-SetupCompleteCommand</code> argument.</p>
+<p>Conveniently, Docker's <a href="https://docs.docker.com/docker-ee-for-windows/install/#using-a-script-to-install-docker-ee">documentation for installing Docker EE</a> (the version supported by Windows) provides exactly the script required, copied below with some additional configuration copied from the 'Prepare Container Host' section of <a href="">'Deploy Containers on Nano'</a> article:</p>
 <pre class="prettyprint"><code># On an online machine, download the zip file
 Invoke-Webrequest -UseBasicparsing -Outfile docker.zip https://download.docker.com/components/engine/windows-server/17.03/docker-17.03.0-ee.zip
 
@@ -164,10 +168,10 @@ dockerd --register-service
 # Start the daemon.
 Start-Service docker
 </code></pre>
-<p>Now this script requires that the Nano Server be online when the script is run so that it can download the Docker binaries. Unfortunately, given that this script will run as part of the deployment process, this is unlikely to be the case. Instead, we'll need to lean on another feature of the <code>New-NanoServerImage</code>, <code>-CopyPath</code>. This argument allows you to specify one or more files to copy to the Nano Server image as part of it's creation and we'll use it to copy a pre-downloaded copy of the docker binaries (along with a copy of this script) to the root of the images C:\ drive, as shown here:</p>
+<p>Now this script requires that the Nano Server be online when the script is run so that it can download the Docker binaries. Unfortunately, given that this script will run as part of the deployment process, this is unlikely to be the case. Instead, we'll need to lean on another feature of the <code>New-NanoServerImage</code>, <code>-CopyPath</code>. This argument allows you to specify one or more files to copy to the Nano Server image as part of it's creation and we'll use it to copy a pre-downloaded copy of the docker binaries (along with a copy of the deployment script) to the root of the images C:\ drive, as shown here:</p>
 <pre class="prettyprint"><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort -CopyPath &#64;('&lt;path to deployment script&gt;\DeployDocker.ps1', '&lt;path in which docker is downloaded&gt;\docker.zip') -SetupCompleteCommand &#64;('Powershell.exe -Command .\DeployDocker.ps1') 
 </code></pre>
-<p>Great, now we can comment out the first line of the script above and it'll run fine, right? Unfortunately not. It seems that, at the stage of the boot process at which this script, powershell isn't quite ready to execute scripts. Fortunately, others have encountered this issue before and Sergey Babkin provides <a href="https://blogs.msdn.microsoft.com/sergey_babkins_blog/2017/01/05/how-to-run-powershell-from-setupcomplete-cmd/">this solution</a>, copied below with customisation for our requirements:</p>
+<p>Great, now we can comment out the first line of the script above and it'll run fine, right? Unfortunately not. It seems that, at the stage of the boot process at which this script runs, powershell isn't quite ready to run powershell. Fortunately, others have encountered this issue before and Sergey Babkin provides <a href="https://blogs.msdn.microsoft.com/sergey_babkins_blog/2017/01/05/how-to-run-powershell-from-setupcomplete-cmd/">this solution</a>; copied below with customisation for our requirements:</p>
 <pre class="prettyprint"><code>set LOCALAPPDATA=%USERPROFILE%\AppData\Local
 set PSExecutionPolicyPreference=Unrestricted
 Powershell -Command C:\DeployDocker.ps1
@@ -175,14 +179,56 @@ Powershell -Command C:\DeployDocker.ps1
 <p>Ok, so we'll add and deploy this batch file as 'DeployDocker.bat' and then execute this instead of the powershell script as the <code>-SetupCompleteCommand</code>, as shown here:</p>
 <pre class="prettyprint"><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort -CopyPath &#64;('&lt;path to deployment batch file'\DeployDocker.bat', '&lt;path to deployment script&gt;\DeployDocker.ps1', '&lt;path in which docker is downloaded&gt;\docker.zip') -SetupCompleteCommand 'C:\DeployDocker.bat' 
 </code></pre>
-<p>If you now create a virtual machine with the 'NanoServer.vhdx' image as it's boot drive, you should find that, once it's booted you're able to communicate with the Docker daemon on the VM. For example:</p>
+<p>And thats it. If you now create a virtual machine with the new 'NanoServer.vhdx' image as it's boot drive, you should find that, once it's booted you're able to communicate with the Docker daemon on the VM. For example:</p>
 <pre class="prettyprint"><code>docker -H &lt;IP Address of VM&gt; ps
 </code></pre>
 <p>Should return a (empty) list of containers present on the Nano Server host.</p>
 <h1>Scripting the creation of a VM</h1>
-<h1>Updating Nano Server</h1>
-<p>Referring back to the <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode">'Getting Started with Swarm Mode'</a> article, it became apparent that a <a href="https://support.microsoft.com/en-us/help/4015217/windows-10-update-kb4015217">relatively recent update</a> is required to run Docker Swarms on Windows Server 2016 based OS's.</p>
+<p>Now, jumping through all the hoops above each time we want to make a new VM to host docker would be arduous to say the least. As such, I put together a powershell module which is able to directly create VM's ready to host Docker containers in just a few steps. From a powershell command prompr, this can be done as follows:</p>
+<ol>
+<li>Get the Nano2Docker powershell module</li>
+</ol>
+<p>This module is available in my Docker repository on Github and can be downloaded directly using the following command:</p>
+<pre class="prettyprint"><code>Invoke-WebRequest -OutFile Nano2Docker.psm1 https://raw.githubusercontent.com/ibebbs/Docker/master/Nano2Docker/Nano2Docker.psm1
+</code></pre>
+<p>Then installed using:</p>
+<pre class="prettyprint"><code>Import-Module Nano2Docker.psm1
+</code></pre>
+<ol start="2">
+<li>Prepare a base NanoServer image</li>
+</ol>
+<p>The process of downloading docker and applying updates can be extremely slow. Therefore we first create a reusable base NanoServer image that has docker installed and updates applied. This is done using the command:</p>
+<pre class="prettyprint"><code>Initialize-Nano2DockerImage -MediaPath &lt;Drive letter for Windows Server 2016&gt; -BuildPath &lt;Path to a build location&gt;
+</code></pre>
+<p>For example, if your Windows Server 2016 media is mounted in the 'G' drive and you want to build the new Nano2Docker image in the 'C:\Nano2Docker' folder, you'd use the command:</p>
+<pre class="prettyprint"><code>Initialize-Nano2DockerImage -MediaPath G: -BuildPath &quot;C:\Nano2Docker&quot;
+</code></pre>
+<p>The command provides defaults download locations for docker and required updates but these can be overriden using the <code>-DockerUrl</code> and <code>-UpdateUrl</code> parameters repsectively. Furthermore, if you already have an '.msu' file downloaded you can save a lot of time by providing this to the command using the <code>-UpdateFile</code> parameter.</p>
+<p>When you run this command, you will be prompted for Administrator credentials for the new Nano2Docker image. Either enter them when prompted or supply a <code>SecureString</code> value to the <code>-Password</code> argument (which is usually done using the <code>Get-Credentials</code> commandlet).</p>
+<p>When this command completes - which can take a while - you will find a 'Nano2Docker.vhdx' file in the BuildPath directory.</p>
+<p>3. Create a VM using the new NanoServer image</p>
+<p>You can now use the <code>New-Nano2Docker</code> commandlet to quickly create new VM docker hosts. The command is used as follows:</p>
+<pre class="prettyprint"><code>New-Nano2Docker -MediaPath &lt;Drive letter for Windows Server 2016&gt; -ImagePath &lt;Path to a previously created Nano2Docker.vhdx&gt;
+</code></pre>
+<p>Using our previous example, the command would be:</p>
+<pre class="prettyprint"><code>New-Nano2Docker -MediaPath G: -ImagePath &quot;C:\Nano2Docker\Nano2Docker.vhdx&quot;
+</code></pre>
+<p>This command will copy the base image to the VM path (defaults to 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks'), provision a new, local, Hyper-V VM named 'Nano2Docker' with reasonable resources (4 cores / 2Gb of dynamic ram) and attached to the first available virtual switch.
+Obviously, each of these characteristics can be changed using the appropriate arguments - use <code>Get-Help New-Nano2Docker</code> to list the available arguments. You will again be asked to an Administrator password for the new VM which can be entered during creation or specified as a parameter to the commandlet.</p>
+<p>Once the new VM has been created, it will be started and the script will wait for NanoServer to start correctly. Once started, the IP address of the new VM is displayed and it should be immediately possible to use docker to communicate with the docker daemon on the VM.</p>
 <h1>Scripting the deployment of a Docker Swarm</h1>
+<p>Given it was now trivial to create docker hosts, I wrote a final commandlet which leverages previous commandlets to provision an entire docker swarm. This is done using the <code>New-Nano2DockerSwarm</code> commandlet as follows:</p>
+<pre class="prettyprint"><code>New-Nano2DockerSwarm -MediaPath &lt;Drive letter for Windows Server 2016&gt; -ImagePath &lt;Path to a previously created Nano2Docker.vhdx&gt; -VMPath &lt;Path to a location to store swarm host VMs&gt;
+</code></pre>
+<p>Again, using our previous example and wanting to store new VM images in the 'C:\Nano2Docker\VMs' directory, the command would be:</p>
+<pre class="prettyprint"><code>New-Nano2DockerSwarm -MediaPath G: -ImagePath &quot;C:\Nano2Docker\Nano2Docker.vhdx&quot; -VMPath &quot;C:\Nano2Docker\VMs&quot;
+</code></pre>
+<p>This command defaults to creating a single manager node and three worker nodes named 'n2d-mngr-0' and 'n2d-wrkr-0/1/2' respectively. All nodes will have already been joined to the swarm in the appropriate capacity and ready for services to be deployed using docker or docker-compose.
+Again, the number of manager and worked nodes as well as the name prefix for each node can be changed via the appropriate arguments (use <code>Get-Help New-Nano2DockerSwarm</code> to list the arguments).</p>
+<h1>Roundup</h1>
+<p>I've successfully used this script to provision multiple docker hosts and docker swarms but it's worthwhile noting that it can be a bit finickity with directories. If you can an error saying it couldn't find a directory then simply create it first. I really ought to fix up the script (improvements via PR gratefully accepted) but I'm now a bit busy deploying services to my swarm :0)</p>
+<p>Furthermore I've successfully used nodes created by this script to provision a hybrid swarm (see the 'Mixed OS clusters section <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode">here</a>) of boot2docker and nano2docker images. With the appropriate labels on the nodes, it is possible to use <code>docker-compose</code> to automatically deploy images to the correct hosts while retaining all the benefits of overlay networking.</p>
+<p>It's a lot of docking fun!</p>
 
 
 
