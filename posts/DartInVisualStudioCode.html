@@ -119,13 +119,13 @@
 <p>Why did I decide on Dart? Well, I had project I wanted to undertake that featured some... shock horror... dynamic web content. If that isn't enough to send chills down your spine, you've either <a href="https://hackernoon.com/how-it-feels-to-learn-javascript-in-2016-d3a717dd577f#.fqoett4pt">never had to look at getting started with modern web development</a> or <a href="https://medium.com/&#64;pistacchio/i-m-a-web-developer-and-i-ve-been-stuck-with-the-simplest-app-for-the-last-10-days-fb5c50917df#.glf30ovv1">you've already drunk the cool-aid</a>.</p>
 <p>Either way, most rational people in the industry will (in the moments of clarity between writing off the last framework as dated and evangelising the next) reluctantly admit that <a href="https://medium.com/&#64;wob/the-sad-state-of-web-development-1603a861d29f#.lqu2r4xup">modern web development is a mess</a>. But this is the world we live in and the best one can do is dodge the analysis paralysis and mitigate the majority of the risks. For me, this was adopting a <a href="https://www.dartlang.org/guides/language/language-tour">strongly-typed modern development language</a> that has a <a href="https://webdev.dartlang.org/">strong web pedegry</a> and just get on with it.</p>
 <h2>But in Visual Studio Code?</h2>
-<p>Why not? It's a great editor and already has great support for Dart courtesy of Danny Tuppeny's <a href="https://marketplace.visualstudio.com/items?itemName=DanTup.DartVS-VisualStudiosupportforGooglesDart">excellent Dart extension</a>. Furthermore, I try to keep my development machine as lean and clean as possible so I didn't want to have to <a href="https://www.jetbrains.com/webstorm/">install an IDE specifically for Dart development</a>.</p>
+<p>Why not? It's a great editor and already has great support for Dart courtesy of Danny Tuppeny's <a href="https://marketplace.visualstudio.com/items?itemName=DanTup.dart-code">excellent Dart extension</a>. Furthermore, I try to keep my development machine as lean and clean as possible so I didn't want to have to <a href="https://www.jetbrains.com/webstorm/">install an IDE specifically for Dart development</a>.</p>
 <p>Fortunately, as you'll see, getting set up for Dart development with Visual Studio Code is very easy, doesn't require any installation (everything is &quot;xcopy&quot; deployed) and you can start being productive almost right away.</p>
 <h2>Ingredients</h2>
 <p>You will need the following:</p>
 <ul>
 <li><a href="http://code.visualstudio.com/Download">Visual Studio Code</a> - obviously</li>
-<li><a href="https://marketplace.visualstudio.com/items?itemName=DanTup.dart-code">DartVS</a> - the Dart language extension for Visual Studio Code</li>
+<li><a href="https://marketplace.visualstudio.com/items?itemName=DanTup.dart-code">Dart Code</a> - the Dart language extension for Visual Studio Code</li>
 <li><a href="https://storage.googleapis.com/dart-archive/channels/stable/release/1.21.0/sdk/dartsdk-windows-x64-release.zip">The Dart SDK</a> - the code Dart binaries and tools needed for dart development</li>
 <li><a href="https://storage.googleapis.com/dart-archive/channels/stable/release/latest/dartium/dartium-windows-ia32-release.zip">Dartium</a> - a version of Chrome (even called &quot;Chrome.exe&quot;) with a built in Dart runtime</li>
 </ul>
@@ -139,7 +139,7 @@
 </ol>
 <img src="https://plt6eg-dm2306.files.1drv.com/y3m_WQkZhj4Xo-vjZzyUVujyGYAM3lM7Gs84uuf59zCfPKJQzrT9d--PF8Ns9Gwm3qluxzW26f_H9OU5PZQEq37lEKy9aKY553bzGzZLNU_CBIRGUWA_9_QbE-a0WgQz284pvZY2-Voc83pjQc2h9iMUIzap8At--sCEdhJXyO6sXw?width=660&height=497&cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Empty Project"/>
 <ol start="6">
-<li>If you haven't already, install the DartVS extension by hitting <code>Ctrl-Shift-X</code> (the keyboard shortcut for &quot;View-&gt;Extensions&quot;) and type Dart in the search box. This should show the &quot;Dart Code&quot; extension by &quot;Danny Tuppeny&quot;. Click install and reload the window when complete.</li>
+<li>If you haven't already, install the Dart Code extension by hitting <code>Ctrl-Shift-X</code> (the keyboard shortcut for &quot;View-&gt;Extensions&quot;) and type Dart in the search box. This should show the &quot;Dart Code&quot; extension by &quot;Danny Tuppeny&quot;. Click install and reload the window when complete.</li>
 <li>As we haven't elected to add the Dart SDK to the path, we need to tell the Dart extension where it can find the SDK. This is done by editing the User Settings (<code>File-&gt;Preferences-&gt;User Settings</code>) and adding the following settings:</li>
 </ol>
 <pre class="prettyprint"><code>    &quot;dart.sdkPath&quot;: &quot;C:\\Apps\\dart-sdk&quot;,
@@ -147,7 +147,7 @@
     &quot;dart.debugExternalLibraries&quot;: false
 </code></pre>
 <ol start="8">
-<li>Back in the Explorer view (<code>Ctrl-Shift-E</code>) add a new file to the <code>web</code> directory named <code>main.dart</code>. We'll populate this file shortly but, for now, it's just so that VSC (and DartVS) realises that this is a Dart project.</li>
+<li>Back in the Explorer view (<code>Ctrl-Shift-E</code>) add a new file to the <code>web</code> directory named <code>main.dart</code>. We'll populate this file shortly but, for now, it's just so that VSC (and Dart Code) realises that this is a Dart project.</li>
 <li>Add another new file named <code>pubspec.yaml</code> to the root directory. This file tells the Dart compiler (named <code>Pub</code>) how to build your Dart project and follows a very <a href="https://www.dartlang.org/tools/pub/pubspec">simply format</a>. In this file add <code>name</code>, <code>dependencies</code> and <code>transformers</code> as shown below:</li>
 </ol>
 <pre class="prettyprint"><code>name: GettingStartedWithDart
@@ -155,7 +155,7 @@ dependencies:
 transformers:
 </code></pre>
 <ol start="10">
-<li>When you save this file, you should see the <code>Output</code> panel appear showing the output of the <code>Pub</code> command. This is a feature of the DartVS extension which runs a <code>pub get</code> command whenever you save the <code>pubspec.yaml</code> file. As you can probably guess from the output (shown below) the purpose of this command is to retrieve/update any dependencies you've declared in the <code>dependencies</code> section. Also, once the <code>pub get</code> command has run, you should see a new <code>pubspec.lock</code> file appear in the root directory.</li>
+<li>When you save this file, you should see the <code>Output</code> panel appear showing the output of the <code>Pub</code> command. This is a feature of the Dart Code extension which runs a <code>pub get</code> command whenever you save the <code>pubspec.yaml</code> file. As you can probably guess from the output (shown below) the purpose of this command is to retrieve/update any dependencies you've declared in the <code>dependencies</code> section. Also, once the <code>pub get</code> command has run, you should see a new <code>pubspec.lock</code> file appear in the root directory.</li>
 </ol>
 <img src="https://plt5eg-dm2306.files.1drv.com/y3mCavvhl_SorCHUuY_oZ01TMQ9jkjpMy_I48Eotp3TlC5s-TRU0JaznDIYoihtHpfFj6A3Aqwu9eEKDhOQaK7jnEO7g6UscYBqeBp5yLg_PnzxGgWQpVTwgrxkJeOw8EUet6KhgGEn2Lkm3IYfP4-K-SEXXvKT4G64DcweiAsnQ-k?width=660&height=497&cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Get Dependencies"/>
 <ol start="11">
