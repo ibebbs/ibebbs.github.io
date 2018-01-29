@@ -1,0 +1,372 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - A SmartHome... NoT - Part I</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+        <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/prettify.css" rel="stylesheet">
+        <link href="/assets/css/github.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/custom.css" rel="stylesheet" />
+        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - A SmartHome... NoT - Part I" />
+        
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/ASmartHome-Part1" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+        <script src="/assets/js/prettify.js"></script>
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+                <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+        <![endif]-->
+
+        </head>
+        <body onload="prettyPrint()">
+
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/about">About Me</a></li>
+        <li><a href="/tags">All Tags</a></li>
+        <li><a href="/posts">Archive</a></li>
+
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+
+                <!-- Page Header -->
+
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+
+<div class="post-heading">
+    <h1>A SmartHome... NoT - Part I</h1>
+        <h2 class="subheading">Home monitoring and automation without compromising privacy nor security</h2>
+    <div class="meta">        
+            Published on 29 January 2018<br>
+    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/home-automation" class="btn btn-default btn-xs">Home Automation</a>
+                    <a role="button" href="/tags/iot" class="btn btn-default btn-xs">IoT</a>
+                    <a role="button" href="/tags/not" class="btn btn-default btn-xs">NoT</a>
+                    <a role="button" href="/tags/privacy" class="btn btn-default btn-xs">Privacy</a>
+                    <a role="button" href="/tags/xiaomi" class="btn btn-default btn-xs">Xiaomi</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+
+<p>I moved house a couple of months back to, what my partner likes to describe as, our &quot;forever home&quot;. As such, I was keen to start looking into home monitoring / automation again as I knew things had progressed significantly since I last considered such things and I was keen to see what could be done. After lots of investigation I believe I have found the basis of a home automation solution which meets my current needs, should be extensible moving forward and which does not compromise the securty or privacy of my home.</p>
+<p>This post is, I hope, the first in a series that discuss the various devices and software I use to monitor and automate my home.</p>
+<h1>Private by design</h1>
+<p>Firstly a word on privacy. While &quot;smart devices&quot; are everywhere nowadays, they almost all require connection to the internet and, often, a subscription to a &quot;cloud&quot; service. I wrote about <a href="http://ian.bebbs.co.uk/posts/MonsterPi">this before</a> and expressed my desire for smart devices to &quot;drop the 'Inter' from IoT and expand the 'net' to become a 'Network of Things', or NoT&quot; which could optionally be bridged to the internet if desired. To quote myself:</p>
+<blockquote>
+<p>I've long loved the idea of home automation. From X10 and LightwaveRF through to modern Bluetooth and Wifi connected devices, I have played with dozens of technologies in search of home automation nirvana. But recently I have watched with growing bewilderment at the incredible number of &quot;cloud-connected&quot; home automation devices being released and the eagerness with which they're snapped up by naive consumers hungry to control everything from the carefree comfort of their iPhone.</p>
+</blockquote>
+<blockquote>
+<p>You see, while you can buy a myriad of IoT devices off the shelf nowadays, they nearly all come with some form of &quot;cloud-service&quot; that is necessary in order for the device to work as sold. As the more wily of reader will no doubt be aware, this exposes your home network to innumerable <a href="https://it.slashdot.org/story/16/10/03/1359200/source-code-for-iot-botnet-mirai-which-took-down-krebs-on-security-website-with-ddos-attack-released">security concerns</a>, <a href="https://it.slashdot.org/story/16/08/08/1449221/hackers-make-the-first-ever-ransomware-for-smart-thermostats">potential abuses</a> and an <a href="https://tech.slashdot.org/story/16/01/14/1347243/nest-thermostat-bug-leaves-owners-without-heating">external point of failure</a> that cannot be closed/fixed without sacrificing some or all of the functionality of the new fangled device.</p>
+</blockquote>
+<p>Since I wrote post, the market for internet connected home automation devices has exploded... as have the concerns around the <a href="(https://gizmodo.com/amazon-agrees-to-hand-over-data-in-echo-murder-case-1793039360)">privacy</a>, <a href="https://www.bleepingcomputer.com/news/government/germany-preparing-law-for-backdoors-in-any-type-of-modern-device/">security</a> and <a href="https://torrentfreak.com/piracy-notices-can-mess-with-your-thermostat-isp-warns-171224/">functionality</a> (or <a href="https://gizmodo.com/yes-your-amazon-echo-is-an-ad-machine-1821712916">unwanted functionality</a>) of the devices. I am <a href="http://uk.businessinsider.com/consumers-holding-off-on-smart-home-gadgets-thanks-to-privacy-fears-2017-11?r=US&amp;IR=T">not alone</a> in being sufficiently concerned by these issues that I choose the devices I allow on my home network very carefully and <a href="http://ian.bebbs.co.uk/tags/monitoring">monitor them closely</a>.</p>
+<p>In short, the list of &quot;off-the-shelf&quot; devices I would feel comfortable having on my home network is very short and, until recently, I was resigned to having to build these devices myself using <a href="https://en.wikipedia.org/wiki/Single-board_computer">single board computers</a> or <a href="https://en.wikipedia.org/wiki/ESP8266">Wifi connected microcontrollers</a>. That is until a family of devices came to my attention that originated from the most unlikely of places...</p>
+<h2>Mi Smart Home</h2>
+<p>China isn't the first country that comes to mind when you think about privacy yet, with the release of the <a href="https://xiaomi-mi.com/mi-smart-home/">&quot;Mi Smart Home&quot;</a> family of devices, the Chinese electronics manufacturer <a href="https://en.wikipedia.org/wiki/Xiaomi">Xiaomi Inc</a> seems to have delivered a smart-device eco-system that is privacy-friendly... albeit somewhat tacitly as we will see below.</p>
+<p>The Mi Smart family consists of a number of small, battery powered Zigbee devices such as <a href="https://xiaomi-mi.com/sockets-and-sensors/xiaomi-mi-temperature-humidity-sensor/">temperature and humidity sensors</a>, <a href="https://xiaomi-mi.com/sockets-and-sensors/xiaomi-mi-door-window-sensors/">door / window sensors</a>, <a href="https://xiaomi-mi.com/sockets-and-sensors/xiaomi-mi-occupancy-sensor/">movement sensors</a> and <a href="https://www.gearbest.com/alarm-systems/pp_610096.html">various switches</a>. Oh... and a curious <a href="https://xiaomi-mi.com/sockets-and-sensors/xiaomi-mi-smart-home-cube-white/">'cube' controller</a>.</p>
+<p>These devices connect to your internal Wifi network via a <a href="https://xiaomi-mi.com/mi-smart-home/xiaomi-mi-gateway-2/">Gateway device</a>. In addition to providing the Zigbee to Wifi bridge, this gateway also provides an ambient light sensor, a very useful RGB light and a umm... not so useful speaker. This is all packaged in a small, round, 30 gram device about 8 centimeters in diameter and 3 cenitmeters deep. Frustratingly the gateway only comes with the Chinese/Australian type I plug so you need an adapter to use it in the UK which adds significantly to the depth (although I've taken to using a <a href="https://www.gearbest.com/plugs-sockets/pp_1168562.html">convenient extension lead</a> instead).</p>
+<p>To set up the Wifi Gateway device and add sensors, you have to install the <a href="https://play.google.com/store/apps/details?id=com.xiaomi.smarthome&amp;hl=en_GB">Xiaomi Mi Home app</a> which, to be frank, is a privacy nightmare. The list of permissions it needs is quite incredible:</p>
+<blockquote>
+<p>Version 5.1.1 can access:</p>
+<ul>
+<li>Device &amp; app history
+<ul>
+<li>retrieve running apps</li>
+</ul>
+</li>
+<li>Identity
+<ul>
+<li>find accounts on the device</li>
+<li>add or remove accounts</li>
+</ul>
+</li>
+<li>Calendar
+<ul>
+<li>read calendar events plus confidential information</li>
+<li>add or modify calendar events and send emails to guests without owners' knowledge</li>
+</ul>
+</li>
+<li>Contacts
+<ul>
+<li>find accounts on the device</li>
+<li>read your contacts</li>
+<li>modify your contacts</li>
+</ul>
+</li>
+<li>Location
+<ul>
+<li>approximate location (network-based)</li>
+<li>precise location (GPS and network-based)</li>
+</ul>
+</li>
+<li>SMS
+<ul>
+<li>read your text messages (SMS or MMS)</li>
+<li>receive text messages (SMS)</li>
+<li>send SMS messages</li>
+</ul>
+</li>
+<li>Phone
+<ul>
+<li>directly call phone numbers</li>
+<li>reroute outgoing calls</li>
+<li>read call log</li>
+<li>read phone status and identity</li>
+<li>write call log</li>
+</ul>
+</li>
+<li>Photos / Media / Files
+<ul>
+<li>read the contents of your USB storage</li>
+<li>modify or delete the contents of your USB storage</li>
+</ul>
+</li>
+<li>Storage
+<ul>
+<li>read the contents of your USB storage</li>
+<li>modify or delete the contents of your USB storage</li>
+</ul>
+</li>
+<li>Camera
+<ul>
+<li>take pictures and videos</li>
+</ul>
+</li>
+<li>Microphone
+<ul>
+<li>record audio</li>
+</ul>
+</li>
+<li>Wi-Fi connection information
+<ul>
+<li>view Wi-Fi connections</li>
+</ul>
+</li>
+<li>Device ID &amp; call information
+<ul>
+<li>read phone status and identity</li>
+</ul>
+</li>
+<li>Other
+<ul>
+<li>download files without notification</li>
+<li>interact across users</li>
+<li>full licence to interact across users</li>
+<li>transmit infrared</li>
+<li>modify secure system settings</li>
+<li>read Home settings and shortcuts</li>
+<li>write Home settings and shortcuts</li>
+<li>view network connections</li>
+<li>create accounts and set passwords</li>
+<li>read battery statistics</li>
+<li>pair with Bluetooth devices</li>
+<li>access Bluetooth settings</li>
+<li>send sticky broadcast</li>
+<li>change network connectivity</li>
+<li>allow Wi-Fi Multicast reception</li>
+<li>connect and disconnect from Wi-Fi</li>
+<li>disable your screen lock</li>
+<li>control flashlight</li>
+<li>full network access</li>
+<li>change your audio settings</li>
+<li>control Near-Field Communication</li>
+<li>read sync settings</li>
+<li>run at startup</li>
+<li>draw over other apps</li>
+<li>use accounts on the device</li>
+<li>control vibration</li>
+<li>prevent device from sleeping</li>
+<li>modify system settings</li>
+<li>toggle sync on and off</li>
+<li>install shortcuts</li>
+<li>uninstall shortcuts</li>
+</ul>
+</li>
+</ul>
+</blockquote>
+<p>Scary huh! How can I possibly claim these devices are privacy friendly when you've basically just given a Chinese company permission to do pretty much anything it likes with your phone's hardware and data? Well, notice how I said you need the app to &quot;set up the Wifi Gateway device and add sensors&quot;. Once they're setup you no longer need the app and, furthermore, once &quot;local network functions&quot; are enabled (more on this in a second) neither the gateway nor sensors need internet access to function.</p>
+<p>So, how to go about using these sensors in a privacy friendly way?</p>
+<h1>Preparation</h1>
+<p>To get set up with these devices without compromising your privacy, you will need:</p>
+<h2>A dedicated VLAN and Wifi network for &quot;smart home&quot; devices</h2>
+<p>I recommend putting any 3rd party &quot;smart&quot; devices in an isolated environment within which you can easily enable or disable internet access. To do this I am using the VLAN feature of my Draytek 2860 router which involves  creating a second VLAN on my network, enabling &quot;Inter-LAN' routing so I could access the VLAN from my existing subnet and, finally, adding firewall rules to prevent devices on this VLAN from accessing the internet / other vlans.</p>
+<h2>A clean Android device</h2>
+<p>I had an old Android phone laying around on which I performed a hard-reset and wiped all user-data. With a clean device I could then install the app without worrying about sharing anything private with Xiaomi</p>
+<h1>Installation</h1>
+<p>First, install the Xiaomi Mi Home app on your clean Android device. On first run after installation you will be prompted for a region and asked to sign in. In order to use all the Mi Smart devices, you <strong>must</strong> select &quot;Mainland China&quot; for your region (this doesn't affect the language in the app) following which you can just create a new account to sign in.</p>
+<p>Once the app is installed you can plug in a gateway. This results in a nice flashing yellow ring of light around the device... and a harsh female voice babbling Chinese at an almost intolerable volume;  basically an audio and visual indication that the gateway is in &quot;pairing&quot; mode.</p>
+<p>Go ahead and pair the gateway to the app following the walk-through <a href="https://www.youtube.com/watch?v=nkFF284OFRE">here</a>. At this point it's a good idea to also install any additional &quot;sub devices&quot; you have (i.e. the various Zigbee sensors) which can be done by following <a href="https://www.youtube.com/watch?v=TiAgeg5P1T4">this</a> walkthrough.</p>
+<p>Finally, in order to use the gateway and sensors without the app and/or internet access, it is necessary to enable &quot;local network functions&quot;. This can be done from the app by following the instructions <a href="https://www.domoticz.com/wiki/Xiaomi_Gateway_(Aqara)">here</a>. Quite why Xiaomi decided to hide what its possible the killer feature of these devices behind a &quot;secret&quot; button I've no idea... fortunately it's an open secret and Xiaomi don't seem to be making any effort to conceal it further.</p>
+<p>With all the above done, feel free to junk the app and disable internet access from the &quot;smart device&quot; subnet / ip range.</p>
+<h1>Usage</h1>
+<p>Once 'local network functions' have been enabled, each Gateway uses the multicast address <code>224.0.0.50</code> to broadcast UDP messages on port <code>9898</code> from the gateway and sub-devices. The gateway publishes a &quot;heartbeat&quot; messages every 10-15 seconds or so meaning you can easily determine everything is working by spinning up Wireshark (on a device connected to the &quot;smart device&quot; subnet) filtering out anything that isn't a UDP message (<code>ip.proto == &quot;udp&quot;</code>) and looking for messages from the gateway IP address. You should eventually see something like this:</p>
+<img src="/Content/posts/Heartbeat.png" alt="Wireshark Heartbeat capture" class="img-responsive" style="margin-left: auto; margin-right: auto; margin-top: 4px; margin-bottom: 4px">
+<p>Once you can see these messages you can start interacting with the gateway and devices using various commands. For example, to get a list of the sub-devices from a gateway you can send a 'get_id_list' command using a UDP packet container this string (as ASCII encoded binary) to the gateway's IP address, again on port <code>9898</code>:</p>
+<p><code>{&quot;cmd&quot;:&quot;get_id_list&quot;}</code></p>
+<p>This will result in a <code>get_id_list_ack</code> response containing a list of <code>sid</code> (aka 'simple' id) values for devices registered with the gateway (including the gateway sensor/status itself)  as follows:</p>
+<p><code>{&quot;cmd&quot;:&quot;get_id_list_ack&quot;,&quot;sid&quot;:&quot;7811dcb06972&quot;,&quot;token&quot;:&quot;L0DI4IiFAvAgInyL&quot;,&quot;data&quot;:&quot;[\&quot;158d0001a200f5\&quot;,\&quot;158d0001c1cdfb\&quot;]&quot;}</code></p>
+<p>You're then able to retrieve the device status using the <code>read</code> command for each <code>sid</code>:</p>
+<p><code>{&quot;cmd&quot;:&quot;read&quot;,&quot;sid&quot;:&quot;7811dcb06972&quot;}</code></p>
+<p>Which will return a <code>read_ack</code> response containing device specific information in the 'data' property. For example, if you send a <code>read</code> command specifying the <code>sid</code> of the gateway you will receive something like the following:</p>
+<p><code>{&quot;cmd&quot;:&quot;read_ack&quot;,&quot;model&quot;:&quot;gateway&quot;,&quot;sid&quot;:&quot;7811dcb06972&quot;,&quot;short_id&quot;:0,&quot;data&quot;:&quot;{\&quot;rgb\&quot;:0,\&quot;illumination\&quot;:1292,\&quot;proto_version\&quot;:\&quot;1.0.9\&quot;}&quot;}</code></p>
+<p>Furthermore, when the status of a sensor changes (for example a door sensor opens or closes) a <code>report</code> message is broadcast as follows:</p>
+<p><code>{&quot;cmd&quot;:&quot;report&quot;,&quot;model&quot;:&quot;magnet&quot;,&quot;sid&quot;:&quot;158d0001c1cdfb&quot;,&quot;short_id&quot;:56258,&quot;data&quot;:&quot;{\&quot;status\&quot;:\&quot;open\&quot;}&quot;}</code></p>
+<h1>Here's one I made earlier...</h1>
+<p>I used the above information to create a small application for listening to and interacting with the gateway and devices. Mostly out of interest, I used <a href="https://dotnet.github.io/orleans/">Microsoft's Orleans framework</a> to create a console application which wraps up the interaction with various devices into strongly typed agents (also an agent approach seemed to nicely mirror the segregated nature of the devices themselves).</p>
+<p>I didn't take this too far as I subsequently decided to use an &quot;off-the-shelf&quot; system for interacting with the Xiaomi devices (the subject of my next &quot;smart home&quot; post) but it's a decent proof-of-concept. I've published the source in a <a href="https://github.com/ibebbs/MiOrleans">repository on Github</a>; feel free to have a play and drop me a line with any questions you might have.</p>
+<p>In the next post I'll disucss the off-the-shelf system I'm now using to privately interact with the Xiaomi devices.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+
+                <hr>
+
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <ul class="list-inline text-center">
+        <li>
+          <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="http://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+        <li>
+          <a href="https://social.msdn.microsoft.com/profile/ian%20bebbington/">
+            <span class="fa-stack fa-lg">
+              <i class="fa fa-circle fa-stack-2x"></i>
+              <i class="fa fa-windows fa-stack-1x fa-inverse"></i>
+            </span>
+          </a>
+        </li>
+      </ul>
+      <p class="copyright text-muted">
+        Copyright © 2018 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/">"Creative Commons Attribution 4.0 International License"</a>
+        <br />
+        <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+        <br />
+        <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
+      </p>
+    </div>
+
+    <script>
+      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+      ga('create', 'UA-70151903-1', 'auto');
+      ga('send', 'pageview');
+
+    </script>
+
+    <script type="text/javascript">
+            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
+            var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
+
+            /* * * DON'T EDIT BELOW THIS LINE * * */
+            (function () {
+                    var s = document.createElement('script'); s.async = true;
+                    s.type = 'text/javascript';
+                    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+                    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+            }());
+    </script>
+</div>
+
+                </footer>
+
+                
+        </body>
+</html>
