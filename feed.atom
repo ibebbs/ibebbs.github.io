@@ -4,7 +4,7 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2019</rights>
-	<updated>2019-05-09T15:45:05Z</updated>
+	<updated>2019-05-09T15:58:27Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/FluentNamespacing</id>
@@ -13,7 +13,7 @@
 		<updated>2019-05-09T00:00:00Z</updated>
 		<content>&lt;p&gt;&lt;em&gt;So, it's been a while since I've blogged. Mostly this has been due to other committments (family, friends, side projects, etc), working more hours contracting than I would ideally like and generally not having any dead-time (such as when I used to commute). Since my last blog post (over a year ago!!) I've been maintaining an ever increasing list of things I'd like to blog about but haven't found the time. Given it's a new year, I've decided to pick a couple of the more challenging/contentious blog ideas and endeavour to get them written. This is the first and, while not necessarily the most contentious, might take some getting your head aroud. You have been warned...&lt;/em&gt;&lt;/p&gt;
 &lt;p&gt;There is a convention at the heart of enterprise development and many modern development frameworks which seems to have been blindly adopted by the development community at large. I hope to challenge this convention as I believe changing it can provide many useful benefits in day to day development.&lt;/p&gt;
-&lt;p&gt;This convention I'm referring to is the tendancy to group classes by &lt;em&gt;functional pattern&lt;/em&gt; rather than &lt;em&gt;functional domain&lt;/em&gt;. What does this mean? Well, to illustrate, lets start a new webapi project:&lt;/p&gt;
+&lt;p&gt;The convention I'm referring to is the tendancy to group classes by &lt;em&gt;functional pattern&lt;/em&gt; rather than &lt;em&gt;functional domain&lt;/em&gt;. What does this mean? Well, to illustrate, lets start a new webapi project:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;dotnet new webapi
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;You will end up with a folder structure similar to this:&lt;/p&gt;
@@ -79,12 +79,12 @@
 &lt;p&gt;Here we have exactly the same functionality but grouped by functional domain not functional pattern; i.e. all classes related to a Person are in the same folder. This has resulted in far less structural noise, simplied class names and no need for additional using statements to be added to any of the classes.&lt;/p&gt;
 &lt;h3 id="fluent-namespacing"&gt;Fluent Namespacing&lt;/h3&gt;
 &lt;p&gt;I have been applying this approach in medium to large enterprise code-bases for some time now and find it provides simplified code, less structural overhead, easier navigation, faster comprehension and improved code architecture. I refer to it as &amp;quot;Fluent Namespacing&amp;quot; because, when you start referring to your classes via the [partial] namespace rather than long class names (requiring additional &lt;code&gt;using&lt;/code&gt; statements), the code tends to read like a &lt;a href="https://martinfowler.com/bliki/FluentInterface.html"&gt;fluent interface&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;I believe this approach it provides numerous additional benefits such as:&lt;/p&gt;
+&lt;p&gt;I believe this approach provides numerous additional benefits such as:&lt;/p&gt;
 &lt;h4 id="propinquity"&gt;1. Propinquity&lt;/h4&gt;
 &lt;p&gt;Want the repository for your entity? It's right along side it. As are all the other classes related to that entity. This means you can very quickly skip between these classes without needing to navigate the breadth of your project looking for a folder for the appropriate functional pattern.&lt;/p&gt;
 &lt;h4 id="scope"&gt;2. Scope&lt;/h4&gt;
 &lt;p&gt;When you write code which involves multiple entities, these entities need to be brought into scope. Rather than adding using statements, I have found that utilising the entity's namespace in a fluent fashion gives very elegant results.
-For example, say we have introduce a &lt;code&gt;Role&lt;/code&gt; entity and the controller for this entity needs to be able to add &lt;code&gt;Person&lt;/code&gt; instances to a role. The class might be implemented something akin to this:&lt;/p&gt;
+For example, say we have introduce a &lt;code&gt;Role&lt;/code&gt; entity and the controller for this entity needs to be able to add &lt;code&gt;Person&lt;/code&gt; instances to a role. A (naive) implementation of this class might look something akin to:&lt;/p&gt;
 &lt;script src="https://gist.github.com/ibebbs/117531fb4a3a3556fd3788d45ffaaa57.js"&gt;&lt;/script&gt;
 &lt;p&gt;Note the lack of additional using statements and how bringing classes related to other entities into scope requires only a parial namespace which then reads like natural language (i.e. Person.Repository / Person.Model).&lt;/p&gt;
 &lt;h4 id="coupling"&gt;3. Coupling&lt;/h4&gt;
@@ -94,16 +94,17 @@ For example, say we have introduce a &lt;code&gt;Role&lt;/code&gt; entity and th
 &lt;h3 id="other-considersations"&gt;Other considersations&lt;/h3&gt;
 &lt;p&gt;There are a couple of downsides to this approach such as:&lt;/p&gt;
 &lt;ol&gt;
-&lt;li&gt;Refactoring
-When you use Visual Studio's built in refactoring methods, it will always endeavour add a &lt;code&gt;using&lt;/code&gt; to your class for classes outside the current namespace, even if you've already referred to them via the namespace:
-&lt;img src="/Content/FluentNamespacing/FluentlyNamespaced-AddReadOnlyField.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Field - yes please, using - no thanks!"&gt;
+&lt;li&gt;&lt;p&gt;Refactoring&lt;/p&gt;
+&lt;p&gt;When you use Visual Studio's built in refactoring methods, it will always endeavour add a &lt;code&gt;using&lt;/code&gt; to your class for classes outside the current namespace, even if you've already referred to them via the namespace:
+&lt;img src="/Content/FluentNamespacing/FluentlyNamespaced-AddReadOnlyField.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Field - yes please, using - no thanks!"&gt;&lt;/p&gt;
 &lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Field - yes please, using - no thanks!&lt;/p&gt;
+&lt;p&gt;Field? Yes please. Using? No thanks!&lt;/p&gt;
 &lt;/blockquote&gt;
 &lt;/li&gt;
-&lt;li&gt;Searching
-In Visual Studio, when you need to search for a specific class, you may find you get many more hits than expected; afterall, if the &lt;code&gt;Model&lt;/code&gt; class for all entities is called &lt;code&gt;Model&lt;/code&gt; searching for 'Model' will return all the entity classes. Fortunately, Visual Studio's 'Go to All' functionality supports search by multiple key word matches so this works:
-&lt;img src="/Content/FluentNamespacing/Go to All.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Ah, there it is"&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Searching&lt;/p&gt;
+&lt;p&gt;In Visual Studio, when you need to search for a specific class, you may find you get many more hits than expected; afterall, if the &lt;code&gt;Model&lt;/code&gt; class for all entities is called &lt;code&gt;Model&lt;/code&gt; searching for 'Model' will return all the entity classes. Fortunately, Visual Studio's 'Go to All' functionality supports search by multiple key word matches so this works:
+&lt;img src="/Content/FluentNamespacing/Go to All.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Ah, there it is"&gt;&lt;/p&gt;
+&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;&lt;em&gt;Note: The fact that these downsides are all related to tooling shows just how ingrained this convention is to modern development.&lt;/em&gt;&lt;/p&gt;
 &lt;h3 id="conclusion"&gt;Conclusion&lt;/h3&gt;
