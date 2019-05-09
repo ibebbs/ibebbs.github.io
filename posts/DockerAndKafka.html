@@ -132,7 +132,7 @@ docker run -it --rm microsoft/nanoserver:latest cmd
 <p>This meant that I would therefore be building two container images, one for Zookeeper and one for Kafka, both of which would be running on Nanoserver.</p>
 <h2 id="building-the-zookeeper-image">Building the Zookeeper image</h2>
 <h3 id="take-1">Take 1</h3>
-<img src="https://mbt4mw-dm2306.files.1drv.com/y3m4bDPZgQ871xh0PU_QAcxaL1v9QKVFYFi8Q2uAb82woT97il9OZ_njULBYVK8aNohSJIgAAawJaj-tNunCWe4oXs5LpggjuVv41JGAQ2TFPco7IB1Xx57j6y2X0TUAtNfOQvoJWLxFFHjL5eSgzVeooe_OjURV4VJ8q_QDhN7coA?width=660&height=363&cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="I built this container up from nothing. When I started here, all there was was nanoserver. Other developers said it was daft to build Zookeeper on nanoserver, but I did it all the same. Just to show'em.">
+<img src="https://mbt4mw.db.files.1drv.com/y4mwGowFjnDW_kYoMAx77RqJvYQ1qLT1X2m3zCD4aDb3EnkwJpwZ8fE03MwNlRTssPAlxLQ7E8TXAFpurKGAZL6KQgHgPS93Jgbo_yoaoLKt81ipcBn0YWgFl7gaeW6KDaCDT1taNRnwNWgxa4sOnOdY9ZStw1ihnv0djLL_-LZgQ6xzuM7H3X73DfOs0tk0orevmh8a4NgpHSl-2hI44900Q?width=690&height=380&cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="I built this container up from nothing. When I started here, all there was was nanoserver. Other developers said it was daft to build Zookeeper on nanoserver, but I did it all the same. Just to show'em.">
 <blockquote class="blockquote">
 <p>I built this [container] up from nothing. When I started here, all there was was [nanoserver]. Other [developers] said it was daft to build [Zookeeper] on [nanoserver], but I did it all the same. Just to show'em.</p>
 </blockquote>
@@ -300,7 +300,7 @@ RUN [ &quot;powershell.exe&quot;, &quot;C:/Install-Zookeeper.ps1&quot; ]
 <p>You see, while the script ran perfectly on Windows Server 2016, Nanoserver is a far more constrained environment. It has neither support for 32-bit assemblies nor any graphic stack to speak of so, in short-order, the 7zip utility, Java installer and <a href="https://nssm.cc/">Non-Sucking Service Manager</a> executables all failed.</p>
 <p>Well, crap.</p>
 <h3 id="take-2">Take 2</h3>
-<img src="https://mbt5mw-dm2306.files.1drv.com/y3mDYUaDMt02GzcHWl0DE1ASfBA6QbYzEwY-koD_MSkQGr3oRavQLf5jyRBH5TVFEBASZyRxAL00cuoRKuNNJ6lvSfEJD42p0QkZNzUQAFV-TKzdglya78e_ON8lHg7vQBS96aSQL-Hz0AobNgzQ83uHZN1T3nyDQKlumWgM50OZBc?width=660&height=440&cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="So! I built a second one!">
+<img src="https://mbt5mw.db.files.1drv.com/y4mxZXjdiHWlj0ey3Kb-IAePEYBT4Ii7wJP05J4x8byzM1Dh9EqI0hF29753PbOEWnQYmlIbbpCl-o1Rbk4AbYXbFUil-V-UHTMZd9s82a3ZzAvN9D86YIT21nX8SNNrGR1HXdY1W2xGKihnZ1IW49HpXNSQL9sfjrs0dMtAzZ9Gm9EbrMIxJqfwYKCTFzo8IbRT9mrcj4WBsNQRYpD5XKveA?width=690&height=460&cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="So! I built a second one!">
 <blockquote class="blockquote">
 <p>So! I built a second one!</p>
 </blockquote>
@@ -308,13 +308,13 @@ RUN [ &quot;powershell.exe&quot;, &quot;C:/Install-Zookeeper.ps1&quot; ]
 <p>While, in retrospect, this was undoubtedly the wrong way forward, I was simultaneously fortunate and frustrated by the fact that it simply doesn't seem possible to use powershell remoting with Nanoserver when running within a container. Indeed, after learning more about <a href="https://msdn.microsoft.com/en-us/library/aa384426(v=vs.85).aspx">WinRM</a> than I thought possible, posting on <a href="https://social.msdn.microsoft.com/Forums/en-US/e0652324-30e4-4ebb-8689-55205e6d8bc9/enterpssession-to-nanoserver-container-in-docker-access-is-denied?forum=windowscontainers">Microsoft's Windows Container forums</a> and even offering my <a href="http://stackoverflow.com/questions/39195068/powershell-remote-access-to-nanoserver-on-docker">first bounty on StackOverflow</a> I simply could not find an answer to why it wasn't possible to establish a remote session.</p>
 <p>In the mean time...</p>
 <h3 id="take-3">Take 3</h3>
-<img src="https://mbt3mw-dm2306.files.1drv.com/y3m5x6G99So08jPRwR0n1Msb-8SrSKNaOsB6aLd-CYAk8kSo9xRsa6i9Kd44QzRHin_EKMOpsNMZpacjCkoeGaMsODu6S7zI3NavsVz89vKF4Ot3b9pLEwaHxmg2mxXzvG8rQqCyf7C769ScaTkbPQ5WG2RwwcTHOyRqm0A-4RDNuQ?width=660&height=441&cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="So, I built a third one...">
+<img src="https://mbt3mw.db.files.1drv.com/y4mAv0zjXUvVibhWqQEmH18FMtheebIg4cFV62i4APNEgm2eDQQ82ifHDQaRsU9xQD966EIcnmaUVA-CPms3_YhIBO4-AVk4tPt0_eoI4EUJgEcQqHZmvpzXgcVoegRGcJrMSOki5E6XNbwBCgNciaCqe25tEI3264z-EyBAz20V4Lz_ZMWzD6boo3fWUCfKc8Oit8Fj2UxQofTs1r-AQjQ-w?width=690&height=461&cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="So, I built a third one...">
 <blockquote class="blockquote">
 <p>I built a third one...</p>
 </blockquote>
 <p>Powershell remoting works beautifully with Nanoserver when running in a Hyper-V virtual machine but Hyper-V networking and Docker networking configurations don't seem to play well together. Indeed, after creating a new virtual-router so that I could access the Nanoserver virtual machine from the host PC, the Docker NAT network became inaccessible. Now, I'm sure it would be possible to dig into the virtual networking configuration and find a way to resolve this but, having spent an incredibly frustrating few hours reconfiguring WinRM, I decided it would be quicker to simply re-install the host OS and start from scratch.</p>
 <h3 id="take-4">Take 4</h3>
-<img src="https://oltxmw-dm2306.files.1drv.com/y3mGaNRc9vDgPZnXfcJZfjYwIEFL32s3nCdk_kA84gB5NGOAoC3SLqP5D7ZffgKPO1VHXQEaRXvVuGCwFjoLKyo7o-gaUXFvGRcZPRPQrifhGNlBmU8RfqR5ZTgKIhxRvzJIMPoXydQ_N5UROZmaUXtKHH3jKtxIobDubPEdWsp-GM?width=660&height=495&cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="But the fourth one stayed up!">
+<img src="https://oltxmw.db.files.1drv.com/y4mUljkhpGUqQULtuT0FcXzTOATDaeuixGBsY3Dy330TLnYARIubLRWshHYQ9s23uU4SeP5wn3t4Bsxlu0-_M_8NGBinr-N3crNs0pFIcsCtkMoZHSfrwI8kqCgRX-nHWXYVQcJRPb_nHVLERHJwCQ3mVoIjqeQ7mIQ_ab-gS0SdtJpwDjAYtZvlQ_cYvOyAOpFESPWHlq1FRjCPK04frsRCg?width=666&height=500&cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="But the fourth one stayed up!">
 <blockquote class="blockquote">
 <p>But the fourth one stayed up!</p>
 </blockquote>
@@ -515,7 +515,7 @@ ENTRYPOINT [ &quot;powershell.exe&quot;, &quot;C:/Start-Zookeeper.ps1&quot; ]
 <p>With the Zookeeper scripts as a pattern, it was ludicrously easy to script up another image for Kafka. Just a few changes to file names and configuration parameters and Kafka started almost first time.</p>
 <p>I won't copy the script or dockerfile here as they're extremely similar to the Zookeeper versions. Instead, all scripts and files used above can be found in my <a href="https://github.com/ibebbs/Docker">Docker repository on Github</a> and the resultant images can be found on <a href="https://hub.docker.com/r/ibebbs/">Docker hub</a>.</p>
 <h2 id="moving-forward">Moving forward</h2>
-<img src="https://oltymw-dm2306.files.1drv.com/y3mIddKC619ngQYu9mwpyXXi9YgUp-MVwZ9_lR8JRla2AKvMm91LwnW2p0G3GkOZj5X_TXQUap_XULDAaiCWMC5Hx0ZvjKdAjeW7YWqacnwEAgCSZgmgBF1DCH83Zcywki6qKmOXbKkZO_SWmvQHpajyOQRHO1pJNB3ak2YpT6DmX8?width=660&height=371&cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="But I don't want any of that!">
+<img src="https://oltymw.db.files.1drv.com/y4mI-m7GTvfSqDTdYfKQO6D0X9Yazi0fEvyfPNeD6grW3Xb88GvXNAhGmIZTQvpnGkFWtNQNkzQRX7i-uEBLeWj5fgtyJ1Y8fbP2VW0LI-HmKIM54Ojfkb_bbtImP41FGHPclzIq2IHCxXGbV78CpNSiOtdC8YjQGhqkh4cnHKgB623cjqmOiJafQxTcFbn0g3GfaDqJOxncoPfzxnf8K9aLQ?width=690&height=388&cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="But I don't want any of that!">
 <blockquote class="blockquote">
 <p>But I don't want any of that!</p>
 </blockquote>
