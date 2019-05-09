@@ -1,5 +1,4 @@
-
-
+﻿
 <!DOCTYPE html>
 <html lang="en">
         <head>
@@ -8,22 +7,21 @@
 
         <title>Ian Bebbington - The Year In Review</title>
         <meta name="description" content="IObservable&lt;Opinion&gt;" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
 
         <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
-        <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
-        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
-        <link href="/assets/css/prettify.css" rel="stylesheet">
-        <link href="/assets/css/github.css" rel="stylesheet">
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
         <link href="/assets/css/clean-blog.css" rel="stylesheet" />
         <link href="/assets/css/master.css" rel="stylesheet" />
-        <link href="/assets/css/custom.css" rel="stylesheet" />
-        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-        <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
-        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
 
 
         <meta name="application-name" content="Ian Bebbington" />
@@ -31,29 +29,32 @@
         <meta name="msapplication-starturl" content="/" />
 
         <meta property="og:title" content="Ian Bebbington - The Year In Review" />
-        
         <meta property="og:type" content="website" />
         <meta property="og:url" content="http://ian.bebbs.co.uk/posts/TheYearInReview" />
         <!-- TODO: More social graph meta tags -->
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-        <script src="/assets/js/prettify.js"></script>
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
         <script src="/assets/js/clean-blog.js"></script>
-        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
         <script src="/assets/js/trianglify.min.js"></script>
         <script src="/assets/js/Please-compressed.js"></script>
-
+        <script src="/assets/js/background-check.min.js"></script>
+                
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
-                <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-                <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
         <![endif]-->
+        
+        
+
 
         </head>
-        <body onload="prettyPrint()">
-
+        <body>
+                
                 <!-- Navigation -->
                 <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
                         <div class="container-fluid">
@@ -67,80 +68,76 @@
                                         </button>
                                         <a class="navbar-brand" href="/">Ian Bebbington</a>
                                 </div>
-
+                        
                                 <!-- Collect the nav links, forms, and other content for toggling -->
                                 <div class="collapse navbar-collapse" id="navbar-collapse">
                                         <ul class="nav navbar-nav navbar-right">
-                                                        <li><a href="/about">About Me</a></li>
-        <li><a href="/tags">All Tags</a></li>
-        <li><a href="/posts">Archive</a></li>
-
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About Me</a></li>
+ 
                                         </ul>
                                 </div>
                                 <!-- /.navbar-collapse -->
                         </div>
                         <!-- /.container -->
                 </nav>
-
+                
                 <!-- Page Header -->
-
                 <header class="intro-header" id="intro-header">
                         <div class="container">
                                 <div class="row">
                                         <div class="col-md-12">
 
     
-
 <div class="post-heading">
     <h1>The Year In Review</h1>
         <h2 class="subheading">A career-break retrospective</h2>
     <div class="meta">        
-            Published on 18 January 2017<br>
-    </div>
+Published on 18 January 2017<br>    </div>
         <div class="tags">
-                    <a role="button" href="/tags/career-break" class="btn btn-default btn-xs">Career Break</a>
-                    <a role="button" href="/tags/future" class="btn btn-default btn-xs">Future</a>
-                    <a role="button" href="/tags/github" class="btn btn-default btn-xs">Github</a>
-                    <a role="button" href="/tags/growth" class="btn btn-default btn-xs">Growth</a>
-                    <a role="button" href="/tags/health" class="btn btn-default btn-xs">Health</a>
-                    <a role="button" href="/tags/stackoverflow" class="btn btn-default btn-xs">StackOverflow</a>
-                    <a role="button" href="/tags/travel" class="btn btn-default btn-xs">Travel</a>
+                    <a role="button" href="/tags/Career-Break" class="btn btn-default btn-xs">Career Break</a>
+                    <a role="button" href="/tags/Future" class="btn btn-default btn-xs">Future</a>
+                    <a role="button" href="/tags/Github" class="btn btn-default btn-xs">Github</a>
+                    <a role="button" href="/tags/Growth" class="btn btn-default btn-xs">Growth</a>
+                    <a role="button" href="/tags/Health" class="btn btn-default btn-xs">Health</a>
+                    <a role="button" href="/tags/StackOverflow" class="btn btn-default btn-xs">StackOverflow</a>
+                    <a role="button" href="/tags/Travel" class="btn btn-default btn-xs">Travel</a>
         </div>     
 </div>
                                         </div>
                                 </div>
                         </div>
                 </header>
-
+                
                 <!-- Main Content -->
                 <div class="container">
                         <div class="row">
                                 <div id="content" class="col-md-12">
                                         
 
-
 <p>Saturday morning, having realized that we had no commitments or prior engagements until the following Tuesday, my partner and I decided to go on a trip. We rapidly packed bags for ourselves and our little girl, threw them in the van and set off with no set destination other than &quot;the south-west&quot;. We ended up staying in a small farm on Exmoor and having a terrific time walking on the moor and visiting nearby sites.</p>
 <p><em>Other than the liberty of being able to just &quot;get away&quot;, this weekend was notable as the previous week marked exactly one year since I left full-time employment.</em></p>
 <p>Back in July, following an epic road-trip around Europe with my girls, I wrote <a href="http://ian.bebbs.co.uk/posts/WotNoBlogPosts">a long blog post</a> about the trip and my plans for the future. These plans centred on taking the rest of the year off as a career-break and using this time to support my family while investigating/evaluating emerging technologies in the .NET ecosystem.</p>
 <p>Now, six months on, it's time to look back over the last year and perform a retrospective; what went well, what could have been better and what should be changed moving forward.</p>
-<blockquote>
+<blockquote class="blockquote">
 <p>Note: This is a long, detailed post with a lot of information/reflection about the previous year. As such I have published it as a MVP (Minimal Viable Post) and will iterate additional information into the post in the future.</p>
 </blockquote>
-<h2>A Timeline</h2>
+<h2 id="a-timeline">A Timeline</h2>
 <p>To aid the retrospective process, I spent last week learning <a href="https://www.dartlang.org/">Dart</a> and <a href="http://www.pixijs.com/">Pixi.js</a> in order to create a timeline visualization of the year. I'm not going to go into the process of making this visualization here as I want to focus on the retrospective, however I will be writing a &quot;making of&quot; follow-up post as the process was both very interesting and thoroughly enjoyable.</p>
 <p>Below you can see the visualization; a timeline covering the entirity of last year and showing the various aspects of my behaviour / productivity on a day-by-day basis. In order to fit into the horizontal space available in most browsers/platforms, the timeline is scaled-down along the horizontal axis. As this obscures much of the data, the timeline was designed to allow you to use your mouse or finger to interactively zoom in and and pan across the it. Give it a go.</p>
 <p>In the following sections I will discuss the various datasets displayed along with a summary of what they represent.</p>
 <script defer="" src="../Content/Scripts/timeline.dart.js"></script>
 <div id="timeline"></div>
-<h2>State</h2>
+<h2 id="state">State</h2>
 <p>This timeline represents my primary oocupation at any given time. From a high-level, last year can be broadly split into two halves, travelling for the first half and working for the latter. However, the detail is more telling so the timeline has been further split into seven disctinct states:</p>
-<h3>Employment</h3>
+<h3 id="employment">Employment</h3>
 <p>My last day of employment was Friday 15th January, 2016. I had worked at my previous company for over four years and very much enjoyed my time there. Unfortunately an <a href="http://www.daedtech.com/top-heavy-department-growth/">internal power struggle</a> resulted in a change of senior management and a move away the progressive development methodologes which had made the company such a great place to work. This, to me, signalled that it was time to move on.</p>
-<h3>Sabatical</h3>
+<h3 id="sabatical">Sabatical</h3>
 <p>I considered the couple of months following ending full time employment as a sabatical; time to reflect, get my affairs in order and spend time with my young family before  considering how to move forward.</p>
 <p>At this time my daughter was just 4 months old so this presented a great opportunity to support my partner and engage with my baby. Having also taken 6 weeks of <a href="https://www.gov.uk/shared-parental-leave-and-pay/overview">Shared Parental Leave</a> the previous year, this meant that, of her first six months of life, I'd been able to spend almost four with her. I feel incredibly fortunate to be in a situation where this is could be the case. The first few months of a baby's life are incredibly tough for both the parents and the baby and I'm very happy that I was able to be with my girls throughout this time.</p>
 <p>It was towards the end of this period that my partner and I decided to capitalise on our unique situation and put the remainder of her maternity leave to use by taking our little girl on a road-trip around Europe. The implications of this decision were to dominate and, to a large degree, consume the entirity of the next three months.</p>
-<h3>Preparation</h3>
+<h3 id="preparation">Preparation</h3>
 <p>Having made the decision to spend a significant amount of time touring Europe, with an 8 month old baby no less, it became apparent that there would be a whole lot of preparation required to make this happen. In March we decided to buy a Nissan Elgrand E51 Rider Autech (shown below) and April onwards was spent preparing it for our trip.</p>
 <img src="https://zdfcta-dm2306.files.1drv.com/y3mRDVqstf6XsjN73biGoYnN5s-SzVcHx9pEdYl2S_wM803HpiosWK5Skxm-kskeHTMkahk_PIdejAp70x14KCaOwmZb6OvAvAig8uqI4bdBs2Pb_lAUsm-O_2lO8krW_18ReDVMLXqVkJWUGUSJ-d80bOIi8ciWIgyxDzL5fw4qF4?width=1796&height=1347&cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Nissan Elgrand E51 Rider Autech"/>
 <p>This preparation was complex, with numerous requirements, constraints and learning curves across a variety of disciplines... but also a whole lot of fun. On our return I wrote a <a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-i-to-v.3311">very long post</a> for the <a href="http://elgrandoc.uk/forum/index.php">Elgrand Owners Club</a> which detailed all the work I had done on the van. While the post took a significant amount of time to write, the forums were invaluable in providing the information I needed to do the work in the first place so I thought it was worth investing this time in case the post helped someone else in the same manner. To this day, the post is still one of the most viewed and commented on posts in the forum. It's well worth a read a read if you have time; if not, here are some pictures of the work instead:</p>
@@ -152,24 +149,24 @@
 <p>During this time I learned a lot about carpentry, electronics and engineering... but I almost didn't. Prior to undertaking the work, I had looked to find a conversion specialist who would do the work for me but most either only provided pattern-part conversions or were too busy to undertake a bespoke project. Well, &quot;necessity being the mother of invention&quot;, I set to it and, in retrospect, am extremely glad I did.</p>
 <p>Despite barely having used an electric drill previously and never having dabbled in 240v electronics, I enjoyed every aspect of the work and am immensely proud of it. We didn't experience a single issue with my work while we were away and, even if we had, it was extremely comforting knowing that I could have resolved the issue in the field if I'd had to.</p>
 <p>Should a similar challenge ever present itself again, I would certainly look at taking it on and, furthermore, would encourage others to do so also as you undoubtedly <a href="https://hbr.org/2016/07/if-youre-not-outside-your-comfort-zone-you-wont-learn-anything">learn a lot more when working outside of your comfort zone</a>.</p>
-<h3>Touring Europe</h3>
+<h3 id="touring-europe">Touring Europe</h3>
 <p>All the prep done - well, as much as was possible in the time available - we left home on May 20th and didn't return again until July 17; totaling just over 8 weeks on the road. In this time we traveled <strong>in excess of 8000 miles and visited 22 countries</strong> seeing numerous friends en-route and making many more in the process.</p>
 <p>Perhaps it was all the prep or perhaps we were just lucky but the trip went off without a hitch and everyone - including our little girl - had an amazing time. Both <a href="https://bigspune.wordpress.com/">my partner</a> and <a href="http://ian.bebbs.co.uk/posts/WotNoBlogPosts">I</a> blogged about the trip - for ourselves as much for any potential reader - and, six months on, are still reflecting on what a fantastic adventure it was.</p>
 <p>Without a shadow of a doubt, and even when considering the week's of preparation before leaving, this trip was time well spent. My partner and I learned a lot about each other (&quot;hey, we <em>can</em> spend several weeks in a confined space together, 24/7&quot;) and our daughter and have accumulated memories that will last a lifetime. We have already talked about doing another similar trip in the future and have begun planning shorter breaks around the UK as a stop-gap until an opportunity for a new adventure comes along.</p>
-<h3>Study</h3>
+<h3 id="study">Study</h3>
 <p>Upon my return, I came across a code for a free <a href="https://borntolearn.mslearn.net/b/weblog/posts/sign-up-to-take-the-beta-exam-for-developing-mobile-apps-70-357-today">Microsoft beta exam about mobile application development</a>. As I was interested in UWP app development and had already taken loads of these beta exams in previous years, I decided to sit the exam even though the code was only valid for a few weeks after signing up, which left very little time to study!!</p>
 <p>As I <a href="https://en.wikipedia.org/wiki/Experiential_learning">learn</a> <a href="http://psycnet.apa.org/journals/bdb/17/1/1.pdf&amp;productCode=pa">best</a> <a href="https://www.virgin.com/richard-branson/you-learn-by-doing-and-by-falling-over">by</a> <a href="https://news.uchicago.edu/article/2015/04/29/learning-doing-helps-students-perform-better-science">doing</a> my study focused on writing a UWP app that incorporated as many of the <a href="https://www.microsoft.com/en-us/learning/exam-70-357.aspx">examined technical aspects</a> as possible. While the methodologies I used for this app were relatively new (i.e. CQRS/ES) the learning curve for this exam really came from some of the unique aspects of UWP app development such as designing for multiple devices/screen sizes, using <a href="https://docs.microsoft.com/en-us/ef/core/">new persistence technologies</a> and leveraging the huge new API surface available to UWP apps.</p>
 <p>Due to an awful dashboard implementation which <a href="https://borntolearn.mslearn.net/b/weblog/posts/more-tips-about-beta-exams-what-to-expect-when-you-39-re-expecting-your-beta-results-that-is">causes much confusion for students who sit beta exams</a>, I am still unsure as to whether I passed this exam or not. My dashboard has not changed to say I have passed the exam but I have not received a summary sheet from Microsoft with my scores nor am I able to access them from my MCP dashboard. In short, the current beta exam process is extremely poor and much worse than it was five or six years ago when I took (and passed) around a dozen such beta exams.</p>
 <p>Regardless, time spent on this study was a huge win. I learned a lot about a platform which is becoming increasingly prevalent in the Windows ecosystem. UWP apps are able to run on everything from Raspberry Pi to Hololens, and I have since deployed/released UWP apps for Raspberry Pi, Mobile (phone/table), PC and XBox. Indeed, after completing the exam, I continued to develop my UWP study app over the next few months.</p>
-<h3>Holiday</h3>
+<h3 id="holiday">Holiday</h3>
 <p>Across the year, I allocated around 40 days (including bank-holidays and weekends) as non-work days (aka holiday). This included snowboarding with friends, trips abroad, visiting relatives and a long festive break over Xmas. Although more than the holiday allowance at most full time jobs (depending on how it's allocated), I feel this represents a fairly decent split between work and play.</p>
-<h3>OneCog.Solutions</h3>
+<h3 id="onecog.solutions">OneCog.Solutions</h3>
 <p>Once life had returned to normal following our tour of Europe and taking the Microsoft beta exam, I decided to work on a few projects that were interesting to me.</p>
 <p>Firstly, this was continuing my investigation of UWP, initially to <a href="http://ian.bebbs.co.uk/posts/CqrsEsMvvmRxEfSqlUwpPcl">flesh out</a> and <a href="https://www.microsoft.com/en-us/store/p/littlelittle/9nblggh51b1b">release</a> the UWP app I had written while studying for the UWP exam but then to also evaluate UWP as a <a href="http://ian.bebbs.co.uk/posts/MonsterPi">platform for IoT devices</a>. I then proceeded to broaden my area of investigation into <a href="http://ian.bebbs.co.uk/posts/DockerAndKafka">non-Microsoft technologies</a> and even into areas that, while still technical, were <a href="http://ian.bebbs.co.uk/posts/3DPrintingWithTheCelRobox">not directly involved with software development</a>.</p>
 <p>During this time I endeavored to keep an up-to-date public profile. Through a <a href="https://trello.com/b/KoTWuFUi/public-board">public Trello board</a>, products I had released (<a href="https://www.microsoft.com/en-gb/store/p/littlelittle/9nblggh51b1b">LittleLittle</a> &amp; <a href="https://www.microsoft.com/en-gb/store/p/toddlerbox/9nblggh3zr4l">ToddlerBox</a>), posts to <a href="http://ian.bebbs.co.uk/">my blog</a> and contributions to both <a href="https://github.com/ibebbs">Github</a> and <a href="http://stackoverflow.com/users/628821/ibebbs">StackOverflow</a> I tried to make sure as much of my time as possible was surfaced publicly. Indeed, having become extremely delivery-oriented since first drinking the agile (<a href="https://medium.com/swlh/agile-is-the-new-waterfall-f7baef5d026d#.jpmks6gi4">lower-case 'a'</a>) kool-aid several years ago, I feel the public-facing nature of these interactions substituted as a form of delivery; or, in Agile parlance, became my <a href="https://www.agilealliance.org/glossary/definition-of-done/">&quot;definition of done&quot;</a>.</p>
 <p>While, in retrospect, I had hoped to have investigated many more technologies than I actually managed during this time, overall I would consider this time well spent. In addition to releasing two applications to the Windows Store and contributing to several public Github projects (more on this later) I managed to rack up over 1000 rep on StackOverflow in just a couple of months.</p>
 <p>Unfortunately, during this time, I didn't achieve my primary goal; namely finding a project that could potentially be grown into a marketable product and form the basis of a company. While there were no shortage of ideas and there still remain a couple of &quot;coals in the fire&quot;, I don't think I've yet found the gap in the market I'm looking for. One slight positive note here is that I have, at the very least, determined a couple of markets I'm very keen on investigating further and in which I'd like to work in the future.</p>
-<h2>Health</h2>
+<h2 id="health">Health</h2>
 <p>For this visualization I have employed step count (vertical bars), weight (yellow line with dotted yellow representing ideal weight) and fat-mass (red line with dotted red representing ideal fat-mass) as a (very rough) approximation of health. While, in theory, I should have had more leisure time available to exercise over the course of the year, in real terms I found that I did far less than expected. This was due to a number of factors:</p>
 <ul>
 <li>My previous employer, being a company that revolves around football, had regular football matches/tournaments between company staff which were of a very high standard. I played in as many of these as possible and, once I left, I very much missed the exercise.</li>
@@ -185,7 +182,7 @@
 </ol>
 <p>In retrospect, something that came as no surprise but for which I failed to anticipate the true impact, was the effect of not exercising on my state of mind and general happiness. Having always been an active and optimistic individual, I completely underestimated the tight correlation between these two characteristics. Mid-November saw me at my least active and, as I've come to realise, my least productive/focused (as evidenced by the sudden surge in StackOverflow rep!). Fortunately I try be somewhat self-reflective and, recognising that my diminished level of activity might be a possible cause for a perceived lack of progress, I decided to start swimming again as a means to address this.</p>
 <p>Now, while I'm still not exercise as much as I would like, I at least feel like my activity levels are sufficient to allow me to focus on projects and achieve my deliverables. Moving forward I very much hope to re-establish the village football team in time for next season or join another team such that I get at least a couple of games a month.</p>
-<h2>Finances</h2>
+<h2 id="finances">Finances</h2>
 <p>In counterpoint to the Health visualization described above, the Finances visualization shows a relative interpretation of my financial health across the year.</p>
 <p>At the beginning of the year, when considering a career-break, I tried to calculate a monthly &quot;burn-rate&quot; (i.e. total out-goings per month). Given I was not planning to change my lifestyle at all and my partner and I had already planned a number of holidays, I arrived at a rough estimate of £3k per month. This was affordable and, while it would put a dent in my savings, wouldn't leave me worrying about money at the end of the year.</p>
 <p>Through-out the year there were a number of factors that further affected my finances:</p>
@@ -195,27 +192,27 @@
 <li>While I typically spend a significant amount on computer hardware, this year I required very little but for a relatively cheap new server.</li>
 </ul>
 <p>Now, looking back across the year (and excluding large one-off payments like buying the van) it seems my burn-rate was closer to £2k, one third less than I had planned. This coupled with receiving returns on previous investments meant I actually ended the year significantly better off than I started it. While this definitely wouldn't be the case were I to continue the career-break for a second year, it is very reassuring to know that I could, should I decide to do so.</p>
-<h2>Github contributions</h2>
+<h2 id="github-contributions">Github contributions</h2>
 <p>Across the year - although predominantly in the last few months - I made 368 commits to Github. These were spread across a couple of dozen repositories but mostly focused on the (private) repository for <a href="https://www.microsoft.com/en-gb/store/p/littlelittle/9nblggh51b1b">LittleLittle</a> and my (statically generated &amp; github-pages hosted) <a href="https://github.com/ibebbs/ibebbs.github.io">blog</a>. Additionally, I contributed to several open source repositories, most notably the <a href="https://github.com/Microsoft/UWPCommunityToolkit">UWP Community Toolkit</a> (1000 stars) and <a href="https://github.com/beto-rodriguez/Live-Charts">Live-Charts</a> (875 stars).</p>
 <p>Given 2016 was a leap-year, 368 commits in 366 days averages (just!) over one a day. Overall I'm quite pleased with this level of commitment and the quantity of work it represents, especially considering the amount of time this year spent not working. Additionally, for the last three months of this year, my partner and I have both elected to work four-day weeks as we felt it represented a better balance between parental and nursery care for our daughter. For me this meant Thursdays became &quot;daddy-day-care&quot; so that I could take my daughter swimming - something we both really enjoy - but which adversely affected my productivity.</p>
 <p>Moving forward I intend to start publishing much more of my work to public repositories including regular updates to my <a href="https://github.com/ibebbs/Spikes">&quot;Spikes&quot;</a> repository which contains investigative projects and examples for solutions to various StackOverflow questions.</p>
-<h2>StackOverflow</h2>
+<h2 id="stackoverflow">StackOverflow</h2>
 <p>Talking of StackOverflow questions, the next visualization shows StackOverflow Reputation accumulation across the year (light blue line) with gains shown day-by-day (dark blue boxes). While I predominantly consider it a distraction, I really enjoy answering questions on StackOverflow, probably due to the awesome <a href="https://en.wikipedia.org/wiki/Gamification">gamification</a> employed on the <a href="http://stackexchange.com/">StackExchange</a> sites.</p>
 <p>While there is a low level of fairly constant reputation gain, most of the gains came in short bursts. As discussed above, I attribute this losing focus on my main projects due to inactivity. Still, there are far worse forms of procrastination than helping people and I consider this a relatively good use of time.</p>
 <p>I am currently endeavoring to get the 'Fanatic' badge (visit StackOverflow for 100 days consecutively) but trying not to let it get in the way of other work. This usually means only answering questions when I can quickly point the asker in the right direction but I will occasionally field a more challenging question when it's <a href="http://stackoverflow.com/questions/tagged/system.reactive">something I'm particularly interested in</a>.</p>
-<h2>Blog posts</h2>
+<h2 id="blog-posts">Blog posts</h2>
 <p>Over the course of the year I have written and published 22 blog posts - totaling nearly 24,000 words - across a range of subjects including:</p>
-<blockquote>
+<blockquote class="blockquote">
 <p>3D PRINTING (1) APACHE KAFKA (1) APACHE ZOOKEEPER (1) ATTACHED PROPERTY (1) BDD (1) BEHAVIORAL (1) BLOG (3) CAREER BREAK (1) CLIENT-SIDE FRAMEWORK (2) CQRS (1) DART (1) DATAFLOW (1) DOCKER (1) DVD RIPPING (1) EF (1) ELASTIC STACK (4) ELASTICSEARCH (4) EVENT SOURCING (1) EVENTS (1) EVENTSOURCING (1) FUTURE (1) GITHUB (2) GROWTH (1) HYPERLINK (1) IOT (1) JAVASCRIPT (2) JS (1) KIBANA (4) LITTLELITTLE (1) LOGSTASH (4) MAPLIN (1) MONITORING (4) MVVM (1) NANOSERVER (1) NETWORKING (4) PARENTHOOD (1) PATTERNS (1) PRODUCTIVITY (1) RASPBERRYPI (1) REACTIVE (7) REST (1) ROBOX (1) RX (7) SQL (1) STATE MACHINES (1) SVG (1) SYSLOG (4) TESTING (1) TODDLERBOX (3) TOOLKIT (2) TPL (2) TRAVEL (1) TYPESCRIPT (1) UWP (7) VISUAL STUDIO (2) VISUAL STUDIO CODE (1) WEBRX (2) WINDOWS SERVER 2016 (1) WYAM (1) XAML (2) XBOX (3)</p>
 </blockquote>
 <p>This content garners an average of around 110 unique visitors and 400 page views every month.</p>
 <p>One of these posts - <a href="https://blogs.msdn.microsoft.com/dotnet/2016/09/07/the-week-in-net-972016/">&quot;The absolute easiest way to use SVG icons in UWP apps&quot;</a> was featured in <a href="https://blogs.msdn.microsoft.com/dotnet/2016/09/07/the-week-in-net-972016/">&quot;The week in .NET – 9/7/2016&quot;</a>. Furthermore, blog posts I have shared with people on other platforms (i.e. StackOverflow, MSDN, etc) have been understood and well received.</p>
 <p>All in, I think I've added some valuable content to my blog this last year but feel like I should have tried harder to increase it's reach. While writing these blog posts inevitably takes a considerably amount of time, I intend to continue making as many new posts as possible, hopefully across an increased range of subjects and - by submitting to various aggregation blogs - with increased readership.</p>
-<h2>Commitments</h2>
+<h2 id="commitments">Commitments</h2>
 <p>This timeline displays any days I had expected to work yet was unable to for a variety of reasons. Over the course of the year this accounted for 42 days, mostly the Thursdays that have become my &quot;daddy-day-care&quot; day and during which I take my daughter swimming. While these &quot;commitments&quot; would have been worked around had I been in full-time employment, the flexibility of working when I can as opposed to when I have to has undoubtedly led to a greater degree of motiviation and concentration when I am in front of the computer.</p>
-<h1>Summary</h1>
+<h1 id="summary">Summary</h1>
 <p>Given this fairly comprehensive look back across the year, it's time to perform the retrospective.</p>
-<h3>What went well?</h3>
+<h3 id="what-went-well">What went well?</h3>
 <p>There were numerous wins across the year including:</p>
 <ol>
 <li>Getting to spend the year with my partner and baby which included spending two months traveling Europe in a camper-van.</li>
@@ -227,7 +224,7 @@
 <li>Fully realising the importance of exercise on productivity.</li>
 <li>Completing the year in better financial health than I had expected.</li>
 </ol>
-<h3>What didn't go so well?</h3>
+<h3 id="what-didnt-go-so-well">What didn't go so well?</h3>
 <p>Given that, despite taking a career break, I continued to be productive in a variety of ways, I don't feel like too many things went badly this year. However there are a few things I would have liked to have achieved but didn't such as:</p>
 <ol>
 <li>Not finding the &quot;market gap&quot; or having the &quot;killer idea&quot; I had hoped to translate into a start-up.</li>
@@ -235,7 +232,7 @@
 <li>Lacking a significant amount of exercise and thereby loosing focus and momentum for ongoing projects.</li>
 <li>Shying away from increasing the exposure of my blog content via news aggregators, social media, etc.</li>
 </ol>
-<h3>What needs to change moving forward</h3>
+<h3 id="what-needs-to-change-moving-forward">What needs to change moving forward</h3>
 <p>Well, I gave myself the year to come up with the &quot;killer idea&quot; but didn't manage it so now it's time to change tack. In the coming months I will be starting to look for contract work which, ideally, I can do remotely. Fortunately there is no pressure for me to return to work so I can be quite picky about the roles I take. The ideal contract would ideally feature one or all of the following:</p>
 <ul>
 <li>UWP/WPF</li>
@@ -258,7 +255,7 @@
 <p>That said, given the large number of <a href="https://blog.rjmetrics.com/2014/04/30/the-big-opportunities-in-the-unknown-unknowns/">&quot;unknown unknowns&quot;</a>, perhaps there are other technologies / markets I've not encountered yet that would be equally enthralling.</p>
 <p>In the mean time, I will continue to investigate other interesting technologies and release updates to my existing products as appropriate.</p>
 <p>Regarding family life, well, in this respect I hope to continue the extremely rewarding work/life balance my partner and I have achieved over the last year. This could be difficult once the demands of external deadlines become a reality again but it's something I would be extremely reluctant to change.</p>
-<h2>In conclusion</h2>
+<h2 id="in-conclusion">In conclusion</h2>
 <p>It's been an amazing year and one I will remember for a long time. Regardless of what I end up doing, it is my aim to take another career break in the not too distant future in which I will endeavor to repeat the successes of this year, remedy the failures and remind myself that it's good to look up from the computer from time to time.</p>
 
 
@@ -266,87 +263,53 @@
                                 </div>
                         </div>
                 </div>
-
+                
                 <hr>
-
+                
                 <!-- Footer -->
                 <footer>
                         <div class="container">
-  <div class="row">
-    <div class="col-md-12 text-center">
-      <ul class="list-inline text-center">
-        <li>
-          <a href="https://twitter.com/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="https://github.com/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="http://stackoverflow.com/users/628821/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="https://social.msdn.microsoft.com/profile/ian%20bebbington/">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-windows fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-      </ul>
-      <p class="copyright text-muted">
-        Copyright © 2018 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/">"Creative Commons Attribution 4.0 International License"</a>
-        <br />
-        <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
-        <br />
-        <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
-      </p>
-    </div>
-
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-      ga('create', 'UA-70151903-1', 'auto');
-      ga('send', 'pageview');
-
-    </script>
-
-    <script type="text/javascript">
-            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-            var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
-
-            /* * * DON'T EDIT BELOW THIS LINE * * */
-            (function () {
-                    var s = document.createElement('script'); s.async = true;
-                    s.type = 'text/javascript';
-                    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
-                    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
-            }());
-    </script>
+        <div class="row">
+                <div class="col-md-12 text-center">
+                    <p class="copyright text-muted">
+                        Copyright © 2019
+                        <br />
+                            <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a>
+                        |
+                            <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                        <br />
+                        <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                    </p>
+                </div>
+        </div>
 </div>
 
-                </footer>
+                </footer> 
 
                 
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
         </body>
-</html>
- </body>
 </html>
 

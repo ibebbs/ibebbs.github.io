@@ -1,5 +1,4 @@
-
-
+﻿
 <!DOCTYPE html>
 <html lang="en">
         <head>
@@ -8,22 +7,21 @@
 
         <title>Ian Bebbington - Nano2Docker</title>
         <meta name="description" content="IObservable&lt;Opinion&gt;" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
 
         <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
-        <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
-        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
-        <link href="/assets/css/prettify.css" rel="stylesheet">
-        <link href="/assets/css/github.css" rel="stylesheet">
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
         <link href="/assets/css/clean-blog.css" rel="stylesheet" />
         <link href="/assets/css/master.css" rel="stylesheet" />
-        <link href="/assets/css/custom.css" rel="stylesheet" />
-        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-        <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
-        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
 
 
         <meta name="application-name" content="Ian Bebbington" />
@@ -31,29 +29,32 @@
         <meta name="msapplication-starturl" content="/" />
 
         <meta property="og:title" content="Ian Bebbington - Nano2Docker" />
-        
         <meta property="og:type" content="website" />
         <meta property="og:url" content="http://ian.bebbs.co.uk/posts/Nano2Docker" />
         <!-- TODO: More social graph meta tags -->
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-        <script src="/assets/js/prettify.js"></script>
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
         <script src="/assets/js/clean-blog.js"></script>
-        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
         <script src="/assets/js/trianglify.min.js"></script>
         <script src="/assets/js/Please-compressed.js"></script>
-
+        <script src="/assets/js/background-check.min.js"></script>
+                
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
-                <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-                <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
         <![endif]-->
+        
+        
+
 
         </head>
-        <body onload="prettyPrint()">
-
+        <body>
+                
                 <!-- Navigation -->
                 <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
                         <div class="container-fluid">
@@ -67,75 +68,71 @@
                                         </button>
                                         <a class="navbar-brand" href="/">Ian Bebbington</a>
                                 </div>
-
+                        
                                 <!-- Collect the nav links, forms, and other content for toggling -->
                                 <div class="collapse navbar-collapse" id="navbar-collapse">
                                         <ul class="nav navbar-nav navbar-right">
-                                                        <li><a href="/about">About Me</a></li>
-        <li><a href="/tags">All Tags</a></li>
-        <li><a href="/posts">Archive</a></li>
-
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About Me</a></li>
+ 
                                         </ul>
                                 </div>
                                 <!-- /.navbar-collapse -->
                         </div>
                         <!-- /.container -->
                 </nav>
-
+                
                 <!-- Page Header -->
-
                 <header class="intro-header" id="intro-header">
                         <div class="container">
                                 <div class="row">
                                         <div class="col-md-12">
 
     
-
 <div class="post-heading">
     <h1>Nano2Docker</h1>
         <h2 class="subheading">Using NanoServer to create a Docker Swarm for Windows Containers</h2>
     <div class="meta">        
-            Published on 10 July 2017<br>
-    </div>
+Published on 10 July 2017<br>    </div>
         <div class="tags">
-                    <a role="button" href="/tags/docker" class="btn btn-default btn-xs">Docker</a>
-                    <a role="button" href="/tags/nanoserver" class="btn btn-default btn-xs">NanoServer</a>
-                    <a role="button" href="/tags/powershell" class="btn btn-default btn-xs">Powershell</a>
+                    <a role="button" href="/tags/Docker" class="btn btn-default btn-xs">Docker</a>
+                    <a role="button" href="/tags/NanoServer" class="btn btn-default btn-xs">NanoServer</a>
+                    <a role="button" href="/tags/Powershell" class="btn btn-default btn-xs">Powershell</a>
         </div>     
 </div>
                                         </div>
                                 </div>
                         </div>
                 </header>
-
+                
                 <!-- Main Content -->
                 <div class="container">
                         <div class="row">
                                 <div id="content" class="col-md-12">
                                         
 
-
-<h1>Deployment at last</h1>
+<h1 id="deployment-at-last">Deployment at last</h1>
 <p>While my current contract doesn't leave much time for personal projects, I have made some progress on my current project (details on exactly what this is to follow). In fact, some of the smaller, peripheral services have their primary use-cases functionally complete and are ready for deployment and I am now faced with the question: Deployment to where?</p>
-<h1>Fabric or Container</h1>
+<h1 id="fabric-or-container">Fabric or Container</h1>
 <p>Given this project constitutes multiple micro-services using message based, asynchronous communication with the potential to scale services horizontally, I required some form of elastic service fabric. Furthermore, I wanted a local development environment which would simulate a cluster of machines but with which I could monkey about as much as I liked without fear of accidentally incurring massive hosting fees in the cloud.</p>
 <p>As I had just upgraded my home server with plenty of memory, I decided to use one of more virtual machines running on this server to host the environment during development, but which technology to use?</p>
 <p>Initially I had intended to use a <a href="https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-get-started-with-a-local-cluster">local Service Fabric cluster</a>. However, upon further investigation I found that the SDK and API introduced significant friction to the development process (needing additional projects for supplying manifest / configuration data for services, overly complex deployment scripts, etc). Even the 'guest executable' approach seemed overly complex and I quickly went off this approach.</p>
 <p>My second thought was <a href="https://www.docker.com/">Docker</a>; specifically the creation of a local <a href="https://docs.docker.com/engine/swarm/">Docker Swarm</a> which I could deploy servies to with <a href="https://docs.docker.com/compose/">Docker Compose</a>. <a href="https://docs.docker.com/machine/">Docker Machine</a> made short work of provisioning Docker hosts in Hyper-V but with one caveat: it's <a href="http://boot2docker.io/">boot2docker</a> image would only run Linux based containers and, while many of the services I have written / will write run quite happily on .NET Core, some require packages that do not yet provide support for .NET Core / Standard.</p>
 <p>Given that a recent update made <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode">Swarm mode available to Windows Server 2016</a> host operating systems, I decided I would look into provisioning a series of Windows Server VM's with container support and configure Docker on these VM's to operate in swarm mode.</p>
-<h1>Using Nano Server as a Docker host</h1>
+<h1 id="using-nano-server-as-a-docker-host">Using Nano Server as a Docker host</h1>
 <p>While I had previously used Microsoft Nano Server as a <a href="http://ian.bebbs.co.uk/posts/ASentimentalAnalysisOfRedDwarfPartII">guest OS</a> for <a href="http://ian.bebbs.co.uk/posts/DockerAndKafka">containerized apps</a>, I hadn't realised that it was possible to use it as a host OS for Docker until I came across <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/deploy-containers-on-nano">this article</a>. For those not familiar with Nano Server it is an extremely slimmed down (the OS image is less than 170Mb) and fast booting (5-10 seconds), headless version of Windows Server 2016 which, given it is capable of acting as a Docker host, effectively makes it 'boot2docker' but for Windows containers.</p>
 <p>Nano Server is shipped with Windows Server 2016 and is accompanied by a Powershell module which provides some terrific facilities for working with Nano Server images. <a href="https://docs.microsoft.com/en-us/windows-server/get-started/deploy-nano-server">This document</a> shows how to use this Powershell module to create customised Nano Server images as either <a href="https://en.wikipedia.org/wiki/Windows_Imaging_Format">'.wim'</a>, <a href="https://en.wikipedia.org/wiki/ISO_image">'.iso'</a> or - most interestingly for me -  <a href="https://technet.microsoft.com/en-us/library/hh831446(v=ws.11).aspx">'.vhdx'</a>. In short, the following powershell command will create a virtual HD that can be attached to a virtual machine and which will boot directly into Nano Server with support for - but no utilites to provide - containerization services:</p>
-<pre class="prettyprint"><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort
+<pre><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort
 </code></pre>
 <p>This command will also open <a href="https://msdn.microsoft.com/en-us/library/aa384426(v=vs.85).aspx">WinRM</a> ports on the Nano Server which allows you to use <a href="https://technet.microsoft.com/en-us/library/ff700227.aspx">PS Remoting</a> to remote into the virtual machine and examine it's state; indispensable for debugging purposes.</p>
-<h1>Updating Nano Server</h1>
+<h1 id="updating-nano-server">Updating Nano Server</h1>
 <p>Referring back to the <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode">'Getting Started with Swarm Mode'</a> article, it states that a <a href="https://support.microsoft.com/en-us/help/4015217/windows-10-update-kb4015217">relatively recent update</a> is required to run Docker Swarms on Windows Server 2016 based OS's. It is therefore necessary to ensure this update is applied to any NanoServer image we create for the purpose of running Docker, ideally during the creation of the image not a subsequent setup script.</p>
 <p>Well, those clever people at Microsoft thought of this too and provided a <code>-ServicingPackagePath</code> argument for the <code>New-NanoServerImage</code> command which takes a path to a cab update file and applies the update to the NanoServer OS during image creation. A mechanism for getting an update from Microsoft (as an *.msu) and extracting it into a (series of) cab-files for use in the <code>New-NanoServerImage</code> is provided by Thomas Maurer in <a href="http://www.thomasmaurer.ch/2016/10/how-to-install-updates-on-nano-server/">an excellent blog post here</a>.</p>
-<h1>Installing Docker as part of a Nano Server image</h1>
+<h1 id="installing-docker-as-part-of-a-nano-server-image">Installing Docker as part of a Nano Server image</h1>
 <p>Now, just like 'boot2docker' we want our Nano Server to be ready to host Windows Containers as soon as it's booted and without further manual configuration. To this end, I needed to find a way to install Docker as part of the deployment process. Fortunately the 'New-NanoServer' command provides a <code>-SetupCompleteCommand</code> argument which allows you to 'run custom commands as part of setupcomplete.cmd' (i.e. on first boot). Great, so now to prepare a script to deploy Docker which we can call via the <code>-SetupCompleteCommand</code> argument.</p>
 <p>Conveniently, Docker's <a href="https://docs.docker.com/docker-ee-for-windows/install/#using-a-script-to-install-docker-ee">documentation for installing Docker EE</a> (the version supported by Windows) provides exactly the script required, copied below with some additional configuration copied from the 'Prepare Container Host' section of <a href="">'Deploy Containers on Nano'</a> article:</p>
-<pre class="prettyprint"><code># On an online machine, download the zip file
+<pre><code># On an online machine, download the zip file
 Invoke-Webrequest -UseBasicparsing -Outfile docker.zip https://download.docker.com/components/engine/windows-server/17.03/docker-17.03.0-ee.zip
 
 # Extract the archive.
@@ -169,63 +166,65 @@ dockerd --register-service
 Start-Service docker
 </code></pre>
 <p>Now this script requires that the Nano Server be online when the script is run so that it can download the Docker binaries. Unfortunately, given that this script will run as part of the deployment process, this is unlikely to be the case. Instead, we'll need to lean on another feature of the <code>New-NanoServerImage</code>, <code>-CopyPath</code>. This argument allows you to specify one or more files to copy to the Nano Server image as part of it's creation and we'll use it to copy a pre-downloaded copy of the docker binaries (along with a copy of the deployment script) to the root of the images C:\ drive, as shown here:</p>
-<pre class="prettyprint"><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort -CopyPath &#64;('&lt;path to deployment script&gt;\DeployDocker.ps1', '&lt;path in which docker is downloaded&gt;\docker.zip') -SetupCompleteCommand &#64;('Powershell.exe -Command .\DeployDocker.ps1') 
+<pre><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort -CopyPath &#64;('&lt;path to deployment script&gt;\DeployDocker.ps1', '&lt;path in which docker is downloaded&gt;\docker.zip') -SetupCompleteCommand &#64;('Powershell.exe -Command .\DeployDocker.ps1') 
 </code></pre>
 <p>Great, now we can comment out the first line of the script above and it'll run fine, right? Unfortunately not. It seems that, at the stage of the boot process at which this script runs, powershell isn't quite ready to run powershell. Fortunately, others have encountered this issue before and Sergey Babkin provides <a href="https://blogs.msdn.microsoft.com/sergey_babkins_blog/2017/01/05/how-to-run-powershell-from-setupcomplete-cmd/">this solution</a>; copied below with customisation for our requirements:</p>
-<pre class="prettyprint"><code>set LOCALAPPDATA=%USERPROFILE%\AppData\Local
+<pre><code>set LOCALAPPDATA=%USERPROFILE%\AppData\Local
 set PSExecutionPolicyPreference=Unrestricted
 Powershell -Command C:\DeployDocker.ps1
 </code></pre>
 <p>Ok, so we'll add and deploy this batch file as 'DeployDocker.bat' and then execute this instead of the powershell script as the <code>-SetupCompleteCommand</code>, as shown here:</p>
-<pre class="prettyprint"><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort -CopyPath &#64;('&lt;path to deployment batch file'\DeployDocker.bat', '&lt;path to deployment script&gt;\DeployDocker.ps1', '&lt;path in which docker is downloaded&gt;\docker.zip') -SetupCompleteCommand 'C:\DeployDocker.bat' 
+<pre><code>New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &lt;path to root of media&gt; -BasePath &lt;path in which to build the image&gt; -TargetPath &lt;destination path&gt;\NanoServer.vhdx -ComputerName &lt;computer name&gt; -Containers -EnableRemoteManagementPort -CopyPath &#64;('&lt;path to deployment batch file'\DeployDocker.bat', '&lt;path to deployment script&gt;\DeployDocker.ps1', '&lt;path in which docker is downloaded&gt;\docker.zip') -SetupCompleteCommand 'C:\DeployDocker.bat' 
 </code></pre>
 <p>And thats it. If you now create a virtual machine with the new 'NanoServer.vhdx' image as it's boot drive, you should find that, once it's booted you're able to communicate with the Docker daemon on the VM. For example:</p>
-<pre class="prettyprint"><code>docker -H &lt;IP Address of VM&gt; ps
+<pre><code>docker -H &lt;IP Address of VM&gt; ps
 </code></pre>
 <p>Should return a (empty) list of containers present on the Nano Server host.</p>
-<h1>Scripting the creation of a VM</h1>
+<h1 id="scripting-the-creation-of-a-vm">Scripting the creation of a VM</h1>
 <p>Now, jumping through all the hoops above each time we want to make a new VM to host docker would be arduous to say the least. As such, I put together a powershell module which is able to directly create VM's ready to host Docker containers in just a few steps. From a powershell command prompr, this can be done as follows:</p>
 <ol>
 <li>Get the Nano2Docker powershell module</li>
 </ol>
 <p>This module is available in my Docker repository on Github and can be downloaded directly using the following command:</p>
-<pre class="prettyprint"><code>Invoke-WebRequest -OutFile Nano2Docker.psm1 https://raw.githubusercontent.com/ibebbs/Docker/master/Nano2Docker/Nano2Docker.psm1
+<pre><code>Invoke-WebRequest -OutFile Nano2Docker.psm1 https://raw.githubusercontent.com/ibebbs/Docker/master/Nano2Docker/Nano2Docker.psm1
 </code></pre>
 <p>Then installed using:</p>
-<pre class="prettyprint"><code>Import-Module Nano2Docker.psm1
+<pre><code>Import-Module Nano2Docker.psm1
 </code></pre>
 <ol start="2">
 <li>Prepare a base NanoServer image</li>
 </ol>
 <p>The process of downloading docker and applying updates can be extremely slow. Therefore we first create a reusable base NanoServer image that has docker installed and updates applied. This is done using the command:</p>
-<pre class="prettyprint"><code>Initialize-Nano2DockerImage -MediaPath &lt;Drive letter for Windows Server 2016&gt; -BuildPath &lt;Path to a build location&gt;
+<pre><code>Initialize-Nano2DockerImage -MediaPath &lt;Drive letter for Windows Server 2016&gt; -BuildPath &lt;Path to a build location&gt;
 </code></pre>
 <p>For example, if your Windows Server 2016 media is mounted in the 'G' drive and you want to build the new Nano2Docker image in the 'C:\Nano2Docker' folder, you'd use the command:</p>
-<pre class="prettyprint"><code>Initialize-Nano2DockerImage -MediaPath G: -BuildPath &quot;C:\Nano2Docker&quot;
+<pre><code>Initialize-Nano2DockerImage -MediaPath G: -BuildPath &quot;C:\Nano2Docker&quot;
 </code></pre>
 <p>The command provides defaults download locations for docker and required updates but these can be overriden using the <code>-DockerUrl</code> and <code>-UpdateUrl</code> parameters repsectively. Furthermore, if you already have an '.msu' file downloaded you can save a lot of time by providing this to the command using the <code>-UpdateFile</code> parameter.</p>
 <p>When you run this command, you will be prompted for Administrator credentials for the new Nano2Docker image. Either enter them when prompted or supply a <code>SecureString</code> value to the <code>-Password</code> argument (which is usually done using the <code>Get-Credentials</code> commandlet).</p>
 <p>When this command completes - which can take a while - you will find a 'Nano2Docker.vhdx' file in the BuildPath directory.</p>
-<p>3. Create a VM using the new NanoServer image</p>
+<ol start="3">
+<li>Create a VM using the new NanoServer image</li>
+</ol>
 <p>You can now use the <code>New-Nano2Docker</code> commandlet to quickly create new VM docker hosts. The command is used as follows:</p>
-<pre class="prettyprint"><code>New-Nano2Docker -MediaPath &lt;Drive letter for Windows Server 2016&gt; -ImagePath &lt;Path to a previously created Nano2Docker.vhdx&gt;
+<pre><code>New-Nano2Docker -MediaPath &lt;Drive letter for Windows Server 2016&gt; -ImagePath &lt;Path to a previously created Nano2Docker.vhdx&gt;
 </code></pre>
 <p>Using our previous example, the command would be:</p>
-<pre class="prettyprint"><code>New-Nano2Docker -MediaPath G: -ImagePath &quot;C:\Nano2Docker\Nano2Docker.vhdx&quot;
+<pre><code>New-Nano2Docker -MediaPath G: -ImagePath &quot;C:\Nano2Docker\Nano2Docker.vhdx&quot;
 </code></pre>
 <p>This command will copy the base image to the VM path (defaults to 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks'), provision a new, local, Hyper-V VM named 'Nano2Docker' with reasonable resources (4 cores / 2Gb of dynamic ram) and attached to the first available virtual switch.
 Obviously, each of these characteristics can be changed using the appropriate arguments - use <code>Get-Help New-Nano2Docker</code> to list the available arguments. You will again be asked to an Administrator password for the new VM which can be entered during creation or specified as a parameter to the commandlet.</p>
 <p>Once the new VM has been created, it will be started and the script will wait for NanoServer to start correctly. Once started, the IP address of the new VM is displayed and it should be immediately possible to use docker to communicate with the docker daemon on the VM.</p>
-<h1>Scripting the deployment of a Docker Swarm</h1>
+<h1 id="scripting-the-deployment-of-a-docker-swarm">Scripting the deployment of a Docker Swarm</h1>
 <p>Given it was now trivial to create docker hosts, I wrote a final commandlet which leverages previous commandlets to provision an entire docker swarm. This is done using the <code>New-Nano2DockerSwarm</code> commandlet as follows:</p>
-<pre class="prettyprint"><code>New-Nano2DockerSwarm -MediaPath &lt;Drive letter for Windows Server 2016&gt; -ImagePath &lt;Path to a previously created Nano2Docker.vhdx&gt; -VMPath &lt;Path to a location to store swarm host VMs&gt;
+<pre><code>New-Nano2DockerSwarm -MediaPath &lt;Drive letter for Windows Server 2016&gt; -ImagePath &lt;Path to a previously created Nano2Docker.vhdx&gt; -VMPath &lt;Path to a location to store swarm host VMs&gt;
 </code></pre>
 <p>Again, using our previous example and wanting to store new VM images in the 'C:\Nano2Docker\VMs' directory, the command would be:</p>
-<pre class="prettyprint"><code>New-Nano2DockerSwarm -MediaPath G: -ImagePath &quot;C:\Nano2Docker\Nano2Docker.vhdx&quot; -VMPath &quot;C:\Nano2Docker\VMs&quot;
+<pre><code>New-Nano2DockerSwarm -MediaPath G: -ImagePath &quot;C:\Nano2Docker\Nano2Docker.vhdx&quot; -VMPath &quot;C:\Nano2Docker\VMs&quot;
 </code></pre>
 <p>This command defaults to creating a single manager node and three worker nodes named 'n2d-mngr-0' and 'n2d-wrkr-0/1/2' respectively. All nodes will have already been joined to the swarm in the appropriate capacity and ready for services to be deployed using docker or docker-compose.
 Again, the number of manager and worked nodes as well as the name prefix for each node can be changed via the appropriate arguments (use <code>Get-Help New-Nano2DockerSwarm</code> to list the arguments).</p>
-<h1>Roundup</h1>
+<h1 id="roundup">Roundup</h1>
 <p>I've successfully used this script to provision multiple docker hosts and docker swarms but it's worthwhile noting that it can be a bit finickity with directories. If you can an error saying it couldn't find a directory then simply create it first. I really ought to fix up the script (improvements via PR gratefully accepted) but I'm now a bit busy deploying services to my swarm :0)</p>
 <p>Furthermore I've successfully used nodes created by this script to provision a hybrid swarm (see the 'Mixed OS clusters section <a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode">here</a>) of boot2docker and nano2docker images. With the appropriate labels on the nodes, it is possible to use <code>docker-compose</code> to automatically deploy images to the correct hosts while retaining all the benefits of overlay networking.</p>
 <p>It's a lot of docking fun!</p>
@@ -235,84 +234,53 @@ Again, the number of manager and worked nodes as well as the name prefix for eac
                                 </div>
                         </div>
                 </div>
-
+                
                 <hr>
-
+                
                 <!-- Footer -->
                 <footer>
                         <div class="container">
-  <div class="row">
-    <div class="col-md-12 text-center">
-      <ul class="list-inline text-center">
-        <li>
-          <a href="https://twitter.com/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="https://github.com/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="http://stackoverflow.com/users/628821/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="https://social.msdn.microsoft.com/profile/ian%20bebbington/">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-windows fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-      </ul>
-      <p class="copyright text-muted">
-        Copyright © 2018 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/">"Creative Commons Attribution 4.0 International License"</a>
-        <br />
-        <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
-        <br />
-        <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
-      </p>
-    </div>
-
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-      ga('create', 'UA-70151903-1', 'auto');
-      ga('send', 'pageview');
-
-    </script>
-
-    <script type="text/javascript">
-            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-            var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
-
-            /* * * DON'T EDIT BELOW THIS LINE * * */
-            (function () {
-                    var s = document.createElement('script'); s.async = true;
-                    s.type = 'text/javascript';
-                    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
-                    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
-            }());
-    </script>
+        <div class="row">
+                <div class="col-md-12 text-center">
+                    <p class="copyright text-muted">
+                        Copyright © 2019
+                        <br />
+                            <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a>
+                        |
+                            <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                        <br />
+                        <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                    </p>
+                </div>
+        </div>
 </div>
 
-                </footer>
+                </footer> 
 
                 
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
         </body>
 </html>
+
