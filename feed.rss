@@ -5,8 +5,113 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2019</copyright>
-		<pubDate>Thu, 09 May 2019 11:29:51 GMT</pubDate>
-		<lastBuildDate>Thu, 09 May 2019 11:29:51 GMT</lastBuildDate>
+		<pubDate>Thu, 09 May 2019 15:45:05 GMT</pubDate>
+		<lastBuildDate>Thu, 09 May 2019 15:45:05 GMT</lastBuildDate>
+		<item>
+			<title>Fluent Namespacing</title>
+			<link>http://ian.bebbs.co.uk/posts/FluentNamespacing</link>
+			<description>&lt;p&gt;&lt;em&gt;So, it's been a while since I've blogged. Mostly this has been due to other committments (family, friends, side projects, etc), working more hours contracting than I would ideally like and generally not having any dead-time (such as when I used to commute). Since my last blog post (over a year ago!!) I've been maintaining an ever increasing list of things I'd like to blog about but haven't found the time. Given it's a new year, I've decided to pick a couple of the more challenging/contentious blog ideas and endeavour to get them written. This is the first and, while not necessarily the most contentious, might take some getting your head aroud. You have been warned...&lt;/em&gt;&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/FluentNamespacing</guid>
+			<pubDate>Thu, 09 May 2019 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;p&gt;&lt;em&gt;So, it's been a while since I've blogged. Mostly this has been due to other committments (family, friends, side projects, etc), working more hours contracting than I would ideally like and generally not having any dead-time (such as when I used to commute). Since my last blog post (over a year ago!!) I've been maintaining an ever increasing list of things I'd like to blog about but haven't found the time. Given it's a new year, I've decided to pick a couple of the more challenging/contentious blog ideas and endeavour to get them written. This is the first and, while not necessarily the most contentious, might take some getting your head aroud. You have been warned...&lt;/em&gt;&lt;/p&gt;
+&lt;p&gt;There is a convention at the heart of enterprise development and many modern development frameworks which seems to have been blindly adopted by the development community at large. I hope to challenge this convention as I believe changing it can provide many useful benefits in day to day development.&lt;/p&gt;
+&lt;p&gt;This convention I'm referring to is the tendancy to group classes by &lt;em&gt;functional pattern&lt;/em&gt; rather than &lt;em&gt;functional domain&lt;/em&gt;. What does this mean? Well, to illustrate, lets start a new webapi project:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;dotnet new webapi
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You will end up with a folder structure similar to this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$:.
+│   appsettings.Development.json
+│   appsettings.json
+│   FluentNamespacing.csproj
+│   Program.cs
+│   Startup.cs
+│   
+├───Controllers
+│       ValuesController.cs
+│       
+└───Properties
+        launchSettings.json
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There, you see it don't you? No? Well, that just shows how ingrained this convention is.&lt;/p&gt;
+&lt;p&gt;I'm referring to the &lt;code&gt;ValuesController&lt;/code&gt; class residing a &lt;code&gt;Controllers&lt;/code&gt; folder. What's the problem with that, you ask? Well, lets develop this project a little further and revisit.&lt;/p&gt;
+&lt;p&gt;Lets say, after a little &lt;em&gt;conventional&lt;/em&gt; development, we're now here:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$:.
+│   appsettings.Development.json
+│   appsettings.json
+│   FluentNamespacing.csproj
+│   Program.cs
+│   Startup.cs
+│               
+├───Controllers
+│       PersonController.cs
+│       
+├───Factories
+│       PersonFactory.cs
+│       
+├───Models
+│       PersonModel.cs
+│               
+├───Properties
+│       launchSettings.json
+│       
+└───Repositories
+        PersonRepository.cs
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Our abstract &lt;code&gt;ValuesController&lt;/code&gt; has become a &lt;code&gt;PersonController&lt;/code&gt; as we want to serve instances of the &lt;code&gt;PersonModel&lt;/code&gt;. But wait, where is the &lt;code&gt;PersonModel&lt;/code&gt; class? Ah, of course, in the &lt;code&gt;Models&lt;/code&gt; folder. Ok, we'll add &lt;code&gt;using FluentNamespacing.Models&lt;/code&gt; to the top of the &lt;code&gt;PersonController.cs&lt;/code&gt; and continue.&lt;/p&gt;
+&lt;p&gt;Now as is common practice, we might want to abstract our datastore via the &lt;a href="https://martinfowler.com/eaaCatalog/repository.html"&gt;repository pattern&lt;/a&gt; so we dutifully create a &lt;code&gt;Repositories&lt;/code&gt; folder within which we add a &lt;code&gt;PersonRepository&lt;/code&gt; class. We need to use this in the &lt;code&gt;PersonController&lt;/code&gt; so we add another using statement to the file (&lt;code&gt;using FluentNamespacing.Repositories&lt;/code&gt;) bringing the &lt;code&gt;PersonRepository&lt;/code&gt; into scope.&lt;/p&gt;
+&lt;p&gt;Finally, when a user uses a POST call to create a new user, the &lt;code&gt;PersonController&lt;/code&gt; should again follow common practise and use the &lt;a href="https://en.wikipedia.org/wiki/Factory_method_pattern"&gt;factory pattern&lt;/a&gt; to create a new &lt;code&gt;PersonModel&lt;/code&gt; which can then be saved via the repository. Again we go round the loop of creating a directory (&lt;code&gt;Factories&lt;/code&gt;), adding a class to it (&lt;code&gt;PersonFactory&lt;/code&gt;) and adding a using to the &lt;code&gt;PersonController.cs&lt;/code&gt; file (&lt;code&gt;using FluentNamespacing.Factories&lt;/code&gt;). Phew.&lt;/p&gt;
+&lt;p&gt;Now look at our project. We have almost as many folders as we do classes and the classes related to the &amp;quot;Person&amp;quot; entity are spread across the project. Furthermore, we've had to prefix each of our classes with the  entity (i.e. &lt;code&gt;Person&lt;/code&gt;) it relates to in order to differentiate it from similar classes for other entities (i.e. &lt;code&gt;Job&lt;/code&gt;, &lt;code&gt;Role&lt;/code&gt;, &lt;code&gt;Group&lt;/code&gt;). That's a lot of typing and/or mouse navigation to get basic functionality in place.&lt;/p&gt;
+&lt;p&gt;Now consider this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;D:.
+│   appsettings.Development.json
+│   appsettings.json
+│   FluentlyNamespaced.csproj
+│   Program.cs
+│   Startup.cs
+│               
+├───Person
+│       Controller.cs
+│       Factory.cs
+│       Model.cs
+│       Repository.cs
+│       
+└───Properties
+        launchSettings.json
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we have exactly the same functionality but grouped by functional domain not functional pattern; i.e. all classes related to a Person are in the same folder. This has resulted in far less structural noise, simplied class names and no need for additional using statements to be added to any of the classes.&lt;/p&gt;
+&lt;h3 id="fluent-namespacing"&gt;Fluent Namespacing&lt;/h3&gt;
+&lt;p&gt;I have been applying this approach in medium to large enterprise code-bases for some time now and find it provides simplified code, less structural overhead, easier navigation, faster comprehension and improved code architecture. I refer to it as &amp;quot;Fluent Namespacing&amp;quot; because, when you start referring to your classes via the [partial] namespace rather than long class names (requiring additional &lt;code&gt;using&lt;/code&gt; statements), the code tends to read like a &lt;a href="https://martinfowler.com/bliki/FluentInterface.html"&gt;fluent interface&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;I believe this approach it provides numerous additional benefits such as:&lt;/p&gt;
+&lt;h4 id="propinquity"&gt;1. Propinquity&lt;/h4&gt;
+&lt;p&gt;Want the repository for your entity? It's right along side it. As are all the other classes related to that entity. This means you can very quickly skip between these classes without needing to navigate the breadth of your project looking for a folder for the appropriate functional pattern.&lt;/p&gt;
+&lt;h4 id="scope"&gt;2. Scope&lt;/h4&gt;
+&lt;p&gt;When you write code which involves multiple entities, these entities need to be brought into scope. Rather than adding using statements, I have found that utilising the entity's namespace in a fluent fashion gives very elegant results.
+For example, say we have introduce a &lt;code&gt;Role&lt;/code&gt; entity and the controller for this entity needs to be able to add &lt;code&gt;Person&lt;/code&gt; instances to a role. The class might be implemented something akin to this:&lt;/p&gt;
+&lt;script src="https://gist.github.com/ibebbs/117531fb4a3a3556fd3788d45ffaaa57.js"&gt;&lt;/script&gt;
+&lt;p&gt;Note the lack of additional using statements and how bringing classes related to other entities into scope requires only a parial namespace which then reads like natural language (i.e. Person.Repository / Person.Model).&lt;/p&gt;
+&lt;h4 id="coupling"&gt;3. Coupling&lt;/h4&gt;
+&lt;p&gt;In general, it is desirable for classes in your project to be loosely coupled. Fluent namespacing can visually illustrate when a class might be tightly-coupled by requiring long namespace traversals. For example:&lt;/p&gt;
+&lt;script src="https://gist.github.com/ibebbs/52ecb2051da6812d2a023cfc76cb0331.js"&gt;&lt;/script&gt;
+&lt;p&gt;Should the Group controller really be using the Person entity's data source (&lt;code&gt;Person.Data.Source&lt;/code&gt;) and mapping provider (&lt;code&gt;Person.Mapping.Provider&lt;/code&gt;) to fetch a &lt;code&gt;Person.Model&lt;/code&gt; instances or would they be better using the Person entity's repository (&lt;code&gt;Person.Repository&lt;/code&gt;)?&lt;/p&gt;
+&lt;h3 id="other-considersations"&gt;Other considersations&lt;/h3&gt;
+&lt;p&gt;There are a couple of downsides to this approach such as:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Refactoring
+When you use Visual Studio's built in refactoring methods, it will always endeavour add a &lt;code&gt;using&lt;/code&gt; to your class for classes outside the current namespace, even if you've already referred to them via the namespace:
+&lt;img src="/Content/FluentNamespacing/FluentlyNamespaced-AddReadOnlyField.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Field - yes please, using - no thanks!"&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;Field - yes please, using - no thanks!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/li&gt;
+&lt;li&gt;Searching
+In Visual Studio, when you need to search for a specific class, you may find you get many more hits than expected; afterall, if the &lt;code&gt;Model&lt;/code&gt; class for all entities is called &lt;code&gt;Model&lt;/code&gt; searching for 'Model' will return all the entity classes. Fortunately, Visual Studio's 'Go to All' functionality supports search by multiple key word matches so this works:
+&lt;img src="/Content/FluentNamespacing/Go to All.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Ah, there it is"&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;em&gt;Note: The fact that these downsides are all related to tooling shows just how ingrained this convention is to modern development.&lt;/em&gt;&lt;/p&gt;
+&lt;h3 id="conclusion"&gt;Conclusion&lt;/h3&gt;
+&lt;p&gt;As shown, moving away from the &amp;quot;grouping by functional pattern&amp;quot; convention and instead using &amp;quot;Fluent Namespacing&amp;quot; can make your code much more readable and maintainable while requiring very little overheard. The side benefits of simplified navigation leading to easier comprehension and the potential for highlighting possible code-smells can really pay dividends in a large code base. I'd very much encourage you to try Fluent Namespacing in your next project, I don't think you'll regret it.&lt;/p&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>A SmartHome... NoT - Part II</title>
 			<link>http://ian.bebbs.co.uk/posts/ASmartHome-Part2</link>
@@ -1762,33 +1867,6 @@ However, after discussing ToddlerBox with a friend, he decided to install it on 
 &lt;p&gt;I plugged in a small table lamp and recorded this:&lt;/p&gt;
 &lt;iframe src="https://onedrive.live.com/embed?cid=03DF8A28BD9D0BC9&amp;resid=3DF8A28BD9D0BC9%21266322&amp;authkey=AI5IzCXupiYl-CU" width="320" height="180" frameborder="0" scrolling="no" allowfullscreen&gt;&lt;/iframe&gt;
 &lt;p&gt;Boom! (Figuratively speaking of course... the MonsterPi didn't literally go boom... yet :0)&lt;/p&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>3D Printing with the CEL Robox</title>
-			<link>http://ian.bebbs.co.uk/posts/3DPrintingWithTheCelRobox</link>
-			<description>&lt;p&gt;So, I've wanted a 3D printer for a while and recently a perfect storm of events meant I finally took the plunge.&lt;/p&gt;</description>
-			<enclosure url="https://zphpnq.db.files.1drv.com/y4mcDFZEF9DB-cF1z1nV74_33wnU6QUM0DCC0nGOJ3HV01-4cCEmTq-XSIyKY21UGevgpVA6LPP3-pnmoLYbHVZY3_tnnVSiwR13EwIXZ5vEKkBE1hx12HPm-vtvXGGPCesUjvkW-SqzfC9xfWW_rZnpCcgFUBNc9CmodlVvD80HG_J47Q-6amEj8k1DCFosUUiZdImqsnF40Czfbc1F9pM7g?width=965&amp;height=292&amp;cropmode=none" length="0" type="image" />
-			<guid>http://ian.bebbs.co.uk/posts/3DPrintingWithTheCelRobox</guid>
-			<pubDate>Fri, 07 Oct 2016 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;p&gt;So, I've wanted a 3D printer for a while and recently a perfect storm of events meant I finally took the plunge.&lt;/p&gt;
-&lt;p&gt;I had hit a wall in my MonsterPi project trying to mount a RaspberryPi in a constrained space (more on this in a subsequent post). Most of my usual hacks (you'd be amazed what you can do with a sheet of acrylic and a Meccano set) simply wouldn't cut it and I was considering abandoning the project. Without intentionally meaning to, I found myself looking at 3D printers on &lt;a href="http://www.maplin.co.uk/c/gadgets-toys-and-hobbies/3d-printers"&gt;Maplin's website&lt;/a&gt; and saw that they were selling 'used' 3D printers at quite a discount.&lt;/p&gt;
-&lt;p&gt;After a quick look around for reviews I found that one of the models Maplin were selling - the &lt;a href="http://www.maplin.co.uk/p/cel-robox-3d-printer-used-b81qq"&gt;CEL Robox&lt;/a&gt; - was listed as one of the best &amp;quot;Plug 'n' play&amp;quot; printers on &lt;a href="https://www.3dhubs.com/best-3d-printer-guide#plugnplay-cel-robox"&gt;3D Hubs&lt;/a&gt;. Moreover, my local (well, 15 miles away) Maplin's store had one in stock. But there was that 'used' thing. From what I'd gathered, getting a 3D printer to print reliably is tricky at the best of times, and I was thinking of buying one that had already been used and returned or worse, didn't even work in the first place.&lt;/p&gt;
-&lt;p&gt;Too intrigued not to dig a little deeper, I gave Maplin a call. Now experience has lead me not to expect too much from Maplin's employees - at best they're well meaning but witless, at worst they think you are -  but this time proved to be an exception. The guy who answered the phone was superb (note to self: must tweet Maplin about how great this guy is). Although he initially seemed confused about not having a used model of the 3D printer in store, he checked the website to confirm availability then the store stock levels to work out what was going on. Turns out the 'used' printer they had was actually the display model and after noting that he was unsure of the history of the printer he offered to make a couple of calls to other staff to find out the condition and how much it had been used then call me back; as I said, he was excellent. As promised, he called back in 15 minutes or so having confirmed that the printer had only been used to print a few example models and had otherwise sat idle for almost a year. Unfortunately in that time it had garnered a few scratches and lost it's box and support material but, having talked to his manager, he would be able to offer a further discount on the used price if I wanted to come in a take a look at it.&lt;/p&gt;
-&lt;p&gt;At the store an hour later it turned out that the guy I had talked to was actually the store manager and was really going the extra mile. By the time I had turned up, he had collated replacement components (power lead, usb lead, brushes, etc) from store stock and had the printer out ready for me to inspect. Amusingly, he had his staff so well organised that, seeing a few components laying around, they had actually put them all back on the shelves so he had to go collect them all again - but I couldn't help but be impressed. Anyway, the scratches turned out to be superfluous, the offer of an additional discount very attractive and the store manager's assurances that should anything be wrong with the unit he'd ensure it was replaced no questions asked very persuasive.&lt;/p&gt;
-&lt;p&gt;So I bought it, brought it home and, once the baby was safely ensconced at nursery the next day, set it up and set about calibrating it. The unit itself is a thing of beauty. Bold lines and colours with smooth, solid feeling mechanical components and a general air of quality; not at all what I've come to expect from a &lt;a href="https://www.kickstarter.com/projects/robox/robox-desktop-3d-printer-and-micro-manufacturing-p"&gt;Kickstarter funded project&lt;/a&gt;. While I was initially wary of buying a 3D printer that used a proprietary &amp;quot;chipped&amp;quot; spool for fear of a lock-in to an expensive source of filament, the integrated nature of the spool into the body of the unit and the intelligence it provides to the software - everything from how much spool is left to how much a particular model will cost to print - is fantastic. Far from other &amp;quot;hobbyist&amp;quot; 3D printers where filament projects precariously around the unit, the feed of filament to the head is completely hidden from view and loading of filament completely automated.&lt;/p&gt;
-&lt;p&gt;Unfortunately calibration wasn't quite as smooth and it took a long time to get the printer ready to actually try printing a model. In fact, despite repeatedly trying and following all suggestions, one of the calibration tests - the needle valve opening calibration for the fill nozzle - stoically refused to run successfully. This may have been the result of the unit sitting idle for so long or simply me not setting it up right but the failure to pass this test was extremely worrisome. Even the 'purge' material test (used to completely empty the print heads when you're planning on changing material) failed to lay down material as it should but this was mostly resolved by vigorously cleaning the print bed with the isopropyl alcohol.&lt;/p&gt;
-&lt;p&gt;Anyway, despite the needle valve opening calibration still failing, I decided to print a model to see how it would perform before deciding whether or not to return the unit. From CEL's downloadable samples, I decided to try printing the 'cargo-box' as it didn't seem to require too much filament and a small container is always useful for something. Actually loading and starting to print a model using CEL's &lt;a href="http://www.cel-robox.com/downloads/"&gt;AutoMaker&lt;/a&gt; software is ludicrously simple: start a new layout, load a model, choose the granularity of the print, go.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Watching a 3D model being printed is really something to behold. Despite it taking hours &amp;quot;like watching a 3D printer fabricate&amp;quot; should really become the metaphorical antonym to &amp;quot;like watching paint dry&amp;quot;; from the initial outline of the print being laid on the print bed, to seeing a solid object emerge, the process is fascinating. Taking a virtual object modelled on your computer and seeing that object take shape and become a physical object in the real world is thrilling, with innumerable possibilities opening up with every layer of filament laid down.&lt;/strong&gt;&lt;/p&gt;
-&lt;p&gt;In short order (well, actually 'long order' but it certainly didn't feel that way) and with much amazement and relief, the print was finished perfectly. A 1.5&amp;quot; square, green plastic cargo-box sat inside the Robox; I had fabricated a solid object from - seemingly - nothing. Once the unit had cooled the heated print-bed and unlocked the door, I tried removing the box, entirely expecting to have to lever and peel the plastic off the bed. To my surprise it moved easily, seemingly held to the bed by nothing more than a static charge. I was further surprised by the strength of the box; given it was made from nothing more than melted strands of plastic, I absolutely expected the fabricated object to have the tensile strength of a faberge egg. Yet it was incredibly rigid and inflexible, only the tell-tale layering giving away the fact that it had been 3D printer rather than cast in an industrial manufacturing plant.&lt;/p&gt;
-&lt;img src="https://0ohhnq.db.files.1drv.com/y4mWQfGlsdu-XCe2yepj8pn9gm0MJ-5NaCzK3i2w4re2t-3TVWsWtM1jMUYNPIEaBu2e5f6woFwAfrrPbjdDWAp5TGrOgfHylbCPmmS-TCoyqF_d0S5bzHPTbNCpagHi83-SSak2oY-2eLYeRQGOiVd1wN7N2IV8gpmAcLxyEapVEkSdw0g0Q1ERKJIuHBV1my59PiDSmwrti1-x67HzcQyuw?width=1024&amp;height=576&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="My first 3D printed object"&gt;
-&lt;p&gt;Now it was time to see if I could use the printer for the purpose I bought it: fabricating custom components for other projects. First up was a bracket to hold a RaspberryPi and other components in a very specific configuration. &lt;a href="http://www.sketchup.com/products/sketchup-pro/new-in-2016?gclid=CIK4ks2Cy88CFc0y0wodZmwHaQ"&gt;SketchUp&lt;/a&gt; has been my go-to 3D modelling software of choice since being bought and given away by Google. It is amazingly quick and easy to use for almost everything except extremely precise components with low tolerances; i.e. exactly the kind of thing I needed to do. So I went about looking for alternatives and quickly settled on the free version of &lt;a href="https://www.rs-online.com/designspark/mechanical-software"&gt;DesignSpark Mechanical from RS Components&lt;/a&gt;. Despite some quirkiness in it's UI, it provides most of the features and ease of use of SketchUp with several digits of precision for designed components. Indeed, instead of using a mouse to try to get the exact length of an edge, you can simply enter the length you want on the keyboard; precisely the functionality I thought was missing from SketchUp.&lt;/p&gt;
-&lt;p&gt;It took several hours to complete the 3D model for the bracket I needed - somewhat due to DesignSpark's learning curve but mostly the precise measurements and imprecise iteration required to design a bracket that would hold all the components just so - but eventually it was ready to print. Again, friction from design software to print ready was minimal. DesignSpark is able to export in the standard STL format and AutoMaker loaded the model and positioned it on the print-bed automatically, promising to fabricate me a completely custom component for just £1.48's worth of material.&lt;/p&gt;
-&lt;p&gt;I set the print going but was quickly dismayed that the first layer of the print wasn't being laid properly at the far corners of the bed, mostly due to the fact that the corners of the bed away from the tabs that hold it in place had risen slightly. Regardless, I decided to let the print continue and see if subsequent layers would adhere to the small smudge of material the print head had managed to deposit. This turned out to be the right choice as by layer three the base of the bracket was fully formed and the printer had started using the &amp;quot;fill&amp;quot; nozzle to quickly start filling out further layers.&lt;/p&gt;
-&lt;p&gt;It took about three hours to design and an hour and forty minutes to fabricate, but the bracket fitted perfectly and was easily strong enough to hold all the components in the configuration I needed. I was a very happy boy and immediately starting to design a subsequent bracket I needed for the same project and plan for a load of other custom bits.&lt;/p&gt;
-&lt;p&gt;In summary, if you're thinking of buying a 3D printer and can afford what is - regardless of the heavy discount - an expensive bit of technology, I would absolutely recommend going for it. The possibilities of what you can create are mind-boggling and the sensation of watching them come into existence exhilarating. Being able to fabricate components I previously had to hack together from off the shelf bits is tremendously empowering and I can unashamedly say that I am completely hooked on 3D printing.&lt;/p&gt;
-&lt;p&gt;Furthermore, while I have no direct experience of other 3D printers, I wouldn't hesitate to recommend CEL's Robox printer as - despite still failing the nozzle calibration - it has yet to fail a print and the software is remarkably straight forward and easy to use.&lt;/p&gt;
-&lt;p&gt;Watch this space for more adventures in 3D printing as I integrate my new found fabrication abilities into my innumerable ongoing projects. First up: MonsterPi.&lt;/p&gt;
 </content:encoded>
 		</item>
 	</channel>

@@ -1,0 +1,268 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Fluent Namespacing</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Fluent Namespacing" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/FluentNamespacing" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About Me</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Fluent Namespacing</h1>
+        <h2 class="subheading">Challenging a convention at the heart of modern C#</h2>
+    <div class="meta">        
+Published on 09 May 2019<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/C%23" class="btn btn-default btn-xs">C#</a>
+                    <a role="button" href="/tags/Conventions" class="btn btn-default btn-xs">Conventions</a>
+                    <a role="button" href="/tags/Methodology" class="btn btn-default btn-xs">Methodology</a>
+                    <a role="button" href="/tags/Patterns" class="btn btn-default btn-xs">Patterns</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<p><em>So, it's been a while since I've blogged. Mostly this has been due to other committments (family, friends, side projects, etc), working more hours contracting than I would ideally like and generally not having any dead-time (such as when I used to commute). Since my last blog post (over a year ago!!) I've been maintaining an ever increasing list of things I'd like to blog about but haven't found the time. Given it's a new year, I've decided to pick a couple of the more challenging/contentious blog ideas and endeavour to get them written. This is the first and, while not necessarily the most contentious, might take some getting your head aroud. You have been warned...</em></p>
+<p>There is a convention at the heart of enterprise development and many modern development frameworks which seems to have been blindly adopted by the development community at large. I hope to challenge this convention as I believe changing it can provide many useful benefits in day to day development.</p>
+<p>This convention I'm referring to is the tendancy to group classes by <em>functional pattern</em> rather than <em>functional domain</em>. What does this mean? Well, to illustrate, lets start a new webapi project:</p>
+<pre><code>dotnet new webapi
+</code></pre>
+<p>You will end up with a folder structure similar to this:</p>
+<pre><code>$:.
+│   appsettings.Development.json
+│   appsettings.json
+│   FluentNamespacing.csproj
+│   Program.cs
+│   Startup.cs
+│   
+├───Controllers
+│       ValuesController.cs
+│       
+└───Properties
+        launchSettings.json
+</code></pre>
+<p>There, you see it don't you? No? Well, that just shows how ingrained this convention is.</p>
+<p>I'm referring to the <code>ValuesController</code> class residing a <code>Controllers</code> folder. What's the problem with that, you ask? Well, lets develop this project a little further and revisit.</p>
+<p>Lets say, after a little <em>conventional</em> development, we're now here:</p>
+<pre><code>$:.
+│   appsettings.Development.json
+│   appsettings.json
+│   FluentNamespacing.csproj
+│   Program.cs
+│   Startup.cs
+│               
+├───Controllers
+│       PersonController.cs
+│       
+├───Factories
+│       PersonFactory.cs
+│       
+├───Models
+│       PersonModel.cs
+│               
+├───Properties
+│       launchSettings.json
+│       
+└───Repositories
+        PersonRepository.cs
+</code></pre>
+<p>Our abstract <code>ValuesController</code> has become a <code>PersonController</code> as we want to serve instances of the <code>PersonModel</code>. But wait, where is the <code>PersonModel</code> class? Ah, of course, in the <code>Models</code> folder. Ok, we'll add <code>using FluentNamespacing.Models</code> to the top of the <code>PersonController.cs</code> and continue.</p>
+<p>Now as is common practice, we might want to abstract our datastore via the <a href="https://martinfowler.com/eaaCatalog/repository.html">repository pattern</a> so we dutifully create a <code>Repositories</code> folder within which we add a <code>PersonRepository</code> class. We need to use this in the <code>PersonController</code> so we add another using statement to the file (<code>using FluentNamespacing.Repositories</code>) bringing the <code>PersonRepository</code> into scope.</p>
+<p>Finally, when a user uses a POST call to create a new user, the <code>PersonController</code> should again follow common practise and use the <a href="https://en.wikipedia.org/wiki/Factory_method_pattern">factory pattern</a> to create a new <code>PersonModel</code> which can then be saved via the repository. Again we go round the loop of creating a directory (<code>Factories</code>), adding a class to it (<code>PersonFactory</code>) and adding a using to the <code>PersonController.cs</code> file (<code>using FluentNamespacing.Factories</code>). Phew.</p>
+<p>Now look at our project. We have almost as many folders as we do classes and the classes related to the &quot;Person&quot; entity are spread across the project. Furthermore, we've had to prefix each of our classes with the  entity (i.e. <code>Person</code>) it relates to in order to differentiate it from similar classes for other entities (i.e. <code>Job</code>, <code>Role</code>, <code>Group</code>). That's a lot of typing and/or mouse navigation to get basic functionality in place.</p>
+<p>Now consider this:</p>
+<pre><code>D:.
+│   appsettings.Development.json
+│   appsettings.json
+│   FluentlyNamespaced.csproj
+│   Program.cs
+│   Startup.cs
+│               
+├───Person
+│       Controller.cs
+│       Factory.cs
+│       Model.cs
+│       Repository.cs
+│       
+└───Properties
+        launchSettings.json
+</code></pre>
+<p>Here we have exactly the same functionality but grouped by functional domain not functional pattern; i.e. all classes related to a Person are in the same folder. This has resulted in far less structural noise, simplied class names and no need for additional using statements to be added to any of the classes.</p>
+<h3 id="fluent-namespacing">Fluent Namespacing</h3>
+<p>I have been applying this approach in medium to large enterprise code-bases for some time now and find it provides simplified code, less structural overhead, easier navigation, faster comprehension and improved code architecture. I refer to it as &quot;Fluent Namespacing&quot; because, when you start referring to your classes via the [partial] namespace rather than long class names (requiring additional <code>using</code> statements), the code tends to read like a <a href="https://martinfowler.com/bliki/FluentInterface.html">fluent interface</a>.</p>
+<p>I believe this approach it provides numerous additional benefits such as:</p>
+<h4 id="propinquity">1. Propinquity</h4>
+<p>Want the repository for your entity? It's right along side it. As are all the other classes related to that entity. This means you can very quickly skip between these classes without needing to navigate the breadth of your project looking for a folder for the appropriate functional pattern.</p>
+<h4 id="scope">2. Scope</h4>
+<p>When you write code which involves multiple entities, these entities need to be brought into scope. Rather than adding using statements, I have found that utilising the entity's namespace in a fluent fashion gives very elegant results.
+For example, say we have introduce a <code>Role</code> entity and the controller for this entity needs to be able to add <code>Person</code> instances to a role. The class might be implemented something akin to this:</p>
+<script src="https://gist.github.com/ibebbs/117531fb4a3a3556fd3788d45ffaaa57.js"></script>
+<p>Note the lack of additional using statements and how bringing classes related to other entities into scope requires only a parial namespace which then reads like natural language (i.e. Person.Repository / Person.Model).</p>
+<h4 id="coupling">3. Coupling</h4>
+<p>In general, it is desirable for classes in your project to be loosely coupled. Fluent namespacing can visually illustrate when a class might be tightly-coupled by requiring long namespace traversals. For example:</p>
+<script src="https://gist.github.com/ibebbs/52ecb2051da6812d2a023cfc76cb0331.js"></script>
+<p>Should the Group controller really be using the Person entity's data source (<code>Person.Data.Source</code>) and mapping provider (<code>Person.Mapping.Provider</code>) to fetch a <code>Person.Model</code> instances or would they be better using the Person entity's repository (<code>Person.Repository</code>)?</p>
+<h3 id="other-considersations">Other considersations</h3>
+<p>There are a couple of downsides to this approach such as:</p>
+<ol>
+<li>Refactoring
+When you use Visual Studio's built in refactoring methods, it will always endeavour add a <code>using</code> to your class for classes outside the current namespace, even if you've already referred to them via the namespace:
+<img src="/Content/FluentNamespacing/FluentlyNamespaced-AddReadOnlyField.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Field - yes please, using - no thanks!">
+<blockquote class="blockquote">
+<p>Field - yes please, using - no thanks!</p>
+</blockquote>
+</li>
+<li>Searching
+In Visual Studio, when you need to search for a specific class, you may find you get many more hits than expected; afterall, if the <code>Model</code> class for all entities is called <code>Model</code> searching for 'Model' will return all the entity classes. Fortunately, Visual Studio's 'Go to All' functionality supports search by multiple key word matches so this works:
+<img src="/Content/FluentNamespacing/Go to All.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Ah, there it is"></li>
+</ol>
+<p><em>Note: The fact that these downsides are all related to tooling shows just how ingrained this convention is to modern development.</em></p>
+<h3 id="conclusion">Conclusion</h3>
+<p>As shown, moving away from the &quot;grouping by functional pattern&quot; convention and instead using &quot;Fluent Namespacing&quot; can make your code much more readable and maintainable while requiring very little overheard. The side benefits of simplified navigation leading to easier comprehension and the potential for highlighting possible code-smells can really pay dividends in a large code base. I'd very much encourage you to try Fluent Namespacing in your next project, I don't think you'll regret it.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12 text-center">
+                    <p class="copyright text-muted">
+                        Copyright © 2019
+                        <br />
+                            <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a>
+                        |
+                            <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                        <br />
+                        <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                    </p>
+                </div>
+        </div>
+</div>
+
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
