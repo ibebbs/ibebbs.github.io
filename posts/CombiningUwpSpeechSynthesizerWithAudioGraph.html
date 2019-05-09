@@ -1,5 +1,4 @@
-
-
+﻿
 <!DOCTYPE html>
 <html lang="en">
         <head>
@@ -8,22 +7,21 @@
 
         <title>Ian Bebbington - Combining the UWP SpeechSynthesizer and AudioGraph APIs</title>
         <meta name="description" content="IObservable&lt;Opinion&gt;" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
 
         <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
-        <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
-        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
-        <link href="/assets/css/prettify.css" rel="stylesheet">
-        <link href="/assets/css/github.css" rel="stylesheet">
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
         <link href="/assets/css/clean-blog.css" rel="stylesheet" />
         <link href="/assets/css/master.css" rel="stylesheet" />
-        <link href="/assets/css/custom.css" rel="stylesheet" />
-        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-        <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
-        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
 
 
         <meta name="application-name" content="Ian Bebbington" />
@@ -31,29 +29,32 @@
         <meta name="msapplication-starturl" content="/" />
 
         <meta property="og:title" content="Ian Bebbington - Combining the UWP SpeechSynthesizer and AudioGraph APIs" />
-        
         <meta property="og:type" content="website" />
         <meta property="og:url" content="http://ian.bebbs.co.uk/posts/CombiningUwpSpeechSynthesizerWithAudioGraph" />
         <!-- TODO: More social graph meta tags -->
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-        <script src="/assets/js/prettify.js"></script>
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
         <script src="/assets/js/clean-blog.js"></script>
-        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
         <script src="/assets/js/trianglify.min.js"></script>
         <script src="/assets/js/Please-compressed.js"></script>
-
+        <script src="/assets/js/background-check.min.js"></script>
+                
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
-                <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-                <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
         <![endif]-->
+        
+        
+
 
         </head>
-        <body onload="prettyPrint()">
-
+        <body>
+                
                 <!-- Navigation -->
                 <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
                         <div class="container-fluid">
@@ -67,69 +68,65 @@
                                         </button>
                                         <a class="navbar-brand" href="/">Ian Bebbington</a>
                                 </div>
-
+                        
                                 <!-- Collect the nav links, forms, and other content for toggling -->
                                 <div class="collapse navbar-collapse" id="navbar-collapse">
                                         <ul class="nav navbar-nav navbar-right">
-                                                        <li><a href="/about">About Me</a></li>
-        <li><a href="/tags">All Tags</a></li>
-        <li><a href="/posts">Archive</a></li>
-
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About Me</a></li>
+ 
                                         </ul>
                                 </div>
                                 <!-- /.navbar-collapse -->
                         </div>
                         <!-- /.container -->
                 </nav>
-
+                
                 <!-- Page Header -->
-
                 <header class="intro-header" id="intro-header" style="background-image: url(&quot;&quot;)">
                         <div class="container">
                                 <div class="row">
                                         <div class="col-md-12">
 
     
-
 <div class="post-heading">
     <h1>Combining the UWP SpeechSynthesizer and AudioGraph APIs</h1>
-        <h2 class="subheading">As it seems to be a &#39;pop&#39;-ular thing to do...</h2>
+        <h2 class="subheading">As it seems to be a &#x27;pop&#x27;-ular thing to do...</h2>
     <div class="meta">        
-            Published on 25 January 2017<br>
-    </div>
+Published on 25 January 2017<br>    </div>
         <div class="tags">
-                    <a role="button" href="/tags/audiograph" class="btn btn-default btn-xs">AudioGraph</a>
-                    <a role="button" href="/tags/iot" class="btn btn-default btn-xs">IoT</a>
-                    <a role="button" href="/tags/raspberrypi" class="btn btn-default btn-xs">RaspberryPi</a>
-                    <a role="button" href="/tags/speechsynthesizer" class="btn btn-default btn-xs">SpeechSynthesizer</a>
-                    <a role="button" href="/tags/uwp" class="btn btn-default btn-xs">UWP</a>
+                    <a role="button" href="/tags/AudioGraph" class="btn btn-default btn-xs">AudioGraph</a>
+                    <a role="button" href="/tags/IoT" class="btn btn-default btn-xs">IoT</a>
+                    <a role="button" href="/tags/RaspberryPi" class="btn btn-default btn-xs">RaspberryPi</a>
+                    <a role="button" href="/tags/SpeechSynthesizer" class="btn btn-default btn-xs">SpeechSynthesizer</a>
+                    <a role="button" href="/tags/UWP" class="btn btn-default btn-xs">UWP</a>
         </div>     
 </div>
                                         </div>
                                 </div>
                         </div>
                 </header>
-
+                
                 <!-- Main Content -->
                 <div class="container">
                         <div class="row">
                                 <div id="content" class="col-md-12">
                                         
 
-
 <p>Synchronicity is a wonderful thing.</p>
 <p>Just this morning I was considering using the new <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.speechsynthesis.speechsynthesizer.aspx">SpeechSynthesizer</a> capabilities of the UWP platform to add spoken language to my <a href="https://www.microsoft.com/en-gb/store/p/toddlerbox/9nblggh3zr4l">ToddlerBox app for Xbox</a>. I had already started using the <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.audiograph.aspx">AudioGraph</a> classes to play sounds in the app so ideally wanted to continue using this API to emit speech.</p>
 <p>Then, during my morning... ahem... ablutions, I came across <a href="https://mtaulty.com/2017/01/15/windows-10-uwp-iot-core-speechsynthesizer-raspberry-pi-and-audio-popping/">this post</a> by Mike Taulty who was looking to do the same thing but for different reasons. It seems that the RaspberryPi has a firmware issue that causes a <a href="https://social.msdn.microsoft.com/Forums/en-US/7c312972-6a09-4acd-8a3f-c59485a81d74/clicking-sound-during-start-and-stop-of-audio-playback?forum=WindowsIoT">popping noise</a>  every time speech is emitted using the MediaPlayer and AudioGraph seems to be a way of resolving it.</p>
-<h2>The problem</h2>
+<h2 id="the-problem">The problem</h2>
 <p>Mike had implemented a means of emitting speech via AudioGraph by saving the <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.speechsynthesis.speechsynthesisstream.aspx?f=255&amp;MSPPError=-2147217396">SpeechSynthesisStream</a> to a  temporary file and then using multiple <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.audiofileinputnode.aspx">AudioFileInputNode</a> instances to render the speech to the AudioGraph.</p>
 <p>&quot;Well&quot;, I thought, &quot;there's got to be a better way. How hard can this be...&quot;</p>
 <p><strong>Turns out the answer is: &quot;Not all that hard, but...&quot;.</strong></p>
-<h2>My approach</h2>
+<h2 id="my-approach">My approach</h2>
 <p>I wanted to find a way to eliminate the need for the temporary files and render the speech stream directly to the graph.</p>
 <p>To do this, I first saved the SpeechSynthesisStream to a file so that I could examine the content. As expected, the file turned out to be a simple 32-bit, mono, ADPCM waveform in <a href="http://soundfile.sapp.org/doc/WaveFormat/">WAV/RIFF format</a>.</p>
 <p>Having previously messed about with AudioGraph I knew there was a way of creating an in-memory waveform and that the <a href="https://github.com/Microsoft/Windows-universal-samples">Windows-Universal-Samples github repository</a> had an <a href="https://github.com/Microsoft/Windows-universal-samples/tree/master/Samples/AudioCreation">AudioCreation sample</a> that <a href="https://github.com/Microsoft/Windows-universal-samples/blob/master/Samples/AudioCreation/cs/AudioCreation/Scenario3_FrameInputNode.xaml.cs">showed how to do this</a>.</p>
 <p>Fundamentally, this sample shows how to use the <a href="https://msdn.microsoft.com/en-gb/library/windows/apps/windows.media.audio.audioframeinputnode.quantumstarted">QuantumStarted event</a> of the <a href="https://msdn.microsoft.com/library/windows/apps/dn914147">AudioFrameInputNode</a> to dynamically add <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audioframe.aspx">AudioFrame</a> to the AudioFrameInputNode which are then rendered to the <a href="https://msdn.microsoft.com/en-gb/library/windows/apps/dn914151">output node</a>. An extract from the sample is shown here:</p>
-<pre class="prettyprint"><code>  unsafe private AudioFrame GenerateAudioData(uint samples)
+<pre><code>  unsafe private AudioFrame GenerateAudioData(uint samples)
   {
       // Buffer size is (number of samples) * (size of each sample)
       // We choose to generate single channel (mono) audio. For multi-channel, multiply by number of channels
@@ -168,7 +165,7 @@
 </code></pre>
 <p>Imitation being the sincerest form of flattery, I then refactored this code to read the binary data from the SpeechSynthesisStream rather than generate a sine wave as shown above. This was greatly facilited by the <a href="https://msdn.microsoft.com/en-us/library/hh582142.aspx">WindowsRuntimeStreamExtensions.AsStreamForRead</a> method which allowed me to use basic <a href="https://msdn.microsoft.com/en-us/library/system.io.stream.aspx">Stream</a> methods  (specifically <a href="https://msdn.microsoft.com/en-us/library/system.io.stream.readbyte.aspx">Stream.ReadByte()</a>) instead of having to mess about with <a href="https://msdn.microsoft.com/en-us/library/windows.media.speechsynthesis.speechsynthesisstream.readasync.aspx">IBuffer</a> instances.</p>
 <p>In short order, I ended up with the code below (where <code>_stream</code> is a member of the containing class pointing to the underlying SpeechSynthesisStream):</p>
-<pre class="prettyprint"><code>    private unsafe void QuantumStarted(AudioFrameInputNode sender, FrameInputNodeQuantumStartedEventArgs args)
+<pre><code>    private unsafe void QuantumStarted(AudioFrameInputNode sender, FrameInputNodeQuantumStartedEventArgs args)
     {
         uint numSamplesNeeded = (uint)args.RequiredSamples;
 
@@ -207,26 +204,26 @@
 </code></pre>
 <p>And to my surprised, it worked!</p>
 <p>I encapsulated this code into a class named <a href="https://github.com/ibebbs/BlogProjects/blob/master/UwpSpeechAudio/GraphExtensions.cs">AudioSpeechInputNode</a> and made this class implement <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.iaudioinputnode.aspx">IAudioInputNode</a> so it could be treated like any other node in the AudioGraph. Finally I added an extension method to AudioGraph that created instance of this node in the same way that other nodes are created. This is shown below:</p>
-<pre class="prettyprint"><code>    AudioSpeechInputNode speechInputNode = await _graph.CreateSpeechInputNodeAsync(new SpeechSynthesizer(), &quot;As input node&quot;);
+<pre><code>    AudioSpeechInputNode speechInputNode = await _graph.CreateSpeechInputNodeAsync(new SpeechSynthesizer(), &quot;As input node&quot;);
     speechInputNode.AddOutgoingConnection(_outputNode); // device output node
     speechInputNode.Stop();
 </code></pre>
 <p>With this node in hand you're then at liberty to call the <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.iaudionode.start.aspx">Start</a>, <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.iaudionode.stop.aspx">Stop</a> and <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.iaudionode.reset.aspx">Reset</a> methods as you see fit.</p>
 <p>Et voila, a SpeechSynthesisStream rendered in an AudioGraph without the need for an intermediary file.</p>
-<h2>You said there was a 'but' ...</h2>
+<h2 id="you-said-there-was-a-but">You said there was a 'but' ...</h2>
 <p>Well, yes. Three of them actually.</p>
-<h3>The big 'but'</h3>
+<h3 id="the-big-but">The big 'but'</h3>
 <p>While this approach certainly solves the issue with needing temporary files and a 'popping' sound each time speech is emitted, I'm afraid to say it does not resolve the 'popping' noise encountered when the application starts on a RaspberryPi.</p>
 <p>Being a good nerd, I had a spare RaspberryPi 3 hanging around with a recent version of Windows 10 IoT Core installed. It took just a few minutes to recompile my <a href="https://github.com/ibebbs/BlogProjects/tree/master/UwpSpeechAudio">sample app</a> to ARM and deploy it to the Pi whereupon I could confirm that there is no popping when emitting speech but there is when the application starts. In fact, I receive three distinct 'pops' during application start-up which, by studiously placing breakpoints, I isolated to <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.audiograph.createasync.aspx">AudioGraph.CreateAsync</a> (two pops) and <a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.audiograph.start.aspx">AudioGraph.Start</a> (one pop).</p>
 <p>Microsoft would have us believe that this is an issue with the RaspberryPi firmware but, as it also occurs on <a href="https://developer.qualcomm.com/hardware/dragonboard-410c">DragonBoard 410c</a> I'm more inclined to believe it's an issue with the Windows drivers. On a hunch, I've just ordered a <a href="https://www.amazon.co.uk/dp/B016CU2PEU">USB Sound Adapter from Amazon</a>. This device is <em>meant</em> to be Windows and RaspberryPi compatible (which doesn't necessarily mean it'll work with IoT Core on RPi) and, if it works, I'll be very interested to see if I still get the popping noises when the application starts. I'll update this post once I have an answer...</p>
-<blockquote>
+<blockquote class="blockquote">
 <p>Update: I'm pleased to say that, not only does <a href="https://www.amazon.co.uk/dp/B016CU2PEU">this device</a> work with Windows 10 IoT Core running on the RaspberryPi 3, but it also resolves the issue with popping noises when the application starts. Of course, this would probably also solve the issue with popping noises when rendering speech through MediaPlayer too making my solution above less necessary.</p>
 </blockquote>
-<h3>The intermediate 'but'</h3>
+<h3 id="the-intermediate-but">The intermediate 'but'</h3>
 <p>My code makes a number of assumptions about the format of the SpeechSynthesisStream and encapsulates these as constants. It would be much better to read the format from the WAVE 'fmt ' chunk of the underlying RIFF structures in the stream but, being a pragmatic, <a href="https://martinfowler.com/bliki/Yagni.html">YAGNI principled</a> developer... I skipped this for now.</p>
-<h3>The small 'but'</h3>
+<h3 id="the-small-but">The small 'but'</h3>
 <p>As is probably very obvious, the code above is in no way optimised. I'm sure there are <em>much</em> better and faster ways of storing and copying the binary data from the SpeechSynthesisStream into the AudioBuffer (perhaps just using an intermediate byte array would help) but, for now, this code works fine.</p>
-<h2>Show me the code</h2>
+<h2 id="show-me-the-code">Show me the code</h2>
 <p>All the code for the above can be found in a <a href="https://github.com/ibebbs/BlogProjects/tree/master/UwpSpeechAudio">UWP sample app</a> within the <a href="https://github.com/ibebbs/BlogProjects">BlogProjects</a> repository of my <a href="https://github.com/ibebbs">Github</a> account.</p>
 <p>Do <a href="https://twitter.com/ibebbs">get in touch</a> if you find this code helpful or have suggestions for improving it.</p>
 
@@ -235,84 +232,39 @@
                                 </div>
                         </div>
                 </div>
-
+                
                 <hr>
-
+                
                 <!-- Footer -->
                 <footer>
                         <div class="container">
-  <div class="row">
-    <div class="col-md-12 text-center">
-      <ul class="list-inline text-center">
-        <li>
-          <a href="https://twitter.com/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="https://github.com/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="http://stackoverflow.com/users/628821/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="https://social.msdn.microsoft.com/profile/ian%20bebbington/">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-windows fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-      </ul>
-      <p class="copyright text-muted">
-        Copyright © 2018 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/">"Creative Commons Attribution 4.0 International License"</a>
-        <br />
-        <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
-        <br />
-        <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
-      </p>
-    </div>
-
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-      ga('create', 'UA-70151903-1', 'auto');
-      ga('send', 'pageview');
-
-    </script>
-
-    <script type="text/javascript">
-            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-            var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
-
-            /* * * DON'T EDIT BELOW THIS LINE * * */
-            (function () {
-                    var s = document.createElement('script'); s.async = true;
-                    s.type = 'text/javascript';
-                    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
-                    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
-            }());
-    </script>
+        <div class="row">
+                <div class="col-md-12 text-center">
+                    <p class="copyright text-muted">
+                        Copyright © 2019
+                        <br />
+                            <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a>
+                        |
+                            <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                        <br />
+                        <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                    </p>
+                </div>
+        </div>
 </div>
 
-                </footer>
+                </footer> 
 
                 
+                <script>hljs.initHighlightingOnLoad();</script>
+
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
         </body>
 </html>
+

@@ -1,5 +1,4 @@
-
-
+﻿
 <!DOCTYPE html>
 <html lang="en">
         <head>
@@ -8,22 +7,21 @@
 
         <title>Ian Bebbington - A SmartHome... NoT - Part II</title>
         <meta name="description" content="IObservable&lt;Opinion&gt;" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
 
         <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
-        <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
         <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
         <link rel="icon" href="/favicon.ico" type="image/x-icon">
 
-        <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet" />
-        <link href="/assets/css/prettify.css" rel="stylesheet">
-        <link href="/assets/css/github.css" rel="stylesheet">
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
         <link href="/assets/css/clean-blog.css" rel="stylesheet" />
         <link href="/assets/css/master.css" rel="stylesheet" />
-        <link href="/assets/css/custom.css" rel="stylesheet" />
-        <link href="http://maxcdn.bootstrapcdn.com/font-awesome/4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-        <link href='http://fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
-        <link href='http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
 
 
         <meta name="application-name" content="Ian Bebbington" />
@@ -31,29 +29,32 @@
         <meta name="msapplication-starturl" content="/" />
 
         <meta property="og:title" content="Ian Bebbington - A SmartHome... NoT - Part II" />
-        
         <meta property="og:type" content="website" />
         <meta property="og:url" content="http://ian.bebbs.co.uk/posts/ASmartHome-Part2" />
         <!-- TODO: More social graph meta tags -->
 
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-        <script src="/assets/js/prettify.js"></script>
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
         <script src="/assets/js/clean-blog.js"></script>
-        <script src="http://d3js.org/d3.v3.min.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
         <script src="/assets/js/trianglify.min.js"></script>
         <script src="/assets/js/Please-compressed.js"></script>
-
+        <script src="/assets/js/background-check.min.js"></script>
+                
         <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
         <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
         <!--[if lt IE 9]>
-                <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-                <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
         <![endif]-->
+        
+        
+
 
         </head>
-        <body onload="prettyPrint()">
-
+        <body>
+                
                 <!-- Navigation -->
                 <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
                         <div class="container-fluid">
@@ -67,69 +68,65 @@
                                         </button>
                                         <a class="navbar-brand" href="/">Ian Bebbington</a>
                                 </div>
-
+                        
                                 <!-- Collect the nav links, forms, and other content for toggling -->
                                 <div class="collapse navbar-collapse" id="navbar-collapse">
                                         <ul class="nav navbar-nav navbar-right">
-                                                        <li><a href="/about">About Me</a></li>
-        <li><a href="/tags">All Tags</a></li>
-        <li><a href="/posts">Archive</a></li>
-
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About Me</a></li>
+ 
                                         </ul>
                                 </div>
                                 <!-- /.navbar-collapse -->
                         </div>
                         <!-- /.container -->
                 </nav>
-
+                
                 <!-- Page Header -->
-
                 <header class="intro-header" id="intro-header">
                         <div class="container">
                                 <div class="row">
                                         <div class="col-md-12">
 
     
-
 <div class="post-heading">
     <h1>A SmartHome... NoT - Part II</h1>
         <h2 class="subheading">Home monitoring and automation without compromising privacy nor security</h2>
     <div class="meta">        
-            Published on 06 February 2018<br>
-    </div>
+Published on 06 February 2018<br>    </div>
         <div class="tags">
-                    <a role="button" href="/tags/home-automation" class="btn btn-default btn-xs">Home Automation</a>
-                    <a role="button" href="/tags/iot" class="btn btn-default btn-xs">IoT</a>
-                    <a role="button" href="/tags/node-red" class="btn btn-default btn-xs">Node-Red</a>
-                    <a role="button" href="/tags/not" class="btn btn-default btn-xs">NoT</a>
-                    <a role="button" href="/tags/openhab" class="btn btn-default btn-xs">OpenHAB</a>
-                    <a role="button" href="/tags/privacy" class="btn btn-default btn-xs">Privacy</a>
-                    <a role="button" href="/tags/xiaomi" class="btn btn-default btn-xs">Xiaomi</a>
+                    <a role="button" href="/tags/Home-Automation" class="btn btn-default btn-xs">Home Automation</a>
+                    <a role="button" href="/tags/IoT" class="btn btn-default btn-xs">IoT</a>
+                    <a role="button" href="/tags/Node-Red" class="btn btn-default btn-xs">Node-Red</a>
+                    <a role="button" href="/tags/NoT" class="btn btn-default btn-xs">NoT</a>
+                    <a role="button" href="/tags/OpenHAB" class="btn btn-default btn-xs">OpenHAB</a>
+                    <a role="button" href="/tags/Privacy" class="btn btn-default btn-xs">Privacy</a>
+                    <a role="button" href="/tags/Xiaomi" class="btn btn-default btn-xs">Xiaomi</a>
         </div>     
 </div>
                                         </div>
                                 </div>
                         </div>
                 </header>
-
+                
                 <!-- Main Content -->
                 <div class="container">
                         <div class="row">
                                 <div id="content" class="col-md-12">
                                         
 
-
 <p>In <a href="http://ian.bebbs.co.uk/posts/ASmartHome-Part1">part I</a> of this series I described how to use Xiaomi Mi Smart Home devices without compromising your home privacy or security.</p>
 <p>And lo, with the <em>sweet, sweet nut</em> of privacy-friendly sensors laid before me, I raised the metaphorical <em>hammer of code</em> like an allegorical Thor about to deliver righteous justice to... and then I stopped. What was I trying to deliver righteous justice to. In fact, what the smeg did I actually want to <em>do</em> with all these things?</p>
 <p>So focused had I been on finding a 'how', I hadn't really considered the what or why? Monitoring, sure but there had to be useful things I could automate.</p>
 <p>At this point I decided to take a look around at what other people were doing and, almost inevitably, came upon the <a href="https://community.openhab.org/">OpenHAB forums</a>.</p>
-<h1>OpenHABian</h1>
+<h1 id="openhabian">OpenHABian</h1>
 <p>OpenHAB has been around for years and for much of this time has been the <em>go to</em> software for home automation.  Nowadays there a numerous other offerings and OpenHAB has had to rapidly evolve to stay competitive. To this end OpenHAB recently released OpenHAB 2 which, as far as I can tell, is a full rewrite based on <a href="https://www.eclipse.org/smarthome/">Eclipse SmartHome framework</a>.</p>
 <p>While <a href="http://www.myopenhab.org/">'cloud based' versions of OpenHAB are available</a> the normal use-case is to deploy a version of OpenHAB on the local network thereby keeping all processing locally too. To facilitate this, they now offer pre-built images of OpenHabian - a distribution for single board computes (i.e. the Raspberry Pi et al) that comes with OpenHAB pre-installed.</p>
 <p>Anyway, I was interested in how OpenHAB might have evolved and love trying out new images on the Raspberry Pi (seriously it's like Docker except on real hardware and... well... works) so downloaded <a href="https://github.com/openhab/openhabian/releases">the latest version</a> (somewhat confusing named 'version 1.4' even though it contains OpenHAB 2.2), <a href="https://etcher.io/">etched it</a> to an SD card, put the SD card in a spare RPi3 and booted.</p>
-<h2>Installation</h2>
+<h2 id="installation">Installation</h2>
 <p>Installation of OpenHABian is pretty straight forward, simply insert the newly prepared SD card and power on the Pi. One thing to note however is that the setup of OpenHABian requires internet access to download additional components / updates. As I had added the RPi3 running OpenHABian to my secured subnet, my first install of OpenHABian failed as there was no internet access available. A quick firewall exclusion and restart solved the problem.</p>
-<h2>Paper UI</h2>
+<h2 id="paper-ui">Paper UI</h2>
 <p>One of the key enhancements in OpenHAB 2 is the introduction of 'Paper UI'. Paper UI is an HTML5 web application which allows a fully graphical setup and administration of <a href="https://docs.openhab.org/configuration/things.html">Things</a> and <a href="https://docs.openhab.org/configuration/items.html">Items</a>. Where previously you'd have to drop into textual configuration of components, Paper UI offers a simplified means of getting your home automation devices known to, and used by, OpenHAB.</p>
 <p>Indeed, getting Paper UI to recognise and use my Xiaomi Mi Smart Home devices was simple and can be done as follows:</p>
 <ol>
@@ -160,7 +157,7 @@
 <p>So far so good. Now what?</p>
 <p>Well, turns out not a lot. After getting your devices added to OpenHABian, you have to move into textual configuration if you want to actually perform any automation via interaction between devices.</p>
 <p>&quot;Oh&quot;, I thought, &quot;That was a waste of time then&quot;.</p>
-<h2>Node-RED</h2>
+<h2 id="node-red">Node-RED</h2>
 <p>On a whim, I decided to SSH into OpenHABian and play with the <a href="https://docs.openhab.org/installation/openhabian.html#openhabian-config">OpenHABian Configuration Tool</a>. Most of the options were fairly straight forward and unexciting until I got to the <a href="https://docs.openhab.org/installation/openhabian.html#optional-components">Optional Components</a> menu. Here a couple of items caught my eye, particularly the option to install Node-RED along side OpenHAB.</p>
 <p>I'd heard of <a href="https://nodered.org/">Node-RED</a> previously but had never tried it. As I was about to junk the install of OpenHABian anyway, I decided I'd have a play... and this is where the magic happened.</p>
 <p>For others who have not used Node-RED, it is a Node.js app designed for &quot;wiring together hardware devices, APIs and online services in new and interesting ways&quot;. It has an amazingly simple yet ludicrously brilliant UI which makes experimentation with it's various 'nodes' extremely quick and easy. Moreover, the installation on OpenHABian comes pre-installed with nodes to interact with 'Items' in OpenHAB.</p>
@@ -187,7 +184,7 @@
 <li>Efficiency - reduce home power consumption</li>
 </ol>
 <p>However, one use case I came up with fell into all three of these categories <strong>and</strong> a logical progression from the above flow.</p>
-<h1>A use case at last!</h1>
+<h1 id="a-use-case-at-last">A use case at last!</h1>
 <p>Our new 'forever home' has a built in double garage. While the doors on the garage are in pretty good condition, the locks are nothing special and present an obvious security weak spot. Indeed, we use the garage doors every day as it's a very convenient way into the house which increases the likelihood we'll forget to close the doors properly.</p>
 <p>Furthermore, the flurescent lights in the garage are old and take an age to turn on. As we need to go through the garage to get to the utility room and can't see the way to the utility room until the light is on, we tended to simply turn them on at the beginning of the day and turn them off before going to bed each night, thereby consuming way more energy than necessary.</p>
 <p>Understanding this, I used an additional gateway in the garage, coupled with sensors on each of the doors (garage door, kitchen door, utility room door) and an easily controllable <a href="https://www.amazon.co.uk/gp/product/B077HLQMBD">IP camera</a> to put together the following flow:</p>
@@ -202,7 +199,7 @@
 <em>Ultimately I intend to upload this image to a cloud storage provider and send a notification to my phone if this happens within certain time constraints but this has yet to be implemented.</em></p>
 </li>
 </ol>
-<h1>Moving forward</h1>
+<h1 id="moving-forward">Moving forward</h1>
 <p>As you can see, the combination of Xiaomi Mi Smart devices, OpenHAB[ian] and Node-RED is extremely potent. Without writing any code (compiled, intepreted or DSL), I'm able to orchestrate some very advanced interactions between sensors, actuators and other services.</p>
 <p>In the next post, I'll discuss how I've developed this platform even further into a full, voice activated, digital assistant while <em>still</em> maintaining privacy and security.</p>
 
@@ -211,84 +208,53 @@
                                 </div>
                         </div>
                 </div>
-
+                
                 <hr>
-
+                
                 <!-- Footer -->
                 <footer>
                         <div class="container">
-  <div class="row">
-    <div class="col-md-12 text-center">
-      <ul class="list-inline text-center">
-        <li>
-          <a href="https://twitter.com/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="https://github.com/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="http://stackoverflow.com/users/628821/ibebbs">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-        <li>
-          <a href="https://social.msdn.microsoft.com/profile/ian%20bebbington/">
-            <span class="fa-stack fa-lg">
-              <i class="fa fa-circle fa-stack-2x"></i>
-              <i class="fa fa-windows fa-stack-1x fa-inverse"></i>
-            </span>
-          </a>
-        </li>
-      </ul>
-      <p class="copyright text-muted">
-        Copyright © 2018 by Ian Bebbington. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/">"Creative Commons Attribution 4.0 International License"</a>
-        <br />
-        <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
-        <br />
-        <strong><a href="http://wyam.io">Generated by Wyam</a></strong>
-      </p>
-    </div>
-
-    <script>
-      (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-      (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-      m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-      })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
-
-      ga('create', 'UA-70151903-1', 'auto');
-      ga('send', 'pageview');
-
-    </script>
-
-    <script type="text/javascript">
-            /* * * CONFIGURATION VARIABLES: EDIT BEFORE PASTING INTO YOUR WEBPAGE * * */
-            var disqus_shortname = 'ibebbs'; // required: replace example with your forum shortname
-
-            /* * * DON'T EDIT BELOW THIS LINE * * */
-            (function () {
-                    var s = document.createElement('script'); s.async = true;
-                    s.type = 'text/javascript';
-                    s.src = '//' + disqus_shortname + '.disqus.com/count.js';
-                    (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
-            }());
-    </script>
+        <div class="row">
+                <div class="col-md-12 text-center">
+                    <p class="copyright text-muted">
+                        Copyright © 2019
+                        <br />
+                            <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a>
+                        |
+                            <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                        <br />
+                        <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                    </p>
+                </div>
+        </div>
 </div>
 
-                </footer>
+                </footer> 
 
                 
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
         </body>
 </html>
+
