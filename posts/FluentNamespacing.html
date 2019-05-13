@@ -113,9 +113,9 @@ Published on 09 May 2019<br>    </div>
                                 <div id="content" class="col-md-12">
                                         
 
-<p><em>So, it's been a while since I've blogged. Mostly this has been due to other committments (family, friends, side projects, etc), working more hours contracting than I would ideally like and generally not having any dead-time (such as when I used to commute). Since my last blog post (over a year ago!!) I've been maintaining an ever increasing list of things I'd like to blog about but haven't found the time. Given it's a new year, I've decided to pick a couple of the more challenging/contentious blog ideas and endeavour to get them written. This is the first and, while not necessarily the most contentious, might take some getting your head aroud. You have been warned...</em></p>
+<p><em>So, it's been a while since I've blogged. Mostly this has been due to other commitments (family, friends, side projects, etc), working more hours contracting than I would ideally like and generally not having any dead-time (such as when I used to commute). Since my last blog post (over a year ago!!) I've been maintaining an ever increasing list of things I'd like to blog about but haven't found the time. Given it's a new year, I've decided to pick a couple of the more challenging/contentious blog ideas and endeavour to get them written. This is the first and, while not necessarily the most contentious, might take some getting your head around. You have been warned...</em></p>
 <p>There is a convention at the heart of enterprise development and many modern development frameworks which seems to have been blindly adopted by the development community at large. I hope to challenge this convention as I believe changing it can provide many useful benefits in day to day development.</p>
-<p>The convention I'm referring to is the tendancy to group classes by <em>functional pattern</em> rather than <em>functional domain</em>. What does this mean? Well, to illustrate, lets start a new webapi project:</p>
+<p>The convention I'm referring to is the tendency to group classes by <em>functional pattern</em> rather than <em>functional domain</em>. What does this mean? Well, to illustrate, lets start a new webapi project:</p>
 <pre><code>dotnet new webapi
 </code></pre>
 <p>You will end up with a folder structure similar to this:</p>
@@ -178,7 +178,7 @@ Published on 09 May 2019<br>    </div>
 └───Properties
         launchSettings.json
 </code></pre>
-<p>Here we have exactly the same functionality but grouped by functional domain not functional pattern; i.e. all classes related to a Person are in the same folder. This has resulted in far less structural noise, simplied class names and no need for additional using statements to be added to any of the classes.</p>
+<p>Here we have exactly the same functionality but grouped by functional domain not functional pattern; i.e. all classes related to a Person are in the same folder. This has resulted in far less structural noise, simplified class names and no need for additional using statements to be added to any of the classes.</p>
 <h3 id="fluent-namespacing">Fluent Namespacing</h3>
 <p>I have been applying this approach in medium to large enterprise code-bases for some time now and find it provides simplified code, less structural overhead, easier navigation, faster comprehension and improved code architecture. I refer to it as &quot;Fluent Namespacing&quot; because, when you start referring to your classes via the [partial] namespace rather than long class names (requiring additional <code>using</code> statements), the code tends to read like a <a href="https://martinfowler.com/bliki/FluentInterface.html">fluent interface</a>.</p>
 <p>I believe this approach provides numerous additional benefits such as:</p>
@@ -186,14 +186,14 @@ Published on 09 May 2019<br>    </div>
 <p>Want the repository for your entity? It's right along side it. As are all the other classes related to that entity. This means you can very quickly skip between these classes without needing to navigate the breadth of your project looking for a folder for the appropriate functional pattern.</p>
 <h4 id="scope">2. Scope</h4>
 <p>When you write code which involves multiple entities, these entities need to be brought into scope. Rather than adding using statements, I have found that utilising the entity's namespace in a fluent fashion gives very elegant results.
-For example, say we have introduce a <code>Role</code> entity and the controller for this entity needs to be able to add <code>Person</code> instances to a role. A (naive) implementation of this class might look something akin to:</p>
+For example, say we have introduce a <code>Role</code> entity and the controller for this entity needs to be able to add <code>Person</code> instances to a role. A (naïve) implementation of this class might look something akin to:</p>
 <script src="https://gist.github.com/ibebbs/117531fb4a3a3556fd3788d45ffaaa57.js"></script>
-<p>Note the lack of additional using statements and how bringing classes related to other entities into scope requires only a parial namespace which then reads like natural language (i.e. Person.Repository / Person.Model).</p>
+<p>Note the lack of additional using statements and how bringing classes related to other entities into scope requires only a partial namespace which then reads like natural language (i.e. Person.Repository / Person.Model).</p>
 <h4 id="coupling">3. Coupling</h4>
 <p>In general, it is desirable for classes in your project to be loosely coupled. Fluent namespacing can visually illustrate when a class might be tightly-coupled by requiring long namespace traversals. For example:</p>
 <script src="https://gist.github.com/ibebbs/52ecb2051da6812d2a023cfc76cb0331.js"></script>
 <p>Should the Group controller really be using the Person entity's data source (<code>Person.Data.Source</code>) and mapping provider (<code>Person.Mapping.Provider</code>) to fetch a <code>Person.Model</code> instances or would they be better using the Person entity's repository (<code>Person.Repository</code>)?</p>
-<h3 id="other-considersations">Other considersations</h3>
+<h3 id="other-considerations">Other considerations</h3>
 <p>There are a couple of downsides to this approach such as:</p>
 <ol>
 <li><p>Refactoring</p>
@@ -210,7 +210,7 @@ For example, say we have introduce a <code>Role</code> entity and the controller
 </ol>
 <p><em>Note: The fact that these downsides are all related to tooling shows just how ingrained this convention is to modern development.</em></p>
 <h3 id="conclusion">Conclusion</h3>
-<p>As shown, moving away from the &quot;grouping by functional pattern&quot; convention and instead using &quot;Fluent Namespacing&quot; can make your code much more readable and maintainable while requiring very little overheard. The side benefits of simplified navigation leading to easier comprehension and the potential for highlighting possible code-smells can really pay dividends in a large code base. I'd very much encourage you to try Fluent Namespacing in your next project, I don't think you'll regret it.</p>
+<p>As shown, moving away from the &quot;grouping by functional pattern&quot; convention and instead using &quot;Fluent Namespacing&quot; can make your code much more readable and maintainable while requiring very little overhead. The side benefits of simplified navigation leading to easier comprehension and the potential for highlighting possible code-smells can really pay dividends in a large code base. I'd very much encourage you to try Fluent Namespacing in your next project, I don't think you'll regret it.</p>
 
 
 
