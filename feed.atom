@@ -4,8 +4,139 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2019</rights>
-	<updated>2019-05-30T19:48:12Z</updated>
+	<updated>2019-06-06T09:24:01Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/IgnoringABillionDollarMistakeIsNotAnOption</id>
+		<title>Ignoring a Billion-Dollar Mistake is simply not an Option</title>
+		<link href="http://ian.bebbs.co.uk/posts/IgnoringABillionDollarMistakeIsNotAnOption" />
+		<updated>2019-06-06T00:00:00Z</updated>
+		<content>&lt;h2 id="a-billion-dollar-mistake"&gt;A 'Billion-Dollar Mistake'?&lt;/h2&gt;
+&lt;p&gt;In 1965, computer scientist and otherwise all round good egg, Sir Charles Antony Richard Hoare (Tony to most) unleashed the 'null reference' upon an unsuspecting world, simply because it was &amp;quot;so easy&amp;quot;. Five decades later, the vast majority of computer programmers remain all too au fait with the &amp;quot;null reference&amp;quot; exception, battling it's seemingly unstoppable encroachment into otherwise flawless program flows.&lt;/p&gt;
+&lt;p&gt;In 2009, Tony apologised for inventing the null reference, stating:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;I call it my billion-dollar mistake. It was the invention of the null reference in 1965. At that time, I was designing the first comprehensive type system for references in an object oriented language (ALGOL W). My goal was to ensure that all use of references should be absolutely safe, with checking performed automatically by the compiler. But I couldn't resist the temptation to put in a null reference, simply because it was so easy to implement. This has led to innumerable errors, vulnerabilities, and system crashes, which have probably caused a billion dollars of pain and damage in the last forty years.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&amp;quot;Innumerable errors, vulnerabilities, and system crashes&amp;quot;? How so? Well, in most programming languages, null is not just a valid value for a reference type, it is the &lt;em&gt;default&lt;/em&gt; value. This means that any uninitialized reference type variable will cause a null reference exception if it is dereferenced. Furthermore, because null is the default reference type value, it tends to be the value returned when a process cannot be completed/calculated correctly causing otherwise innocuous dependent code to become inherently error prone. For example:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;string value = ParseValue(); // &amp;lt;= returns null as value cannot be parsed
+Console.WriteLine($&amp;quot;Value contains {value.Length} characters&amp;quot;); // &amp;lt;= Boom!
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Yes, we all look at the above code and shrug it off with a &amp;quot;D'uh, of course the value should be null checked&amp;quot;. But why? Why, in a statically typed and run-time checked language should there exist such a simple - and indeed default - means of causing an exception when, by definition, &lt;a href="https://www.google.com/search?q=exceptions+should+be+exceptional"&gt;exceptions should be exceptional&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="c-8.0-to-the-rescue"&gt;C# 8.0 to the rescue?&lt;/h2&gt;
+&lt;p&gt;With the rise in prominence of functional languages (particularly F#) which do not suffer this issue (at least by default), the C# community is working to address this mistake with the release of a major new feature in version 8.0 of the language: &lt;a href="https://docs.microsoft.com/en-us/dotnet/csharp/nullable-references"&gt;Nullable reference types&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Firstly, kudos to the community for calling the feature &amp;quot;Nullable reference types&amp;quot; rather than &amp;quot;Non-nullable reference types&amp;quot; inferring that nullability is the &amp;quot;non-default behaviour&amp;quot; you can have if you explicitly want. Unfortunately, the implementation of this feature is, in my opinion, completely hamstrung by backwards compatibility. Specifically:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;It will (in it's current guise) only ever cause compiler warnings not errors. Obviously you can enable warnings as errors but this isn't always feasible on large legacy projects.&lt;/li&gt;
+&lt;li&gt;It must be specifically enabled at a project level - potentially a large undertaking on legacy projects - or via messy directives in code.&lt;/li&gt;
+&lt;li&gt;It can't be applied consistently in all cases or at all in some cases. For example Jon Skeet's IEqualityComparer&lt;T&gt; example &lt;a href="https://codeblog.jonskeet.uk/2018/04/21/first-steps-with-nullable-reference-types/"&gt;here&lt;/a&gt; or the &amp;quot;Generics and nullable types&amp;quot; section of &lt;a href="https://www.infoq.com/articles/csharp-nullable-reference-case-study/"&gt;this InfoQ post&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;Mixing code using &amp;quot;null reference types&amp;quot; with class libraries which have not implemented this functionality is likely to be extremely messy in the short to medium term requiring &amp;quot;nullable shims&amp;quot; etc.&lt;/li&gt;
+&lt;li&gt;In the majority of cases, it doesn't actually remove the need for null reference checks.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;To me the &amp;quot;Nullable reference types&amp;quot; feature feels a bit like the proverbial hammer used to crack a nut. Except that, in this instance, the hammer isn't actually capable of cracking the nut, it is just a vehicle for the label on the side providing instructions on how to get the nut cracked.&lt;/p&gt;
+&lt;p&gt;Ok, that's a little facetious. On new or small code-bases, I'm sure utilizing &amp;quot;nullable reference types&amp;quot; will pay dividends and I would support it's use whole-heartedly. But what about large legacy code bases where having to specifically enable &amp;quot;nullable reference types&amp;quot; or enabling &amp;quot;warnings as errors&amp;quot; might not be viable.&lt;/p&gt;
+&lt;h2 id="perhaps-theres-another-option"&gt;Perhaps there's another Option?&lt;/h2&gt;
+&lt;p&gt;The more astute readers out there have no doubt have seen where this blog post is heading due to my nod to F# above and the not so subtle use of the word Option. As a functional language, F# eschews the use of null (unless specifically enabled on a type by type basis) by explicitly modelling the concept of &amp;quot;nothing-able&amp;quot; with a type: the discriminated union type called Option.&lt;/p&gt;
+&lt;p&gt;Here's a description of the Option type from the &lt;a href="https://docs.microsoft.com/en-us/dotnet/fsharp/language-reference/discriminated-unions"&gt;FSharp Language Reference&lt;/a&gt;:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;The option type is a simple discriminated union in the F# core library. The option type is declared as follows.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-F#"&gt;// The option type is a discriminated union.
+type Option&amp;lt;'a&amp;gt; =
+    | Some of 'a
+    | None
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The previous code specifies that the type Option is a discriminated union that has two cases, Some and None. The Some case has an associated value that consists of one anonymous field whose type is represented by the type parameter 'a. The None case has no associated value. Thus the option type specifies a generic type that either has a value of some type or no value.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;In short, instead of allowing a value to be null, the value is wrapped inside another object which is able to explicitly say whether the value is something or nothing. While this is an F# concept, it can be mirrored quite simply in C# as follows:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-C#"&gt;public struct Option&amp;lt;T&amp;gt;
+{
+    public static readonly Option&amp;lt;T&amp;gt; None = new Option&amp;lt;T&amp;gt;();
+
+    public static Option&amp;lt;T&amp;gt; Some(T value)
+    {
+        return new Option&amp;lt;T&amp;gt;(value);
+    }
+
+    private Option(T value)
+    {
+        IsSome = true;
+        Value = value;
+    }
+
+    public T Value { get; private set; }
+    public bool IsSome { get; private set; }
+    public bool IsNone =&amp;gt; !IsSome;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that this is a struct (i.e. a value type which cannot be null) but also generic meaning it can hold a reference type value. Using this class we can write code which in which we can be confident that we won't encounter a null reference:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-C#"&gt;var option = GetSomeOption();
+if (option.IsSome)
+{
+    Console.WriteLine($&amp;quot;Found a value of {option.Value}&amp;quot;);
+}
+else
+{
+    Console.WriteLine(&amp;quot;Did not find a value&amp;quot;);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;What's that? This code looks exactly like the code for a null reference check? True, except for three important differences:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;The use of an Option as the return type indicates to the consumer that &amp;quot;None&amp;quot; is a valid value and must be considered - as opposed to a null which may or may not be deliberate.&lt;/li&gt;
+&lt;li&gt;The Value property must be explicitly read from the Option meaning the consumer is less likely to access the property without checking that it 'IsSome' first.&lt;/li&gt;
+&lt;li&gt;You can do more with &lt;em&gt;something&lt;/em&gt; than you can with &lt;em&gt;nothing&lt;/em&gt;; read on.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Regarding that last point, once we have something - i.e. an Option type - we can work with it to facilitate it's use in code. For example, consider the following extension methods:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-C#"&gt;/// &amp;lt;summary&amp;gt;
+/// Projects an &amp;lt;see cref=&amp;quot;Option{T}&amp;quot;/&amp;gt; of &amp;lt;typeparamref name=&amp;quot;TSource&amp;quot;/&amp;gt; to
+/// an &amp;lt;see cref=&amp;quot;Option{T}&amp;quot;/&amp;gt; of &amp;lt;typeparamref name=&amp;quot;TDest&amp;quot;/&amp;gt; using the
+/// specified &amp;lt;paramref name=&amp;quot;projection&amp;quot;/&amp;gt;
+/// &amp;lt;/summary&amp;gt;
+public static Option&amp;lt;TDest&amp;gt; Select&amp;lt;TSource, TDest&amp;gt;(this Option&amp;lt;TSource&amp;gt; source, Func&amp;lt;TSource, Option&amp;lt;TDest&amp;gt;&amp;gt; projection)
+{
+    return source.IsSome ? projection(source.Value) : None&amp;lt;TDest&amp;gt;();
+}
+
+/// &amp;lt;summary&amp;gt;
+/// If the &amp;lt;see cref=&amp;quot;Option{T}.IsSome&amp;quot;/&amp;gt; returns true for the &amp;lt;see cref=&amp;quot;Option{T}&amp;quot;/&amp;gt; specified in &amp;lt;paramref name=&amp;quot;source&amp;quot;/&amp;gt;
+/// then this method will return it's &amp;lt;see cref=&amp;quot;Option{T}.Value&amp;quot;/&amp;gt;, otherwise the value of the &amp;lt;paramref name=&amp;quot;value&amp;quot;/&amp;gt; parameter
+/// is returned
+/// &amp;lt;/summary&amp;gt;
+public static T Coalesce&amp;lt;T&amp;gt;(this Option&amp;lt;T&amp;gt; source, T value)
+{
+    return source.IsSome ? source.Value : value;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Using these we can move away from imperative property checking an adopt a more declarative style:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-C#"&gt;var response = GetSomeOption()
+    .Select(value =&amp;gt; $&amp;quot;Found a value of {value}&amp;quot;)
+    .Coalesce(&amp;quot;Did not find a value&amp;quot;);
+
+Console.WriteLine(response);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The benefits of declarative code vs imperative code will likely be the subject of my next &amp;quot;contentious&amp;quot; blog post. I have repeatedly debated  the various pros and cons of declarative code with co-workers and clients and still believe it's a fundamentally better way of expressing intent while simultaneously and writing &amp;quot;safer&amp;quot; code.&lt;/p&gt;
+&lt;p&gt;So anyway, notice anything about the Option type?&lt;/p&gt;
+&lt;h2 id="oh-isnt-this-one-of-those.err.gonad-things"&gt;Oh, isn't this one of those... err... gonad things?&lt;/h2&gt;
+&lt;p&gt;Monad? Yes. The Option type is, in my opinion, the quintessential monad as, when combined with compositional functions like those shown above, it is able to provide &amp;quot;a design pattern that allows structuring programs generically while automating away boilerplate code needed by the program logic&amp;quot;; i.e. removing all those damn ugly null checks!&lt;/p&gt;
+&lt;p&gt;After working with the Option type for a number of years across numerous project's I've accumulated (mostly by plagiarizing F#) a number of monadic functions which can almost eliminate imperative code (at least with respect to null checking). These functions are especially useful for collections as shown (in the somewhat contrived example) below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-C#"&gt;var result = Enumerable
+    .Range(1, 100)
+    .Select(value =&amp;gt; ReturnSomeIfAValidValueOtherwiseNone(value)) // &amp;lt;= Returns an Option
+    .Collect() // &amp;lt;= Do not propagate values of Option.None
+    .FirstOption() // &amp;lt;= Take the first value of Option.Some or return Option.None if none exist
+    .Select(value =&amp;gt; $&amp;quot;{value} is the first valid value&amp;quot;)
+    .Coalesce(&amp;quot;No valid values found&amp;quot;);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="ok-so-where-does-this-get-us"&gt;Ok, so where does this get us?&lt;/h2&gt;
+&lt;p&gt;Well, looking back and comparing this with &amp;quot;nullable reference types&amp;quot;, I believe explicitly modelling the concept of nothing using the Option type provides many advantages such as:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;You can adopt this approach incrementally - one method at a time if need be - without huge numbers of warnings or messy code directives.&lt;/li&gt;
+&lt;li&gt;Explicitly stating that a method can return &amp;quot;nothing&amp;quot; with the Option type is a much more obvious means of expressing intent than a &amp;quot;nullable reference type&amp;quot;.&lt;/li&gt;
+&lt;li&gt;You can finally get rid of null reference checks!&lt;/li&gt;
+&lt;li&gt;Returning &lt;em&gt;something&lt;/em&gt; rather than &lt;em&gt;nothing&lt;/em&gt; facilitates the adoption of a more declarative programming style.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;So there we go. A safe, obvious, easy and, most-importantly, low-cost means of dealing with the &amp;quot;Billion-Dollar Mistake&amp;quot;. Give it a stab and see what you think. As shown above, there's a very low barrier to entry so there's very little to lose.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;In 1965, computer scientist and otherwise all round good egg, Sir Charles Antony Richard Hoare (Tony to most) unleashed the 'null reference' upon an unsuspecting world, simply because it was "so easy". Five decades later, the vast majority of computer programmers remain all too au fait with the "null reference" exception, battling it's seemingly unstoppable encroachment into otherwise flawless program flows.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/FluentNamespacing</id>
 		<title>Fluent Namespacing</title>
@@ -1810,63 +1941,5 @@ However, after discussing ToddlerBox with a friend, he decided to install it on 
 &lt;p&gt;In the mean time, well done to all the maintainers of, and contributors to, the toolkit on this important milestone.&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;Shortly after my blog post about &lt;a href="http://ian.bebbs.co.uk/posts/UsingHyperlinkInMVVM"&gt;Using a Hyperlink in MVVM&lt;/a&gt; a group of developers at Microsoft collated and released the &lt;a href="https://blogs.windows.com/buildingapps/2016/08/17/introducing-the-uwp-community-toolkit/#pRVgJbZbTBMHPyGG.97"&gt;UWP Community Toolkit&lt;/a&gt;. They were actively asking for contributions and, given the self contained nature of the Hyperlink extension, it seemed like a natural fit for the toolkit so I decided to try contributing it via pull request.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/MonsterPi</id>
-		<title>MonsterPi</title>
-		<link href="http://ian.bebbs.co.uk/posts/MonsterPi" />
-		<link rel="enclosure" type="image" href="https://0ohdnq.db.files.1drv.com/y4mitDNm76sXoUc4Awg9nfut1InNpftFJ5lwNHnTo5kLNwx1XEofZqA1iTKH5-33gdEI-vHBnR-miUmIBqMlpbGct3OQFbXXl4UxH-BuVum2HSAeJk2OvTdbUaDZlrhMPda6QpYWhwPXf6etwHK-Uysho07icRyXIewBetN164FU3NjvIgkOfWLqnjnqCT5tObLkVRUKvqzRZg4Kzu5ECB52w?width=967&amp;height=273&amp;cropmode=none" />
-		<updated>2016-10-08T00:00:00Z</updated>
-		<content>&lt;h2 id="preface"&gt;Preface&lt;/h2&gt;
-&lt;p&gt;I've long loved the idea of home automation. From X10 and LightwaveRF through to modern Bluetooth and Wifi connected devices, I have played with dozens of technologies in search of home automation nirvana. But recently I have watched with growing bewilderment at the incredible number of &amp;quot;cloud-connected&amp;quot; home automation devices being released and the eagerness with which they're snapped up by naive consumers hungry to control everything from the carefree comfort of their iPhone.&lt;/p&gt;
-&lt;p&gt;You see, while you can buy a myriad of IoT devices off the shelf nowadays, they nearly all come with some form of &amp;quot;cloud-service&amp;quot; that is necessary in order for the device to work as sold. As the more wily of reader will no doubt be aware, this exposes your home network to innumerable &lt;a href="https://it.slashdot.org/story/16/10/03/1359200/source-code-for-iot-botnet-mirai-which-took-down-krebs-on-security-website-with-ddos-attack-released"&gt;security concerns&lt;/a&gt;, &lt;a href="https://it.slashdot.org/story/16/08/08/1449221/hackers-make-the-first-ever-ransomware-for-smart-thermostats"&gt;potential abuses&lt;/a&gt; and an &lt;a href="https://tech.slashdot.org/story/16/01/14/1347243/nest-thermostat-bug-leaves-owners-without-heating"&gt;external point of failure&lt;/a&gt; that cannot be closed/fixed without sacrificing some or all of the functionality of the new fangled device.&lt;/p&gt;
-&lt;p&gt;While I understand the ostensible benefits of this approach (ease of setup, remote use without manually opening firewall ports, centralised patching and upgrading, etc), sacrificing control of (potentially hazardous or invasive) devices within my home is not a value proposition I am comfortable with. I would very much like to see a new (or is that old?) breed of device that:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;does not require an internet connection to operate with all features intact,&lt;/li&gt;
-&lt;li&gt;with which the owner can proactively decide what control and data is available to servers outside of the home network and,&lt;/li&gt;
-&lt;li&gt;which surface simple, open interfaces to the owner allowing them to completely control all aspects of the device.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;In short, I'd like to drop the 'Inter' from IoT and expand the 'net' to become a 'Network of Things', or NoT.&lt;/p&gt;
-&lt;p&gt;In terms of the consumer market, I am undoubtedly swimming against the tide here. Fortunately with the rise of hobbyist devices such as Arduino and RaspberryPi, IoT technologies have been democratised to the extent that anyone with just the smallest ability with a soldering iron and faculty with an IDE can create such devices for themselves.&lt;/p&gt;
-&lt;p&gt;Ladies and gentlemen, I present my first (finished) NoT device, the...&lt;/p&gt;
-&lt;h1 id="monsterpi"&gt;MonsterPi&lt;/h1&gt;
-&lt;p&gt;Years ago, while setting up my (living room) home cinema, I came across the &lt;a href="http://www.adverts.ie/home-audio/monster-hts-1600-home-theatre-powercenter-5-outlet-with-stage-2-clean-power-purge-protector-uk-version/7055360"&gt;Monster Power HTS 1600&lt;/a&gt; on &lt;a href="https://www.scan.co.uk/"&gt;Scan's website&lt;/a&gt;. It seems Monster Products were end-of-lining their power products in the UK (the above link was literally the only one I could find that still works!) and Scan were selling them off at £30 a piece. It was exactly what I was looking for at the time and, not being one to pass up a bargain, I bought two.&lt;/p&gt;
-&lt;img src="https://0oiczq.db.files.1drv.com/y4mqxsieWccnVIqEDC_OS5ayOi9XcRk2y1KTFnQeZTSzBrgGKr9V7GLrKhTkZnLWEUWpm3wq8TH4-AQVJeYokuGbrXB9E1wuHRhOuJHcZI1B-gqO4j4nnNGKyPgBs3riJx9GhbmetOB_MhYbixEhFAB1RuBeP6gsKPeAFxmT6J9Bn-jqkiAlq3zykPYdo0ZkFEgDPh-THr20aiRj2vVOGZ2FQ?width=700&amp;height=466&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="One of the few remaining pictures online of the Monster Power HTS 1600 UK version"&gt;
-&lt;p&gt;Both devices found homes powering and protected my front room and study AV equipment and, to this day, I am still very happy with them. However, I always felt that Monster had missed a trick with this product: the ability to individually and - ideally - remotely turn each of the sockets on the unit on and off as desired.&lt;/p&gt;
-&lt;p&gt;When Microsoft announced that Windows IoT Core would run on a RaspberryPi the learning curve ahead of making this happen evaporated and I knew it was something I wanted to do. Unfortunately both Monster Power devices were in full time use and I didn't want to potentially sacrifice one on a project that might not work and could consign the device to the scrap yard. Given that you couldn't purchase the UK version of these devices any more and that, when they occasionally appeared on eBay, they'd invariably be priced at £100+ the project was indefinitely parked.&lt;/p&gt;
-&lt;p&gt;Finally, a couple of months ago, a 'used' one appeared on eBay without a reserve and with bidding at thirty odd quid having just a few hours to go. I placed a bid without really hoping it would be successful and, to my surprise, ended up winning the auction for £40'ish including delivery. When it arrived I was delighted to find that it seemed to be brand new and unused (twisty wire on all the cables, supplementary cables still in sealed bags, etc). Plugging it in proved that everything worked as it should so everything was in place to build the MonsterPi.&lt;/p&gt;
-&lt;h2 id="software"&gt;Software&lt;/h2&gt;
-&lt;p&gt;While waiting for the time and space required to start hacking up the hardware, I took a look into what was required to write a headless UWP app, self-hosting a HTTP REST endpoint that could be deployed to the RaspberryPi and set values on the GPIO pins necessary to control the &lt;a href="http://www.waveshare.com/rpi-relay-board.htm"&gt;Waveshare RaspberryPi Relay Board&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;It didn't take long to find &lt;a href="https://github.com/tomkuijsten/restup"&gt;Restup&lt;/a&gt;, a beautifully simple if somewhat minimal 'Webserver for Universal Windows Apps'. The github repository provided ample samples for writing various types of 'controller' and in less than an hour, I had a working solution.&lt;/p&gt;
-&lt;p&gt;Given the Waveshare relay board just required GPIO pins to be set in order to control the relay (low to close, high to open) this was achieved very simply using the classes available in the &lt;a href="https://msdn.microsoft.com/library/windows/apps/windows.devices.gpio.aspx"&gt;Windows.Devices.Gpio namespace&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Deployment was taken care of by Visual Studio and configuration performed using the Windows IoT Core Device Portal. The Device Portal allows you to configure deployed apps to run at start up thereby creating a &amp;quot;service-like&amp;quot; experience for headless apps.&lt;/p&gt;
-&lt;img src="https://0oidzq.db.files.1drv.com/y4mCOHs4AcSA0ukw3TczkdNSQ-EOOaAQeO3VW6HOqD6zHD6WWAga_j08fXas4hKZj-q-B0gEGriDBpXRyA52g2a7WsHg4xeyA1khSpizKi5gMh18gXmXKJDWnCCk6VLoMZNqi9ewYQLrbozwE1rUUgvclqYOyMpivDwqnftMweBuH9SuX9g2mE6Tx3uX_EGB1RLkOaBPo4gFSGQ9ZnvzAaU9w?width=1363&amp;height=905&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Using the device portal to set Start-up apps"&gt;
-&lt;p&gt;Full source code is available on my &lt;a href="https://github.com/ibebbs/MonsterPi"&gt;Github account&lt;/a&gt;.&lt;/p&gt;
-&lt;h2 id="hardware"&gt;Hardware&lt;/h2&gt;
-&lt;p&gt;The hardware side of things proved to be both easier and more tricky than I expected.&lt;/p&gt;
-&lt;p&gt;Initially I thought fitting the Pi was going to be child's-play when, upon opening the Monster Power chasis I found that the configuration of sockets providing isolation for RJ11 and RJ45 devices (phone and ethernet respectively) matched the layout of the ethernet and USB connectors of the Pi almost perfectly. Furthermore, these sockets were mounted on an easily removable daughter-board providing an obvious way to fix the pi in place.&lt;/p&gt;
-&lt;img src="https://nhtcwg.db.files.1drv.com/y4mMqpyLGskrYW9KjrOdaQIbL00ngf_BNysKCi2wRc1FtpiynmlOVq7JJX4iEQArf825Xi6HdprXITQ0-1ki_vJZ8ZvEmLbWZK6yV9ltuz_EdyX_tApP7FWHN1JGvX3hx78Aq-N2Sl59UWPxBnAZbdd2wBIAxDgQ2xBKGvuOSTmuLsQ_sOBK_dhEauZvLwTKaKOIFeZxf1tKki0JvCNaJGXXg?width=1024&amp;height=576&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="The sockets on the RaspberryPi aligned almost perfectly with the RJ11 isolator sockets"&gt;
-&lt;p&gt;While alignment wasn't perfect, filing the holes in the chasis to provide access to all ports would be easy.&lt;/p&gt;
-&lt;p&gt;Complexity came when I realised that, although the Monster Power included a micro-controller driven digital display, it was unlikely that the DC subsystem in place to power this would be adequate for the RaspberryPi. So here I had to get creative.&lt;/p&gt;
-&lt;p&gt;I bought a small &lt;a href="https://www.amazon.co.uk/gp/product/B01H0OH3PI/ref=oh_aui_detailpage_o02_s01?ie=UTF8&amp;amp;psc=1"&gt;12v 80W switching power supply&lt;/a&gt; which would fit down one side of the Moster Power chasis and wired it to the 240v input of using the conveniently provided ring terminals. I used a &lt;a href="http://ian.bebbs.co.uk/posts/3DPrintingWithTheCelRobox"&gt;custom printed bracket&lt;/a&gt; to secure the PSU in place while providing a platform to mount the &lt;a href="http://www.waveshare.com/rpi-relay-board.htm"&gt;Waveshare RaspberryPi Relay Board&lt;/a&gt; above, in close proximity to the sockets I wanted to control with the relays.&lt;/p&gt;
-&lt;p&gt;The live wire to the three sockets to be controlled by relays were daisy-chained together so one side of this wire was cut from each socket and connected to the normally-closed output of the relay (extending where necessary using crimp connectors).&lt;/p&gt;
-&lt;p&gt;This is shown below:&lt;/p&gt;
-&lt;img src="https://zphbnq.db.files.1drv.com/y4mJ6hwZLwCbkevWtnsZydVTAAKhKp-Ce9Ks6tibIexlwh4hexgcszHCTc8LagL57MPBBTa8xAGw6wukCZJHYFh1OlsPpdocfTKuMhEEntj_0L9pCQL_nMhF_5ACuEr1sQ7SBiDeOXkBrwbpFpFo8mWytP_sEk68ohwpX5_c_HO6vTGHeRZWb_h2pnzQj4uz1g0Pu-cBzsAmtQq24Jp6Z1gSQ?width=576&amp;height=1024&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="12v switching PSU with relay board mounted in custom bracket"&gt;
-&lt;p&gt;While the perspective in the picture makes it look like it hangs over the edge of the chasis, it does actually fit. It's tight, but it fits.&lt;/p&gt;
-&lt;p&gt;I used a &lt;a href="https://www.amazon.co.uk/gp/product/B01CUA5Q74/ref=oh_aui_detailpage_o02_s00?ie=UTF8&amp;amp;psc=1"&gt;12V To 5V 3A 15W Power Converter Regulator with Micro USB Cable&lt;/a&gt; to power the RaspberryPi and - given I now had plenty of power to spare, decided to also fit the &lt;a href="https://www.amazon.co.uk/Step-Down-Step-down-Power-Module/dp/B00ENE55SQ/ref=pd_nav_hcs_bia_t_1?ie=UTF8&amp;amp;psc=1&amp;amp;refRID=J91844QA901NNMPP9XHJ"&gt;4-port USB power module&lt;/a&gt; I had bought, but not used, for our &lt;a href="http://ian.bebbs.co.uk/posts/WotNoBlogPosts"&gt;travels earlier in the year&lt;/a&gt;. Again, this aligned almost perfectly in the remaining holes in the Monster Power chasis.&lt;/p&gt;
-&lt;p&gt;Both these were mounted - upside down - on a custom printed bracket using the screw holes for the original daughter board to secure it in place. Terminal connectors were used to provide connection to the power supply just in case I needed to remove the components at a later date for some reason.&lt;/p&gt;
-&lt;img src="https://nhtewg.db.files.1drv.com/y4m5qeaNVNg9hCM-PidgkaWfp5y4itzOuRDI9gFyjYM6Gsd_GTo3ew8jiI8osEPd-RxY0e0_fklzyuMyZccZrk8moABMbVR966t7UbIAA716GZJe6ROzL-BsTNQGzNi6bwYouMfJQGI-XFr-nXSVbnKwPrh-yFRNBEQAJR-WaG1MF1Ze474L1g3dR7IsBsJpg6tr3s59DZXY25T3crjsKH-sw?width=1024&amp;height=576&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Mounting the RaspberryPi and USB power module on a custom bracket"&gt;
-&lt;p&gt;Finally, boards were fixed in place and a ribbon cable connected between the GPIO socket on the RaspberryPi and the relay board to allow control of the relays.&lt;/p&gt;
-&lt;img src="https://zphhnq.db.files.1drv.com/y4myf7buxs3C2WBePTmzDYo_3fskehVWsqvflHppYbYD3QezWJqMiGlPhEn42TD2I0EeefW1VeDwkGMc9NoWxNLv7gE2GTyPJ8ILua16_Y-2sHPeBku8AOHysIS3tkg8Yga1TCe3ZZ8j3QjqQXurHS70ZKEb-VbL9JfHXTBBZO7PYg5S2-xZO3NueUnc8-iigDfPuKVdrxpMR7CdB7npSLrLQ?width=1024&amp;height=576&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Brackets in place and RaspberryPi fitted"&gt;
-&lt;p&gt;After a thorough check to make sure there were no shorts on any of the connections and that I had connected polarity correctly, I plugged it in and turned it on....&lt;/p&gt;
-&lt;h2 id="testing"&gt;Testing&lt;/h2&gt;
-&lt;p&gt;... and everything worked.&lt;/p&gt;
-&lt;p&gt;The RaspberryPi booted but didn't switch the sockets on as - I think - not having a network connection meant it couldn't get an IP address which meant the software hadn't enabled to relays due to being configured to fail safe (leave the sockets off). The power indicator on the USB power module suggested it was working fine too.&lt;/p&gt;
-&lt;p&gt;Next I relocated to another room where a network connection was available. I plugged it in, turned it on and saw the network connection LED's start blinking. After 15-20 seconds or so while the RaspberryPi booted, the relays tickets on and I was able to hit the REST endpoint from &lt;a href="https://www.getpostman.com/"&gt;Postman&lt;/a&gt;. I'd even managed to get the names of the sockets on the rest service to match the sockets the relays were controlling, although I admit this was more luck than judgement (I had completely expected to have to re-configure the software to match after the hardware was complete).&lt;/p&gt;
-&lt;p&gt;I plugged in a small table lamp and recorded this:&lt;/p&gt;
-&lt;iframe src="https://onedrive.live.com/embed?cid=03DF8A28BD9D0BC9&amp;resid=3DF8A28BD9D0BC9%21266322&amp;authkey=AI5IzCXupiYl-CU" width="320" height="180" frameborder="0" scrolling="no" allowfullscreen&gt;&lt;/iframe&gt;
-&lt;p&gt;Boom! (Figuratively speaking of course... the MonsterPi didn't literally go boom... yet :0)&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;I've long loved the idea of home automation. From X10 and LightwaveRF through to modern Bluetooth and Wifi connected devices, I have played with dozens of technologies in search of home automation nirvana. But recently I have watched with growing bewilderment at the incredible number of "cloud-connected" home automation devices being released and the eagerness with which they're snapped up by naive consumers hungry to control everything from the carefree comfort of their iPhone.&lt;/p&gt;</summary>
 	</entry>
 </feed>
