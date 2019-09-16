@@ -5,8 +5,56 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2019</copyright>
-		<pubDate>Thu, 06 Jun 2019 09:24:01 GMT</pubDate>
-		<lastBuildDate>Thu, 06 Jun 2019 09:24:01 GMT</lastBuildDate>
+		<pubDate>Mon, 16 Sep 2019 12:15:27 GMT</pubDate>
+		<lastBuildDate>Mon, 16 Sep 2019 12:15:27 GMT</lastBuildDate>
+		<item>
+			<title>Be Brave. Like BAT, man!</title>
+			<link>http://ian.bebbs.co.uk/posts/BeBraveLikeBATMan</link>
+			<description>&lt;p&gt;Brave is a privacy focused browser with a revolutionary means of supporting content publisher's revenue streams. Here's why you  should &lt;a href="https://brave.com/beb095"&gt;give it a try&lt;/a&gt;, particularly if you maintain a blog or publish open-source software.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/BeBraveLikeBATMan</guid>
+			<pubDate>Fri, 06 Sep 2019 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;h1 id="tldr"&gt;TL;DR&lt;/h1&gt;
+&lt;p&gt;Brave is a privacy focused browser with a revolutionary means of supporting content publisher's revenue streams. Here's why you  should &lt;a href="https://brave.com/beb095"&gt;give it a try&lt;/a&gt;, particularly if you maintain a blog or publish open-source software.&lt;/p&gt;
+&lt;h2 id="it-all-starts-with-privacy"&gt;It all starts with Privacy&lt;/h2&gt;
+&lt;p&gt;As anyone who knows me will tell you, I care deeply about privacy. In fact, should you happen to ask one of these people about my insistence on privacy, they'll give a nod confirmation accompanied by a not so subtle eye-roll of derision. This used to bother me but I've learned the hard way the lesson which Corey Doctorow states so eloquently:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;It’s really hard to get people to care about dangers that are far in the future, especially when the action that puts you in danger and the consequences of that action are separated by an unbridgeable gap of time and space. Privacy disclosures are a public health problem, like smoking. No one puff on a cigarette will definitely give you cancer, but take enough puffs and you’ll virtually guarantee cancer, eventually. No one act of disclosure of personal information will harm you, but once enough disclosures have taken place, over enough time, you’re going to get into serious privacy trouble.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I am that schmuck who actual reads (and, more often than not, is terrified by) the list of permissions installing an app on your phone requires. Therefore, when my beloved Windows Mobile phone was finally - and somewhat forcibly - supplanted by an Android device, my first action was to endeavour to replace all the privacy invading dross that came pre-installed and find more secure alternatives.&lt;/p&gt;
+&lt;p&gt;And so it was that I chose &lt;a href="https://brave.com/beb095"&gt;Brave&lt;/a&gt; to replace the stock Chrome browser.&lt;/p&gt;
+&lt;h2 id="the-brave-browser"&gt;The Brave Browser&lt;/h2&gt;
+&lt;p&gt;Brave is a Chromium based browser focused on user privacy. It's privacy features include the ability to block ads, cross site trackers, cross site cookies and device identification; all features used by nefarious advertising agencies to aggressively profile and target individuals without consent. Moreover, on a mobile device, using Brave saves time, money and battery as adverts and trackers are not downloaded resulting in sites that load quicker, using less data allowance and consuming less power.&lt;/p&gt;
+&lt;p&gt;It works really well and, to me, is a no brainer. I've yet to find a site that didn't work in Brave or has been otherwise negatively impacted by the removal of adverts/trackers. I would unreservedly recommend that everyone swap Google Chrome for Brave immediately; you won't look back.&lt;/p&gt;
+&lt;h2 id="its-a-win-win-but-not-a-win-win-win"&gt;It's a win-win, but not a win-win-win.&lt;/h2&gt;
+&lt;p&gt;Of course, there's an issue with blocking adverts: Many content publishers rely on the use of advertising to pay the bills and, by preventing adverts from appearing, you're depriving the sites you visit most of a vital source of revenue.&lt;/p&gt;
+&lt;p&gt;Brave's founders were very aware of the web's dependence on the trichotomy of users, content publishers and advertisers when they released their browser. In the years since, they have released and refined various approaches to resolving this issue, finally arriving at the BAT.&lt;/p&gt;
+&lt;h2 id="basic-attention-token-bat"&gt;Basic Attention Token (BAT)&lt;/h2&gt;
+&lt;p&gt;The Basic Attention Token endeavours to address this issue by providing a means for advertisers to reach users through content publisher's sites while doing so anonymously and providing financial incentives to &lt;em&gt;all the involved parties&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;As the old addage goes, a picture is worth a thousand words so here's one worth many times that direct from the &lt;a href="https://basicattentiontoken.org"&gt;basicattentiontoken.org&lt;/a&gt; website:&lt;/p&gt;
+&lt;img src="https://basicattentiontoken.org/wp-content/uploads/2017/03/bat_triad_diagram.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="BAT Triad"&gt;
+&lt;p&gt;In short, users are able to support the sites they visit most by being exposed to advertisements that are truly relevant to them, all without compromising privacy. Amazingly the user is even &lt;em&gt;rewarded&lt;/em&gt; for being exposed to these ads and will accumulate BAT (directly tradable against other crypto - and by extension - fiat currencies) in the browser's built in wallet.&lt;/p&gt;
+&lt;h1 id="brave-rewards"&gt;Brave Rewards&lt;/h1&gt;
+&lt;p&gt;This really is a revolution in how the modern web operates and is monetized yet, amazingly, it is entirely optional in the Brave Browser.&lt;/p&gt;
+&lt;p&gt;It is enabled by opting in to 'Brave Rewards' as shown below:&lt;/p&gt;
+&lt;img src="../Content/BeBraveLikeBATman/BraveRewards.jpg" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Brave Rewards Summary"&gt;
+&lt;p&gt;I enabled &amp;quot;Brave Rewards&amp;quot; a couple of months back after being prompted by Brave and reading about it in depth. As you can see, just by using the browser as I normal would, without any obvious, annoying or intrusive ads, and despite having 'Auto-Contribute' enabled, I have accumulated ~26 BAT.&lt;/p&gt;
+&lt;p&gt;&amp;quot;But that's less than five dollars!&amp;quot; I hear you say. True, but that's five dollars that would otherwise have been in the pockets of the big internet advertising agencies and, as with other crypto currencies, has the possibility to be worth much more should the BAT continue it's current growth. More importantly though, by auto-contributing accrued BAT to the sites I visit most, I have directly supported these sites with (micro) payments in a way I ordinarily would not have been able to do.&lt;/p&gt;
+&lt;h2 id="now-get-pay-for-attention"&gt;Now [get] pay [for] attention!&lt;/h2&gt;
+&lt;p&gt;All in all, I feel pretty good about my adoption and promotion of BAT. So much so that I recently registered as a &lt;a href="https://publishers.basicattentiontoken.org/"&gt;'Verified Content Creator'&lt;/a&gt; and added both my &lt;a href="ian.bebbs.co.uk"&gt;blog&lt;/a&gt; and my &lt;a href="https://github.com/ibebbs"&gt;github account&lt;/a&gt; as revenue channels. By registering in this way, anyone who uses the Brave browser to read my blog or open-source projects will automatically help support the further creation of these forms of content by contributing BAT.&lt;/p&gt;
+&lt;p&gt;The &lt;a href="https://publishers.basicattentiontoken.org/"&gt;Brave Rewards Creators program&lt;/a&gt; allows you to accrue BAT through numerous channels including (at the time of writing) web sites, youtube, twitch, twitter, vimeo, reddit and gituhb. If you create content in any of these ways, I very much recommend you register as a verified content creator. Brave maintains historical contributions to creators not currently registered, so you could be in for a windfall of BAT when you do!&lt;/p&gt;
+&lt;h2 id="bat-sht-crazy"&gt;BAT-sh*t crazy!&lt;/h2&gt;
+&lt;p&gt;More recently I've moved to using Brave as my primary desktop browser too. Initial experiences are that the it provides the same excellent browsing characteristics of it's Android cousin but that it's use of system notifications for ad delivery is a little too &amp;quot;in your face&amp;quot;. I'm going to stick with it for a while and see how it goes. If the ads get too much, I'll simply disable &amp;quot;Brave Rewards&amp;quot; on the desktop while continuing to enjoy privacy and speed enhancements delivered by this excellent browser.&lt;/p&gt;
+&lt;h2 id="support-me"&gt;Support me&lt;/h2&gt;
+&lt;p&gt;If you have had your interest piqued by this post and are now interested in trying out the Brave, it would be great if you could use this &lt;a href="https://brave.com/beb095"&gt;referral link&lt;/a&gt; for download. It will net me approximately $5 of BAT via the &lt;a href="https://brave.com/referral-program/"&gt;Brave referral program&lt;/a&gt;. Thanks!&lt;/p&gt;
+&lt;h2 id="further-reading"&gt;Further Reading&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://basicattentiontoken.org/"&gt;Basic Attention Token homepage&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://arunoda.me/blog/all-about-basic-attention-token"&gt;All about Basic Attention Token (BAT)&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://locusmag.com/2016/07/cory-doctorow-peak-indifference/"&gt;Cory Doctorow: Peak Indifference&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://batgrowth.com/"&gt;BATGrowth.com&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>Ignoring a Billion-Dollar Mistake is simply not an Option</title>
 			<link>http://ian.bebbs.co.uk/posts/IgnoringABillionDollarMistakeIsNotAnOption</link>
@@ -1929,18 +1977,6 @@ However, after discussing ToddlerBox with a friend, he decided to install it on 
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;As you can see, states can (and should!) be very small and easily testable. All together a complete, strongly typed, 'async' friendly state machine can be implemented with just a handful of classes containing minimal code.&lt;/p&gt;
 &lt;p&gt;I have used this pattern on numerous occasions and enjoy the simplicity and extensibility it affords me when defining long-running process flows.&lt;/p&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>UWP Community Toolkit v1.1 Released</title>
-			<link>http://ian.bebbs.co.uk/posts/UWPCommunityToolkitv1_1</link>
-			<description>&lt;p&gt;Shortly after my blog post about &lt;a href="http://ian.bebbs.co.uk/posts/UsingHyperlinkInMVVM"&gt;Using a Hyperlink in MVVM&lt;/a&gt; a group of developers at Microsoft collated and released the &lt;a href="https://blogs.windows.com/buildingapps/2016/08/17/introducing-the-uwp-community-toolkit/#pRVgJbZbTBMHPyGG.97"&gt;UWP Community Toolkit&lt;/a&gt;. They were actively asking for contributions and, given the self contained nature of the Hyperlink extension, it seemed like a natural fit for the toolkit so I decided to try contributing it via pull request.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/UWPCommunityToolkitv1_1</guid>
-			<pubDate>Mon, 10 Oct 2016 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;p&gt;Shortly after my blog post about &lt;a href="http://ian.bebbs.co.uk/posts/UsingHyperlinkInMVVM"&gt;Using a Hyperlink in MVVM&lt;/a&gt; a group of developers at Microsoft collated and released the &lt;a href="https://blogs.windows.com/buildingapps/2016/08/17/introducing-the-uwp-community-toolkit/#pRVgJbZbTBMHPyGG.97"&gt;UWP Community Toolkit&lt;/a&gt;. They were actively asking for contributions and, given the self contained nature of the Hyperlink extension, it seemed like a natural fit for the toolkit so I decided to try contributing it via pull request.&lt;/p&gt;
-&lt;p&gt;The toolkit's contribution guidelines and conventions closely matched my own coding style so I had to change very little of the code in my article but did have to add XML summary blocks to each public class and members. With that done I could add the class to the &lt;a href="https://github.com/ibebbs/UWPCommunityToolkit/tree/dev/Microsoft.Toolkit.Uwp/Helpers"&gt;Helpers folder on the dev branch of my fork of the toolkit&lt;/a&gt; and &lt;a href="https://github.com/Microsoft/UWPCommunityToolkit/pull/226"&gt;issue a pull request&lt;/a&gt;. I was also asked to produce some documentation and a sample for the class which was then pulled into the document repo.&lt;/p&gt;
-&lt;p&gt;The rest, as they say, is history. &lt;a href="https://blogs.windows.com/buildingapps/2016/10/05/announcing-uwp-community-toolkit-1-1/#1QBL3lQjtLbY537i.97"&gt;Version 1.1 of the toolkit released&lt;/a&gt; with yours truly in the &lt;a href="https://github.com/Microsoft/UWPCommunityToolkit/releases/"&gt;list of contributors&lt;/a&gt;. It's a small contribution but I really think the toolkit is a promising project and absolutely intend to contribute further in the near future.&lt;/p&gt;
-&lt;p&gt;In the mean time, well done to all the maintainers of, and contributors to, the toolkit on this important milestone.&lt;/p&gt;
 </content:encoded>
 		</item>
 	</channel>
