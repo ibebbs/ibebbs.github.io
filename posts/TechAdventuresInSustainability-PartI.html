@@ -143,6 +143,7 @@ Published on 26 September 2019<br>    </div>
 <ul>
 <li><a href="https://github.com/dotnet/core">.NET Core 2.2</a></li>
 <li><a href="https://www.docker.com/">Docker</a> (and <a href="https://www.docker.com/products/docker-hub">Docker Hub</a>)</li>
+<li><a href="https://github.com/xamarin/mqtt">MQTT</a></li>
 <li><a href="https://github.com/rossmann-engineering/EasyModbusTCP.NET">ModBus over TCP</a></li>
 <li><a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-3.0&amp;tabs=visual-studio">Background tasks with hosted services in ASP.NET Core</a></li>
 <li><a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.0">The .NET Core Options pattern for configuration</a></li>
@@ -257,7 +258,7 @@ volumes:
       device: &quot;:/smartHome/grafana&quot;
 </code></pre>
 <p>Note that I use IP-Address protected NFS volume shares for persisting data to a Windows Server. These can be quite tricky to set up but it's the most reliable means I've found of persisting docker volumes with stock docker-compose (i.e. without additional plugins).</p>
-<p>With this file in hand (or, more to the point, on disk), all the services and be started together by simply navigating to the file's location and issuing the following command:</p>
+<p>With this file in hand (or, more to the point, on disk), all the services can be started together by simply navigating to the file's location and issuing the following command:</p>
 <pre><code>docker-compose up
 </code></pre>
 <p>Here's a screen capture of my current Grafana dashboard (today hasn't been a great day for solar):</p>

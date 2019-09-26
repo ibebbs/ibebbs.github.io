@@ -4,7 +4,7 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2019</rights>
-	<updated>2019-09-26T15:52:49Z</updated>
+	<updated>2019-09-26T16:03:17Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI</id>
@@ -32,6 +32,7 @@
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="https://github.com/dotnet/core"&gt;.NET Core 2.2&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://www.docker.com/"&gt;Docker&lt;/a&gt; (and &lt;a href="https://www.docker.com/products/docker-hub"&gt;Docker Hub&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/xamarin/mqtt"&gt;MQTT&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://github.com/rossmann-engineering/EasyModbusTCP.NET"&gt;ModBus over TCP&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-3.0&amp;amp;tabs=visual-studio"&gt;Background tasks with hosted services in ASP.NET Core&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.0"&gt;The .NET Core Options pattern for configuration&lt;/a&gt;&lt;/li&gt;
@@ -146,7 +147,7 @@ volumes:
       device: &amp;quot;:/smartHome/grafana&amp;quot;
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Note that I use IP-Address protected NFS volume shares for persisting data to a Windows Server. These can be quite tricky to set up but it's the most reliable means I've found of persisting docker volumes with stock docker-compose (i.e. without additional plugins).&lt;/p&gt;
-&lt;p&gt;With this file in hand (or, more to the point, on disk), all the services and be started together by simply navigating to the file's location and issuing the following command:&lt;/p&gt;
+&lt;p&gt;With this file in hand (or, more to the point, on disk), all the services can be started together by simply navigating to the file's location and issuing the following command:&lt;/p&gt;
 &lt;pre&gt;&lt;code&gt;docker-compose up
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Here's a screen capture of my current Grafana dashboard (today hasn't been a great day for solar):&lt;/p&gt;
