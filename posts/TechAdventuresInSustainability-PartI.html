@@ -1,0 +1,342 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Tech Adventures in Sustainability</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Tech Adventures in Sustainability" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Tech Adventures in Sustainability</h1>
+        <h2 class="subheading">Part I - Monitoring our solar generation</h2>
+    <div class="meta">        
+Published on 26 September 2019<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/net-core" class="btn btn-default btn-xs">.net core</a>
+                    <a role="button" href="/tags/Docker" class="btn btn-default btn-xs">Docker</a>
+                    <a role="button" href="/tags/Solar" class="btn btn-default btn-xs">Solar</a>
+                    <a role="button" href="/tags/SolarEdge" class="btn btn-default btn-xs">SolarEdge</a>
+                    <a role="button" href="/tags/Sustainability" class="btn btn-default btn-xs">Sustainability</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="tldr">TL;DR</h2>
+<p>Installing solar panels and monitoring solar production not only provides immediate benefits in sustainable living but also highlights new, simple ways to change your lifestyle to further save money and energy. Here's how we do it.</p>
+<h2 id="background">Background</h2>
+<p>As with most people nowadays, the environment and climate change is weighing heavily on my thoughts. As such, my partner and I have been looking into ways we can make our lifestyle more sustainable. Being in tech, I have chosen to &quot;use what I know&quot; to enable or facilitate changes to our lifestyle that promote sustainability without compromising on quality of living or requiring unnecessarily onerous daily chores.</p>
+<p>In this series of blog posts, I will be describing the decisions, approaches, tools and devices we've employed since starting down this road. Where possible, I will share as much of the tech as possible so others can adopt or adapt similar practises and, hopefully, enhance the sustainability of their lifestyle too.</p>
+<h2 id="solar-power">Solar Power</h2>
+<p>Our first - and possibly most significant - step towards a more sustainable lifestyle has been to install solar panels. Until recently, installing solar panels on a domestic property in the UK has been a questionable value proposition due to the return on investment sometimes being longer than the lifetime of the panels/inverter. The UK government went someway to alleviating this issue with <a href="https://www.gov.uk/feed-in-tariffs">Feed-in Tarrifs (FiT)</a> but still repayment times tended to be longer than the warranty period of many of the components in the installation.</p>
+<p>Nowadays, the drop in costs and improved efficiency of solar panels coupled with improved and more robust technology in other components (particularly the inverter) mean that, despite the UK government ending the FIT program, a solar installation can easily provide a return on investment within the warrantied lifetime it's components.</p>
+<p>And so it was that, when we moved into our new house, we set aside money to install solar panels. After a lot of research into the underlying technologies, comparing features provided by various manufactures and talking to a number of solar installation specialists, we chose a local company to install a 6.18kWp system comprising of <a href="http://www.jasolar.com/html/en/">JA Solar</a> panels and a <a href="http://www.jasolar.com/html/en/">SolarEdge</a> inverter.</p>
+<h2 id="monitoring-solar-production">Monitoring Solar Production</h2>
+<p>While JA Solar was chosen simply due to it's price/performance ratio, we were especially keen to install a SolarEdge system due to it's ability to be monitored in multiple ways.</p>
+<p>First up, SolarEdge provides an excellent cloud-based monitoring platform with both web and native apps compatible with major platforms. Furthermore SolarEdge provide a <a href="https://www.solaredge.com/sites/default/files/se_monitoring_api.pdf">RESTful API</a> facilitating automated data collection and monitoring. Unfortunately the cloud-based apps/API require that all data collection (and a significant amount of inverter control) is delegated to SolarEdge servers (with all the <a href="https://horusscenario.com/what-is-the-horus-scenario/">privacy and security considerations</a> that implies) and are then subject to usage-restrictions, request limits and significant latency.</p>
+<p>Fortunately, the SolarEdge inverter also provides numerous means of <a href="https://www.solaredge.com/sites/default/files/solaredge-communication_options_application_note_v2_250_and_above.pdf">local data collection and control</a>. The most powerful of these means is the onboard RS-485 connector which allows full control over the inverter and the ability to collect virtually all data generated by the unit. The github user <a href="https://github.com/jbuehl">'jbuehl'</a> has by-far the most accomplished open-source code available for interacting with this interface in his <a href="https://github.com/jbuehl/solaredge">'solaredge'</a> repository. Unfortunately, while it is the most powerful, it is also the most difficult means of recording data from the inverter, requiring the user to open the inverter and wire up to the RS-485 connector directly.</p>
+<p>However, if you don't require control over the inverter and merely want to record the data being generated, there is a much easier means: <a href="https://www.solaredge.com/sites/default/files/sunspec-implementation-technical-note.pdf">ModBus over TCP</a>. While this does require a setting to be enabled on the inverter (a completely trivial series of button presses), connection is made via standard TCP/IP on port 502.</p>
+<h2 id="solaredge.monitor">SolarEdge.Monitor</h2>
+<p>While there were <a href="https://github.com/search?q=solaredge">numerous repositories on Github</a> for interacting with SolarEdge inverters, there didn't seem to be any that met all my requirements. Specifically, I wanted a solution that could be easily deployed to a variety of target platforms, which could read all available inverter parameters and publish these parameters to an MQTT broker (for consumption by other services) at a configurable interval.</p>
+<p>I therefore wrote <a href="https://github.com/ibebbs/SolarEdge.Monitor">SolarEdge.Monitor</a>.</p>
+<p>This project was a lot of fun and utilised the following technologies and techniques:</p>
+<ul>
+<li><a href="https://github.com/dotnet/core">.NET Core 2.2</a></li>
+<li><a href="https://www.docker.com/">Docker</a> (and <a href="https://www.docker.com/products/docker-hub">Docker Hub</a>)</li>
+<li><a href="https://github.com/rossmann-engineering/EasyModbusTCP.NET">ModBus over TCP</a></li>
+<li><a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-3.0&amp;tabs=visual-studio">Background tasks with hosted services in ASP.NET Core</a></li>
+<li><a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.0">The .NET Core Options pattern for configuration</a></li>
+<li><a href="http://ian.bebbs.co.uk/posts/FluentNamespacing">Fluent Namespacing</a></li>
+<li><a href="http://ian.bebbs.co.uk/posts/ReactiveStateMachines">Reactive State Machines</a></li>
+</ul>
+<p>While it can be cloned and run locally, it's real value comes when used as a containerized application as part of a composed solution.</p>
+<h2 id="docker-docker-compose">Docker &amp; Docker Compose</h2>
+<p>SolarEdge.Monitor is available as a Linux container image from <a href="https://hub.docker.com/r/ibebbs/solaredge.monitor">Docker Hub</a>. It can therefore be run from any docker host (anything from a RaspberryPi to Windows Server) by simply issuing the following commands:</p>
+<pre><code>docker pull ibebbs/solaredge.monitor
+docker run [environment variables] ibebbs/solaredge.monitor
+</code></pre>
+<p>The various environment variables are (or will be shortly) fully documented on Docker Hub but here are a simple set that will get the service running:</p>
+<pre><code>Solaredge:Monitor:Inverter:Address=[IP Address of the Inverter]
+Solaredge:Monitor:MQTT:Address=[IP Address of the MQTT broker]
+Solaredge:Monitor:Service:ModelsToRead=inverter
+</code></pre>
+<p>Running with these settings will poll the inverter every 10 seconds and publish a JSON serialized message containing data read from the inverter to the MQTT broker on a topic named <code>home/solar/inverter</code>. This can be consumed by any MQTT client for further processing.</p>
+<p>To provide data persistence, aggregation and visualization, I use docker-compose to supplement SolarEdge.Monitor with other services such as:</p>
+<ul>
+<li><a href="https://nodered.org/">Node-Red</a> - for receiving MQTT messages and reshaping them into metrics for submission to...</li>
+<li><a href="https://www.influxdata.com/">InfluxDB</a> - for persisting the metrics and providing a querying back-end to...</li>
+<li><a href="https://grafana.com/">Grafana</a> - for visualizing persisted data and extracting insights</li>
+</ul>
+<p>Here's an example <code>docker-compose.yml</code> that, while requiring some substitution of environment variables, provides most of the ground work for getting these services running together (I'm afraid I don't yet have the customised Node-Red image or flows hosted in a public repository, but I hope to have this available soon):</p>
+<pre><code>version: &quot;3.2&quot;
+
+services:
+  # https://hub.docker.com/_/eclipse-mosquitto
+  mqtt:
+    image: eclipse-mosquitto
+    ports:
+      - &quot;1883:1883&quot;
+      - &quot;9001:9001&quot;
+
+  # https://hub.docker.com/r/nodered/node-red-docker/
+  nodered:
+    build: ./nodered
+    ports:
+      - &quot;1880:1880&quot;
+    volumes:
+      - type: volume
+        source: nodered
+        target: /data
+        volume:
+          nocopy: true
+    depends_on:
+      - &quot;mqtt&quot;
+
+  # https://hub.docker.com/_/influxdb
+  influxdb:
+    image: influxdb
+    ports:
+      - &quot;8086:8086&quot;
+    environment:
+    - INFLUXDB_DB=SmartHome
+    - INFLUXDB_HTTP_AUTH_ENABLED
+    - INFLUXDB_ADMIN_USER=InfluxAdmin
+    - INFLUXDB_ADMIN_PASSWORD=[Admin password]
+    - INFLUXDB_USER=InfluxUser
+    - INFLUXDB_USER_PASSWORD=[User password]
+    volumes:
+      - type: volume
+        source: influxdb
+        target: /var/lib/influxdb
+        volume:
+          nocopy: true
+
+  # https://hub.docker.com/r/grafana/grafana
+  grafana:
+    image: grafana/grafana
+    ports:
+      - &quot;3000:3000&quot;
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=[Admin password to set for Grafana]
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
+    depends_on:
+      - influxdb
+    volumes:
+      - type: volume
+        source: grafana
+        target: /var/lib/grafana
+        volume:
+          nocopy: true
+
+  # https://hub.docker.com/r/ibebbs/solaredge.monitor
+  solaredgemonitor:
+    image: ibebbs/solaredge.monitor
+    environment:
+      - Solaredge:Monitor:Inverter:Address=[Address of SolarEdge Inverter]
+      - Solaredge:Monitor:MQTT:Address=mqtt
+      - Solaredge:Monitor:MQTT:ClientId=InverterMonitor
+      - Solaredge:Monitor:Service:ModelsToRead=inverter
+    depends_on:
+      - mqtt
+
+volumes:
+  nodered:
+    driver_opts:
+      type: nfs
+      o: &quot;addr=192.168.1.11,nolock,soft,rw&quot;
+      device: &quot;:/smartHome/nodered&quot;
+  influxdb:
+    driver_opts:
+      type: nfs
+      o: &quot;addr=192.168.1.11,nolock,soft,rw&quot;
+      device: &quot;:/smartHome/influxdb&quot;
+  grafana:
+    driver_opts:
+      type: nfs
+      o: &quot;addr=192.168.1.11,nolock,soft,rw&quot;
+      device: &quot;:/smartHome/grafana&quot;
+</code></pre>
+<p>Note that I use IP-Address protected NFS volume shares for persisting data to a Windows Server. These can be quite tricky to set up but it's the most reliable means I've found of persisting docker volumes with stock docker-compose (i.e. without additional plugins).</p>
+<p>With this file in hand (or, more to the point, on disk), all the services and be started together by simply navigating to the file's location and issuing the following command:</p>
+<pre><code>docker-compose up
+</code></pre>
+<p>Here's a screen capture of my current Grafana dashboard (today hasn't been a great day for solar):</p>
+<img src="../Content/TechAdventuresInSustainability-PartI/GrafanaDashboard.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Grafana Dashboard">
+<h2 id="conclusion">Conclusion</h2>
+<p>Being able to quickly and reliably monitor our solar production has drastically changed how we use electricity in the house. For example, the washing machine and (shock, horror!) tumble dryer (sorry, we have kids and therefore too much washing to hang everything out) now get put on only when we have surplus electricity. We've also become super conscious of the multitude of energy zapping devices we have plugged in all over the house which we now endeavour to turn off as often as possible.</p>
+<p>Furthermore, being able to aggregate and analyse this data retrospectively has allowed us to make informed decisions on future sustainability choices like whether to get an electric car or solar battery. Unfortunately neither of these options have yet made the cut, mostly due to RoI considerations.</p>
+<p>In future posts, I'll show some of the ways in which I've used this data and other forms of technology to further promote sustainable living. For now though I would like to conclude by saying that having solar panels installed and being able to see the impact they're having has had a profound effect on our electricity usage and our views on sustainability in general. We feel very good about having made this important step to reducing our carbon foot-print and that, in itself, has provided the motivation to explore more ways to live more sustainably.</p>
+<img src="../Content/TechAdventuresInSustainability-PartI/EnvironmentalBenefits.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Environmental Benefits">
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                <ul class="list-inline text-center">
+                        <li>
+                        <a href="https://twitter.com/ibebbs">
+                                <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                                </span>
+                        </a>
+                        </li>
+                        <li>
+                        <a href="https://github.com/ibebbs">
+                                <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                        </a>
+                        </li>
+                </ul>
+                <p class="copyright text-muted">
+                        Copyright © 2019. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                        <br />
+                        <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                        <br />
+                        <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                        <br />
+                        <br />
+                </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+

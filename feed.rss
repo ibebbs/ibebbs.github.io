@@ -5,8 +5,161 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2019</copyright>
-		<pubDate>Mon, 16 Sep 2019 19:16:46 GMT</pubDate>
-		<lastBuildDate>Mon, 16 Sep 2019 19:16:46 GMT</lastBuildDate>
+		<pubDate>Thu, 26 Sep 2019 15:52:49 GMT</pubDate>
+		<lastBuildDate>Thu, 26 Sep 2019 15:52:49 GMT</lastBuildDate>
+		<item>
+			<title>Tech Adventures in Sustainability</title>
+			<link>http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI</link>
+			<description>&lt;p&gt;Installing solar panels and monitoring solar production not only provides immediate benefits in sustainable living but also highlights new, simple ways to change your lifestyle to further save money and energy. Here's how we do it.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI</guid>
+			<pubDate>Thu, 26 Sep 2019 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;Installing solar panels and monitoring solar production not only provides immediate benefits in sustainable living but also highlights new, simple ways to change your lifestyle to further save money and energy. Here's how we do it.&lt;/p&gt;
+&lt;h2 id="background"&gt;Background&lt;/h2&gt;
+&lt;p&gt;As with most people nowadays, the environment and climate change is weighing heavily on my thoughts. As such, my partner and I have been looking into ways we can make our lifestyle more sustainable. Being in tech, I have chosen to &amp;quot;use what I know&amp;quot; to enable or facilitate changes to our lifestyle that promote sustainability without compromising on quality of living or requiring unnecessarily onerous daily chores.&lt;/p&gt;
+&lt;p&gt;In this series of blog posts, I will be describing the decisions, approaches, tools and devices we've employed since starting down this road. Where possible, I will share as much of the tech as possible so others can adopt or adapt similar practises and, hopefully, enhance the sustainability of their lifestyle too.&lt;/p&gt;
+&lt;h2 id="solar-power"&gt;Solar Power&lt;/h2&gt;
+&lt;p&gt;Our first - and possibly most significant - step towards a more sustainable lifestyle has been to install solar panels. Until recently, installing solar panels on a domestic property in the UK has been a questionable value proposition due to the return on investment sometimes being longer than the lifetime of the panels/inverter. The UK government went someway to alleviating this issue with &lt;a href="https://www.gov.uk/feed-in-tariffs"&gt;Feed-in Tarrifs (FiT)&lt;/a&gt; but still repayment times tended to be longer than the warranty period of many of the components in the installation.&lt;/p&gt;
+&lt;p&gt;Nowadays, the drop in costs and improved efficiency of solar panels coupled with improved and more robust technology in other components (particularly the inverter) mean that, despite the UK government ending the FIT program, a solar installation can easily provide a return on investment within the warrantied lifetime it's components.&lt;/p&gt;
+&lt;p&gt;And so it was that, when we moved into our new house, we set aside money to install solar panels. After a lot of research into the underlying technologies, comparing features provided by various manufactures and talking to a number of solar installation specialists, we chose a local company to install a 6.18kWp system comprising of &lt;a href="http://www.jasolar.com/html/en/"&gt;JA Solar&lt;/a&gt; panels and a &lt;a href="http://www.jasolar.com/html/en/"&gt;SolarEdge&lt;/a&gt; inverter.&lt;/p&gt;
+&lt;h2 id="monitoring-solar-production"&gt;Monitoring Solar Production&lt;/h2&gt;
+&lt;p&gt;While JA Solar was chosen simply due to it's price/performance ratio, we were especially keen to install a SolarEdge system due to it's ability to be monitored in multiple ways.&lt;/p&gt;
+&lt;p&gt;First up, SolarEdge provides an excellent cloud-based monitoring platform with both web and native apps compatible with major platforms. Furthermore SolarEdge provide a &lt;a href="https://www.solaredge.com/sites/default/files/se_monitoring_api.pdf"&gt;RESTful API&lt;/a&gt; facilitating automated data collection and monitoring. Unfortunately the cloud-based apps/API require that all data collection (and a significant amount of inverter control) is delegated to SolarEdge servers (with all the &lt;a href="https://horusscenario.com/what-is-the-horus-scenario/"&gt;privacy and security considerations&lt;/a&gt; that implies) and are then subject to usage-restrictions, request limits and significant latency.&lt;/p&gt;
+&lt;p&gt;Fortunately, the SolarEdge inverter also provides numerous means of &lt;a href="https://www.solaredge.com/sites/default/files/solaredge-communication_options_application_note_v2_250_and_above.pdf"&gt;local data collection and control&lt;/a&gt;. The most powerful of these means is the onboard RS-485 connector which allows full control over the inverter and the ability to collect virtually all data generated by the unit. The github user &lt;a href="https://github.com/jbuehl"&gt;'jbuehl'&lt;/a&gt; has by-far the most accomplished open-source code available for interacting with this interface in his &lt;a href="https://github.com/jbuehl/solaredge"&gt;'solaredge'&lt;/a&gt; repository. Unfortunately, while it is the most powerful, it is also the most difficult means of recording data from the inverter, requiring the user to open the inverter and wire up to the RS-485 connector directly.&lt;/p&gt;
+&lt;p&gt;However, if you don't require control over the inverter and merely want to record the data being generated, there is a much easier means: &lt;a href="https://www.solaredge.com/sites/default/files/sunspec-implementation-technical-note.pdf"&gt;ModBus over TCP&lt;/a&gt;. While this does require a setting to be enabled on the inverter (a completely trivial series of button presses), connection is made via standard TCP/IP on port 502.&lt;/p&gt;
+&lt;h2 id="solaredge.monitor"&gt;SolarEdge.Monitor&lt;/h2&gt;
+&lt;p&gt;While there were &lt;a href="https://github.com/search?q=solaredge"&gt;numerous repositories on Github&lt;/a&gt; for interacting with SolarEdge inverters, there didn't seem to be any that met all my requirements. Specifically, I wanted a solution that could be easily deployed to a variety of target platforms, which could read all available inverter parameters and publish these parameters to an MQTT broker (for consumption by other services) at a configurable interval.&lt;/p&gt;
+&lt;p&gt;I therefore wrote &lt;a href="https://github.com/ibebbs/SolarEdge.Monitor"&gt;SolarEdge.Monitor&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This project was a lot of fun and utilised the following technologies and techniques:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://github.com/dotnet/core"&gt;.NET Core 2.2&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.docker.com/"&gt;Docker&lt;/a&gt; (and &lt;a href="https://www.docker.com/products/docker-hub"&gt;Docker Hub&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://github.com/rossmann-engineering/EasyModbusTCP.NET"&gt;ModBus over TCP&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-3.0&amp;amp;tabs=visual-studio"&gt;Background tasks with hosted services in ASP.NET Core&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.0"&gt;The .NET Core Options pattern for configuration&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://ian.bebbs.co.uk/posts/FluentNamespacing"&gt;Fluent Namespacing&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="http://ian.bebbs.co.uk/posts/ReactiveStateMachines"&gt;Reactive State Machines&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;While it can be cloned and run locally, it's real value comes when used as a containerized application as part of a composed solution.&lt;/p&gt;
+&lt;h2 id="docker-docker-compose"&gt;Docker &amp;amp; Docker Compose&lt;/h2&gt;
+&lt;p&gt;SolarEdge.Monitor is available as a Linux container image from &lt;a href="https://hub.docker.com/r/ibebbs/solaredge.monitor"&gt;Docker Hub&lt;/a&gt;. It can therefore be run from any docker host (anything from a RaspberryPi to Windows Server) by simply issuing the following commands:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;docker pull ibebbs/solaredge.monitor
+docker run [environment variables] ibebbs/solaredge.monitor
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The various environment variables are (or will be shortly) fully documented on Docker Hub but here are a simple set that will get the service running:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Solaredge:Monitor:Inverter:Address=[IP Address of the Inverter]
+Solaredge:Monitor:MQTT:Address=[IP Address of the MQTT broker]
+Solaredge:Monitor:Service:ModelsToRead=inverter
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Running with these settings will poll the inverter every 10 seconds and publish a JSON serialized message containing data read from the inverter to the MQTT broker on a topic named &lt;code&gt;home/solar/inverter&lt;/code&gt;. This can be consumed by any MQTT client for further processing.&lt;/p&gt;
+&lt;p&gt;To provide data persistence, aggregation and visualization, I use docker-compose to supplement SolarEdge.Monitor with other services such as:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://nodered.org/"&gt;Node-Red&lt;/a&gt; - for receiving MQTT messages and reshaping them into metrics for submission to...&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.influxdata.com/"&gt;InfluxDB&lt;/a&gt; - for persisting the metrics and providing a querying back-end to...&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://grafana.com/"&gt;Grafana&lt;/a&gt; - for visualizing persisted data and extracting insights&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here's an example &lt;code&gt;docker-compose.yml&lt;/code&gt; that, while requiring some substitution of environment variables, provides most of the ground work for getting these services running together (I'm afraid I don't yet have the customised Node-Red image or flows hosted in a public repository, but I hope to have this available soon):&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;version: &amp;quot;3.2&amp;quot;
+
+services:
+  # https://hub.docker.com/_/eclipse-mosquitto
+  mqtt:
+    image: eclipse-mosquitto
+    ports:
+      - &amp;quot;1883:1883&amp;quot;
+      - &amp;quot;9001:9001&amp;quot;
+
+  # https://hub.docker.com/r/nodered/node-red-docker/
+  nodered:
+    build: ./nodered
+    ports:
+      - &amp;quot;1880:1880&amp;quot;
+    volumes:
+      - type: volume
+        source: nodered
+        target: /data
+        volume:
+          nocopy: true
+    depends_on:
+      - &amp;quot;mqtt&amp;quot;
+
+  # https://hub.docker.com/_/influxdb
+  influxdb:
+    image: influxdb
+    ports:
+      - &amp;quot;8086:8086&amp;quot;
+    environment:
+    - INFLUXDB_DB=SmartHome
+    - INFLUXDB_HTTP_AUTH_ENABLED
+    - INFLUXDB_ADMIN_USER=InfluxAdmin
+    - INFLUXDB_ADMIN_PASSWORD=[Admin password]
+    - INFLUXDB_USER=InfluxUser
+    - INFLUXDB_USER_PASSWORD=[User password]
+    volumes:
+      - type: volume
+        source: influxdb
+        target: /var/lib/influxdb
+        volume:
+          nocopy: true
+
+  # https://hub.docker.com/r/grafana/grafana
+  grafana:
+    image: grafana/grafana
+    ports:
+      - &amp;quot;3000:3000&amp;quot;
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=[Admin password to set for Grafana]
+      - GF_PANELS_DISABLE_SANITIZE_HTML=true
+    depends_on:
+      - influxdb
+    volumes:
+      - type: volume
+        source: grafana
+        target: /var/lib/grafana
+        volume:
+          nocopy: true
+
+  # https://hub.docker.com/r/ibebbs/solaredge.monitor
+  solaredgemonitor:
+    image: ibebbs/solaredge.monitor
+    environment:
+      - Solaredge:Monitor:Inverter:Address=[Address of SolarEdge Inverter]
+      - Solaredge:Monitor:MQTT:Address=mqtt
+      - Solaredge:Monitor:MQTT:ClientId=InverterMonitor
+      - Solaredge:Monitor:Service:ModelsToRead=inverter
+    depends_on:
+      - mqtt
+
+volumes:
+  nodered:
+    driver_opts:
+      type: nfs
+      o: &amp;quot;addr=192.168.1.11,nolock,soft,rw&amp;quot;
+      device: &amp;quot;:/smartHome/nodered&amp;quot;
+  influxdb:
+    driver_opts:
+      type: nfs
+      o: &amp;quot;addr=192.168.1.11,nolock,soft,rw&amp;quot;
+      device: &amp;quot;:/smartHome/influxdb&amp;quot;
+  grafana:
+    driver_opts:
+      type: nfs
+      o: &amp;quot;addr=192.168.1.11,nolock,soft,rw&amp;quot;
+      device: &amp;quot;:/smartHome/grafana&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that I use IP-Address protected NFS volume shares for persisting data to a Windows Server. These can be quite tricky to set up but it's the most reliable means I've found of persisting docker volumes with stock docker-compose (i.e. without additional plugins).&lt;/p&gt;
+&lt;p&gt;With this file in hand (or, more to the point, on disk), all the services and be started together by simply navigating to the file's location and issuing the following command:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;docker-compose up
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here's a screen capture of my current Grafana dashboard (today hasn't been a great day for solar):&lt;/p&gt;
+&lt;img src="../Content/TechAdventuresInSustainability-PartI/GrafanaDashboard.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Grafana Dashboard"&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Being able to quickly and reliably monitor our solar production has drastically changed how we use electricity in the house. For example, the washing machine and (shock, horror!) tumble dryer (sorry, we have kids and therefore too much washing to hang everything out) now get put on only when we have surplus electricity. We've also become super conscious of the multitude of energy zapping devices we have plugged in all over the house which we now endeavour to turn off as often as possible.&lt;/p&gt;
+&lt;p&gt;Furthermore, being able to aggregate and analyse this data retrospectively has allowed us to make informed decisions on future sustainability choices like whether to get an electric car or solar battery. Unfortunately neither of these options have yet made the cut, mostly due to RoI considerations.&lt;/p&gt;
+&lt;p&gt;In future posts, I'll show some of the ways in which I've used this data and other forms of technology to further promote sustainable living. For now though I would like to conclude by saying that having solar panels installed and being able to see the impact they're having has had a profound effect on our electricity usage and our views on sustainability in general. We feel very good about having made this important step to reducing our carbon foot-print and that, in itself, has provided the motivation to explore more ways to live more sustainably.&lt;/p&gt;
+&lt;img src="../Content/TechAdventuresInSustainability-PartI/EnvironmentalBenefits.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Environmental Benefits"&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>Be Brave. Like BAT, man!</title>
 			<link>http://ian.bebbs.co.uk/posts/BeBraveLikeBATMan</link>
@@ -1866,117 +2019,6 @@ However, after discussing ToddlerBox with a friend, he decided to install it on 
 &lt;p&gt;&lt;img src="https://o7vp1q.db.files.1drv.com/y4mWADGS_LcUsvs51hBlWcryw1GNTldo0lPlASfk5_5kbdLGacQkNSP_1mez3hP1tVQrNGW625_iOTzwHECxqaEP4PvJXiuyUdVnkf3dJAXAQVKI1P-1bflQaf4IFXULfUBYwgp_ruxjUOtyhd_j8Zi8tQB1O5NPKZhQsXyFZjPhAAE7rhBmL06thdPrWysrS_TYrR0-iWoCviotBU_yUhhkg?width=890&amp;amp;height=1024&amp;amp;cropmode=none" class="img-fluid" alt="T-shirt front" /&gt;&lt;img src="https://orvx1q.db.files.1drv.com/y4mitU5_fkFFEtLzTWGi5vt7vzxBcBkBisX90EZwaffV-yk04yQMjaP_NFAyOBsKguEv8nyilWdw9EqOJIj5c6jio8oLRCxC2akw1R25jpw4v4q53FaV5-HJ88n9bLPB_idxOQueeCi6apdXtplFM1g7RY9Lsp9j8gkO3CoIQ6y3_KIXmdKHFxQoOAEH8J7WaXFmJCgzoKjCAKpq_91LY1pWA?width=922&amp;amp;height=1024&amp;amp;cropmode=none" class="img-fluid" alt="T-shirt back" /&gt;&lt;/p&gt;
 &lt;p&gt;How cool is that?! Not too many open source projects provide such swag!&lt;/p&gt;
 &lt;p&gt;Thanks to the &lt;a href="https://github.com/Microsoft/UWPCommunityToolkit"&gt;UWP Community Toolkit&lt;/a&gt; maintainers, keep up the good work!&lt;/p&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>Reactive State Machines</title>
-			<link>http://ian.bebbs.co.uk/posts/ReactiveStateMachines</link>
-			<description>&lt;p&gt;Today I'd like to share an implementation I've recently been employing that leverages Rx to implement a &lt;a href="https://en.wikipedia.org/wiki/Finite-state_machine"&gt;state-machine&lt;/a&gt;.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/ReactiveStateMachines</guid>
-			<pubDate>Wed, 09 Nov 2016 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;p&gt;Today I'd like to share an implementation I've recently been employing that leverages Rx to implement a &lt;a href="https://en.wikipedia.org/wiki/Finite-state_machine"&gt;state-machine&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;&lt;a href="http://www.martinfowler.com/dslCatalog/stateMachine.html"&gt;State-machines are a terrific pattern&lt;/a&gt; that, when applied correctly, can greatly simplify the implementation, maintenance and extensibility of many types of functionality; from &lt;a href="https://msdn.microsoft.com/en-gb/windows/uwp/launch-resume/app-lifecycle"&gt;application lifecycle management&lt;/a&gt; to business process coordination. They're particularly helpful with long-running, asynchronous processes that need to behave differently at various stages of the process, especially when the process is message or event driven.&lt;/p&gt;
-&lt;p&gt;Normally, state machines are defined by &amp;quot;a list of its states, its initial state, and the triggering condition for each transition&amp;quot;. However, when looked at from the point of view of &amp;quot;&lt;a href="http://slides.com/robwormald/everything-is-a-stream#/" title="Everything is a stream - Rob Wormald"&gt;everything&lt;/a&gt; &lt;a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754" title="The introduction to Reactive Programming you've been missing - andrestaltz"&gt;being&lt;/a&gt; &lt;a href="http://weareadaptive.com/blog/2014/05/05/everything-is-a-stream/" title="Reactive Trader 2: Everything is a Stream - Matt Barrett"&gt;a&lt;/a&gt; &lt;a href="http://colintheshots.com/blog/?p=85" title="Be Reactive - Colintheshots"&gt;stream&lt;/a&gt;&amp;quot;, they can also be viewed as a stream of transitions with states existing as the rest period between those transitions.&lt;/p&gt;
-&lt;p&gt;In this mindset, a state can simply be defined as follows:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;public interface IState
-{
-    IObservable&amp;lt;ITransition&amp;gt; Enter();
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;In short, the result of entering a state is an observable of transitions away from the state.&lt;/p&gt;
-&lt;p&gt;With this in hand, the state machine of, for example, a typical UWP app can be defined as follows:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;public class StateMachine
-{        
-    private readonly IStateFactory _factory;
-    private readonly Subject&amp;lt;IState&amp;gt; _state;
-
-    public Machine(IStateFactory factory)
-    {
-        _factory = factory;
-
-        _state = new Subject&amp;lt;IState&amp;gt;();
-    }
-
-    public IDisposable Initialize()
-    {
-        // First create a stream of transitions by ...
-        IObservable&amp;lt;ITransition&amp;gt; transitions = _state
-            // ... starting from the initializing state ...
-            .StartWith(_factory.Initializing())
-            // ... enter the current state ...
-            .Select(state =&amp;gt; state.Enter())
-            // ... subscribing to the transition observable ...
-            .Switch()
-            // ... and ensure only a single shared subscription is made to the transitions observable ...
-            .Publish()
-            // ... held until there are no more subscribers
-            .RefCount();
-
-        // Then, for each transition type, select the new state...
-        IObservable&amp;lt;IState&amp;gt; states = Observable.Merge(
-            states.OfType&amp;lt;Transition.ToStarting&amp;gt;().Select(transition =&amp;gt; _factory.Starting()),
-            states.OfType&amp;lt;Transition.ToResuming&amp;gt;().Select(transition =&amp;gt; _factory.Resuming()),
-            states.OfType&amp;lt;Transition.ToRunning&amp;gt;().Select(transition =&amp;gt; _factory.Running()),
-            states.OfType&amp;lt;Transition.ToSuspending&amp;gt;().Select(transition =&amp;gt; _factory.Suspending())
-        );
-
-        // Finally, subscribe to the state observable ...
-        return states
-            // ... ensuring all transitions are serialized ...
-            .ObserveOn(Scheduler.CurrentThread)
-            // ... back onto the source state observable
-            .Subscribe(_state);
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;There are no constraints regarding which events/triggers each state uses to construct the observable of transitions returned when the Enter method is called, but they usually follow one of two patterns:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Wait for an event/trigger to be received and transition to a new state based on the type of event/trigger received.&lt;/li&gt;
-&lt;li&gt;Perform an asynchronous / long-running process and transition to another state when it completes.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;To illustrate this, the Initializing and Starting state definitions below can be considered to be examples of the former and latter patterns respectively.&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;internal class Initializing : IState
-{
-    private readonly IEventAggregator _bus;
-
-    public Initializing(IEventAggregator bus)
-    {
-        _bus = bus;
-    }
-
-    public IObservable&amp;lt;ITransition&amp;gt; Enter()
-    {
-        return Observable.Merge&amp;lt;ITransition&amp;gt;(
-            _bus.GetEvent&amp;lt;Event.Start&amp;gt;().Select(_ =&amp;gt; new Transition.ToStarting()),
-            _bus.GetEvent&amp;lt;Event.Resume&amp;gt;().Select(_ =&amp;gt; new Transition.ToResuming())
-        );
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;internal class Starting : IState
-{
-    private readonly DataStore.IContext _dataStoreContext;
-
-    public Starting(DataStore.IContext dataStoreContext)
-    {
-        _dataStoreContext = dataStoreContext;
-    }
-
-    public IObservable&amp;lt;ITransition&amp;gt; Enter()
-    {
-        return Observable.Create&amp;lt;ITransition&amp;gt;(
-            async observer =&amp;gt;
-            {
-                await _dataStoreContext.InitializeAsync();
-
-                observer.OnNext(new Transition.ToRunning());
-            }
-        );
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;As you can see, states can (and should!) be very small and easily testable. All together a complete, strongly typed, 'async' friendly state machine can be implemented with just a handful of classes containing minimal code.&lt;/p&gt;
-&lt;p&gt;I have used this pattern on numerous occasions and enjoy the simplicity and extensibility it affords me when defining long-running process flows.&lt;/p&gt;
 </content:encoded>
 		</item>
 	</channel>
