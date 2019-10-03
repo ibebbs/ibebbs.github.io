@@ -5,8 +5,105 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2019</copyright>
-		<pubDate>Thu, 26 Sep 2019 20:47:19 GMT</pubDate>
-		<lastBuildDate>Thu, 26 Sep 2019 20:47:19 GMT</lastBuildDate>
+		<pubDate>Thu, 03 Oct 2019 16:18:22 GMT</pubDate>
+		<lastBuildDate>Thu, 03 Oct 2019 16:18:22 GMT</lastBuildDate>
+		<item>
+			<title>Using A Touch Overlay, In Portrait, On Raspbian Buster</title>
+			<link>http://ian.bebbs.co.uk/posts/UsingATouchOverlayInPortrainOnRaspbian</link>
+			<description>&lt;p&gt;This is just a short post - mostly for my own benefit - on how to use a touch-overlay, in portrait, on Raspbian Buster&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/UsingATouchOverlayInPortrainOnRaspbian</guid>
+			<pubDate>Thu, 03 Oct 2019 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;This is just a short post - mostly for my own benefit - on how to use a touch-overlay, in portrait, on Raspbian Buster&lt;/p&gt;
+&lt;p&gt;These instructions are for using a standard HDMI monitor (I'm using a Samsung ME46B) and USB Touchscreen overlay (I'm using a Samsung TM46LBC) in a &lt;code&gt;right&lt;/code&gt; portrait (i.e rotated 270° clockwise) configuration. They probably won't work for hat/phat style LCDs with built-in touch-panels.&lt;/p&gt;
+&lt;h2 id="changing-to-portrait"&gt;Changing to portrait&lt;/h2&gt;
+&lt;p&gt;Raspbian Buster has moved to the 'G2 GL (Fake KMS) OpenGL desktop driver with fake KMS' OpenGL driver by default (&lt;code&gt;dtoverlay=vc4-fkms-v3d&lt;/code&gt; in &lt;code&gt;/boot/config.txt&lt;/code&gt;). Fortunately, as they moved to the 'fake' driver, you're still given significant control over the display configuration from &lt;code&gt;/boot/config.txt&lt;/code&gt; and changing the display orientation remains unchanged.&lt;/p&gt;
+&lt;p&gt;As such, use the command &lt;code&gt;sudo nano /boot/config.txt&lt;/code&gt; to start editing the file and add the following lines at the bottom (uncommenting the appropriate line):&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# display_rotate=1 # rotate 90° clockwise
+# display_rotate=2 # rotate 180° clockwise
+display_rotate=3 # rotate 270° clockwise
+avoid_warnings=1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Reboot the Pi (&lt;code&gt;sudo reboot&lt;/code&gt;) and you should see that the display is now in the correct orientation.&lt;/p&gt;
+&lt;h2 id="correcting-overscan"&gt;Correcting Overscan&lt;/h2&gt;
+&lt;p&gt;Before moving onto installing/calibrating the touch-panel, it is well worth spending some time correcting the Overscan on your display. To do this, again edit &lt;code&gt;config.txt&lt;/code&gt; and find lines similar to below:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;# uncomment this if your display has a black border of unused pixels visible
+# and your display can output without overscan
+disable_overscan=0
+
+# uncomment the following to adjust overscan. Use positive numbers if console
+# goes off screen, and negative if there is too much border
+overscan_left=-10
+overscan_right=-10
+overscan_top=8
+overscan_bottom=8
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The values you see above are those required to make my panel display correctly (nothing off-screen, no big borders). If you need to change overscan you'll need to find the values that work for you by changing values and rebooting to see the effect.&lt;/p&gt;
+&lt;h2 id="calibrating-the-touch-panel"&gt;Calibrating the Touch-Panel&lt;/h2&gt;
+&lt;p&gt;While the touch panel I am using was correctly identified as a 'Nexio Touch Device' by &lt;code&gt;xinput --list&lt;/code&gt; getting it to respect the display orientation and calibrating it correctly turned out to be a pain. After &lt;em&gt;a lot&lt;/em&gt; of searching I finally found &lt;a href="https://www.instructables.com/id/Rotate-Raspberry-Pi-Display-and-Touchscreen/"&gt;two&lt;/a&gt; &lt;a href="https://www.raspberrypi.org/forums/viewtopic.php?t=179477#p1163460"&gt;posts&lt;/a&gt; which, when combined, got the touch panel working correctly.&lt;/p&gt;
+&lt;p&gt;Firstly, you'll need to install the &lt;code&gt;evdev&lt;/code&gt; driver and the &lt;code&gt;xinput_calibrator&lt;/code&gt; using the command:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get install xserver-xorg-input-evdev xinput_calibrator
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Next locate the touch-panel display configuration file as described in this &lt;a href="https://www.instructables.com/id/Rotate-Raspberry-Pi-Display-and-Touchscreen/"&gt;instructable&lt;/a&gt;; mine was &lt;code&gt;/usr/share/X11/xorg.conf.d/40-libinput.conf&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;In this file, find the &lt;code&gt;InputClass&lt;/code&gt; Section which includes the Identifier &lt;code&gt;libinput touchscreen catchall&lt;/code&gt;. In this section, change the &lt;code&gt;Driver&lt;/code&gt; value from &lt;code&gt;libinput&lt;/code&gt; to &lt;code&gt;evdev&lt;/code&gt; and add a &lt;code&gt;TransformationMatrix&lt;/code&gt; option to reflect to display orientation as shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Section &amp;quot;InputClass&amp;quot;
+        Identifier &amp;quot;libinput touchscreen catchall&amp;quot;
+        MatchIsTouchscreen &amp;quot;on&amp;quot;
+        MatchDevicePath &amp;quot;/dev/input/event*&amp;quot;
+        Driver &amp;quot;evdev&amp;quot; # &amp;lt;- change this
+        Option &amp;quot;TransformationMatrix&amp;quot; &amp;quot;0 1 0 -1 0 1 0 0 1&amp;quot; # &amp;lt;- Add this
+EndSection
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The exact transformation matrix you need is available in the instructable but I've repeated them here for easy reference:&lt;/p&gt;
+&lt;table class="table"&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Angle&lt;/th&gt;
+&lt;th&gt;Transformation Matrix&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;90°&lt;/td&gt;
+&lt;td&gt;&amp;quot;0 -1 1 1 0 0 0 0 1&amp;quot;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;180°&lt;/td&gt;
+&lt;td&gt;&amp;quot;-1 0 1 0 -1 1 0 0 1&amp;quot;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;270°&lt;/td&gt;
+&lt;td&gt;&amp;quot;0 1 0 -1 0 1 0 0 1&amp;quot;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Now, if you restart your Pi you should notice that the touch panel is at least in the correct orientation (mouse cursor moves in the same direction as your finger). To calibrate it such that the mouse cursor moves to exactly where you touch, use the &lt;code&gt;xinput_calibrator&lt;/code&gt; tool by running it from the Terminal window in a desktop session.&lt;/p&gt;
+&lt;p&gt;Follow the instructions and &lt;code&gt;input_calibrator&lt;/code&gt; will do two things:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Correctly calibrate the display - the mouse cursor should now be under your touch; and&lt;/li&gt;
+&lt;li&gt;Give you a block of text to add to persistent configuration as shown below:&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code&gt;Calibrating EVDEV driver for &amp;quot;Nexio Touch Device(HS) Nexio HID Multi-Touch ATI0460-06 &amp;quot; id=7
+	current calibration values (from XInput): min_x=15929, max_x=149 and min_y=16328, max_y=171
+
+Doing dynamic recalibration:
+	Setting calibration data: 15872, 0, 16498, -69
+	--&amp;gt; Making the calibration permanent &amp;lt;--
+  copy the snippet below into '/etc/X11/xorg.conf.d/99-calibration.conf' (/usr/share/X11/xorg.conf.d/ in some distro's)
+Section &amp;quot;InputClass&amp;quot;
+	Identifier	&amp;quot;calibration&amp;quot;
+	MatchProduct	&amp;quot;Nexio Touch Device(HS) Nexio HID Multi-Touch ATI0460-06 &amp;quot;
+	Option	&amp;quot;Calibration&amp;quot;	&amp;quot;15872 0 16498 -69&amp;quot;
+	Option	&amp;quot;SwapAxes&amp;quot;	&amp;quot;0&amp;quot;
+EndSection
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Follow the instructions it provides by copying the region from &lt;code&gt;Section &amp;quot;InputClass&amp;quot;&lt;/code&gt; down to &lt;code&gt;EndSection&lt;/code&gt; then using the following command to create (or edit) the persistent configuration file:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo nano /usr/share/X11/xorg.conf.d/99-calibration.conf
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Paste the block of text you copied earlier, save and exit, then reboot.&lt;/p&gt;
+&lt;p&gt;Voila, a perfectly configured touch overlay. Enjoy!&lt;/p&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>Tech Adventures in Sustainability</title>
 			<link>http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI</link>
@@ -2007,19 +2104,6 @@ However, after discussing ToddlerBox with a friend, he decided to install it on 
 &lt;p&gt;Given this success, I made some final touches and submitted it to the store; specifically for XBox. To my amazement, it passed certification first time, within 24 hours of submission despite submitting it on a Sunday. And here it is:&lt;/p&gt;
 &lt;img src="https://1y8kkg.db.files.1drv.com/y4m0CBfgsb9aGM1VZtawRIIp41pI48AguA0lF7rvWqEXvXKj9XDUBorT4kOcw--enuZEgaTqeBvAZgEwMT9nXw1hm6yQc4CpVUjM9NBNTdm2R_r9iawhaC9WQ368NaM5p6irfPo4IRBibb1wb5KIuBjpE6CTNbilueBpc6K60NubxcQKJ-C2CGf9gqpxKdW7GAxbU32S5lcFzr7tUKOMEjGKQ?width=1024&amp;height=576&amp;cropmode=none" class="img-responsive" style="margin: auto; width:800px; margin-top: 6px; margin-bottom: 6px;" alt="ToddlerBox in the store"&gt;
 &lt;p&gt;Installing from the store and ready to entertain my little one whenever I need a break.&lt;/p&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>I contributed and all I got...</title>
-			<link>http://ian.bebbs.co.uk/posts/IContributedAndAllIGot</link>
-			<description>&lt;p&gt;A while back, I contributed my &lt;a href="http://ian.bebbs.co.uk/posts/UsingHyperlinkInMVVM"&gt;HyperlinkExtensions&lt;/a&gt; to the &lt;a href="http://ian.bebbs.co.uk/posts/UWPCommunityToolkitv1_1"&gt;UWP Community Toolkit&lt;/a&gt;. This morning postman brought me a very pleasant surprise:&lt;/p&gt;</description>
-			<enclosure url="https://orvw1q.db.files.1drv.com/y4mi_PK8IRrFR2HwcByqWclKduqsjg2b57A21vfNiJMb2DKcapvHcfQVcLLSIgyOqU1RxVYds4sxrKsgTPCDvVshmBfQK3K5CBS8972H6RoalVap6-KpAfnu6Lu7thJS5YShv9jPA_U907hu6QxcNvqPr-WuMuOuNwCWAy2C5MZ-AlwoU370JcgZp1FVJfZb8ft_Avw45HZn2P02LbMLXaQQA?width=2465&amp;height=1039&amp;cropmode=none" length="0" type="image" />
-			<guid>http://ian.bebbs.co.uk/posts/IContributedAndAllIGot</guid>
-			<pubDate>Sat, 12 Nov 2016 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;p&gt;A while back, I contributed my &lt;a href="http://ian.bebbs.co.uk/posts/UsingHyperlinkInMVVM"&gt;HyperlinkExtensions&lt;/a&gt; to the &lt;a href="http://ian.bebbs.co.uk/posts/UWPCommunityToolkitv1_1"&gt;UWP Community Toolkit&lt;/a&gt;. This morning postman brought me a very pleasant surprise:&lt;/p&gt;
-&lt;p&gt;&lt;img src="https://o7vp1q.db.files.1drv.com/y4mWADGS_LcUsvs51hBlWcryw1GNTldo0lPlASfk5_5kbdLGacQkNSP_1mez3hP1tVQrNGW625_iOTzwHECxqaEP4PvJXiuyUdVnkf3dJAXAQVKI1P-1bflQaf4IFXULfUBYwgp_ruxjUOtyhd_j8Zi8tQB1O5NPKZhQsXyFZjPhAAE7rhBmL06thdPrWysrS_TYrR0-iWoCviotBU_yUhhkg?width=890&amp;amp;height=1024&amp;amp;cropmode=none" class="img-fluid" alt="T-shirt front" /&gt;&lt;img src="https://orvx1q.db.files.1drv.com/y4mitU5_fkFFEtLzTWGi5vt7vzxBcBkBisX90EZwaffV-yk04yQMjaP_NFAyOBsKguEv8nyilWdw9EqOJIj5c6jio8oLRCxC2akw1R25jpw4v4q53FaV5-HJ88n9bLPB_idxOQueeCi6apdXtplFM1g7RY9Lsp9j8gkO3CoIQ6y3_KIXmdKHFxQoOAEH8J7WaXFmJCgzoKjCAKpq_91LY1pWA?width=922&amp;amp;height=1024&amp;amp;cropmode=none" class="img-fluid" alt="T-shirt back" /&gt;&lt;/p&gt;
-&lt;p&gt;How cool is that?! Not too many open source projects provide such swag!&lt;/p&gt;
-&lt;p&gt;Thanks to the &lt;a href="https://github.com/Microsoft/UWPCommunityToolkit"&gt;UWP Community Toolkit&lt;/a&gt; maintainers, keep up the good work!&lt;/p&gt;
 </content:encoded>
 		</item>
 	</channel>

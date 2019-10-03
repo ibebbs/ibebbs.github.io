@@ -5,7 +5,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
 
-        <title>Ian Bebbington</title>
+        <title>Ian Bebbington - Using A Touch Overlay, In Portrait, On Raspbian Buster</title>
         <meta name="description" content="IObservable&lt;Opinion&gt;" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">        
 
@@ -28,9 +28,9 @@
         <meta name="msapplication-tooltip" content="Ian Bebbington" />
         <meta name="msapplication-starturl" content="/" />
 
-        <meta property="og:title" content="Ian Bebbington" />
+        <meta property="og:title" content="Ian Bebbington - Using A Touch Overlay, In Portrait, On Raspbian Buster" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="http://ian.bebbs.co.uk/" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/UsingATouchOverlayInPortrainOnRaspbian" />
         <!-- TODO: More social graph meta tags -->
 
         <script src="/assets/js/jquery.min.js"></script>
@@ -97,10 +97,16 @@
                                 <div class="row">
                                         <div class="col-md-12">
 
-    <div class="site-heading">
-        <h1>IObservable&lt;Opinion&gt;</h1>
-                <hr class="small">
-        <span class="subheading">Subscribe?</span>
+    
+<div class="post-heading">
+    <h1>Using A Touch Overlay, In Portrait, On Raspbian Buster</h1>
+        <h2 class="subheading">Another wild google-chase in finding reliable information</h2>
+    <div class="meta">        
+Published on 03 October 2019<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/Raspberry-Pi" class="btn btn-default btn-xs">Raspberry Pi</a>
+                    <a role="button" href="/tags/xinput" class="btn btn-default btn-xs">xinput</a>
+        </div>     
 </div>
                                         </div>
                                 </div>
@@ -112,77 +118,98 @@
                         <div class="row">
                                 <div id="content" class="col-md-12">
                                         
-<div class="row">
-    <div class="col-sm-8 right-border">
-                <div class="post-preview">
-                    <a href="/posts/UsingATouchOverlayInPortrainOnRaspbian">
-                        <h2 class="post-title">Using A Touch Overlay, In Portrait, On Raspbian Buster</h2>
-                            <h3 class="post-subtitle">Another wild google-chase in finding reliable information</h3>
-                    </a>
-                    <p class="post-meta">Posted on 03 October 2019</p>
-<p>This is just a short post - mostly for my own benefit - on how to use a touch-overlay, in portrait, on Raspbian Buster</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/TechAdventuresInSustainability-PartI">
-                        <h2 class="post-title">Tech Adventures in Sustainability</h2>
-                            <h3 class="post-subtitle">Part I - Monitoring our solar generation</h3>
-                    </a>
-                    <p class="post-meta">Posted on 26 September 2019</p>
-<p>Installing solar panels and monitoring solar production not only provides immediate benefits in sustainable living but also highlights new, simple ways to change your lifestyle to further save money and energy. Here's how we do it.</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/BeBraveLikeBATMan">
-                        <h2 class="post-title">Be Brave. Like BAT, man!</h2>
-                            <h3 class="post-subtitle">A revolutionary solution to the web&#x27;s advertising trichotomy.</h3>
-                    </a>
-                    <p class="post-meta">Posted on 06 September 2019</p>
-<p>Brave is a privacy focused browser with a revolutionary means of supporting content publisher's revenue streams. Here's why you  should <a href="https://brave.com/beb095">give it a try</a>, particularly if you maintain a blog or publish open-source software.</p>                </div>       
-        <ul class="pager">
-            <li class="previous">                
-            </li>
-            <li class="next">
-            </li>
-        </ul>
-    </div>
-    <div class="col-sm-4 sidebar">
-        <hr class="visible-xs-block" />
 
-            <h5>Tags</h5>
-            <div>
-                    <a role="button" href="/tags/UWP" class="btn btn-default btn-sm"> UWP (8)</a>
-                    <a role="button" href="/tags/Reactive" class="btn btn-default btn-sm"> Reactive (7)</a>
-                    <a role="button" href="/tags/Rx" class="btn btn-default btn-sm"> Rx (7)</a>
-                    <a role="button" href="/tags/Monitoring" class="btn btn-default btn-sm"> Monitoring (4)</a>
-                    <a role="button" href="/tags/LogStash" class="btn btn-default btn-sm"> LogStash (4)</a>
-                    <a role="button" href="/tags/IoT" class="btn btn-default btn-sm"> IoT (4)</a>
-                    <a role="button" href="/tags/Syslog" class="btn btn-default btn-sm"> Syslog (4)</a>
-                    <a role="button" href="/tags/Elastic-Stack" class="btn btn-default btn-sm"> Elastic Stack (4)</a>
-                    <a role="button" href="/tags/ElasticSearch" class="btn btn-default btn-sm"> ElasticSearch (4)</a>
-                    <a role="button" href="/tags/Docker" class="btn btn-default btn-sm"> Docker (4)</a>
-            </div>
-            <ul class="pager">
-                <li class="next">
-                    <a href="/tags">View All Tags &rarr;</a>
-                </li>
-            </ul>
+<h2 id="intro">Intro</h2>
+<p>This is just a short post - mostly for my own benefit - on how to use a touch-overlay, in portrait, on Raspbian Buster</p>
+<p>These instructions are for using a standard HDMI monitor (I'm using a Samsung ME46B) and USB Touchscreen overlay (I'm using a Samsung TM46LBC) in a <code>right</code> portrait (i.e rotated 270° clockwise) configuration. They probably won't work for hat/phat style LCDs with built-in touch-panels.</p>
+<h2 id="changing-to-portrait">Changing to portrait</h2>
+<p>Raspbian Buster has moved to the 'G2 GL (Fake KMS) OpenGL desktop driver with fake KMS' OpenGL driver by default (<code>dtoverlay=vc4-fkms-v3d</code> in <code>/boot/config.txt</code>). Fortunately, as they moved to the 'fake' driver, you're still given significant control over the display configuration from <code>/boot/config.txt</code> and changing the display orientation remains unchanged.</p>
+<p>As such, use the command <code>sudo nano /boot/config.txt</code> to start editing the file and add the following lines at the bottom (uncommenting the appropriate line):</p>
+<pre><code># display_rotate=1 # rotate 90° clockwise
+# display_rotate=2 # rotate 180° clockwise
+display_rotate=3 # rotate 270° clockwise
+avoid_warnings=1
+</code></pre>
+<p>Reboot the Pi (<code>sudo reboot</code>) and you should see that the display is now in the correct orientation.</p>
+<h2 id="correcting-overscan">Correcting Overscan</h2>
+<p>Before moving onto installing/calibrating the touch-panel, it is well worth spending some time correcting the Overscan on your display. To do this, again edit <code>config.txt</code> and find lines similar to below:</p>
+<pre><code># uncomment this if your display has a black border of unused pixels visible
+# and your display can output without overscan
+disable_overscan=0
 
-            <hr />
-            <h5>Older Posts</h5>
-            <ul class="list-unstyled">
-                    <li><a href="/posts/IgnoringABillionDollarMistakeIsNotAnOption">Ignoring a Billion-Dollar Mistake is simply not an Option</a></li>
-                    <li><a href="/posts/FluentNamespacing">Fluent Namespacing</a></li>
-                    <li><a href="/posts/ASmartHome-Part2">A SmartHome... NoT - Part II</a></li>
-                    <li><a href="/posts/ASmartHome-Part1">A SmartHome... NoT - Part I</a></li>
-            </ul>
-                <ul class="pager">
-                    <li class="next">
-                        <a href="/posts">Archive &rarr;</a>
-                    </li>
-                </ul>
+# uncomment the following to adjust overscan. Use positive numbers if console
+# goes off screen, and negative if there is too much border
+overscan_left=-10
+overscan_right=-10
+overscan_top=8
+overscan_bottom=8
+</code></pre>
+<p>The values you see above are those required to make my panel display correctly (nothing off-screen, no big borders). If you need to change overscan you'll need to find the values that work for you by changing values and rebooting to see the effect.</p>
+<h2 id="calibrating-the-touch-panel">Calibrating the Touch-Panel</h2>
+<p>While the touch panel I am using was correctly identified as a 'Nexio Touch Device' by <code>xinput --list</code> getting it to respect the display orientation and calibrating it correctly turned out to be a pain. After <em>a lot</em> of searching I finally found <a href="https://www.instructables.com/id/Rotate-Raspberry-Pi-Display-and-Touchscreen/">two</a> <a href="https://www.raspberrypi.org/forums/viewtopic.php?t=179477#p1163460">posts</a> which, when combined, got the touch panel working correctly.</p>
+<p>Firstly, you'll need to install the <code>evdev</code> driver and the <code>xinput_calibrator</code> using the command:</p>
+<pre><code>sudo apt-get install xserver-xorg-input-evdev xinput_calibrator
+</code></pre>
+<p>Next locate the touch-panel display configuration file as described in this <a href="https://www.instructables.com/id/Rotate-Raspberry-Pi-Display-and-Touchscreen/">instructable</a>; mine was <code>/usr/share/X11/xorg.conf.d/40-libinput.conf</code></p>
+<p>In this file, find the <code>InputClass</code> Section which includes the Identifier <code>libinput touchscreen catchall</code>. In this section, change the <code>Driver</code> value from <code>libinput</code> to <code>evdev</code> and add a <code>TransformationMatrix</code> option to reflect to display orientation as shown below:</p>
+<pre><code>Section &quot;InputClass&quot;
+        Identifier &quot;libinput touchscreen catchall&quot;
+        MatchIsTouchscreen &quot;on&quot;
+        MatchDevicePath &quot;/dev/input/event*&quot;
+        Driver &quot;evdev&quot; # &lt;- change this
+        Option &quot;TransformationMatrix&quot; &quot;0 1 0 -1 0 1 0 0 1&quot; # &lt;- Add this
+EndSection
+</code></pre>
+<p>The exact transformation matrix you need is available in the instructable but I've repeated them here for easy reference:</p>
+<table class="table">
+<thead>
+<tr>
+<th>Angle</th>
+<th>Transformation Matrix</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>90°</td>
+<td>&quot;0 -1 1 1 0 0 0 0 1&quot;</td>
+</tr>
+<tr>
+<td>180°</td>
+<td>&quot;-1 0 1 0 -1 1 0 0 1&quot;</td>
+</tr>
+<tr>
+<td>270°</td>
+<td>&quot;0 1 0 -1 0 1 0 0 1&quot;</td>
+</tr>
+</tbody>
+</table>
+<p>Now, if you restart your Pi you should notice that the touch panel is at least in the correct orientation (mouse cursor moves in the same direction as your finger). To calibrate it such that the mouse cursor moves to exactly where you touch, use the <code>xinput_calibrator</code> tool by running it from the Terminal window in a desktop session.</p>
+<p>Follow the instructions and <code>input_calibrator</code> will do two things:</p>
+<ol>
+<li>Correctly calibrate the display - the mouse cursor should now be under your touch; and</li>
+<li>Give you a block of text to add to persistent configuration as shown below:</li>
+</ol>
+<pre><code>Calibrating EVDEV driver for &quot;Nexio Touch Device(HS) Nexio HID Multi-Touch ATI0460-06 &quot; id=7
+	current calibration values (from XInput): min_x=15929, max_x=149 and min_y=16328, max_y=171
 
-        
-    </div> 
-</div>
+Doing dynamic recalibration:
+	Setting calibration data: 15872, 0, 16498, -69
+	--&gt; Making the calibration permanent &lt;--
+  copy the snippet below into '/etc/X11/xorg.conf.d/99-calibration.conf' (/usr/share/X11/xorg.conf.d/ in some distro's)
+Section &quot;InputClass&quot;
+	Identifier	&quot;calibration&quot;
+	MatchProduct	&quot;Nexio Touch Device(HS) Nexio HID Multi-Touch ATI0460-06 &quot;
+	Option	&quot;Calibration&quot;	&quot;15872 0 16498 -69&quot;
+	Option	&quot;SwapAxes&quot;	&quot;0&quot;
+EndSection
+</code></pre>
+<p>Follow the instructions it provides by copying the region from <code>Section &quot;InputClass&quot;</code> down to <code>EndSection</code> then using the following command to create (or edit) the persistent configuration file:</p>
+<pre><code>sudo nano /usr/share/X11/xorg.conf.d/99-calibration.conf
+</code></pre>
+<p>Paste the block of text you copied earlier, save and exit, then reboot.</p>
+<p>Voila, a perfectly configured touch overlay. Enjoy!</p>
+
+
 
                                 </div>
                         </div>
