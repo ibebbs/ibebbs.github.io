@@ -4,8 +4,162 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2019</rights>
-	<updated>2019-10-03T16:18:22Z</updated>
+	<updated>2019-10-04T20:29:30Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/BuildingDotNetCore3WithAzurePipelines</id>
+		<title>Building .NET Core 3.0 With Azure Pipelines</title>
+		<link href="http://ian.bebbs.co.uk/posts/BuildingDotNetCore3WithAzurePipelines" />
+		<updated>2019-10-04T00:00:00Z</updated>
+		<content>&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;My &amp;quot;go to&amp;quot; build system and package repository - &lt;a href="https://www.myget.org/"&gt;MyGet&lt;/a&gt; - doesn't yet support building .NET Core 3.0 (or more specifically .NET Standard 2.1) projects. Having recently read about some of the features Microsoft have been adding to Azure DevOps I thought I'd see how easy (or not) it was to get a Pipeline setup to build my project and publish the package back to MyGet.&lt;/p&gt;
+&lt;h2 id="you-need-what"&gt;You need what?!?&lt;/h2&gt;
+&lt;p&gt;Azure DevOps is very welcoming and it takes almost no time to set up your organisation and project... all for free no less! Unfortunately, when I then started creating a new build pipeline and selected GitHub in answer to the &amp;quot;Where is your code?&amp;quot; prompt, I was presented with this OAuth request:&lt;/p&gt;
+&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/YouNeedWhatNow.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="You need what now?"&gt;
+&lt;p&gt;Yup. In order to build a single, public repository from my GitHub account, I needed to let Azure have access to &lt;em&gt;everything&lt;/em&gt;; public &lt;em&gt;and&lt;/em&gt; private. How about &amp;quot;No&amp;quot;.&lt;/p&gt;
+&lt;h2 id="ahh-classic"&gt;Ahh, classic!&lt;/h2&gt;
+&lt;p&gt;Fortunately, Azure provides a second means of creating a pipeline - ostensibly, but not necessarily, without Yaml - through the use of a small &amp;quot;Use the classic editor&amp;quot; hyperlink below the main options.&lt;/p&gt;
+&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/UseTheClassicEditor.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Guess I'll be using this then"&gt;
+&lt;p&gt;When you do this, you're once again asked to &amp;quot;Select a source&amp;quot; and authenticate with that source as shown below. This time however, you're able to &amp;quot;Authorize with a GitHub personal access token&amp;quot;.&lt;/p&gt;
+&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/GitHubPersonalAccessToken.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="GitHub Personal Access Token"&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;Note: it may be possible to use a &amp;quot;personal access token&amp;quot;&amp;quot; with the new &amp;quot;Where is your code?&amp;quot; editor. Unfortunately, I wasn't able to confirm this as I seemed to be stuck in a OAuth loop wherein, each time I click &amp;quot;GitHub&amp;quot;, it no longer asks me to log in but immediately prompts me to &amp;quot;Authorize Azure Pipelines&amp;quot; with all the privileges shown above. As there's no &amp;quot;Cancel&amp;quot; button, my only recourse is to use the browser's back button which doesn't seem to cancel the OAuth flow. ¯\&lt;em&gt;(ツ)&lt;/em&gt;/¯&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I then quickly nipped over to GitHub and created a personal access token (Settings-&amp;gt;Developer settings-&amp;gt;Personal access tokens) which only has access to &lt;em&gt;public&lt;/em&gt; repositories, web-hook settings and basic user information as shown below:&lt;/p&gt;
+&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/NewPersonalAccessToken.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="New Personal Access Token"&gt;
+&lt;p&gt;Clicking &amp;quot;Generate token&amp;quot; provided me with a token which I copy/pasted into Azure pipelines. I was then able to select the repository I wanted to build from a list of only my public repositories. Ace!&lt;/p&gt;
+&lt;h2 id="yet-still-with-yaml"&gt;Yet still with Yaml!&lt;/h2&gt;
+&lt;p&gt;I was then asked to &amp;quot;Select a template&amp;quot;. At this point, I could elect to use a Yaml file (per the &amp;quot;new editor&amp;quot;) as shown below:&lt;/p&gt;
+&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/SelectATemplate.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Select A Token"&gt;
+&lt;p&gt;This seemed to be exactly what I wanted until I realised that this path doesn't actually create a Yaml build template for you but instead expects find one in the repository.&lt;/p&gt;
+&lt;p&gt;As I hadn't written an Azure Pipelines Yaml file before, the idea of creating one from scratch was a little daunting. I therefore decided to cheat. I copied the repository from GitHub to Azure DevOps Repos and recreated a build pipeline using the new &amp;quot;Where is your code?&amp;quot; editor. I then copied the Yaml file this produced into my GitHub repository and continued building this pipeline.&lt;/p&gt;
+&lt;p&gt;So here's the template &lt;code&gt;azure-pipelines.yml&lt;/code&gt; file I ended up with:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-yaml"&gt;# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: NuGetToolInstaller&amp;#64;1
+
+- task: NuGetCommand&amp;#64;2
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: VSBuild&amp;#64;1
+  inputs:
+    solution: '$(solution)'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation=&amp;quot;$(build.artifactStagingDirectory)\WebApp.zip&amp;quot; /p:DeployIisAppPath=&amp;quot;Default Web Site&amp;quot;'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: VSTest&amp;#64;2
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="its-good-but-its-not-right"&gt;It's good but it's not right&lt;/h2&gt;
+&lt;p&gt;Not a bad start but this template was designed to &amp;quot;Build and test ASP.NET Core projects targeting the full .NET Framework.&amp;quot;. I wasn't targeting the full .NET Framework so I &lt;a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/?view=azure-devops"&gt;hit the books&lt;/a&gt; and quickly found a section on the &lt;a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/dotnet-core?view=azure-devops"&gt;.NET Core Ecosystem&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The information here allowed me to move from &lt;code&gt;VSBuild&lt;/code&gt; based tasks to &lt;code&gt;dotnet&lt;/code&gt; based scripts. Moving to using Ubuntu for the build, only including build steps and removing everything else resulted in this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-yaml"&gt;trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  version: 1.0.1
+
+steps:
+- script: dotnet restore
+- script: dotnet build
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Tentatively, I enqueued a build which resulted in...&lt;/p&gt;
+&lt;h2 id="a-spectacular-failure"&gt;A spectacular failure&lt;/h2&gt;
+&lt;p&gt;It didn't take long to find the cause of the failure. Digging into the build logs showed the following failure for one of the script steps:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;&amp;quot;The current .NET SDK does not support targeting .NET Standard 2.1.  Either target .NET Standard 2.0 or lower, or use a version of the .NET SDK that supports .NET Standard 2.1.&amp;quot;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;&amp;quot;Oh, exactly the same error as Myget&amp;quot; I thought. Fortunately, from perusing the documentation earlier, I had come across the section on &lt;a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/dotnet-core?view=azure-devops#build-environment"&gt;&amp;quot;Build Environment&amp;quot;&lt;/a&gt; and the fact that the Microsoft-hosted build agents don't provide all versions of the .NET Core SDK. They do however provide a very simple means of installing additional frameworks by simply adding a &amp;quot;DotNetCoreInstaller&amp;quot; task to your Yaml. I figured it couldn't hurt to try and amended my 'azure-pipelines.yml` to this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-yaml"&gt;trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  version: 1.0.1
+
+steps:
+- task: UseDotNet&amp;#64;2
+  displayName: 'Use .NET Core sdk'
+  inputs:
+    packageType: sdk
+    version: 3.x
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+- script: dotnet restore
+- script: dotnet build
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And, somewhat amazingly, it worked.&lt;/p&gt;
+&lt;h2 id="move-em-on-head-em-up"&gt;Move 'em on, head 'em up!&lt;/h2&gt;
+&lt;p&gt;With a successful build running, all that was left was to package the built assembly into a nuget package and push it to MyGet. From prior reading I knew that the first thing I had to do here was add a &amp;quot;Service Connection&amp;quot; to the project from the settings. Which.... are.... where???&lt;/p&gt;
+&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/ProjectSettings.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Project Settings"&gt;
+&lt;p&gt;Ah, here they are! Of course! Hidden until you [accidentally] move your mouse over project header bar. (!?!)&lt;/p&gt;
+&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/AhHereTheyAre.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Ah Here They Are!"&gt;
+&lt;p&gt;Weird.&lt;/p&gt;
+&lt;p&gt;Anyway, having finally found the project settings I was able to add a new &amp;quot;Nuget&amp;quot; connection (from &amp;quot;Pipelines-&amp;gt;Service connections&amp;quot;) which I populated with details provided by MyGet. I then populated the package settings within my library's &lt;code&gt;.csproj&lt;/code&gt; file and enabled the &amp;quot;Generate Nuget package on build&amp;quot; setting. With this all done, I simply needed 'push' the package as follows:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-yaml"&gt;trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  version: 1.0.1
+
+steps:
+- task: UseDotNet&amp;#64;2
+  displayName: 'Use .NET Core sdk'
+  inputs:
+    packageType: sdk
+    version: 3.x
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+- script: dotnet restore
+- script: dotnet build
+- task: NuGetCommand&amp;#64;2
+  inputs:
+    command: push
+    nuGetFeedType: external
+    packagesToPush: '$(Build.Repository.LocalPath)/**/*.nupkg;!$(Build.Repository.LocalPath)/**/*.symbols.nupkg'
+    publishFeedCredentials: 'MyGet Bebbs Feed'
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And the compiled package appeared in my MyGet repository. Boom!&lt;/p&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;I am very impressed with Azure pipelines. The tools they've made available in their Yaml based build system are fantastic and make building a project easy and clean yet flexible and powerful. Furthermore, the actual build process is very fast. From git push to package in my nuget repository took less than a minute. Yes, it's just a small library without any tests (for now), but each build required installing a new version of the .NET Core SDK onto the build agent and, even though this was all hosted on the Free tier, I never had to wait for a build agent to become available.&lt;/p&gt;
+&lt;p&gt;If they could just tighten up the OAuth permission requested from GitHub I'd be very tempted to adopt Azure DevOps for all my projects. I'd certainly consider recommending it to clients should they be looking to move away from other CI/CD solutions.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;My "go to" build system and package repository - &lt;a href="https://www.myget.org/"&gt;MyGet&lt;/a&gt; - doesn't yet support building .NET Core 3.0 (or more specifically .NET Standard 2.1) projects. Having recently read about some of the features Microsoft have been adding to Azure DevOps I thought I'd see how easy (or not) it was to get a Pipeline setup to build my project and publish the package back to MyGet.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/UsingATouchOverlayInPortrainOnRaspbian</id>
 		<title>Using A Touch Overlay, In Portrait, On Raspbian Buster</title>
@@ -2077,32 +2231,5 @@ However, after discussing ToddlerBox with a friend, he decided to install it on 
 &lt;p&gt;All good fun :0D&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;Wow!&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/ToddlerBoxReleasedToStore</id>
-		<title>ToddlerBox Released to the XBox Store</title>
-		<link href="http://ian.bebbs.co.uk/posts/ToddlerBoxReleasedToStore" />
-		<link rel="enclosure" type="image" href="https://zphykg.dm2302.livefilestore.com/y3mVAxtKFjUEGk7Hdhzjl4UZ2INnFdBbw9K-tnYZ8DYoJ-VoKxpAN6w8Ng0DFTYdSxpHY6IvL5-VwJpLkQl6qWRmMQXSExLXopz5CFuSxIbyaMLrnL2Vy3yPZlISAAknXZdT4HwiZJ55zg2UtKwucBL88-xHh6rn5Mh97yzfRsCPjI?width=1919&amp;height=1075&amp;cropmode=none" />
-		<updated>2016-11-16T00:00:00Z</updated>
-		<content>&lt;p&gt;My little girl loves playing with the XBox controller. In fact, she'll make a beeline for it as soon as she sees it and sit for ages twiddling the thumb-sticks and mashing the buttons. So I thought it'd be great to provide some visual accompaniment to the tactile experience of playing with the controller. Furthermore, I'd been looking for an excuse to play with Win2D as part of a UWP app and this felt like a perfect opportunity.&lt;/p&gt;
-&lt;p&gt;To this end, I cracked open Visual Studio, started a blank UWP app, added a nuget reference to Win2D and started coding. Using a &lt;a href="https://microsoft.github.io/Win2D/html/T_Microsoft_Graphics_Canvas_UI_Xaml_CanvasAnimatedControl.htm"&gt;CanvasAnimatedControl&lt;/a&gt; it was simple to use the &lt;a href="https://microsoft.github.io/Win2D/html/E_Microsoft_Graphics_Canvas_UI_Xaml_CanvasAnimatedControl_Update.htm"&gt;Update&lt;/a&gt; callback to read the &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.gaming.input.gamepad"&gt;Gamepad&lt;/a&gt; input and then use the &lt;a href="https://microsoft.github.io/Win2D/html/E_Microsoft_Graphics_Canvas_UI_Xaml_CanvasAnimatedControl_Draw.htm"&gt;Draw&lt;/a&gt; callback to draw a series of sprites based on the values read.&lt;/p&gt;
-&lt;p&gt;All in, from not having used Win2D before, it took just a few hours to get a minimal app working with a variety of sprites and manipulation mechanisms. Flipping my &lt;a href="https://msdn.microsoft.com/en-gb/windows/uwp/xbox-apps/devkit-activation"&gt;XBox into developer mode&lt;/a&gt; allowed me to deploy the app directly to the Xbox and have a play. And I must say, I was very pleased with the result:&lt;/p&gt;
-&lt;img src="https://zphxkg.db.files.1drv.com/y4mKfpXRnW9rkEjlULJy8sv9pOYntzye0_i_OLyhC4OpruJzYEMDwN4Idd2DiKo1VaGJwbKRbN0bzvpuAYzLldyYxICrQIAHEz4BdIaVP46LlaceNFvuv03vN2RBdATVagIcekjyd9vEMxGeI-2-66lqN_36uXNx09RBGL4U3TEGcZUGgSSC2b2fY6tuGmhXc3aUsaiwlH8yzEiPqpE130h6g?width=1024&amp;height=575&amp;cropmode=none" class="img-responsive" style="margin: auto; width:320px; margin-top: 6px; margin-bottom: 6px;" alt="Lots of animals"&gt;
-&lt;h6 style="text-align: center;" markdown="1"&gt;Lots of animals&lt;/h6&gt;
-&lt;img src="https://zphykg.db.files.1drv.com/y4mAwg439KNtNcTCarv1Y78XwsNLSMT94pgh0_dZKZbQetS2EcAF4kDYLm-XgYg8-18DiRxw4uZDwRI4AHRV-Tvv2-_7nbkMW4F-k1LjcVwp0FLT4P_rNELeHg6aQjDTQz5IJv-s8o6HUXFVRLHRndb2DqUbDPwj-3qTxJfvhn_HLL9Ya9dD2UfV9pteXuhckUiyNdtAzxmhPN9zQE7xvTuuQ?width=1024&amp;height=574&amp;cropmode=none" class="img-responsive" style="margin: auto; width:320px; margin-top: 6px; margin-bottom: 6px;" alt="Lots of colours"&gt;
-&lt;h6 style="text-align: center;" markdown="1"&gt;Lots of colours&lt;/h6&gt;
-&lt;img src="https://zphwkg.db.files.1drv.com/y4mfQvjah4E9PX8dP2QImVbvsNM2JLJh9eCJuynXHU_q2sV6DQgyWZxwcVz1jubgl8ZAqrKRr-z1jBM_ciA5d67e7tTtj3w0j9l2cX6yCtmrThB5SGKesnySSBC8cO8TWHyP734Y91Fz2fZzoGq971EqglORagAcOscHCq-5K9A7B5jvVlLfTVhLL-9An0P3KXUKzyvlNOcYQuv4wrggAk6NQ?width=1024&amp;height=575&amp;cropmode=none" class="img-responsive" style="margin: auto; width:320px; margin-top: 6px; margin-bottom: 6px;" alt="Big..."&gt;
-&lt;h6 style="text-align: center;" markdown="1"&gt;Big...&lt;/h6&gt;
-&lt;img src="https://zphvkg.db.files.1drv.com/y4m9oH0cRnu6-bNUrfz9m1Uzzfd0DL2e6wyAxlKn0lOtnt6PlCQ5BlCrXGUy615UWpun1dcKgcvFYrHBImR_Fi7p7FiMIyRhskABN-8GEV5aOb1I-qI7OCHgX5llWe5RzYe-8InKqfgxOoZp_Lb1LsrJidOOirwjsgoMEkvtaMXCv9anaESB6AfUFVgdBF1lHroU0ZGEAEPmQ_dBQrFhLyceA?width=1024&amp;height=575&amp;cropmode=none" class="img-responsive" style="margin: auto; width:320px; margin-top: 6px; margin-bottom: 6px;" alt="...or small"&gt;
-&lt;h6 style="text-align: center;" markdown="1"&gt;...or small&lt;/h6&gt;
-&lt;img src="https://zphukg.db.files.1drv.com/y4miQXIT7ixWd6U5AyyyeKKK9P9f7V-_N9Iy4T6hRGJKjZfsgI2IoV1Uv8_rWz_M8R9iZFVhCiSQX-4O4NrPYjev4N1AqH8r7MoZWO7UqO4bQLT-TjGA6fApKaS_w3qvzUIGoRCa167qwyniPBfltEK84ziJi3IYAwzFJUyf-xfks9YskYihZ9OnjQh0-s58naICFXfiDoPqPOXt27eVc0orA?width=1024&amp;height=575&amp;cropmode=none" class="img-responsive" style="margin: auto; width:320px; margin-top: 6px; margin-bottom: 6px;" alt="And monkeys!!!"&gt;
-&lt;h6 style="text-align: center;" markdown="1"&gt;And monkeys!!!!&lt;/h6&gt;
-&lt;p&gt;The real test came when I handed to the controller to my 14 month old baby girl. It took a few seconds for her to realise that what she did on the controller affected what was displayed on screen but then there was no stopping her. For three or four minutes (a record for her!!!) she sat still, mashing away on the controller and staring at the screen while I sat mesmerized by how quickly she picked it all up.&lt;/p&gt;
-&lt;p&gt;I'd call that a win!&lt;/p&gt;
-&lt;p&gt;Given this success, I made some final touches and submitted it to the store; specifically for XBox. To my amazement, it passed certification first time, within 24 hours of submission despite submitting it on a Sunday. And here it is:&lt;/p&gt;
-&lt;img src="https://1y8kkg.db.files.1drv.com/y4m0CBfgsb9aGM1VZtawRIIp41pI48AguA0lF7rvWqEXvXKj9XDUBorT4kOcw--enuZEgaTqeBvAZgEwMT9nXw1hm6yQc4CpVUjM9NBNTdm2R_r9iawhaC9WQ368NaM5p6irfPo4IRBibb1wb5KIuBjpE6CTNbilueBpc6K60NubxcQKJ-C2CGf9gqpxKdW7GAxbU32S5lcFzr7tUKOMEjGKQ?width=1024&amp;height=576&amp;cropmode=none" class="img-responsive" style="margin: auto; width:800px; margin-top: 6px; margin-bottom: 6px;" alt="ToddlerBox in the store"&gt;
-&lt;p&gt;Installing from the store and ready to entertain my little one whenever I need a break.&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;My little girl loves playing with the XBox controller. In fact, she'll make a beeline for it as soon as she sees it and sit for ages twiddling the thumb-sticks and mashing the buttons. So I thought it'd be great to provide some visual accompaniment to the tactile experience of playing with the controller. Furthermore, I'd been looking for an excuse to play with Win2D as part of a UWP app and this felt like a perfect opportunity.&lt;/p&gt;</summary>
 	</entry>
 </feed>

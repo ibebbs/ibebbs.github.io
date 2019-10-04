@@ -1,0 +1,348 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Building .NET Core 3.0 With Azure Pipelines</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Building .NET Core 3.0 With Azure Pipelines" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/BuildingDotNetCore3WithAzurePipelines" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Building .NET Core 3.0 With Azure Pipelines</h1>
+        <h2 class="subheading">Without giving away the keys to the castle!</h2>
+    <div class="meta">        
+Published on 04 October 2019<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/NET-Core" class="btn btn-default btn-xs">.NET Core</a>
+                    <a role="button" href="/tags/Azure" class="btn btn-default btn-xs">Azure</a>
+                    <a role="button" href="/tags/Azure-DevOps" class="btn btn-default btn-xs">Azure DevOps</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="intro">Intro</h2>
+<p>My &quot;go to&quot; build system and package repository - <a href="https://www.myget.org/">MyGet</a> - doesn't yet support building .NET Core 3.0 (or more specifically .NET Standard 2.1) projects. Having recently read about some of the features Microsoft have been adding to Azure DevOps I thought I'd see how easy (or not) it was to get a Pipeline setup to build my project and publish the package back to MyGet.</p>
+<h2 id="you-need-what">You need what?!?</h2>
+<p>Azure DevOps is very welcoming and it takes almost no time to set up your organisation and project... all for free no less! Unfortunately, when I then started creating a new build pipeline and selected GitHub in answer to the &quot;Where is your code?&quot; prompt, I was presented with this OAuth request:</p>
+<img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/YouNeedWhatNow.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="You need what now?">
+<p>Yup. In order to build a single, public repository from my GitHub account, I needed to let Azure have access to <em>everything</em>; public <em>and</em> private. How about &quot;No&quot;.</p>
+<h2 id="ahh-classic">Ahh, classic!</h2>
+<p>Fortunately, Azure provides a second means of creating a pipeline - ostensibly, but not necessarily, without Yaml - through the use of a small &quot;Use the classic editor&quot; hyperlink below the main options.</p>
+<img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/UseTheClassicEditor.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Guess I'll be using this then">
+<p>When you do this, you're once again asked to &quot;Select a source&quot; and authenticate with that source as shown below. This time however, you're able to &quot;Authorize with a GitHub personal access token&quot;.</p>
+<img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/GitHubPersonalAccessToken.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="GitHub Personal Access Token">
+<blockquote class="blockquote">
+<p>Note: it may be possible to use a &quot;personal access token&quot;&quot; with the new &quot;Where is your code?&quot; editor. Unfortunately, I wasn't able to confirm this as I seemed to be stuck in a OAuth loop wherein, each time I click &quot;GitHub&quot;, it no longer asks me to log in but immediately prompts me to &quot;Authorize Azure Pipelines&quot; with all the privileges shown above. As there's no &quot;Cancel&quot; button, my only recourse is to use the browser's back button which doesn't seem to cancel the OAuth flow. ¯\<em>(ツ)</em>/¯</p>
+</blockquote>
+<p>I then quickly nipped over to GitHub and created a personal access token (Settings-&gt;Developer settings-&gt;Personal access tokens) which only has access to <em>public</em> repositories, web-hook settings and basic user information as shown below:</p>
+<img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/NewPersonalAccessToken.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="New Personal Access Token">
+<p>Clicking &quot;Generate token&quot; provided me with a token which I copy/pasted into Azure pipelines. I was then able to select the repository I wanted to build from a list of only my public repositories. Ace!</p>
+<h2 id="yet-still-with-yaml">Yet still with Yaml!</h2>
+<p>I was then asked to &quot;Select a template&quot;. At this point, I could elect to use a Yaml file (per the &quot;new editor&quot;) as shown below:</p>
+<img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/SelectATemplate.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Select A Token">
+<p>This seemed to be exactly what I wanted until I realised that this path doesn't actually create a Yaml build template for you but instead expects find one in the repository.</p>
+<p>As I hadn't written an Azure Pipelines Yaml file before, the idea of creating one from scratch was a little daunting. I therefore decided to cheat. I copied the repository from GitHub to Azure DevOps Repos and recreated a build pipeline using the new &quot;Where is your code?&quot; editor. I then copied the Yaml file this produced into my GitHub repository and continued building this pipeline.</p>
+<p>So here's the template <code>azure-pipelines.yml</code> file I ended up with:</p>
+<pre><code class="language-yaml"># ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- master
+
+pool:
+  vmImage: 'windows-latest'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: NuGetToolInstaller&#64;1
+
+- task: NuGetCommand&#64;2
+  inputs:
+    restoreSolution: '$(solution)'
+
+- task: VSBuild&#64;1
+  inputs:
+    solution: '$(solution)'
+    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation=&quot;$(build.artifactStagingDirectory)\WebApp.zip&quot; /p:DeployIisAppPath=&quot;Default Web Site&quot;'
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+- task: VSTest&#64;2
+  inputs:
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+</code></pre>
+<h2 id="its-good-but-its-not-right">It's good but it's not right</h2>
+<p>Not a bad start but this template was designed to &quot;Build and test ASP.NET Core projects targeting the full .NET Framework.&quot;. I wasn't targeting the full .NET Framework so I <a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/?view=azure-devops">hit the books</a> and quickly found a section on the <a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/dotnet-core?view=azure-devops">.NET Core Ecosystem</a>.</p>
+<p>The information here allowed me to move from <code>VSBuild</code> based tasks to <code>dotnet</code> based scripts. Moving to using Ubuntu for the build, only including build steps and removing everything else resulted in this:</p>
+<pre><code class="language-yaml">trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  version: 1.0.1
+
+steps:
+- script: dotnet restore
+- script: dotnet build
+</code></pre>
+<p>Tentatively, I enqueued a build which resulted in...</p>
+<h2 id="a-spectacular-failure">A spectacular failure</h2>
+<p>It didn't take long to find the cause of the failure. Digging into the build logs showed the following failure for one of the script steps:</p>
+<blockquote class="blockquote">
+<p>&quot;The current .NET SDK does not support targeting .NET Standard 2.1.  Either target .NET Standard 2.0 or lower, or use a version of the .NET SDK that supports .NET Standard 2.1.&quot;</p>
+</blockquote>
+<p>&quot;Oh, exactly the same error as Myget&quot; I thought. Fortunately, from perusing the documentation earlier, I had come across the section on <a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/dotnet-core?view=azure-devops#build-environment">&quot;Build Environment&quot;</a> and the fact that the Microsoft-hosted build agents don't provide all versions of the .NET Core SDK. They do however provide a very simple means of installing additional frameworks by simply adding a &quot;DotNetCoreInstaller&quot; task to your Yaml. I figured it couldn't hurt to try and amended my 'azure-pipelines.yml` to this:</p>
+<pre><code class="language-yaml">trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  version: 1.0.1
+
+steps:
+- task: UseDotNet&#64;2
+  displayName: 'Use .NET Core sdk'
+  inputs:
+    packageType: sdk
+    version: 3.x
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+- script: dotnet restore
+- script: dotnet build
+</code></pre>
+<p>And, somewhat amazingly, it worked.</p>
+<h2 id="move-em-on-head-em-up">Move 'em on, head 'em up!</h2>
+<p>With a successful build running, all that was left was to package the built assembly into a nuget package and push it to MyGet. From prior reading I knew that the first thing I had to do here was add a &quot;Service Connection&quot; to the project from the settings. Which.... are.... where???</p>
+<img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/ProjectSettings.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Project Settings">
+<p>Ah, here they are! Of course! Hidden until you [accidentally] move your mouse over project header bar. (!?!)</p>
+<img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/AhHereTheyAre.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Ah Here They Are!">
+<p>Weird.</p>
+<p>Anyway, having finally found the project settings I was able to add a new &quot;Nuget&quot; connection (from &quot;Pipelines-&gt;Service connections&quot;) which I populated with details provided by MyGet. I then populated the package settings within my library's <code>.csproj</code> file and enabled the &quot;Generate Nuget package on build&quot; setting. With this all done, I simply needed 'push' the package as follows:</p>
+<pre><code class="language-yaml">trigger:
+- master
+
+pool:
+  vmImage: 'ubuntu-16.04'
+
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+  version: 1.0.1
+
+steps:
+- task: UseDotNet&#64;2
+  displayName: 'Use .NET Core sdk'
+  inputs:
+    packageType: sdk
+    version: 3.x
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+- script: dotnet restore
+- script: dotnet build
+- task: NuGetCommand&#64;2
+  inputs:
+    command: push
+    nuGetFeedType: external
+    packagesToPush: '$(Build.Repository.LocalPath)/**/*.nupkg;!$(Build.Repository.LocalPath)/**/*.symbols.nupkg'
+    publishFeedCredentials: 'MyGet Bebbs Feed'
+</code></pre>
+<p>And the compiled package appeared in my MyGet repository. Boom!</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>I am very impressed with Azure pipelines. The tools they've made available in their Yaml based build system are fantastic and make building a project easy and clean yet flexible and powerful. Furthermore, the actual build process is very fast. From git push to package in my nuget repository took less than a minute. Yes, it's just a small library without any tests (for now), but each build required installing a new version of the .NET Core SDK onto the build agent and, even though this was all hosted on the Free tier, I never had to wait for a build agent to become available.</p>
+<p>If they could just tighten up the OAuth permission requested from GitHub I'd be very tempted to adopt Azure DevOps for all my projects. I'd certainly consider recommending it to clients should they be looking to move away from other CI/CD solutions.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                <ul class="list-inline text-center">
+                        <li>
+                        <a href="https://twitter.com/ibebbs">
+                                <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+                                </span>
+                        </a>
+                        </li>
+                        <li>
+                        <a href="https://github.com/ibebbs">
+                                <span class="fa-stack fa-lg">
+                                <i class="fa fa-circle fa-stack-2x"></i>
+                                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+                                </span>
+                        </a>
+                        </li>
+                </ul>
+                <br />
+                <ul class="list-inline text-center">
+                        <li>                                
+                        <!-- Buy Me A Coffee Button -->
+                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                        </li>
+                </ul>
+                <p class="copyright text-muted">
+                        Copyright © 2019. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                        <br />
+                        <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                        <br />
+                        <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                        <br />
+                        <br />
+                </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
