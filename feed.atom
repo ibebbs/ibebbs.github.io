@@ -4,8 +4,108 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2019</rights>
-	<updated>2019-11-08T13:18:54Z</updated>
+	<updated>2019-11-11T13:05:49Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/LightweightRuntimeCompositionForGenericHost</id>
+		<title>Light-weight run-time composition for the .NET Core 3.0 Generic Host</title>
+		<link href="http://ian.bebbs.co.uk/posts/LightweightRuntimeCompositionForGenericHost" />
+		<updated>2019-11-11T00:00:00Z</updated>
+		<content>&lt;h1 id="tldr"&gt;TL;DR&lt;/h1&gt;
+&lt;p&gt;&lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition"&gt;Cogenity.Extensions.Hosting.Composition&lt;/a&gt; can provide lightweight, runtime composition for the &lt;a href="(https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0)"&gt;.NET Core 3.0 Generic Host&lt;/a&gt;... with some caveats. &lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5"&gt;An issue&lt;/a&gt; has been created as an RFC on how best to address these caveats with comments/contributions welcomed.&lt;/p&gt;
+&lt;h1 id="did-you-know"&gt;Did you know...&lt;/h1&gt;
+&lt;p&gt;The &lt;a href="https://github.com/aspnet/AspNetCore/issues/9337"&gt;.NET Core 3.0 web stack has been &amp;quot;re-platformed&amp;quot; onto the generic host library&lt;/a&gt;?&lt;/p&gt;
+&lt;p&gt;Furthermore, did you know that &lt;code&gt;WebHost&lt;/code&gt; allows you to &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/platform-specific-configuration?view=aspnetcore-3.0"&gt;load additional non-referenced assemblies at runtime which can participate in service start-up by implementing the &lt;code&gt;IHostingStartup&lt;/code&gt; interface&lt;/a&gt;?&lt;/p&gt;
+&lt;p&gt;Well neither did I until I started looking for a way to perform runtime-composition for a service utilizing the &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0"&gt;.NET Core 3.0 Generic Host&lt;/a&gt;. It turns out that, while both the changes above are great for the web-platform, nothing similar exists out-of-the-box for the Generic Host. So here's what I did...&lt;/p&gt;
+&lt;h1 id="background"&gt;Background&lt;/h1&gt;
+&lt;p&gt;I'm currently working on a very interesting project which I hope to see open-sourced in a few weeks time. At the moment it's being developed behind closed doors but with various reusable components being segregated into open-source projects/packages for use by the community.&lt;/p&gt;
+&lt;p&gt;One facet of this project is a .NET Core 3.0 service which needs to be deployable in a variety of environments and across a number of platforms. While this service provides a set of core behaviours, these behaviours need to be augmented by arbitrary functionality specific to the environment/platform the service is being used within.&lt;/p&gt;
+&lt;p&gt;So it was that I came to look for a means to provide light-weight runtime-composition to services implemented using the .NET Core 3.0 Generic Host and, to my surprise, came up empty handed.&lt;/p&gt;
+&lt;h1 id="wait-runtime-composition"&gt;Wait, runtime composition?&lt;/h1&gt;
+&lt;p&gt;Yes, the ability to add functionality/behaviours to a software component, ostensibly by loading additional assemblies at runtime, without requiring re-compilation of said software component.&lt;/p&gt;
+&lt;p&gt;Specifically, my requirements were:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;A simple, fast, lightweight means to safely load and configure additional assemblies at service start-up; and&lt;/li&gt;
+&lt;li&gt;A means for these assemblies to participate in host composition (i.e. do something like '&lt;code&gt;IHostBuilder.UseRabbitMq&amp;lt;MyMessageHandler&amp;gt;()&lt;/code&gt;').&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;With a couple of nice-to-haves:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Allow for multiple instances of a specific assembly to be loaded with different configurations.&lt;/li&gt;
+&lt;li&gt;Allow multiple versions of specific assemblies to be loaded concurrently.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id="surely-this-is-a-solved-problem"&gt;Surely this is a solved problem?&lt;/h1&gt;
+&lt;p&gt;I thought so too. Having used MEF (the Managed Extensibility Framework) in the past I went to see if it had been ported to .NET Core and &lt;a href="https://www.nuget.org/packages/System.Composition"&gt;indeed it had&lt;/a&gt;. Unfortunately, it seems to have fallen out of favour and there's very little documentation about it's use in .NET Core and even less about how one might integrate it into the Generic Host.&lt;/p&gt;
+&lt;p&gt;I then found &lt;a href="https://github.com/khellang/Scrutor"&gt;Scrutor&lt;/a&gt; which, while more integrated into the Generic Host eco-system (it provides fantastic assembly scanning and decoration capabilities specfically for Microsoft.Extensions.DependencyInjection), didn't provide a means for the discovered types to participate in host composition.&lt;/p&gt;
+&lt;p&gt;Finally I discovered &lt;a href="https://github.com/dapplo/Dapplo.Microsoft.Extensions.Hosting"&gt;Dapplo.Microsoft.Extensions.Hosting&lt;/a&gt; which provides the &lt;a href="https://www.nuget.org/packages/Dapplo.Microsoft.Extensions.Hosting.Plugins/"&gt;Dapplo.Microsoft.Extensions.Hosting.Plugins&lt;/a&gt; package. This was extremely close to what I wanted but relied too heavily on directory scanning (thereby not meeting the &amp;quot;fast and safe&amp;quot; requirements) and, like Scrutor and MEF, also didn't provide a means to participate in host composition (the &amp;quot;plugins&amp;quot; only have access to the &lt;code&gt;HostBuilderContent&lt;/code&gt;).&lt;/p&gt;
+&lt;h1 id="right-well-how-hard-can-this-be"&gt;Right, well how hard can this be?&lt;/h1&gt;
+&lt;p&gt;Not that hard it turns out... but with several caveats.&lt;/p&gt;
+&lt;p&gt;Within a few hours of deciding to roll-my-own solution to the requirements above, and by borrowing extensively from the various projects I'd already encountered, I'd written &lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition"&gt;Cogenity.Extensions.Hosting.Composition&lt;/a&gt;. This solution used configuration (rather than directory scanning) to specify the additional assemblies to load and, like the Dapplo project, used .NET Core's &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-3.0"&gt;&lt;code&gt;AssemblyLoadContext&lt;/code&gt;&lt;/a&gt; to provide scoping of loaded assemblies providing additional safety and reliability characteristics (in the abscence of AppDomains).&lt;/p&gt;
+&lt;p&gt;A &lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/tree/master/samples"&gt;&lt;code&gt;GenericHostConsole&lt;/code&gt; sample project&lt;/a&gt; was written to show the library's use and demonstrate it's functionality which worked beautifully. From the host project, all that was required to provide runtime composition was a call to the &lt;code&gt;.UseComposition&lt;/code&gt; extension method and some associated configuration (I decided to use a &lt;a href="https://www.nuget.org/packages/NetEscapades.Configuration.Yaml"&gt;Yaml&lt;/a&gt; file but any &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.0"&gt;configuration provider&lt;/a&gt; could be used) as shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;private static async Task Main(string[] args)
+{
+    var builder = Host.CreateDefaultBuilder(args)
+        .ConfigureHostConfiguration(configurationBuilder =&amp;gt; configurationBuilder.AddCommandLine(args))
+        .UseComposition(config =&amp;gt; config.AddYamlFile(args[0]), &amp;quot;composition&amp;quot;);
+
+    await builder
+        .Build()
+        .RunAsync();
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code class="language-yaml"&gt;composition:
+  modules:
+    - name: ConsoleWriter
+      assembly: GenericHostConsole.Writer
+      configurationSection: consolewriterConfiguration
+      optional: true
+
+consolewriterConfiguration:
+  writeIntervalInSeconds: 2
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then additional assemblies could be provided (in this case &lt;code&gt;GenericHostConsole.Writer&lt;/code&gt;) which simply needed to implement the &lt;code&gt;IModule&lt;/code&gt; interface as shown here:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public class Module : IModule
+{
+    public IHostBuilder Configure(IHostBuilder hostbuilder, string configurationSection)
+    {
+        return hostbuilder
+            .ConfigureServices(
+                (hostBuilderContext, serviceCollection) =&amp;gt;
+                {
+                    serviceCollection.AddOptions&amp;lt;Configuration&amp;gt;().Bind(hostBuilderContext.Configuration.GetSection(configurationSection));
+                    serviceCollection.AddSingleton&amp;lt;IHostedService, Service&amp;gt;();
+                })
+            .ConfigureLogging((hostingContext, logging) =&amp;gt; logging.AddConsole());
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After compiling, copying the &lt;code&gt;GenericHostConsole.Writer&lt;/code&gt; assembly to the &lt;code&gt;GenericHostConsole&lt;/code&gt; project and running the latter's executable, the &lt;code&gt;GenericHostConsole.Writer.Service&lt;/code&gt; wrote to the console every two seconds, as configured.&lt;/p&gt;
+&lt;h1 id="boom-done.well.sort-of"&gt;Boom! Done... well... sort of.&lt;/h1&gt;
+&lt;p&gt;I returned to the project I required this for and followed the above pattern, expecting (ok, somewhat naively) everything to be rosy. &lt;em&gt;It failed spectacularly&lt;/em&gt;.&lt;/p&gt;
+&lt;p&gt;You see, while my sample project for Cogenity.Extensions.Hosting.Composition, simply augmented the host by adding a new service with no other dependencies, the original project required new services to interact with core functionality provided by the project, mainly by injection of services defined in a 'common' assembly (i.e. one referenced both by the host project and the composition modules). Starting the project resulting in the DI container reporting that it couldn't locate implementations of required services despite those services being registered with the host's DI container (by throwing a &lt;code&gt;System.InvalidOperationException: Unable to resolve service for type '&amp;lt;service&amp;gt;' while attempting to activate '&amp;lt;consumer&amp;gt;')&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;It turned out that I was being bitten by the following:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Due to the requirement of needing to allow additional modules to participate in host composition, assemblies were being loaded at composition, not build time as shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;var builder = Host.CreateDefaultBuilder(args)
+    .ConfigureHostConfiguration(configurationBuilder =&amp;gt; configurationBuilder.AddCommandLine(args))
+    .UseComposition(config =&amp;gt; config.AddYamlFile(args[0]), &amp;quot;composition&amp;quot;); // &amp;lt;- Assemblies loaded here
+    .ConfigureServices(, serviceCollection) =&amp;gt; serviceCollection.AddSingleton&amp;lt;IEventBus, EventBus&amp;gt;())
+
+await builder
+    .Build() // &amp;lt;- Not here
+    .RunAsync();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;This meant that the &lt;code&gt;AssemblyLoadContext&lt;/code&gt; used to isolate module assemblies was loading new instances of 'common' assemblies rather than using the ones being registered by the host service (i.e. the IEventBus in the above example), thereby explaining why the various implementations couldn't be found.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h1 id="so-what-now"&gt;So what now?&lt;/h1&gt;
+&lt;p&gt;Well, it can be used as-is for basic composition functionality, but it's really not what I need moving forward.&lt;/p&gt;
+&lt;p&gt;I have considered several possible solutions ranging from simply removing assembly isolation (and no-longer providing the 'nice-to-haves') to working more intimately with the &lt;code&gt;HostBuilder.Build&lt;/code&gt; process to ensure shared assemblies are fully loaded prior to loading additional assemblies for composition. Each of the approaches have pros and cons which I am trying to consider from a 'general consumer' point of view before deciding on the solution to adopt.&lt;/p&gt;
+&lt;p&gt;To this end, I have &lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5"&gt;created an issue&lt;/a&gt; in the Github repository for this project in which I describe what I see as the various ways forward and, where possible, links to branches proving out the various approaches. I've labelled it as 'discussion' and would genuinely be interested to hear people's thoughts. If this project is of interest to you and/or you have suggestions about how best to resolve the above issues, please feel free to add a comment with your suggestions and/or requests for modified/additional functionality.&lt;/p&gt;
+&lt;p&gt;If you require runtime composition for projects utilizing the .NET Core Generic Host then watch this space as I hope to have a more versatile solution in place within the next week or so.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;&lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition"&gt;Cogenity.Extensions.Hosting.Composition&lt;/a&gt; can provide lightweight, runtime composition for the &lt;a href="(https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0)"&gt;.NET Core 3.0 Generic Host&lt;/a&gt;... with some caveats. &lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5"&gt;An issue&lt;/a&gt; has been created as an RFC on how best to address these caveats with comments/contributions welcomed.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/BuildingDotNetCore3WithAzurePipelines</id>
 		<title>Building .NET Core 3.0 With Azure Pipelines</title>
@@ -2167,69 +2267,5 @@ However, after discussing ToddlerBox with a friend, he decided to install it on 
 &lt;p&gt;Rip little machine, rip like wind!! Oh, wait...&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;From a youth of misspent money, I have a moderately large DVD collection. Some 600 movies in half a dozen DVD racks take a disproportionately large space in my dining room. This year, my partner and I  decided to host Xmas dinner for the family, meaning a dining table that could host a dozen was in order and... well, you can see where this is heading. The DVDs had to go.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/ToddlerBoxHitsOneThousandUsers</id>
-		<title>ToddlerBox Hits 1000 Users</title>
-		<link href="http://ian.bebbs.co.uk/posts/ToddlerBoxHitsOneThousandUsers" />
-		<link rel="enclosure" type="image" href="https://github.com/ibebbs/ToddlerBox/raw/master/store/Screenshots/Xbox/Donkeys.png" />
-		<updated>2016-11-29T00:00:00Z</updated>
-		<content>&lt;p&gt;Wow!&lt;/p&gt;
-&lt;p&gt;ToddlerBox has been in the store less than two weeks and, despite very little in the way of promotion (my other half sent out a call on Facebook for beta users), it has somehow accumulated over a thousand installs!&lt;/p&gt;
-&lt;p&gt;Acquisitions have seen steady growth across a (more or less) expected demographic as can be seen below:&lt;/p&gt;
-&lt;img src="https://zphbkg.db.files.1drv.com/y4mHqGRXvIOAGkEwYLdWcU-lsinel6flzQAz2ipULEYhJiCBr8TA4PRF0aiCLhIvsc2OgbGZQC0TZ3uMaOUpT_KECunlkXq3LpRXFLcgLqLZVKOrWc5hTB3sxMzSzoEHf3kln8VrcgXF_fpsj_qJPv5Jin303kCarf8a8PMyhZ6tyBrkC0bJmdXRw4Q6nbpsqorOG20hkIymJMsjb4XHqMeEQ?width=1024&amp;height=225&amp;cropmode=none" class="img-responsive" style="margin: auto; width:660px; margin-top: 6px; margin-bottom: 6px;" alt="Acquisitions over App Lifetime"&gt;
-&lt;img src="https://0ohtkg.db.files.1drv.com/y4m96RS7qph0Z45IfITph18gbreFsCKc_Xt3hq1alh1WPAUIb50J1jZYnr25naItbl4uOlZbawdrsC8vBcu7-JqICA6ADo-VZ_ylQtTuUKwtOrgSHpHuTDKiJ_xO1sCGrR5zX_Bu9P9URdWxPCbJBSvZ1DuZmYQOLSji3lFpL0CE_B8_7EpKtERaIqIQAcVaaoC4qQ7sE-JL5HOyLSJhmsuwA?width=1024&amp;height=365&amp;cropmode=none" class="img-responsive" style="margin: auto; width:660px; margin-top: 6px; margin-bottom: 6px;" alt="Acquisitions by Demographic"&gt;
-&lt;p&gt;In addition to the number of users, the number of countries it is being used in has been really surprising. Sure, there's no localization concerns so there's no reason it &lt;em&gt;wouldn't&lt;/em&gt; be used in non-English speaking countries but I'm genuinely pleased to see it being used all over the world; from USA to Saudi Arabia and from Canada to China! Here's the current breakdown of usage:&lt;/p&gt;
-&lt;table&gt;
-  &lt;thead&gt;
-    &lt;tr&gt;
-      &lt;th&gt;Country&lt;/th&gt;
-      &lt;th&gt;Sessions&lt;/th&gt;
-    &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-    &lt;tr&gt;&lt;td&gt;United States&lt;/td&gt;&lt;td&gt;910&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;United Kingdom&lt;/td&gt;&lt;td&gt;311&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Canada&lt;/td&gt;&lt;td&gt;110&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Australia&lt;/td&gt;&lt;td&gt;42&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Saudi Arabia&lt;/td&gt;&lt;td&gt;33&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;China &lt;/td&gt;&lt;td&gt;25&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Brazil&lt;/td&gt;&lt;td&gt;20&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Mexico&lt;/td&gt;&lt;td&gt;19&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Germany&lt;/td&gt;&lt;td&gt;17&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Netherlands&lt;/td&gt;&lt;td&gt;14&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;France&lt;/td&gt;&lt;td&gt;13&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;New Zealand&lt;/td&gt;&lt;td&gt;12&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Ireland&lt;/td&gt;&lt;td&gt;8&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Latvia&lt;/td&gt;&lt;td&gt;8&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Hungary&lt;/td&gt;&lt;td&gt;7&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Sweden&lt;/td&gt;&lt;td&gt;6&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Russia&lt;/td&gt;&lt;td&gt;6&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Poland&lt;/td&gt;&lt;td&gt;5&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Slovakia &lt;/td&gt;&lt;td&gt;5&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;South Africa&lt;/td&gt;&lt;td&gt;5&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Austria&lt;/td&gt;&lt;td&gt;4&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Belgium&lt;/td&gt;&lt;td&gt;4&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Switzerland&lt;/td&gt;&lt;td&gt;4&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Spain &lt;/td&gt;&lt;td&gt;4&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Czech Republic&lt;/td&gt;&lt;td&gt;3&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Guam&lt;/td&gt;&lt;td&gt;3&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Puerto Rico&lt;/td&gt;&lt;td&gt;3&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Chile &lt;/td&gt;&lt;td&gt;2&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Denmark&lt;/td&gt;&lt;td&gt;2&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Romania&lt;/td&gt;&lt;td&gt;2&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Colombia &lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Italy &lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Libya &lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Norway&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Trinidad and Tobago&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;United Arab Emirates &lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;/tr&gt;
-    &lt;tr&gt;&lt;td&gt;Unknown&lt;/td&gt;&lt;td&gt;1&lt;/td&gt;&lt;/tr&gt;
-  &lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;Given the somewhat unexpected success of ToddlerBox I am planning to release a number of future versions with various enhancements and new interactions/visualizations for toddler's to mash away at.&lt;/p&gt;
-&lt;p&gt;All good fun :0D&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;Wow!&lt;/p&gt;</summary>
 	</entry>
 </feed>

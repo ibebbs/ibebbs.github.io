@@ -1,0 +1,311 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Light-weight run-time composition for the .NET Core 3.0 Generic Host</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Light-weight run-time composition for the .NET Core 3.0 Generic Host" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/LightweightRuntimeCompositionForGenericHost" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Light-weight run-time composition for the .NET Core 3.0 Generic Host</h1>
+        <h2 class="subheading">With an RFC (Request For Comments) from the community</h2>
+    <div class="meta">        
+Published on 11 November 2019<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/net-core" class="btn btn-default btn-xs">.net core</a>
+                    <a role="button" href="/tags/composition" class="btn btn-default btn-xs">composition</a>
+                    <a role="button" href="/tags/generic-host" class="btn btn-default btn-xs">generic host</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h1 id="tldr">TL;DR</h1>
+<p><a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition">Cogenity.Extensions.Hosting.Composition</a> can provide lightweight, runtime composition for the <a href="(https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0)">.NET Core 3.0 Generic Host</a>... with some caveats. <a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5">An issue</a> has been created as an RFC on how best to address these caveats with comments/contributions welcomed.</p>
+<h1 id="did-you-know">Did you know...</h1>
+<p>The <a href="https://github.com/aspnet/AspNetCore/issues/9337">.NET Core 3.0 web stack has been &quot;re-platformed&quot; onto the generic host library</a>?</p>
+<p>Furthermore, did you know that <code>WebHost</code> allows you to <a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/platform-specific-configuration?view=aspnetcore-3.0">load additional non-referenced assemblies at runtime which can participate in service start-up by implementing the <code>IHostingStartup</code> interface</a>?</p>
+<p>Well neither did I until I started looking for a way to perform runtime-composition for a service utilizing the <a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0">.NET Core 3.0 Generic Host</a>. It turns out that, while both the changes above are great for the web-platform, nothing similar exists out-of-the-box for the Generic Host. So here's what I did...</p>
+<h1 id="background">Background</h1>
+<p>I'm currently working on a very interesting project which I hope to see open-sourced in a few weeks time. At the moment it's being developed behind closed doors but with various reusable components being segregated into open-source projects/packages for use by the community.</p>
+<p>One facet of this project is a .NET Core 3.0 service which needs to be deployable in a variety of environments and across a number of platforms. While this service provides a set of core behaviours, these behaviours need to be augmented by arbitrary functionality specific to the environment/platform the service is being used within.</p>
+<p>So it was that I came to look for a means to provide light-weight runtime-composition to services implemented using the .NET Core 3.0 Generic Host and, to my surprise, came up empty handed.</p>
+<h1 id="wait-runtime-composition">Wait, runtime composition?</h1>
+<p>Yes, the ability to add functionality/behaviours to a software component, ostensibly by loading additional assemblies at runtime, without requiring re-compilation of said software component.</p>
+<p>Specifically, my requirements were:</p>
+<ol>
+<li>A simple, fast, lightweight means to safely load and configure additional assemblies at service start-up; and</li>
+<li>A means for these assemblies to participate in host composition (i.e. do something like '<code>IHostBuilder.UseRabbitMq&lt;MyMessageHandler&gt;()</code>').</li>
+</ol>
+<p>With a couple of nice-to-haves:</p>
+<ol>
+<li>Allow for multiple instances of a specific assembly to be loaded with different configurations.</li>
+<li>Allow multiple versions of specific assemblies to be loaded concurrently.</li>
+</ol>
+<h1 id="surely-this-is-a-solved-problem">Surely this is a solved problem?</h1>
+<p>I thought so too. Having used MEF (the Managed Extensibility Framework) in the past I went to see if it had been ported to .NET Core and <a href="https://www.nuget.org/packages/System.Composition">indeed it had</a>. Unfortunately, it seems to have fallen out of favour and there's very little documentation about it's use in .NET Core and even less about how one might integrate it into the Generic Host.</p>
+<p>I then found <a href="https://github.com/khellang/Scrutor">Scrutor</a> which, while more integrated into the Generic Host eco-system (it provides fantastic assembly scanning and decoration capabilities specfically for Microsoft.Extensions.DependencyInjection), didn't provide a means for the discovered types to participate in host composition.</p>
+<p>Finally I discovered <a href="https://github.com/dapplo/Dapplo.Microsoft.Extensions.Hosting">Dapplo.Microsoft.Extensions.Hosting</a> which provides the <a href="https://www.nuget.org/packages/Dapplo.Microsoft.Extensions.Hosting.Plugins/">Dapplo.Microsoft.Extensions.Hosting.Plugins</a> package. This was extremely close to what I wanted but relied too heavily on directory scanning (thereby not meeting the &quot;fast and safe&quot; requirements) and, like Scrutor and MEF, also didn't provide a means to participate in host composition (the &quot;plugins&quot; only have access to the <code>HostBuilderContent</code>).</p>
+<h1 id="right-well-how-hard-can-this-be">Right, well how hard can this be?</h1>
+<p>Not that hard it turns out... but with several caveats.</p>
+<p>Within a few hours of deciding to roll-my-own solution to the requirements above, and by borrowing extensively from the various projects I'd already encountered, I'd written <a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition">Cogenity.Extensions.Hosting.Composition</a>. This solution used configuration (rather than directory scanning) to specify the additional assemblies to load and, like the Dapplo project, used .NET Core's <a href="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-3.0"><code>AssemblyLoadContext</code></a> to provide scoping of loaded assemblies providing additional safety and reliability characteristics (in the abscence of AppDomains).</p>
+<p>A <a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/tree/master/samples"><code>GenericHostConsole</code> sample project</a> was written to show the library's use and demonstrate it's functionality which worked beautifully. From the host project, all that was required to provide runtime composition was a call to the <code>.UseComposition</code> extension method and some associated configuration (I decided to use a <a href="https://www.nuget.org/packages/NetEscapades.Configuration.Yaml">Yaml</a> file but any <a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.0">configuration provider</a> could be used) as shown below:</p>
+<pre><code class="language-c#">private static async Task Main(string[] args)
+{
+    var builder = Host.CreateDefaultBuilder(args)
+        .ConfigureHostConfiguration(configurationBuilder =&gt; configurationBuilder.AddCommandLine(args))
+        .UseComposition(config =&gt; config.AddYamlFile(args[0]), &quot;composition&quot;);
+
+    await builder
+        .Build()
+        .RunAsync();
+}
+</code></pre>
+<pre><code class="language-yaml">composition:
+  modules:
+    - name: ConsoleWriter
+      assembly: GenericHostConsole.Writer
+      configurationSection: consolewriterConfiguration
+      optional: true
+
+consolewriterConfiguration:
+  writeIntervalInSeconds: 2
+</code></pre>
+<p>Then additional assemblies could be provided (in this case <code>GenericHostConsole.Writer</code>) which simply needed to implement the <code>IModule</code> interface as shown here:</p>
+<pre><code class="language-c#">public class Module : IModule
+{
+    public IHostBuilder Configure(IHostBuilder hostbuilder, string configurationSection)
+    {
+        return hostbuilder
+            .ConfigureServices(
+                (hostBuilderContext, serviceCollection) =&gt;
+                {
+                    serviceCollection.AddOptions&lt;Configuration&gt;().Bind(hostBuilderContext.Configuration.GetSection(configurationSection));
+                    serviceCollection.AddSingleton&lt;IHostedService, Service&gt;();
+                })
+            .ConfigureLogging((hostingContext, logging) =&gt; logging.AddConsole());
+    }
+}
+</code></pre>
+<p>After compiling, copying the <code>GenericHostConsole.Writer</code> assembly to the <code>GenericHostConsole</code> project and running the latter's executable, the <code>GenericHostConsole.Writer.Service</code> wrote to the console every two seconds, as configured.</p>
+<h1 id="boom-done.well.sort-of">Boom! Done... well... sort of.</h1>
+<p>I returned to the project I required this for and followed the above pattern, expecting (ok, somewhat naively) everything to be rosy. <em>It failed spectacularly</em>.</p>
+<p>You see, while my sample project for Cogenity.Extensions.Hosting.Composition, simply augmented the host by adding a new service with no other dependencies, the original project required new services to interact with core functionality provided by the project, mainly by injection of services defined in a 'common' assembly (i.e. one referenced both by the host project and the composition modules). Starting the project resulting in the DI container reporting that it couldn't locate implementations of required services despite those services being registered with the host's DI container (by throwing a <code>System.InvalidOperationException: Unable to resolve service for type '&lt;service&gt;' while attempting to activate '&lt;consumer&gt;')</code>).</p>
+<p>It turned out that I was being bitten by the following:</p>
+<ol>
+<li><p>Due to the requirement of needing to allow additional modules to participate in host composition, assemblies were being loaded at composition, not build time as shown below:</p>
+<pre><code class="language-c#">var builder = Host.CreateDefaultBuilder(args)
+    .ConfigureHostConfiguration(configurationBuilder =&gt; configurationBuilder.AddCommandLine(args))
+    .UseComposition(config =&gt; config.AddYamlFile(args[0]), &quot;composition&quot;); // &lt;- Assemblies loaded here
+    .ConfigureServices(, serviceCollection) =&gt; serviceCollection.AddSingleton&lt;IEventBus, EventBus&gt;())
+
+await builder
+    .Build() // &lt;- Not here
+    .RunAsync();
+</code></pre>
+</li>
+<li><p>This meant that the <code>AssemblyLoadContext</code> used to isolate module assemblies was loading new instances of 'common' assemblies rather than using the ones being registered by the host service (i.e. the IEventBus in the above example), thereby explaining why the various implementations couldn't be found.</p>
+</li>
+</ol>
+<h1 id="so-what-now">So what now?</h1>
+<p>Well, it can be used as-is for basic composition functionality, but it's really not what I need moving forward.</p>
+<p>I have considered several possible solutions ranging from simply removing assembly isolation (and no-longer providing the 'nice-to-haves') to working more intimately with the <code>HostBuilder.Build</code> process to ensure shared assemblies are fully loaded prior to loading additional assemblies for composition. Each of the approaches have pros and cons which I am trying to consider from a 'general consumer' point of view before deciding on the solution to adopt.</p>
+<p>To this end, I have <a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5">created an issue</a> in the Github repository for this project in which I describe what I see as the various ways forward and, where possible, links to branches proving out the various approaches. I've labelled it as 'discussion' and would genuinely be interested to hear people's thoughts. If this project is of interest to you and/or you have suggestions about how best to resolve the above issues, please feel free to add a comment with your suggestions and/or requests for modified/additional functionality.</p>
+<p>If you require runtime composition for projects utilizing the .NET Core Generic Host then watch this space as I hope to have a more versatile solution in place within the next week or so.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2019. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
