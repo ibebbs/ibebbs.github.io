@@ -5,7 +5,7 @@
         <meta charset="utf-8">
         <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
 
-        <title>Ian Bebbington</title>
+        <title>Ian Bebbington - Augmenting the .NET Core 3.0 Generic Host</title>
         <meta name="description" content="IObservable&lt;Opinion&gt;" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0">        
 
@@ -28,9 +28,9 @@
         <meta name="msapplication-tooltip" content="Ian Bebbington" />
         <meta name="msapplication-starturl" content="/" />
 
-        <meta property="og:title" content="Ian Bebbington" />
+        <meta property="og:title" content="Ian Bebbington - Augmenting the .NET Core 3.0 Generic Host" />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="http://ian.bebbs.co.uk/" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/AugmentingTheGenericHost" />
         <!-- TODO: More social graph meta tags -->
 
         <script src="/assets/js/jquery.min.js"></script>
@@ -97,10 +97,18 @@
                                 <div class="row">
                                         <div class="col-md-12">
 
-    <div class="site-heading">
-        <h1>IObservable&lt;Opinion&gt;</h1>
-                <hr class="small">
-        <span class="subheading">Subscribe?</span>
+    
+<div class="post-heading">
+    <h1>Augmenting the .NET Core 3.0 Generic Host</h1>
+        <h2 class="subheading">Battling a SOLID implementation of the Open-closed Principle</h2>
+    <div class="meta">        
+Published on 18 November 2019<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/net-core" class="btn btn-default btn-xs">.net core</a>
+                    <a role="button" href="/tags/eventlistener" class="btn btn-default btn-xs">eventlistener</a>
+                    <a role="button" href="/tags/eventsource" class="btn btn-default btn-xs">eventsource</a>
+                    <a role="button" href="/tags/generic-host" class="btn btn-default btn-xs">generic host</a>
+        </div>     
 </div>
                                         </div>
                                 </div>
@@ -112,151 +120,70 @@
                         <div class="row">
                                 <div id="content" class="col-md-12">
                                         
-<div class="row">
-    <div class="col-sm-8 right-border">
-                <div class="post-preview">
-                    <a href="/posts/AugmentingTheGenericHost">
-                        <h2 class="post-title">Augmenting the .NET Core 3.0 Generic Host</h2>
-                            <h3 class="post-subtitle">Battling a SOLID implementation of the Open-closed Principle</h3>
-                    </a>
-                    <p class="post-meta">Posted on 18 November 2019</p>
-<p>I love the .NET Core 3.0 Generic Host, I really do. As a framework for simplifying common scaffolding and lifetime management of long-running services, it's <em>almost</em> faultless. Unfortunately, the mere fact of <a href="http://tomasp.net/blog/2015/library-frameworks/">being a framework rather than a library</a> can lead to issues where, as a user of the framework, you're unable to accomplish a specific goal. For me, this happened while trying to get instrumentation written to a various <a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource">EventSource</a> instances to be output - in a configurable manner - through the Generic Host's logging infrastructure. Sounds simple huh, and it really ought to be. But it wasn't. Here's why:</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/LightweightRuntimeCompositionForGenericHost">
-                        <h2 class="post-title">Light-weight run-time composition for the .NET Core 3.0 Generic Host</h2>
-                            <h3 class="post-subtitle">With an RFC (Request For Comments) from the community</h3>
-                    </a>
-                    <p class="post-meta">Posted on 11 November 2019</p>
-<p><a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition">Cogenity.Extensions.Hosting.Composition</a> can provide lightweight, runtime composition for the <a href="(https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0)">.NET Core 3.0 Generic Host</a>... with some caveats. <a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5">An issue</a> has been created as an RFC on how best to address these caveats with comments/contributions welcomed.</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/BuildingDotNetCore3WithAzurePipelines">
-                        <h2 class="post-title">Building .NET Core 3.0 With Azure Pipelines</h2>
-                            <h3 class="post-subtitle">Without giving away the keys to the castle!</h3>
-                    </a>
-                    <p class="post-meta">Posted on 04 October 2019</p>
-<p>My "go to" build system and package repository - <a href="https://www.myget.org/">MyGet</a> - doesn't yet support building .NET Core 3.0 (or more specifically .NET Standard 2.1) projects. Having recently read about some of the features Microsoft have been adding to Azure DevOps I thought I'd see how easy (or not) it was to get a Pipeline setup to build my project and publish the package back to MyGet.</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/UsingATouchOverlayInPortrainOnRaspbian">
-                        <h2 class="post-title">Using A Touch Overlay, In Portrait, On Raspbian Buster</h2>
-                            <h3 class="post-subtitle">Another wild google-chase in finding reliable information</h3>
-                    </a>
-                    <p class="post-meta">Posted on 03 October 2019</p>
-<p>This is just a short post - mostly for my own benefit - on how to use a touch-overlay, in portrait, on Raspbian Buster</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/TechAdventuresInSustainability-PartI">
-                        <h2 class="post-title">Tech Adventures in Sustainability</h2>
-                            <h3 class="post-subtitle">Part I - Monitoring our solar generation</h3>
-                    </a>
-                    <p class="post-meta">Posted on 26 September 2019</p>
-<p>Installing solar panels and monitoring solar production not only provides immediate benefits in sustainable living but also highlights new, simple ways to change your lifestyle to further save money and energy. Here's how we do it.</p>                </div>       
-        <ul class="pager">
-            <li class="previous">                
-            </li>
-            <li class="next">
-            </li>
-        </ul>
-    </div>
-    <div class="col-sm-4 sidebar">
-        <hr class="visible-xs-block" />
 
-        <h1>Hire Me</h1>
-        <p>I work as a remote contractor and freelance software developer specializing in Microsoft technologies from Edge to Cloud. You can read more about me and my work <a href="about.html">here</a>.</p>
-        <p>If you have a project you'd like to discuss, please feel free to drop me a line using any of the following:</p>
-        <ul class="list-inline text-center">
-    <li>
-        <a href="mailto:opportunities@bebbs.co.uk">
-            <span class="fa-stack fa-lg">
-                <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-envelope fa-stack-1x fa-inverse"></i>
-            </span>
-        </a>
-    </li>
-    <li>
-        <a href="https://twitter.com/ibebbs">
-            <span class="fa-stack fa-lg">
-                <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
-            </span>
-        </a>
-    </li>
-    <li>
-        <a href="https://www.linkedin.com/in/ianbebbington/">
-            <span class="fa-stack fa-lg">
-                <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
-            </span>
-        </a>
-    </li>
-    <li />
-    <li>
-        <a href="https://github.com/ibebbs">
-            <span class="fa-stack fa-lg">
-                <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
-            </span>
-        </a>
-    </li>
-    <li>
-        <a href="https://stackoverflow.com/users/628821/ibebbs">
-            <span class="fa-stack fa-lg">
-                <i class="fa fa-circle fa-stack-2x"></i>
-                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
-            </span>
-        </a>
-    </li>
-</ul>
-        <hr />
-        
-        <h5>Top Posts</h5>
-        <ul class="list-unstyled">
-                <li><a href="/posts/IgnoringABillionDollarMistakeIsNotAnOption">Ignoring a Billion-Dollar Mistake is simply not an Option</a></li>
-                <li><a href="/posts/FluentNamespacing">Fluent Namespacing</a></li>
-                <li><a href="/posts/CqrsEsMvvmRxEfSqlUwpPcl">CQRS/ES &amp; MVVM using RX, EF &amp; SQL in UWP &amp; PCL &#x2026;</a></li>
-                <li><a href="/posts/ReactiveStateMachines">Reactive State Machines</a></li>
-                <li><a href="/posts/ReactiveBehaviors">Reactive Behaviors</a></li>
-        </ul>
-        <hr />
+<h1 id="background">Background</h1>
+<p>I love the .NET Core 3.0 Generic Host, I really do. As a framework for simplifying common scaffolding and lifetime management of long-running services, it's <em>almost</em> faultless. Unfortunately, the mere fact of <a href="http://tomasp.net/blog/2015/library-frameworks/">being a framework rather than a library</a> can lead to issues where, as a user of the framework, you're unable to accomplish a specific goal. For me, this happened while trying to get instrumentation written to a various <a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource">EventSource</a> instances to be output - in a configurable manner - through the Generic Host's logging infrastructure. Sounds simple huh, and it really ought to be. But it wasn't. Here's why:</p>
+<h1 id="the-open-closed-principle">The Open-Closed Principle</h1>
+<p>In the unlikely event you're not familiar with this principle, you can read about it <a href="https://en.wikipedia.org/wiki/Open%E2%80%93closed_principle">here</a>.</p>
+<p>The Generic Host is a beacon of SOLID-design and seems to embrace the 'Open-closed principal' particularly closely. Perhaps this is due to the fact that, almost by definition, the Generic Host needs to be extremely extensible. Therefore, to ensure it's able to guide it's users into the <a href="https://blog.codinghorror.com/falling-into-the-pit-of-success/">pit of success</a>, the implementation of the Generic Host closes many avenues for modifying its default behaviours.</p>
+<p>Unfortunately there are instances where users have good reason to want to modify default behaviour. For example, there have been <a href="https://github.com/aspnet/Extensions/issues/1151">multiple</a> <a href="https://github.com/aspnet/Extensions/issues/810">feature</a> <a href="https://github.com/aspnet/Extensions/issues/525">requests</a> for the Generic Host to provide a means for consumers to add behaviour to the start-up routine <em>after</em> the dependency injection container has been created but before it's used to resolve any <code>IHostedService</code> instances. In each of these instances, the maintainers of the <a href="https://github.com/aspnet/Extensions">Microsoft.Extensions repository</a> have suggested alternatives for the specific use-case being mooted even though, in my opinion, these alternatives seem to be rather poor workarounds for what I believe to be a valid feature request.</p>
+<p>Why do I believe it's a valid feature when so many other <a href="https://github.com/davidfowl">awesome</a> <a href="https://github.com/anurse">.NET</a> <a href="https://github.com/Tratcher">developers</a> believe differently? Well, because the generic host itself uses this feature, as can be seen <a href="https://github.com/aspnet/Extensions/blob/f4e9a5e1da193faad2338e0a8225a531a2c1417c/src/Hosting/Hosting/src/HostBuilder.cs#L242">here</a>:</p>
+<pre><code class="language-c#">_appServices = _serviceProviderFactory.CreateServiceProvider(containerBuilder);
 
-            <h5>Top Tags</h5>
-            <div>
-                    <a role="button" href="/tags/UWP" class="btn btn-default btn-sm"> UWP (8)</a>
-                    <a role="button" href="/tags/Rx" class="btn btn-default btn-sm"> Rx (7)</a>
-                    <a role="button" href="/tags/Reactive" class="btn btn-default btn-sm"> Reactive (7)</a>
-                    <a role="button" href="/tags/Elastic-Stack" class="btn btn-default btn-sm"> Elastic Stack (4)</a>
-                    <a role="button" href="/tags/Kibana" class="btn btn-default btn-sm"> Kibana (4)</a>
-                    <a role="button" href="/tags/Docker" class="btn btn-default btn-sm"> Docker (4)</a>
-                    <a role="button" href="/tags/Networking" class="btn btn-default btn-sm"> Networking (4)</a>
-                    <a role="button" href="/tags/LogStash" class="btn btn-default btn-sm"> LogStash (4)</a>
-                    <a role="button" href="/tags/IoT" class="btn btn-default btn-sm"> IoT (4)</a>
-                    <a role="button" href="/tags/Syslog" class="btn btn-default btn-sm"> Syslog (4)</a>
-            </div>
-            <ul class="pager">
-                <li class="next">
-                    <a href="/tags">View All Tags &rarr;</a>
-                </li>
-            </ul>
-            <hr />
+if (_appServices == null)
+{
+    throw new InvalidOperationException($&quot;The IServiceProviderFactory returned a null IServiceProvider.&quot;);
+}
 
-            <h5>Older Posts</h5>
-            <ul class="list-unstyled">
-                    <li><a href="/posts/BeBraveLikeBATMan">Be Brave. Like BAT, man!</a></li>
-                    <li><a href="/posts/IgnoringABillionDollarMistakeIsNotAnOption">Ignoring a Billion-Dollar Mistake is simply not an Option</a></li>
-                    <li><a href="/posts/FluentNamespacing">Fluent Namespacing</a></li>
-                    <li><a href="/posts/ASmartHome-Part2">A SmartHome... NoT - Part II</a></li>
-            </ul>
-                <ul class="pager">
-                    <li class="next">
-                        <a href="/posts">Archive &rarr;</a>
-                    </li>
-                </ul>
+// resolve configuration explicitly once to mark it as resolved within the
+// service provider, ensuring it will be properly disposed with the provider
+_ = _appServices.GetService&lt;IConfiguration&gt;();
+</code></pre>
+<p>As you can see, <em>for perfectly valid reasons</em>, the Generic Host needs to perform an operation <em>after</em> the service provider has been created but before any further types are resolved. I do not believe it's only the Generic Host infrastructure code that requires this entry-point. Indeed, this is the feature I required to ensure I could correctly instantiate and configure a singleton <a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventlistener">EventListener</a> instance prior to events being written to (and potentially lost from) various EventSource instances throughout my code.</p>
+<p>So, rather than accept a workaround and potentially compromise some core requirements, I decided to see if there was a way I could implement the above feature without straying too far from canonical Generic Host start-up code.</p>
+<h1 id="ihostapplicationlifetime">IHostApplicationLifetime</h1>
+<p>The GenericHost has an <a href="https://github.com/aspnet/Extensions/blob/master/src/Hosting/Abstractions/src/IHostApplicationLifetime.cs"><code>IHostApplicationLifetime</code></a> interface which is responsible for coordinating application lifetime notifications. Registered with the dependency injection container as a singleton, it is ordinarily injected into <code>IHostedService</code> instances, providing the ability for any service to request that the application be stopped.</p>
+<p>However, this interface is also injected into the various <code>IHostLifetime</code> implementations (i.e. <a href="https://github.com/aspnet/Extensions/blob/master/src/Hosting/Hosting/src/Internal/ConsoleLifetime.cs">ConsoleLifetime</a> for console applications, <a href="https://github.com/aspnet/Extensions/blob/master/src/Hosting/WindowsServices/src/WindowsServiceLifetime.cs">WindowsServiceLifetime</a> for Windows services, etc) and, as such, it is instantiated once, after the dependency injection container is created but before any <code>IHostedService</code> instances are resolved.</p>
+<p>Sounds useful huh.</p>
+<p>Best of all, this interface provides the means to react to application start and stop events via a <a href="https://github.com/aspnet/Extensions/blob/f4e9a5e1da193faad2338e0a8225a531a2c1417c/src/Hosting/Hosting/src/Internal/ConsoleLifetime.cs#L48">novel use of <code>CancellationToken</code> instances</a>. I therefore chose this as my entry point for providing required functionality.</p>
+<h1 id="applicationlifetimeex-ugh">ApplicationLifetimeEx (ugh)</h1>
+<p>Inheriting from the default the <a href="https://github.com/aspnet/Extensions/blob/master/src/Hosting/Hosting/src/Internal/ApplicationLifetime.cs">IHostApplicationLifetime implementation</a>, registering callbacks for the <code>ApplicationStarted</code> and <code>ApplicationStopping</code> cancellation tokens and then registering the derived class as the new <code>IHostApplicationLifetime</code> implementation in the Generic Host's DI container worked perfectly. Using this approach I was able to leverage standard generic host start-up code and functionality to resolve an EventListener, with configuration, prior to any further types being instantiated.</p>
+<p>An example of this can be found in the development branch my Cogenity.Extensions repository <a href="https://github.com/ibebbs/Cogenity.Extensions/tree/develop/src/Cogenity.Extensions.Logging.EventSource">here</a>.</p>
+<h1 id="sounds-good.so-why-only-in-the-development-branch">Sounds good. So why only in the development branch?</h1>
+<p>Well, this approach has <em>a lot</em> of drawbacks, the most significant of which being that it fails to adhere to another important OO design principal; that of <a href="https://en.wikipedia.org/wiki/Composition_over_inheritance">'Composition over inheritance'</a>. In fact, the above approach - in it's current form - is not composable <em>at all</em>. If another library wanted to hijack the IHostApplicationLifetime interface in a similar way, then my implementation (and associated functionality) would be entirely lost.</p>
+<p>As the Generic Host goes to great lengths to ensure that composability is maintained at all times and in all configurations  <em>this approach is probably not one I would recommend</em>. Given there are no better options at the current time, I will probably proceed with this implementation as, to me, it is a <a href="https://en.wikipedia.org/wiki/White_box_%28software_engineering%29">white box</a>, but I don't intend to make a packaged version available for general consumption.</p>
+<p>That said, when the <a href="https://github.com/aspnet/Extensions/issues/2653">suggested decoration extensions</a> are made available, decorating the default IHostApplicationLifetime implementation will become a composable operation and this approach could suddenly become a lot more attractive.</p>
+<h1 id="until-then">Until then...</h1>
+<p>... I kind of hope the project maintainers will take another look at these feature requests and provide a more holistic solution. Perhaps something along the lines of:</p>
+<pre><code class="language-c#">private static async Task Main(string[] args)
+{
+    var builder = Host.CreateDefaultBuilder(args)
+        .ConfigureServices(
+            services =&gt;
+            {
+                ...
+            })
+        .ConfigureApplicationLifetime(
+            (applicationLifetime, appServices) =&gt;
+            {
+                applicationLifetime.ApplicationStarted.Register(() =&gt; [do something with appServices])
+            }
+        );
 
-        
-    </div> 
-</div>
+    await builder
+        .Build()
+        .RunAsync();
+}
+</code></pre>
+<p>I think this could be quite nice as the GenericHost could then move the</p>
+<pre><code class="language-c#">// resolve configuration explicitly once to mark it as resolved within the
+// service provider, ensuring it will be properly disposed with the provider
+_ = _appServices.GetService&lt;IConfiguration&gt;();
+</code></pre>
+<p>block into a <code>ConfigureApplicationLifetime</code> configuration call back within the <code>CreateDefaultBuilder</code> call.</p>
+<p>Of course, this signature would provide all sorts of opportunities for naughtiness and smells and, while I could probably implement it using the method described above, I'm very much hoping the great minds behind this project might be able to propose something a little safe.</p>
+
+
 
                                 </div>
                         </div>
