@@ -4,7 +4,7 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2019</rights>
-	<updated>2019-11-18T16:30:08Z</updated>
+	<updated>2019-11-18T16:37:34Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/AugmentingTheGenericHost</id>
@@ -71,7 +71,7 @@ _ = _appServices.GetService&amp;lt;IConfiguration&amp;gt;();
 _ = _appServices.GetService&amp;lt;IConfiguration&amp;gt;();
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;block into a &lt;code&gt;ConfigureApplicationLifetime&lt;/code&gt; configuration call back within the &lt;code&gt;CreateDefaultBuilder&lt;/code&gt; call.&lt;/p&gt;
-&lt;p&gt;Of course, this signature would provide all sorts of opportunities for naughtiness and smells and, while I could probably implement it using the method described above, I'm very much hoping the great minds behind this project might be able to propose something a little safe.&lt;/p&gt;
+&lt;p&gt;Of course, this signature would provide all sorts of opportunities for naughtiness and smells and, while I could probably implement it using the method described above, I'm very much hoping the great minds behind this project might be able to propose something a little safer.&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;I love the .NET Core 3.0 Generic Host, I really do. As a framework for simplifying common scaffolding and lifetime management of long-running services, it's &lt;em&gt;almost&lt;/em&gt; faultless. Unfortunately, the mere fact of &lt;a href="http://tomasp.net/blog/2015/library-frameworks/"&gt;being a framework rather than a library&lt;/a&gt; can lead to issues where, as a user of the framework, you're unable to accomplish a specific goal. For me, this happened while trying to get instrumentation written to a various &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource"&gt;EventSource&lt;/a&gt; instances to be output - in a configurable manner - through the Generic Host's logging infrastructure. Sounds simple huh, and it really ought to be. But it wasn't. Here's why:&lt;/p&gt;</summary>
 	</entry>

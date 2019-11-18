@@ -5,8 +5,8 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2019</copyright>
-		<pubDate>Mon, 18 Nov 2019 16:30:08 GMT</pubDate>
-		<lastBuildDate>Mon, 18 Nov 2019 16:30:08 GMT</lastBuildDate>
+		<pubDate>Mon, 18 Nov 2019 16:37:34 GMT</pubDate>
+		<lastBuildDate>Mon, 18 Nov 2019 16:37:34 GMT</lastBuildDate>
 		<item>
 			<title>Augmenting the .NET Core 3.0 Generic Host</title>
 			<link>http://ian.bebbs.co.uk/posts/AugmentingTheGenericHost</link>
@@ -73,7 +73,7 @@ _ = _appServices.GetService&amp;lt;IConfiguration&amp;gt;();
 _ = _appServices.GetService&amp;lt;IConfiguration&amp;gt;();
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;block into a &lt;code&gt;ConfigureApplicationLifetime&lt;/code&gt; configuration call back within the &lt;code&gt;CreateDefaultBuilder&lt;/code&gt; call.&lt;/p&gt;
-&lt;p&gt;Of course, this signature would provide all sorts of opportunities for naughtiness and smells and, while I could probably implement it using the method described above, I'm very much hoping the great minds behind this project might be able to propose something a little safe.&lt;/p&gt;
+&lt;p&gt;Of course, this signature would provide all sorts of opportunities for naughtiness and smells and, while I could probably implement it using the method described above, I'm very much hoping the great minds behind this project might be able to propose something a little safer.&lt;/p&gt;
 </content:encoded>
 		</item>
 		<item>
