@@ -49,7 +49,10 @@
                 <script src="/assets/js/respond.min.js"></script>
         <![endif]-->
         
-        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -115,6 +118,14 @@
 <div class="row">
     <div class="col-sm-8 right-border">
                 <div class="post-preview">
+                    <a href="/posts/Uno">
+                        <h2 class="post-title">The Seven GUIs of Christmas</h2>
+                            <h3 class="post-subtitle">Using the Uno platform to implement the 7GUIs &quot;programming benchmark&quot;.</h3>
+                    </a>
+                    <p class="post-meta">Posted on 01 December 2019</p>
+<p>The <a href="https://platform.uno/">Uno platform</a> allows native UWP code to be run across Windows, Android, iOS and even in the browser. In this post I will cover the use of the Uno Platform to implement the <a href="https://eugenkiss.github.io/7guis/">7GUIs: A GUI Programming Benchmark</a>, across 5 platforms, employing FRP paradigms and all in a (mostly) seasonal style! Will it all hang together? Read on to find out.</p>                </div>       
+                    <hr /> 
+                <div class="post-preview">
                     <a href="/posts/AugmentingTheGenericHost">
                         <h2 class="post-title">Augmenting the .NET Core 3.0 Generic Host</h2>
                             <h3 class="post-subtitle">Battling a SOLID implementation of the Open-closed Principle</h3>
@@ -129,30 +140,6 @@
                     </a>
                     <p class="post-meta">Posted on 11 November 2019</p>
 <p><a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition">Cogenity.Extensions.Hosting.Composition</a> can provide lightweight, runtime composition for the <a href="(https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0)">.NET Core 3.0 Generic Host</a>... with some caveats. <a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5">An issue</a> has been created as an RFC on how best to address these caveats with comments/contributions welcomed.</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/BuildingDotNetCore3WithAzurePipelines">
-                        <h2 class="post-title">Building .NET Core 3.0 With Azure Pipelines</h2>
-                            <h3 class="post-subtitle">Without giving away the keys to the castle!</h3>
-                    </a>
-                    <p class="post-meta">Posted on 04 October 2019</p>
-<p>My "go to" build system and package repository - <a href="https://www.myget.org/">MyGet</a> - doesn't yet support building .NET Core 3.0 (or more specifically .NET Standard 2.1) projects. Having recently read about some of the features Microsoft have been adding to Azure DevOps I thought I'd see how easy (or not) it was to get a Pipeline setup to build my project and publish the package back to MyGet.</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/UsingATouchOverlayInPortrainOnRaspbian">
-                        <h2 class="post-title">Using A Touch Overlay, In Portrait, On Raspbian Buster</h2>
-                            <h3 class="post-subtitle">Another wild google-chase in finding reliable information</h3>
-                    </a>
-                    <p class="post-meta">Posted on 03 October 2019</p>
-<p>This is just a short post - mostly for my own benefit - on how to use a touch-overlay, in portrait, on Raspbian Buster</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/TechAdventuresInSustainability-PartI">
-                        <h2 class="post-title">Tech Adventures in Sustainability</h2>
-                            <h3 class="post-subtitle">Part I - Monitoring our solar generation</h3>
-                    </a>
-                    <p class="post-meta">Posted on 26 September 2019</p>
-<p>Installing solar panels and monitoring solar production not only provides immediate benefits in sustainable living but also highlights new, simple ways to change your lifestyle to further save money and energy. Here's how we do it.</p>                </div>       
         <ul class="pager">
             <li class="previous">                
             </li>
@@ -223,16 +210,16 @@
 
             <h5>Top Tags</h5>
             <div>
-                    <a role="button" href="/tags/UWP" class="btn btn-default btn-sm"> UWP (8)</a>
+                    <a role="button" href="/tags/uwp" class="btn btn-default btn-sm"> uwp (9)</a>
                     <a role="button" href="/tags/Rx" class="btn btn-default btn-sm"> Rx (7)</a>
                     <a role="button" href="/tags/Reactive" class="btn btn-default btn-sm"> Reactive (7)</a>
-                    <a role="button" href="/tags/IoT" class="btn btn-default btn-sm"> IoT (4)</a>
-                    <a role="button" href="/tags/Networking" class="btn btn-default btn-sm"> Networking (4)</a>
-                    <a role="button" href="/tags/Syslog" class="btn btn-default btn-sm"> Syslog (4)</a>
-                    <a role="button" href="/tags/Docker" class="btn btn-default btn-sm"> Docker (4)</a>
+                    <a role="button" href="/tags/net-core" class="btn btn-default btn-sm"> .net core (5)</a>
                     <a role="button" href="/tags/LogStash" class="btn btn-default btn-sm"> LogStash (4)</a>
-                    <a role="button" href="/tags/ElasticSearch" class="btn btn-default btn-sm"> ElasticSearch (4)</a>
+                    <a role="button" href="/tags/IoT" class="btn btn-default btn-sm"> IoT (4)</a>
+                    <a role="button" href="/tags/Elastic-Stack" class="btn btn-default btn-sm"> Elastic Stack (4)</a>
+                    <a role="button" href="/tags/Monitoring" class="btn btn-default btn-sm"> Monitoring (4)</a>
                     <a role="button" href="/tags/Kibana" class="btn btn-default btn-sm"> Kibana (4)</a>
+                    <a role="button" href="/tags/Docker" class="btn btn-default btn-sm"> Docker (4)</a>
             </div>
             <ul class="pager">
                 <li class="next">
@@ -243,10 +230,10 @@
 
             <h5>Older Posts</h5>
             <ul class="list-unstyled">
+                    <li><a href="/posts/BuildingDotNetCore3WithAzurePipelines">Building .NET Core 3.0 With Azure Pipelines</a></li>
+                    <li><a href="/posts/UsingATouchOverlayInPortrainOnRaspbian">Using A Touch Overlay, In Portrait, On Raspbian Buster</a></li>
+                    <li><a href="/posts/TechAdventuresInSustainability-PartI">Tech Adventures in Sustainability</a></li>
                     <li><a href="/posts/BeBraveLikeBATMan">Be Brave. Like BAT, man!</a></li>
-                    <li><a href="/posts/IgnoringABillionDollarMistakeIsNotAnOption">Ignoring a Billion-Dollar Mistake is simply not an Option</a></li>
-                    <li><a href="/posts/FluentNamespacing">Fluent Namespacing</a></li>
-                    <li><a href="/posts/ASmartHome-Part2">A SmartHome... NoT - Part II</a></li>
             </ul>
                 <ul class="pager">
                     <li class="next">

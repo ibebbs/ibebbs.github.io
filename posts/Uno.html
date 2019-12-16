@@ -1,0 +1,739 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - The Seven GUIs of Christmas</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - The Seven GUIs of Christmas" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/Uno" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header" style="background-image: url(&quot;/Content/Uno/Background.png&quot;)">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>The Seven GUIs of Christmas</h1>
+        <h2 class="subheading">Using the Uno platform to implement the 7GUIs &quot;programming benchmark&quot;.</h2>
+    <div class="meta">        
+Published on 01 December 2019<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/net-core" class="btn btn-default btn-xs">.net core</a>
+                    <a role="button" href="/tags/android" class="btn btn-default btn-xs">android</a>
+                    <a role="button" href="/tags/gui" class="btn btn-default btn-xs">gui</a>
+                    <a role="button" href="/tags/uno-platform" class="btn btn-default btn-xs">uno platform</a>
+                    <a role="button" href="/tags/uwp" class="btn btn-default btn-xs">uwp</a>
+                    <a role="button" href="/tags/wpf" class="btn btn-default btn-xs">wpf</a>
+                    <a role="button" href="/tags/xaml" class="btn btn-default btn-xs">xaml</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h1 id="tldr">TL;DR</h1>
+<p>The <a href="https://platform.uno/">Uno platform</a> allows native UWP code to be run across Windows, Android, iOS and even in the browser. In this post I will cover the use of the Uno Platform to implement the <a href="https://eugenkiss.github.io/7guis/">7GUIs: A GUI Programming Benchmark</a>, across 5 platforms, employing FRP paradigms and all in a (mostly) seasonal style! Will it all hang together? Read on to find out.</p>
+<h1 id="the-twelve-days.err.seven-guis-of-christmas">The Twelve Days ... err.... Seven GUIs of Christmas</h1>
+<p>This is a lengthy post so first up, let me provide you with a seasonal - if a little tenuous - index:</p>
+<p>Ahem...</p>
+<blockquote class="blockquote">
+<p>On the seventh day of Christmas my true love gave to me:<br />
+<a href="#seven-guis-shining">Seven GUIs shining</a><br />
+<a href="#six-points-opining">Six points opining</a><br />
+<a href="#five-platform-binaries">Five platform bin[arie]s</a>!<br />
+<a href="#four-important-words">Four important words</a><br />
+<a href="#third-advent-yens">Third advent yens</a><br />
+<a href="#dual-screen-loves">Dual screen loves</a><br />
+<a href="#on-the-first-day-of-christmas.an-app-bridge-for-uwp">And an app-bridge for UWP</a></p>
+</blockquote>
+<p>Well, it almost works.</p>
+<p>Anyway, this post starts with &quot;the first day of Christmas&quot; and provides some background to, and explanation of, the use of the Uno Platform for implementing the 7GUIs &quot;programming benchmark&quot;. If you're not interested in this background and just want to see the actual GUIs in action then feel free to jump ahead to the <a href="#seven-guis-shining">&quot;Seven GUIs shining&quot;</a> or the <a href="#conclusion">Conclusion</a> where I summarise my findings.</p>
+<h1 id="on-the-first-day-of-christmas.an-app-bridge-for-uwp">On the first day of Christmas... an app-bridge for UWP.</h1>
+<p>Well, to be honest, it was some time before the first day of Xmas when I became aware of the <a href="https://platform.uno/">Uno platform</a> by <a href="https://nventive.com/">nventive</a>:</p>
+<blockquote class="blockquote">
+<p>a Universal Windows Platform Bridge that allows UWP-based code to run on iOS, Android, and WebAssembly.</p>
+</blockquote>
+<p>I have been writing Xaml for over a decade and find it to be the most powerful and productive UI framework I've ever encountered. As such, I was immediately intrigued by the Uno platform and interested in what it might bring to the table for a UI technology that is increasingly being overlooked in favour of (<a href="https://hackernoon.com/how-it-feels-to-learn-javascript-in-2016-d3a717dd577f">the scourge that is</a>) web front-ends.</p>
+<p>Obviously there had been attempts at this kind of thing before - most notably <a href="https://dotnet.microsoft.com/apps/xamarin">Xamarin</a> and <a href="http://avaloniaui.net/">Avalonia</a> - but the approach taken by nventive is notable in that, instead of having to learn a new dialect of Xaml and/or buy into a framework to the exclusion of all else, they would allow UWP code to be run 'as is' across each platform. Furthermore, by supporting transpilation to WebAssembly, the same code could then be run in the browser.</p>
+<p>Unfortunately, I was a little too busy to dive into it at the time so I added the Uno Platform to my (ever growing) backlog of things to evaluate and continued with current projects until...</p>
+<h1 id="dual-screen-loves">Dual Screen Loves</h1>
+<p>... October, when Microsoft's Panos Panay surprised everyone with these beauties:</p>
+<img src="/Content/Uno/PanayNeoDuo.jpg" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Panos Panay Reveals Surface Neo and Duo"/>
+<p>A new category of Surface device featuring dual screens, similar to the previously cancelled - but much lauded - <a href="https://www.youtube.com/watch?v=UmIgNfp-MdI">Courier project</a>.</p>
+<p>Having been mourning the loss of Windows Mobile/Phone since begrudgingly switching to an Android device some months back, these devices looked like salvation. The two devices, aimed at productivity and mobility respectively, looked amazing in the <a href="https://www.youtube.com/watch?v=kU78s9ExFFA">introductory videos</a> and I was immediately, and unashamedly, sold.</p>
+<p>Until, that is, I learned something rather perplexing. You see, while the larger device - the Surface Neo - would be running Microsoft's new Windows 10X OS, the smaller 'mobile' device - the Surface Duo - was apparently running a heavily customised version of Android.</p>
+<p>What? Really? Surely not!</p>
+<p>While I understood why Microsoft might not want to re-engage in a smartphone market war it had already fought for and lost (twice!), Windows 10X was supposedly based on CShell, a UI layer specifically designed to adapt to any form factor and - it would seem - perfectly suited to running on devices like these. Indeed, I wasn't the only one surprised by this announcement and many echoed my confusion, some even going so far as to set up a <a href="https://www.change.org/p/panos-panay-satya-nadella-panos-satya-give-us-a-microsoft-surface-duo-running-windows-10x">petition to provide the Duo with Win 10X</a>.</p>
+<p>Despite the immediate outcry, Microsoft remained adamant that the Duo will run Android and so it was that I realised that the Uno platform seemed perfectly - and almost uniquely - positioned as a framework for developing apps for these devices. Then...</p>
+<h1 id="third-advent-yens">Third Advent Yens</h1>
+<blockquote class="blockquote">
+<p>yen n. - A strong desire or inclination; a yearning or craving.</p>
+</blockquote>
+<p>... the day after Microsoft announced these devices, two articles arrived in my news feed: <a href="https://crosscuttingconcerns.com/The-Third-Annual-csharp-Advent">&quot;The Third Annual C# Advent&quot;</a> from <a href="https://crosscuttingconcerns.com/">Matthew Groves's blog</a> and, <a href="https://eugenkiss.github.io/7guis/">7GUIs: A GUI Programming Benchmark</a>.</p>
+<p>&quot;So let's get this straight&quot;, I thought, &quot;I have a GUI framework I want to evaluate, a GUI programming benchmark to attempt and a call for blog posts on .NET technologies&quot;. Well, sometimes synchronicity simply can't be ignored. I decided a blog post on the 7GUIs using the Uno platform would make for a great post while allowing me to evaluate this platform for UWP + Android development ahead of the release of the Surface Neo and Surface Duo devices.</p>
+<p>I applied for a slot in the Annual C# Advent series and got the 16th December, which is what you're reading now. If you enjoy this post (or even if you don't!), perhaps you might like to take the time to visit the <a href="https://crosscuttingconcerns.com/The-Third-Annual-csharp-Advent">full list of posts in this series</a> and check out some of the others. There are <em>loads</em> of great posts by some really terrific authors.</p>
+<h1 id="four-important-words">Four Important Words</h1>
+<p>Over the course of a software engineering career spanning more than 20 years, I have developed and refined (and occasionally changed) opinions about how best to perform this craft. While most of my career has been spent following OOD/OOP paradigms, in recent years I have developed a strong preference for <a href="https://en.wikipedia.org/wiki/Declarative_programming">declarative programming</a> - typically using some form of <a href="https://en.wikipedia.org/wiki/Functional_reactive_programming">functional, reactive programming (FRP)</a> - following <a href="https://en.wikipedia.org/wiki/Behavior-driven_development">behavioural/domain driven design</a> principles. I <a href="https://ian.bebbs.co.uk/posts/CqrsEsMvvmRxEfSqlUwpPcl">wrote a blog post</a> back in 2016 showing a practical application of these principles for an app I had released and, in the intervening years, have become only more convinced that these approaches represent an elegant and productive means of taming complexity in many modern software systems.</p>
+<p>Below I outline four &quot;important words&quot; (aka principles) I intend to use while implementing the 7GUIs.</p>
+<h3 id="behavioural">Behavioural</h3>
+<p>From <a href="https://en.wikipedia.org/wiki/Behavior-driven_development">Wikipedia</a>:</p>
+<blockquote class="blockquote">
+<p>Behavior-driven development combines the general techniques and principles of TDD with ideas from domain-driven design and object-oriented analysis and design to provide software development and management teams with shared tools and a shared process to collaborate on software development.</p>
+</blockquote>
+<p>While I agree with this quote, for me BDD doesn't stop at writing tests in a behavioural style but should instead permeate deep into the implementation of the software itself. Fundamentally I believe the desired behaviours of the software system should be encapsulated and expressed in such a way that even a non-technical reader could see reference to them should they happen across the code.</p>
+<p>In a <a href="https://ian.bebbs.co.uk/posts/ReactiveBehaviors">blog post</a> back in 2015 I explored ways in which this might be achieved through the use of declarative FRP principles. While aged (and containing a questionable use of a Subject), I believe this post still provides a decent introduction to how specific behaviours - i.e. 'The login button should be enabled when the user has entered both a username and a password' - can be implemented in, and fully encapsulated within, a single appropriately named method - i.e. <code>ShouldEnableTheLogInButtonWhenTheUserHasEnteredBothUsernameAndPassword</code>.</p>
+<h3 id="declarative">Declarative</h3>
+<p>Paraphrased from <a href="https://en.wikipedia.org/wiki/Declarative_programming">Wikipedia</a>:</p>
+<blockquote class="blockquote">
+<p>Declarative programming focuses on 'what' the program must accomplish instead of 'how' that task is to be accomplished. This is in contrast with imperative programming, which implements algorithms in explicit steps.</p>
+</blockquote>
+<p>Ostensibly, this can be seen through a comparison of the following two code snippets, both of which sum a value from a collection:</p>
+<h4 id="imperative">Imperative:</h4>
+<pre><code class="language-c#">int value = 0;
+foreach (var item in collection)
+{
+  value += item.Value;
+}
+return value;
+</code></pre>
+<h4 id="declarative-1">Declarative:</h4>
+<pre><code class="language-c#">return collection.Sum(item =&gt; item.Value);
+</code></pre>
+<p>Now being declarative <a href="https://lispcast.com/is-functional-programming-declarative/">can be considered a somewhat relative term</a> but, as you can see from the simplistic example above, if you follow the principle of expressing 'intent rather than algorithm' you can, in my opinion, greatly improve readability and transparency of functionality. Obviously this approach compliments the goals of behavioural design expressed above.</p>
+<h3 id="functional">Functional</h3>
+<p>More <a href="https://en.wikipedia.org/wiki/Functional_programming">Wikipedia</a>:</p>
+<blockquote class="blockquote">
+<p>[Functional programming] is a declarative programming paradigm in that programming is done with expressions or declarations instead of statements. In functional code, the output value of a function depends only on its arguments, so calling a function with the same value for an argument always produces the same result. This is in contrast to imperative programming where, in addition to a function's arguments, global program state can affect a function's resulting value. Eliminating side effects, that is, changes in state that do not depend on the function inputs, can make understanding a program easier, which is one of the key motivations for the development of functional programming.</p>
+</blockquote>
+<p>Functional programming (FP) has become fashionable in the software industry recently and support for functional paradigms are increasingly being released for - and, in some cases, are core to - many languages and frameworks that were once solely object-oriented. Unfortunately FP still faces significant opposition from many quarters, mainly - I believe - due to a perceived complexity around it's core principles; a perception somewhat fomented by the idiom of many functional practitioners! Indeed, I often encounter this issue when discussing FP with clients and have to explain how it is, in many ways, far simpler than many of the <a href="https://scotch.io/bar-talk/s-o-l-i-d-the-first-five-principles-of-object-oriented-design">myriad principles</a> employed by those writing object-oriented code.</p>
+<p>C# has enjoyed first class support for functional constructs since the introduction of LINQ back in .NET 3.5 yet many using the language today - even those employing LINQ-to-X features - are unaware of functional programming or how it can be used to simplify and improve their code. This is a shame because - as will be seen in many of the GUIs below - C# is able to elegantly mix OO and FP paradigms such that the relative strengths of each can be leveraged where they make most sense.</p>
+<h3 id="reactive">Reactive</h3>
+<p>Last couple of <a href="https://en.wikipedia.org/wiki/Reactive_programming">Wikipedia</a> quotes for a while:</p>
+<blockquote class="blockquote">
+<p>Reactive programming is a declarative programming paradigm concerned with data streams and the propagation of change. [It] has been proposed as a way to simplify the creation of interactive user interfaces and near-real-time system animation.</p>
+</blockquote>
+<p>Wikipedia goes on to state how:</p>
+<blockquote class="blockquote">
+<p>In an imperative programming setting, <code>a := b + c</code> would mean that <code>a</code> is being assigned the result of <code>b + c</code> in the instant the expression is evaluated, and later, the values of <code>b</code> and <code>c</code> can be changed with no effect on the value of <code>a</code>. On the other hand, in reactive programming, the value of <code>a</code> is automatically updated whenever the values of <code>b</code> or <code>c</code> change, without the program having to re-execute the statement <code>a := b + c</code> to determine the presently assigned value of <code>a</code>.</p>
+</blockquote>
+<p>This is a somewhat long handed way of saying that, in reactive programming, state is derived from declarative flows of functional computations over source values such that it is not necessary to explicitly recompute state when one of these values change.</p>
+<p>Again C# has had fantastic support for Reactive Programming for many years in the form of the <a href="https://github.com/dotnet/reactive">Reactive Extensions library</a>. In fact, such was the success of this library that, since it's original implementation in C#, it has been ported to numerous other languages and used within an incredible variety of software systems; not least of which being a significant number of modern web frameworks.</p>
+<h1 id="five-platform-binaries">Five Platform Bin[arie]s!</h1>
+<p>Well, sort of.</p>
+<h3 id="wpf">WPF</h3>
+<p>Out of the box, Uno supports four platforms; UWP, Android, iOS &amp; WebAssembly. For this blog post, I also wanted to try supporting WPF due, in most part, to the following:</p>
+<ol>
+<li>WPF is XAML based and, in many ways, the progenitor to UWP so it should be able to leverage much of the code that will be written</li>
+<li>WPF still plays an important role in the .NET GUI ecosystem, particularly for enterprise applications.</li>
+<li>WPF was recently <a href="https://github.com/dotnet/wpf">open-sourced as part of .NET Core 3.0</a> and I hadn't yet had a chance to try it!</li>
+</ol>
+<p>Fortunately, it turns out that, once various other considerations had been accounted for (see below) supporting WPF didn't present much friction at all. In fact, with the exception of a couple of compiler directives in <a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.data.ivalueconverter?view=netframework-4.8">IValueConverter</a> implementations, supporting WPF necessitated hardly any additional code at all.</p>
+<h3 id="ios">iOS</h3>
+<p>Until recently, I viewed Apple devices as over-priced, walled-off, proprietary guff bought by fan-bois with more money than sense. In light of Apple's stance on privacy, this opinion has softened slightly in the last couple of years such that you <em>may</em> no longer <em>have</em> to be a fan-boi to buy an Apple device. Regardless I still refuse to buy Apple products and am extremely happy with a combination of devices from other manufactures - most notably Microsoft and Dell. These manufactures don't artificially limit the interoperability of their products nor do they engage in <a href="https://www.itworld.com/article/3316958/apple-and-samsung-fined-for-planned-obsolescence.html">'planned obsolescence'</a> to force consumers into a viscous and costly upgrade cycle (seriously, I have a 7 year old Dell laptop which - despite being bulky - is still my main mobile workhorse).</p>
+<p>Unfortunately, given Apple's ludicrous position that you must own (or <a href="https://www.macincloud.com/">rent!?!</a>) an Apple device to build applications for iOS (it seems it's still illegal to run iOS on anything other than an approved Apple device), I have no way of testing the iOS binaries being produced herein. As such, all the screen shots for Apple will be a simple placeholder until some kind soul decides they want to run them for me (I promise not to call you a fan-boi) and provide screen shots / bug reports / PRs.</p>
+<h1 id="six-points-opining">Six Points Opining</h1>
+<p>Some other considerations for implementation:</p>
+<h3 id="model-view-viewmodel">1. Model-View-ViewModel</h3>
+<p>To me, the MVVM pattern is one of those methodologies that once you &quot;get&quot; you wonder how you ever managed to deliver anything without. In fact, decoupling a view from its interaction model is critical if you wish to achieve many of the paradigms listed above (i.e. behavioural driven, declarative, functional and reactive). Therefore, all GUIs presented here use this pattern despite it possibly rating lower on a number of the 7GUIs <a href="https://eugenkiss.github.io/7guis/dimensions">Dimensions of Evaluation</a>.</p>
+<p>This then leads us to the question of whether to adopt a 'View-First' or 'ViewModel-First' approach (a good comparison of which can be found in <a href="https://stackoverflow.com/questions/3763072/what-are-the-pros-and-cons-of-view-first-vs-viewmodel-first-in-the-mvvm-pattern">this</a> SO question). While I generally prefer the latter over the former - particularly when writing large applications - the 'ViewModel-First' is undeniably more complicated given that UWP and WPF apps adopt, by default, 'View-first' mechanisms (e.g. <a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.startupuri?view=netframework-4.8">StartupUri</a>). So, for simplicity's sake, I've used a 'View-First' approach for these GUIs wherein each View creates the associated ViewModel within it's constructor.</p>
+<p>Lifetime management of the view model (and it's constituent behaviours) is provided by <code>Activate</code>/<code>Deactivate</code> calls to the ViewModel from within the <code>OnNavigatedTo</code>/<code>OnNavigatedFrom</code> methods (for UWP) or <code>OnActivated</code>/<code>OnClosed</code> (for WPF). Where the GUI being implemented requires intimate interaction with the UI (i.e. the CircleDrawer GUI), these interaction points are passed - as <code>IObservable</code> instances - to the ViewModel as parameters to the <code>Activate</code> call.</p>
+<h3 id="reactiveui">2. ReactiveUI</h3>
+<p>The Uno platform comes with templates for implementing GUIs using <a href="https://reactiveui.net/">ReactiveUI</a>:</p>
+<blockquote class="blockquote">
+<p>An advanced, composable, functional reactive model-view-viewmodel framework for all .NET platforms that is inspired by functional reactive programming.</p>
+</blockquote>
+<p>Ostensibly this sounds like a great fit for satisfying the paradigms outlined above and I had initially intended to use ReactiveUI as another exploratory feature of this blog post. Unfortunately this intention was quashed almost immediately as I found the following:</p>
+<ol>
+<li>Platform support<br />
+At the point of attempting to use ReactiveUI, the latest Universal Windows platform it supported was 1803 (the April 2018 Update). This was quite surprising and somewhat troubling given the age of this platform.</li>
+<li>Inheriting a Framework<br />
+ReactiveUI requires that ViewModels derive from specific base classes. This, to me, puts it firmly on the Framework side of the <a href="http://tomasp.net/blog/2015/library-frameworks/">Framework vs Library debate</a>. Given I would already be adopting various constraints from the Uno platform, I didn't want to find myself in a position of encountering potential incompatibility between these technologies some way down the line.</li>
+<li>Overly complex API Structure<br />
+Just getting started with ReactiveUI is a daunting prospect when its <a href="https://reactiveui.net/docs/handbook/">handbook</a> contains some 22 <em>sections</em> on subjects ranging from data persistence to logging. While I appreciate that opinionated frameworks can have a lot to offer, this sort of complexity is indicative of one which, in my opinion, ought to be broken into smaller, composable libraries which can be adopted as and when necessary.</li>
+</ol>
+<h3 id="mvx.observable">3. MVx.Observable</h3>
+<p>Rather than shoe-horn ReactiveUI into this evaluation I instead elected to modernize and generalize a package I had written some time ago: <a href="https://github.com/ibebbs/Caliburn.Micro.Reactive.Extensions">Caliburn.Micro.Reactive.Extensions</a>. This package, as it's name implies, was implemented specifically for use within the <a href="https://caliburnmicro.com/">Caliburn Micro</a> framework and provides all the &quot;good stuff&quot; of ReactiveUI (i.e. composable, functional, reactive) while remaining a library that places no untoward restrictions or dependencies on consumer code.</p>
+<p>Fundamentally this library constitutes just three classes:</p>
+<ol>
+<li>ObservableProperty<T><br />
+A class which implements both <a href="https://docs.microsoft.com/en-us/dotnet/api/system.iobservable-1?view=netframework-4.8"><code>IObservable&lt;T&gt;</code></a> and <a href="https://docs.microsoft.com/en-us/dotnet/api/system.iobserver-1?view=netframework-4.8"><code>IObserver&lt;T&gt;</code></a> - such that it can be used within declarative reactive flows - and which provides some additional functionality to facilitate its use as a data-binding source (i.e. Get/Set methods).</li>
+<li>ObservableCommand<br />
+A class which implements <a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.input.icommand?view=netframework-4.8"><code>ICommand</code></a> through implementations of the <code>IObservable&lt;bool&gt;</code> (for 'can execute' state changes) and <code>IObservable&lt;T&gt;</code> (for invocations) interfaces.</li>
+<li>ObservableBus<br />
+An &quot;observable&quot; implementation of an <a href="https://www.martinfowler.com/eaaDev/EventAggregator.html">Event Aggregator pattern</a> for inter-ViewModel communication.</li>
+</ol>
+<p>Generalizing this library required removing the use of Caliburn.Micro's base classes - which were typically used to facilitate property change notification - and replacing them with callbacks (which can then be hidden in derived classes for specific frameworks if so desired). Modernizing involved recreating the project as a .NET Standard 2.0 library and using up-to-date dependency versions (specifically System.Reactive 4.x).</p>
+<p>The most difficult part of bringing this library up to date was undoubtedly picking a name for it. I spent ages playing with acronyms that accurately reflected the library's purpose and, for a second, even toyed with naming it the <a href="https://www.youtube.com/watch?v=k8xFbWLUDoQ">&quot;IBCBDFR&quot;</a>. Finally I decided on 'MVx.Observable' to indicate its reactive nature and its applicability to multiple forms of the Model-View pattern.</p>
+<p>Source is available on <a href="https://github.com/ibebbs/MVx">GitHub</a> and a prebuilt package is available in <a href="https://www.nuget.org/packages/MVx.Observable/">Nuget</a> should you wish to give it a try.</p>
+<h3 id="separate-views">4. Separate Views</h3>
+<p>The Uno platform is, somewhat amazingly, able to display (almost) the exact same XAML page across multiple platforms (or 'heads' to use Uno parlance) with a very high degree of fidelity. This is quite an achievement and the team at nventive are rightly proud of this capability.</p>
+<p>However, from the perspective of someone looking to write large applications on this platform, I don't believe this facility is particularly important nor - to a certain extent - even desirable. You see, in my experience, it is often the case that each platform and/or form-factor requires such different UI and/or UX that trying to shoe-horn everything into a single XAML page results in a page that is difficult, if not impossible, to maintain. Instead I find it much better to be able to share business logic, user flows and - where it makes sense - common controls across platforms while using specific page layouts for each form-factor.</p>
+<p>As such, the GUI's presented here will use a dedicated view implementation on each platform while using a common view-model to share interaction patterns and user-flows.</p>
+<h3 id="implementation-process">5. Implementation Process</h3>
+<p>For each of the GUIs I separated implementation into two phases; first implementing the prerequisite functionality in UWP then porting (which mainly constituted lots of copy/pasting) the completed GUI to Uno. This allowed me to ensure the GUI was functionally complete prior to incurring the additional friction of multi-platform builds.</p>
+<h3 id="project-structure">6. Project Structure</h3>
+<p>When you create a new Uno project, the standard template gives you the following structure:</p>
+<pre><code>Solution
+|-Project.Droid
+|-Project.iOS
+|-Project.UWP
+|-Project.Wasm
+|-Project.Shared
+</code></pre>
+<p>In this structure, the 'Shared' project contains the majority of the code/Xaml including the App.xaml[.cs] and MainPage.xaml[.cs] files. It is literally a <a href="http://rion.io/2017/03/22/sharing-is-caring-using-shared-projects-in-asp-net/">&quot;Shared Project&quot;</a> which each of the other project reference in order to - in essence - copy its contents into themselves.</p>
+<p>To support WPF and remove the need to share a single view across all platforms (as described above), I refactored to the following structure:</p>
+<pre><code>Solution
+|-Project.Common
+|-Project.Droid
+|-Project.iOS
+|-Project.UWP
+|-Project.Wasm
+|-Project.Wpf
+|-Project.Shared
+</code></pre>
+<p>In this structure, the (fully implemented) App.xaml[.cs] and MainPage.xaml[.cs] were copied from the Shared project to each head project where they could be suitably customised. Next the ViewModel (and any other reusable code) was moved to the new .Net Standard 2.0 Common project and referenced by each head project. This left the Shared project containing just assets and, where necessary, any common controls or <code>IValueConverter</code> implementations.</p>
+<h1 id="seven-guis-shining">Seven GUIs Shining</h1>
+<p>Now, without further ado (of which there has been plenty), may I present the <a href="https://eugenkiss.github.io/7guis">7GUIs</a>!</p>
+<p>Each of the GUIs shown here represent an implementation of one of the tasks from the <a href="https://eugenkiss.github.io/7guis/tasks">7 GUIs task list</a>. Despite the fact that many of the GUIs in this list represent - in my opinion - particularly poor UI/UX implementations, I've endeavoured to stay as close as possible to the example GUI provided for the task so that my implementation might be easily compared to <a href="https://eugenkiss.github.io/7guis/implementations">other implementations</a>.</p>
+<p>Furthermore, given the various constraints presented by writing for multiple platforms, I have employed a 'lowest common denominator' approach to implementing some features. For example, dialogs are typically represented by messages appearing in the current UI rather than opening an additional modal overlay. Obviously each platform presents various mechanisms for implementing these common UI metaphors and it would be entirely possible, using the Uno platform, to leverage these mechanism by means of platform specific implementations of an abstracted interface. However, for expediency, I chose not to do this at this time and to just keep it simple.</p>
+<p>For each GUI I have provided a visualization of the GUI running on each platform (click/press to see a larger version) along with a description of the specific challenges and issues presented by the implementation. It is my hope that these details provide the reader with a good insight into the value of implementing interaction patterns as a series of declarative, functional, behavioural flows along with how the Uno platform may be used to provide 'write-once, run-anywhere' style, cross-platform, native applications.</p>
+<h2 id="counter">1. Counter</h2>
+<blockquote class="blockquote">
+<p>Challenge: Understanding the basic ideas of a language/toolkit.</p>
+</blockquote>
+<div class="row justify-content-center unobackground">
+    <div class="col-md-8">
+        <div class="row">
+            <a href="https://eugenkiss.github.io/7guis/static/counter.9cd92091.png" data-toggle="lightbox" data-gallery="counter" data-title="Counter Task" class="col-xs-4 col-sm-4">
+                <img src="https://eugenkiss.github.io/7guis/static/counter.9cd92091.png" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Counter-Android.gif" data-toggle="lightbox" data-gallery="counter" data-title="Counter on Android" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Counter-Android.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="counter" data-title="Counter on iOS" class="col-xs-4 col-sm-4">
+                <img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+        <div class="row">
+            <a href="/Content/Uno/Counter-UWP.gif" data-toggle="lightbox" data-gallery="counter" data-title="Counter in UWP" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Counter-UWP.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Counter-WASM.gif" data-toggle="lightbox" data-gallery="counter" data-title="Counter in Edge" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Counter-WASM.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Counter-WPF.gif" data-toggle="lightbox" data-gallery="counter" data-title="Counter in WPF" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Counter-WPF.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+    </div>
+</div>
+<h3 id="implementation">Implementation</h3>
+<p>This task required just a single <code>CounterShouldBeIncrementedWhenIncrementIsInvoked</code> behaviour in the <a href="https://github.com/ibebbs/SevenGuis/blob/master/src/Counter/Counter.Common/MainPageViewModel.cs">view model</a>. Given its simplicity, here's the behaviour in full:</p>
+<pre><code class="language-c#">private IDisposable CounterShouldBeIncrementedWhenIncrementIsInvoked()
+{
+    return _increment
+        .Scan(0, (value, _) =&gt; value + 1)
+        .Subscribe(_counter);
+}
+</code></pre>
+<p>In this example, <code>_increment</code> is an <code>Observable.Command</code> and <code>_counter</code> is an <code>Observable.Property&lt;int&gt;</code>. Both these members are exposed as properties for data-binding. And that's it. There's no class level <code>_currentValue</code> member variable as all state is encapsulated within the reactive function.</p>
+<h2 id="temperature-converter">2. Temperature Converter</h2>
+<blockquote class="blockquote">
+<p>Challenges: bidirectional data flow, user-provided text input.</p>
+</blockquote>
+<div class="row justify-content-center unobackground">
+    <div class="col-md-8">
+        <div class="row">
+            <a href="https://eugenkiss.github.io/7guis/static/tempconv.de9aff1f.png" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter Task" class="col-xs-4 col-sm-4">
+                <img src="https://eugenkiss.github.io/7guis/static/tempconv.de9aff1f.png" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/TemperatureConverter-Android.gif" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter on Android" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/TemperatureConverter-Android.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter on iOS" class="col-xs-4 col-sm-4">
+                <img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+        <div class="row">
+            <a href="/Content/Uno/TemperatureConverter-UWP.gif" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter in UWP" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/TemperatureConverter-UWP.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/TemperatureConverter-WASM.gif" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter in Edge" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/TemperatureConverter-WASM.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/TemperatureConverter-WPF.gif" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter in WPF" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/TemperatureConverter-WPF.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+    </div>
+</div>
+<h3 id="implementation-1">Implementation</h3>
+<p>This task required just two behaviours in the <a href="https://github.com/ibebbs/SevenGuis/blob/master/src/TemperatureConverter/TemperatureConverter.Common/MainPageViewModel.cs">view model</a>; <code>ShouldUpdateFahrenheitWhenCelciusIsChanged</code> and <code>ShouldUpdateCelciusWhenFahrenheitIsChanged</code>. These behaviours follow the same pattern but use a different conversion so, for brevity, only the <code>ShouldUpdateFahrenheitWhenCelciusIsChanged</code> behaviour as shown here:</p>
+<pre><code class="language-c#">private IDisposable ShouldUpdateFahrenheitWhenCelciusIsChanged()
+{
+    return _celcius
+        .DistinctUntilChanged()
+        .Select(Domain.ConvertCelciusToFahrenheit)
+        .Subscribe(_fahrenheit);
+}
+</code></pre>
+<p>As you can see, the actual domain logic has been split into a static function on a <code>Domain</code> class and used to convert the values from the <code>_celcius</code> <code>Observable.Property&lt;int&gt;</code> into Fahrenheit which is then forwarded to the <code>_fahrenheit</code> <code>Observable.Property&lt;int&gt;</code>. As these values write to each other, the <code>DistinctUntilChanged</code> operator is used to prevent a feedback loop.</p>
+<h2 id="flight-booker">3. Flight Booker</h2>
+<blockquote class="blockquote">
+<p>Challenge: Constraints.</p>
+</blockquote>
+<div class="row justify-content-center unobackground">
+    <div class="col-md-8">
+        <div class="row">
+            <a href="https://eugenkiss.github.io/7guis/static/bookflight.a5434663.png" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker Task" class="col-xs-4 col-sm-4">
+                <img src="https://eugenkiss.github.io/7guis/static/bookflight.a5434663.png" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/FlightBooker-Android.gif" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker on Android" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/FlightBooker-Android.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker on iOS" class="col-xs-4 col-sm-4">
+                <img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+        <div class="row">
+            <a href="/Content/Uno/FlightBooker-UWP.gif" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker in UWP" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/FlightBooker-UWP.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/FlightBooker-WASM.gif" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker in Edge" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/FlightBooker-WASM.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/FlightBooker-WPF.gif" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker in WPF" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/FlightBooker-WPF.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+    </div>
+</div>
+<h3 id="implementation-2">Implementation</h3>
+<p>The relatively simple paragraph describing the behaviour of this task belies quite a bit of complexity and required five behaviours to fully implement:</p>
+<ul>
+<li><code>ShouldEnableReturnWhenFlightTypeIsReturn</code></li>
+<li><code>ShouldSetOutboundValidWhenOutboundDateHasValue</code></li>
+<li><code>ShouldSetReturnValidWhenReturnDateHasValueOrFlightTypeIsOneWay</code></li>
+<li><code>ShouldEnableBookWhenDatesAreValidForTheSelectedFlightType</code></li>
+<li><code>ShouldDisplayMessageWhenBookInvoked</code></li>
+</ul>
+<p>I won't dig into each of these behaviours as you should be getting the gist of how this might work now. If not you can find the implementation in the <a href="https://github.com/ibebbs/SevenGuis/tree/master/src/FlightBooker">view model</a>.</p>
+<p>The <code>ShouldSetOutboundValidWhenOutboundDateHasValue</code> and <code>ShouldSetReturnValidWhenReturnDateHasValueOrFlightTypeIsOneWay</code> could have been implemented in the view with various bindings and converters but as they form part of the behaviour specification, they're kept in the view model so that they can be tested.</p>
+<p>Amazingly, the most difficult bit of this task was finding a means of reliably setting the initial value of the &quot;Flight Type&quot; combo-box. It turns out that this was due to a bug in UWP that means the <code>SelectedValue</code> property of a <a href="https://stackoverflow.com/questions/35599479/combobox-does-not-select-binding-value-initially">combo-box doesn't support binding to an enumeration property</a>. This was eventually resolved by binding the <code>SelectedIndex</code> property of the combobox to the enumeration via a converter.</p>
+<h2 id="timer">4. Timer</h2>
+<blockquote class="blockquote">
+<p>Challenges: concurrency, competing user/signal interactions, responsiveness.</p>
+</blockquote>
+<div class="row justify-content-center unobackground">
+    <div class="col-md-8">
+        <div class="row">
+            <a href="https://eugenkiss.github.io/7guis/static/timer.ed46b6b4.png" data-toggle="lightbox" data-gallery="timer" data-title="Timer Task" class="col-xs-4 col-sm-4">
+                <img src="https://eugenkiss.github.io/7guis/static/timer.ed46b6b4.png" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Timer-Android.gif" data-toggle="lightbox" data-gallery="timer" data-title="Timer on Android" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Timer-Android.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="timer" data-title="Timer on iOS" class="col-xs-4 col-sm-4">
+                <img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+        <div class="row">
+            <a href="/Content/Uno/Timer-UWP.gif" data-toggle="lightbox" data-gallery="timer" data-title="Timer in UWP" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Timer-UWP.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Timer-WASM.gif" data-toggle="lightbox" data-gallery="timer" data-title="Timer in Edge" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Timer-WASM.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Timer-WPF.gif" data-toggle="lightbox" data-gallery="timer" data-title="Timer in WPF" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Timer-WPF.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+    </div>
+</div>
+<h3 id="implementation-3">Implementation</h3>
+<p>This task is where the Reactive Extensions and MVx.Observables really shine. Here's the task description:</p>
+<blockquote class="blockquote">
+<p>The task is to build a frame containing a gauge G for the elapsed time e, a label which shows the elapsed time as a numerical value, a slider S by which the duration d of the timer can be adjusted while the timer is running and a reset button R. Adjusting S must immediately reflect on d and not only when S is released. It follows that while moving S the filled amount of G will (usually) change immediately. When e ≥ d is true then the timer stops (and G will be full). If, thereafter, d is increased such that d &gt; e will be true then the timer restarts to tick until e ≥ d is true again. Clicking R will reset e to zero.</p>
+</blockquote>
+<p>And here's the single behaviour required to satisfy this specification:</p>
+<pre><code class="language-c#">private IDisposable ShouldIncrementElapsedUntilResetOrEqualToMax()
+{
+    return _reset
+        .StartWith((object)null)
+        .Select(_ =&gt; Observable
+            .Interval(Interval)
+            .WithLatestFrom(_max, (interval, max) =&gt; max)
+            .Scan((long)0, (acc, max) =&gt; acc + Interval.Ticks &gt;= max ? max : acc + Interval.Ticks))
+            .DistinctUntilChanged()
+        .Switch()
+        .ObserveOn(_scheduler)
+        .Subscribe(_elapsed);
+}
+</code></pre>
+<p>To break this down: Every time the <code>_reset</code> <code>Observable.Command</code> is invoked and starting with an initial invocation, select a new observable. This new observable will emit a value at a specific interval which will be incremented automatically until it is equal to the <code>_max</code> value. Once it is equal to the <code>_max</code> value, no further values will be emitted until <code>_max</code> changes or the timer is reset. Finally, subscribe to the new observable and forward the emitted values to the <code>_elapsed</code> <code>Observable.Property&lt;int&gt;</code> on the UI thread.</p>
+<p>Now, admittedly the timer underlying this observable doesn't 'stop' once the value has reached the max value per the description. While it would be possible to do this in a single behaviour, the required expression would be significantly more complicated and, given the low cost of recalculating the value every interval, I elected to keep the observable simple and obvious.</p>
+<h2 id="crud">5. CRUD</h2>
+<blockquote class="blockquote">
+<p>Challenges: separating the domain and presentation logic, managing mutation, building a non-trivial layout.</p>
+</blockquote>
+<div class="row justify-content-center unobackground">
+    <div class="col-md-8">
+        <div class="row">
+            <a href="https://eugenkiss.github.io/7guis/static/crud.515ce94b.png" data-toggle="lightbox" data-gallery="crud" data-title="CRUD Task" class="col-xs-4 col-sm-4">
+                <img src="https://eugenkiss.github.io/7guis/static/crud.515ce94b.png" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Crud-Android.gif" data-toggle="lightbox" data-gallery="crud" data-title="CRUD on Android" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Crud-Android.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="crud" data-title="CRUD on iOS" class="col-xs-4 col-sm-4">
+                <img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+        <div class="row">
+            <a href="/Content/Uno/Crud-UWP.gif" data-toggle="lightbox" data-gallery="crud" data-title="CRUD in UWP" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Crud-UWP.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Crud-WASM.gif" data-toggle="lightbox" data-gallery="crud" data-title="CRUD in Edge" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Crud-WASM.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Crud-WPF.gif" data-toggle="lightbox" data-gallery="crud" data-title="CRUD in WPF" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Crud-WPF.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+    </div>
+</div>
+<p>CRUD is a great test of a UI as it forms a matrix of operations across numerous controls. This is shown by the <a href="https://eugenkiss.github.io/7guis/tasks#crud">complexity of the description of the task</a> and the number of behaviours required to meet this specification:</p>
+<ul>
+<li><code>ShouldEnableUpdateWhenSelected</code></li>
+<li><code>ShouldEnableDeleteWhenSelected</code></li>
+<li><code>ShouldEnableCreateWhenNameAndSurnameArePopulated</code></li>
+<li><code>ShouldPopulateNamesWithFilteredNames</code></li>
+<li><code>ShouldAddFullNameWhenCreateInvoked</code></li>
+<li><code>ShouldUpdateFullNameWhenUpdatedInvoked</code></li>
+<li><code>ShouldRemoveFullNameWhenDeleteInvoked</code></li>
+<li><code>ShouldPopulateNameWhenFullNameSelected</code></li>
+<li><code>ShouldPopulateSurnameWhenFullNameSelected</code></li>
+</ul>
+<h2 id="circle-drawer">6. Circle Drawer</h2>
+<blockquote class="blockquote">
+<p>Challenges: undo/redo, custom drawing, dialog control*.</p>
+</blockquote>
+<div class="row justify-content-center unobackground">
+    <div class="col-md-8">
+        <div class="row">
+            <a href="https://eugenkiss.github.io/7guis/static/circledraw.235dfd8b.png" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer Task" class="col-xs-4 col-sm-4">
+                <img src="https://eugenkiss.github.io/7guis/static/circledraw.235dfd8b.png" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/CircleDrawer-Android.gif" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer on Android" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/CircleDrawer-Android.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer on iOS" class="col-xs-4 col-sm-4">
+                <img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+        <div class="row">
+            <a href="/Content/Uno/CircleDrawer-UWP.gif" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer in UWP" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/CircleDrawer-UWP.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/CircleDrawer-WASM.gif" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer in Edge" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/CircleDrawer-WASM.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/CircleDrawer-WPF.gif" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer in WPF" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/CircleDrawer-WPF.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+    </div>
+</div>
+<p>I think it's fair to say Uno struggled with this task. While the UWP version was completed in short order, neither the Android nor WASM heads worked <em>at all</em> and the WPF project had several issues.</p>
+<p>It turned out that both the UWP and WASM platforms suffered similar - but not the exactly the same - issues. The first issue I encountered was with determining where a user clicked on a Canvas used as an items container for a ListView control. Digging into this I found further issues where the <code>TappedRoutedEventArgs</code> resulting from the click returned different <code>OriginalSource</code> objects - sometimes the Canvas, sometimes the ListView - and getting the clicked position relative to the <code>OriginalSource</code> always returned the position <code>{X: 0, Y: 0}</code>. Then I found that the attached property binding mechanism I'd used to bind <code>Canvas.X</code> and <code>Canvas.Y</code> properties on the ListViewItem instances representing the circles just wasn't being applied consistently. The WPF head, on the other hand, struggled with distinguishing between clicks on an item and clicks in an empty area of the ListView such that it's not possible to reselect a circle once it's been deselected.</p>
+<p>Perhaps a lot of the above issues could have been resolved by using a custom control or a custom item container for the ListView but, as the UWP solution worked perfectly, this was something I felt I ought not to have to do. Ultimately I hacked through as many of the issues as I could but this was one task where all the heads don't perform in the same way. Furthermore, I'm sure the WPF issue could be resolved by working out if the click caused an item to be selected but unfortunately I ran out of time before I could investigate this.</p>
+<p>Anyway, this solution used a basic form of command processor to apply interactions to a state container which contained the current circles along with undo and redo stacks of commands. This provided a very simple mechanism for undoing or redoing a command such that the view model needed only the following behaviours:</p>
+<ul>
+<li><code>ShouldPopulateCirclesFromState</code></li>
+<li><code>ShouldEnableOrDisableUndoBasedOnState</code></li>
+<li><code>ShouldEnableOrDisableRedoBasedOnState</code></li>
+<li><code>ShouldEnableOrDisableAdjustDiameterBasedOnSelectedItem</code></li>
+<li><code>ShouldSetSelectedFromState</code></li>
+<li><code>ShouldShowAdjustDiameterDialogWhenAdjustDiameterInvoked</code></li>
+</ul>
+<h2 id="cells">7. Cells</h2>
+<blockquote class="blockquote">
+<p>Challenges: change propagation, widget customization, implementing a more authentic/involved GUI application.</p>
+</blockquote>
+<div class="row justify-content-center unobackground">
+    <div class="col-md-8">
+        <div class="row">
+            <a href="https://eugenkiss.github.io/7guis/static/cells.9544a72f.png" data-toggle="lightbox" data-gallery="cells" data-title="Cells Task" class="col-xs-4 col-sm-4">
+                <img src="https://eugenkiss.github.io/7guis/static/cells.9544a72f.png" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Cells-Android.gif" data-toggle="lightbox" data-gallery="cells" data-title="Cells on Android" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Cells-Android.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="cells" data-title="Cells on iOS" class="col-xs-4 col-sm-4">
+                <img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+        <div class="row">
+            <a href="/Content/Uno/Cells-UWP.gif" data-toggle="lightbox" data-gallery="cells" data-title="Cells in UWP" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Cells-UWP.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Cells-WASM.gif" data-toggle="lightbox" data-gallery="cells" data-title="Cells in Edge" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Cells-WASM.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+            <a href="/Content/Uno/Cells-WPF.gif" data-toggle="lightbox" data-gallery="cells" data-title="Cells in WPF" class="col-xs-4 col-sm-4">
+                <img src="/Content/Uno/Cells-WPF.gif" class="img-fluid ekko-lightbox-image">
+            </a>
+        </div>
+    </div>
+</div>
+<p>This project was a lot of fun to write; well, at least for the UWP head anyway. Never before had I even conceived of trying to write a spreadsheet, yet here I was six GUI's in with one to go and I didn't want to turn back now. It actually turned out to be both easier and more difficult than I had imagined:</p>
+<p>Easier in that the business logic of a spreadsheet application turned out to be surprisingly simple and involved building a recursive dependency tree whenever any cell changed and then evaluating each of the dependencies using an <a href="https://www.nuget.org/packages/XLParser/">off-the-shelf expression parser</a> married to a custom expression visitor implementation. All this was isolated in a <a href="https://github.com/ibebbs/SevenGuis/tree/master/src/Cells/Cells.Common/Spreadsheet">business domain</a> with communication between this domain and the MVVM layer taking place via events transmitted over a message bus.</p>
+<p>The view layer on the other hand was very, very frustrating. It proved to be impossible to find a DataGrid control for UWP that worked with both row <em>and</em> column virtualization so I ended up having to instantiate the entire spreadsheet ahead of time. This was possible due to the description of the problem specifying that there need be only 100 rows and 26 columns otherwise I would have had to write some (probably quite clunky) custom control or give up as it would have been too much work for a blog post. After this I then found that the DataGrid I had chosen to use (because it had been ported specifically to the Uno platform - <a href="https://www.nuget.org/packages/Uno.Microsoft.Toolkit.Uwp.UI.Controls.DataGrid/5.1.0-build.200.gf9c311b069">Uno.Microsoft.Toolkit.Uwp.UI.Controls.DataGrid</a>) didn't actually work for Android or WASM anyway and just displayed an empty grid.</p>
+<p>It would have been fun to dig into the issues I found with the DataGrid on Android and WASM as it would have been cool to say that I'd written a cross-platform spreadsheet. Unfortunately I ran out of time and will, for now, have to admit defeat here.</p>
+<p>Anyway, in this task the <code>MainPageViewModel</code> simply consisted of a collection of <code>RowViewModel</code> instances which, in turn, consisted of <code>CellViewModel</code> instances. As I wasn't able to use virtualisation in the DataGrid, all behaviour was in the <code>CellViewModel</code> and consisted of:</p>
+<ul>
+<li><code>ShouldUpdateContentWhenContentChangedReceived</code></li>
+<li><code>ShouldPublishTextChangedWhenTextChanged</code></li>
+</ul>
+<p>Both these behaviours interact with the message bus to send change events or receive content updates.</p>
+<h1 id="conclusion">Conclusion</h1>
+<h3 id="uno-platform">Uno Platform</h3>
+<p>As I hope you have seen from the above, the Uno Platform really does make it possible to develop true &quot;write-once, run-anywhere&quot; applications. Its ability to provide a consistent UWP API across multiple devices/browsers is truly a monumental achievement.</p>
+<p>However, as we have also seen, it can sometimes struggle with low-level or complicated UIs which can make some advanced UX patterns difficult to get working consistently across all platforms. I was very surprised that the DataGrid control didn't function at all on Android or WASM as this control is often considered central to a lot of line-of-business applications.</p>
+<p>Fortunately Uno is currently under active development and has a very engaged community of developers reporting issues and submitting pull-requests. Version 2.0 of the platform has <a href="https://platform.uno/announcing-uno-platform-2-0/">just been released</a> and new packages are pushed to <a href="https://www.nuget.org/packages/Uno.UI">nuget</a> almost every day. I therefore have high hopes that many of the issues I encountered here will be resolved in the near future.</p>
+<p>So would I advocate the use of Uno platform? Well, as any good developer will tell you, &quot;It depends&quot;. It certainly has a great many strengths and should be considered a viable alternative to Xamarin but the fact that it's still suffering some growing pains can't be denied. I guess if I were <a href="https://www.thoughtworks.com/radar">ThoughtWorks</a>, the Uno Platform would feature in the 'Trial' section of my <a href="https://www.thoughtworks.com/radar/languages-and-frameworks">Technology Radar</a>.</p>
+<h3 id="guis">7GUIs</h3>
+<p>The &quot;7GUIs Programming Benchmark&quot; provided a diverse and interesting set of challenges. From the super simple 'Counter' to the implementation of a full spreadsheet it really does cover a lot of common UI/UX patterns.</p>
+<p>As a benchmark for evaluating the Uno platform however, I don't think it was a particularly good choice. Uno is targeted at rich visuals using controls which have native interaction patterns across multiple form-factors, something that almost certainly wasn't a consideration for the creators of the 7GUIs.</p>
+<h3 id="declarative-behaviours-frp">Declarative Behaviours &amp; FRP</h3>
+<p>While a significant amount of the detail regarding these aspects of the UI implementation had to be omitted from the descriptions of each task, I trust you are able to see how Behavioural Design can be incorporated into declarative code and how FRP can provide numerous benefits to an implementation.</p>
+<p>I would very much encourage you to examine the use of these paradigms in the implementation of the UIs and more broadly from the growing body of code employing these practices. Also, if you get the chance, take some time to <a href="https://fsharp.org/">learn F#</a>; I almost guarantee that, once you hit that functional &quot;light-bulb&quot; moment, your C# will never be the same again.</p>
+<h3 id="dual-screen-devices">Dual-Screen Devices</h3>
+<p>So how does this all fare for the underlying use case of developing applications for the Surface Neo and Surface Duo? Well, personally I'm very encouraged. The current version of Uno works beautifully with my preferred implementation paradigms and, with just a couple of exceptions, provided an extremely consistent and stable API surface to work with across all its supported platforms.</p>
+<p>I am very much looking forward to getting my hands on these devices (nudge, nudge, Microsoft) and spending some serious time looking at what can be achieved with these tools and form-factors. I'm especially interested to try some of the new <a href="https://platform.uno/winui-on-windows7-via-unoplatform/">WinUI features</a> in a cross platform application; I mean, can you imagine some of the beautiful new <a href="https://docs.microsoft.com/en-us/windows/uwp/design/style/acrylic">Acrylic UIs</a> running natively on Android... woah.</p>
+<h3 id="source-questions-feedback">Source, Questions &amp; Feedback</h3>
+<p>All the source code for this article can be found in my <a href="https://github.com/ibebbs/SevenGuis">SevenGuis Github Repository</a>. Fork it and have a play (and send me a PR if you manage to resolve any of the issues I got stumped by).</p>
+<p>I'd also love to hear any questions or feedback you may have about this article. Feel free to get in touch using any of the social links below or from my <a href="https://ian.bebbs.co.uk/about">about page</a>.</p>
+<h1 id="and-finally">And finally...</h1>
+<p><img src="https://media.giphy.com/media/kBM8KY3zrk7D2/giphy.gif" class="img-fluid" alt="Merry Christmas" /></p>
+<script type="text/javascript">
+$(document).on('click', '[data-toggle="lightbox"]', function(event) {
+                event.preventDefault();
+                $(this).ekkoLightbox();
+            });
+</script>
+<div id="myModal" class="modal">
+  <span class="close cursor" onclick="closeModal()">&times;</span>
+  <div class="modal-content">
+    <div class="mySlides">
+      <div class="numbertext">1 / 4</div>
+      <img src="https://eugenkiss.github.io/7guis/static/counter.9cd92091.png" alt="Counter Task">
+    </div>
+    <div class="mySlides">
+      <div class="numbertext">2 / 4</div>
+      <img src="/Content/Uno/Counter-Android.gif" alt="Counter on Android">
+    </div>
+    <div class="mySlides">
+      <div class="numbertext">3 / 4</div>
+      <img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" alt="Counter on iOS"/>
+    </div>
+    <div class="mySlides">
+      <div class="numbertext">4 / 4</div>
+      <img src="/Content/Uno/Counter-UWP.gif" alt="Counter on UWP"/>
+    </div>
+    <div class="mySlides">
+      <div class="numbertext">5 / 5</div>
+      <img src="/Content/Uno/Counter-WASM.gif" alt="Counter on WASM"/>
+    </div>
+    <div class="mySlides">
+      <div class="numbertext">6 / 6</div>
+      <img src="/Content/Uno/Counter-WPF.gif" alt="Counter on WPF"/>
+    </div>
+    <!-- Next/previous controls -->
+    <a class="prev" onclick="plusSlides(-1)">&#10094;</a>
+    <a class="next" onclick="plusSlides(1)">&#10095;</a>
+    <!-- Caption text -->
+    <div class="caption-container">
+      <p id="caption"></p>
+    </div>
+  </div>
+</div>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2019. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
