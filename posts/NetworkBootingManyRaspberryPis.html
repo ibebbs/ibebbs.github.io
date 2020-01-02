@@ -1,0 +1,431 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Network Booting Many Raspberry Pis</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Network Booting Many Raspberry Pis" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/NetworkBootingManyRaspberryPis" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Network Booting Many Raspberry Pis</h1>
+        <h2 class="subheading">A guide that works for me... mileage may vary</h2>
+    <div class="meta">        
+Published on 02 January 2020<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/network-boot" class="btn btn-default btn-xs">network boot</a>
+                    <a role="button" href="/tags/pxe" class="btn btn-default btn-xs">pxe</a>
+                    <a role="button" href="/tags/Raspberry-Pi" class="btn btn-default btn-xs">Raspberry Pi</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="intro">Intro</h2>
+<p>This is just a short post - mostly for my own benefit - on how to network boot multiple Raspberry Pis from an x86 Linux Server. While this has been covered <a href="https://hackaday.com/2019/11/11/network-booting-the-pi-4/">many</a> <a href="https://hackaday.com/2018/10/08/hack-my-house-running-raspberry-pi-without-an-sd-card/">times</a> in <a href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/net_tutorial.md">other</a> <a href="https://github.com/raspberrypi/rpi-eeprom/blob/master/firmware/raspberry_pi4_network_boot_beta.md">posts</a> none of them worked for me &quot;out of the box&quot;. Here's what does.</p>
+<h2 id="infrastructure">Infrastructure</h2>
+<p>I will be using the following components</p>
+<ul>
+<li>Hyper-V Virtual Machine running Raspberry Pi Desktop (aka Debian Buster with Raspberry Pi Desktop) downloaded from <a href="https://www.raspberrypi.org/downloads/raspberry-pi-desktop/">here</a> as the network boot server.</li>
+<li>Multiple Raspberry Pi 3B+ (the non-plus Raspberry Pi 3B requires <a href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/net_tutorial.md">additional steps</a>) as network boot clients</li>
+</ul>
+<h2 id="requirements">Requirements</h2>
+<p>The <a href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/net_tutorial.md">official Raspberry Pi Network Boot instructions</a> assume you're using a Raspberry Pi as the network boot server and can therefore &quot;copy&quot; a Raspbian installation from an SD Card that has been installed on the network boot client Raspberry Pi. As I want to use an Linux server - running in a virtualised environment no less - I will be using additional steps from Hackaday's excellent article on <a href="https://hackaday.com/2019/11/11/network-booting-the-pi-4/">Network Booting The Pi 4</a>.</p>
+<p>Additionally, while each of the network boot client Raspberry Pi's will be running Raspbian Buster Lite, they will be used for different purposes so must run a unique Raspbian installation.</p>
+<h2 id="steps">Steps</h2>
+<h3 id="network-boot-server">Network Boot Server</h3>
+<ol>
+<li><p>Create a virtual machine and install Debian Buster with Raspberry Pi Desktop. I will not cover instructions for doing this here as there are many virtualisation engines and instructions for each would be different; suffice to say I used a Gen 1 Hyper-V instance on Windows Server 2016 with 4 virtual cores, 8Gb of RAM and 64Gb of disk-space. Furthermore, after installation, I enabled SSH and used SSH to execute the following.</p>
+</li>
+<li><p>Install required software using the following command:</p>
+<pre><code class="language-bash">sudo apt-get install unzip kpartx dnsmasq nfs-kernel-server
+</code></pre>
+</li>
+<li><p>Make a directory to contain the first network boot client image:</p>
+<pre><code>sudo mkdir -p /nfs/raspi1
+</code></pre>
+</li>
+<li><p>Download and unzip the latest Raspbian Buster Lite image:</p>
+<pre><code class="language-bash">wget https://downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2019-09-30/2019-09-26-raspbian-buster-lite.zip
+unzip 2019-09-26-raspbian-buster-lite.zip
+</code></pre>
+</li>
+<li><p>Mount the Raspbian Buster Lite image to known locations:</p>
+<pre><code class="language-bash">sudo kpartx -a -v 2019-09-26-raspbian-buster.img
+mkdir rootmnt
+mkdir bootmnt
+sudo mount /dev/mapper/loop0p2 rootmnt/
+sudo mount /dev/mapper/loop0p1 bootmnt/
+</code></pre>
+</li>
+<li><p>Copy the Raspbian Buster Lite image to the network boot client image directory created above:</p>
+<pre><code class="language-bash">sudo cp -a rootmnt/* /nfs/raspi1/
+sudo cp -a bootmnt/* /nfs/raspi1/boot/
+</code></pre>
+</li>
+<li><p>Ensure the network boot client image doesn't attempt to look for filesystems on the SD Card:</p>
+<pre><code class="language-bash">sudo sed -i /UUID/d /nfs/raspi1/etc/fstab
+</code></pre>
+</li>
+<li><p>Replace the boot command in the network boot client image to boot from a network share. Ensure you replace [IP Address] with the IP address of your network boot server (note the <code>modprobe.blacklist</code> is required to successfully boot the Raspberry Pi 3B+ as described <a href="https://raspberrypi.stackexchange.com/a/105886">here</a>):</p>
+<pre><code class="language-bash">echo &quot;console=serial0,115200 console=tty root=/dev/nfs nfsroot=[IP Address]:/nfs/raspi1,vers=3 rw ip=dhcp rootwait elevator=deadline modprobe.blacklist=bcm2835_v4l2&quot; | sudo tee /nfs/raspi1/boot/cmdline.txt
+</code></pre>
+</li>
+<li><p>Enable SSH in the network boot client image:</p>
+<pre><code class="language-bash">sudo touch /nfs/raspi1/boot/ssh
+</code></pre>
+</li>
+<li><p>Create a network share containing the network boot client image:</p>
+<pre><code class="language-bash">echo &quot;/nfs/raspi1 *(rw,sync,no_subtree_check,no_root_squash)&quot; | sudo tee -a /etc/exports
+</code></pre>
+</li>
+<li><p>Create a TrivialFTP folder containing boot code for all network boot clients</p>
+<pre><code class="language-bash">sudo mkdir /tftpboot
+sudo cp /nfs/raspi1/boot/bootcode.bin /tftpboot/bootcode.bin
+sudo chmod 777 /tftpboot
+</code></pre>
+</li>
+<li><p>Enable and restart <code>rpcbind</code> and <code>nfs-kernel-server</code> services:</p>
+<pre><code class="language-bash">sudo systemctl enable rpcbind
+sudo systemctl enable nfs-kernel-server
+sudo systemctl restart rpcbind
+sudo systemctl restart nfs-kernel-server
+</code></pre>
+</li>
+<li><p>Reconfigure <code>dnsmasq</code> to server TFTP files only to Raspberry Pi instances as described here:</p>
+<blockquote class="blockquote">
+<p>We need to add our settings to the dnsmasq config file, which is where most of the magic happens. Let’s talk about that “proxy” setting. What we’re asking dnsmasq to do is watch for DHCP requests, and rather than respond to those requests directly, wait for the primary DHCP server to assign an IP address. If dnsmasq sees a request for PXE information, it will send additional information to inform the PXE-capable device of the PXE server information. The upside is that this approach lets us support PXE booting without modifying the primary DHCP server.</p>
+</blockquote>
+<p>Be sure to replace [Broadcast Address] with the broadcast address for your network (use <code>ip address | grep brd</code> to find it):</p>
+<pre><code class="language-bash">echo 'dhcp-range=[Broadcast Address],proxy' | sudo tee -a /etc/dnsmasq.conf
+echo 'log-dhcp' | sudo tee -a /etc/dnsmasq.conf
+echo 'enable-tftp' | sudo tee -a /etc/dnsmasq.conf
+echo 'tftp-root=/tftpboot' | sudo tee -a /etc/dnsmasq.conf
+echo 'pxe-service=0,&quot;Raspberry Pi Boot&quot;' | sudo tee -a /etc/dnsmasq.conf
+</code></pre>
+</li>
+<li><p>Enable and restart the <code>dnsmasq</code> service:</p>
+<pre><code class="language-bash">sudo systemctl enable dnsmasq
+sudo systemctl restart dnsmasq
+</code></pre>
+</li>
+<li><p>Find the serial number of the first network boot client:</p>
+<ol>
+<li><p>Tail <code>daemon.log</code> to :</p>
+<pre><code class="language-bash">sudo tail -f /var/log/daemon.log
+</code></pre>
+</li>
+<li><p>Plug in a network cable and power cable to the first network boot client. After 10-30 seconds you should see output like this in the daemon.log:</p>
+<blockquote class="blockquote">
+<p>dnsmasq-dhcp[9460]: 653460281 available DHCP subnet: 192.168.1.255/255.255.255.0<br />
+dnsmasq-dhcp[9460]: 653460281 vendor class: PXEClient:Arch:00000:UNDI:002001<br />
+dnsmasq-dhcp[9460]: 653460281 PXE(eth0) b8:27:eb:ec:46:57 proxy<br />
+dnsmasq-dhcp[9460]: 653460281 tags: eth0<br />
+dnsmasq-dhcp[9460]: 653460281 broadcast response<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  1 option: 53 message-type  2<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  4 option: 54 server-identifier  192.168.1.102<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  9 option: 60 vendor-class  50:58:45:43:6c:69:65:6e:74<br />
+dnsmasq-dhcp[9460]: 653460281 sent size: 17 option: 97 client-machine-id 00:44:44:44:44:44:44:44:44:44:44:44:44:44...<br />
+dnsmasq-dhcp[9460]: 653460281 sent size: 32 option: 43 vendor-encap  06:01:03:0a:04:00:50:58:45:09:14:00:00:11...<br />
+dnsmasq-tftp[9460]: file /tftpboot/bootsig.bin not found<br />
+dnsmasq-tftp[9460]: sent /tftpboot/bootcode.bin to 192.168.1.112<br />
+dnsmasq-dhcp[9460]: 653460281 available DHCP subnet: 192.168.1.255/255.255.255.0<br />
+dnsmasq-dhcp[9460]: 653460281 vendor class: PXEClient:Arch:00000:UNDI:002001<br />
+dnsmasq-dhcp[9460]: 653460281 PXE(eth0) b8:27:eb:ec:46:57 proxy<br />
+dnsmasq-dhcp[9460]: 653460281 tags: eth0<br />
+dnsmasq-dhcp[9460]: 653460281 broadcast response<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  1 option: 53 message-type  2<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  4 option: 54 server-identifier  192.168.1.102<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  9 option: 60 vendor-class  50:58:45:43:6c:69:65:6e:74<br />
+dnsmasq-dhcp[9460]: 653460281 sent size: 17 option: 97 client-machine-id  00:57:46:ec:fe:57:46:ec:fe:57:46:ec:fe:57...<br />
+dnsmasq-dhcp[9460]: 653460281 sent size: 32 option: 43 vendor-encap  06:01:03:0a:04:00:50:58:45:09:14:00:00:11...<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/start.elf not found<br />
+dnsmasq-tftp[9460]: file /tftpboot/autoboot.txt not found<br />
+dnsmasq-tftp[9460]: file /tftpboot/config.txt not found<br />
+dnsmasq-tftp[9460]: file /tftpboot/recovery.elf not found<br />
+dnsmasq-tftp[9460]: file /tftpboot/start.elf not found<br />
+dnsmasq-tftp[9460]: file /tftpboot/fixup.dat not found</p>
+</blockquote>
+<p>This shows that the first network boot client has successfully made requests to the TFTP service on the network boot service.</p>
+</li>
+<li><p>Notice the <code>dnsmasq-tftp[9460]: file /tftpboot/feec4657/start.elf not found</code> line. The 'feec4657' value is the serial number of the network boot client (it will obviously be different for you) and allows you to use different images for different devices.</p>
+</li>
+</ol>
+</li>
+<li><p>Create a directory for the first network boot client in the <code>/tftpboot</code> directory (remembering to replace <code>[SerialNumber]</code> with the value you found above):</p>
+<pre><code class="language-bash">sudo mkdir /tftpboot/[SerialNumber]
+</code></pre>
+</li>
+<li><p>Copy the boot directory from the <code>/nfs/raspi1</code> directory to the new directory in <code>/tftpboot</code>:</p>
+<pre><code class="language-bash">sudo cp -a /nfs/raspi1/boot/* /tftpboot/[SerialNumber]/
+</code></pre>
+</li>
+<li><p>Reconnect the power to the network boot client and it should now boot successfully. If you use <code>sudo tail -f /var/log/daemon.log</code> again you should see something like the following:</p>
+<blockquote class="blockquote">
+<p>dnsmasq-dhcp[9460]: 653460281 vendor class: PXEClient:Arch:00000:UNDI:002001<br />
+dnsmasq-dhcp[9460]: 653460281 PXE(eth0) b8:27:eb:ec:46:57 proxy<br />
+dnsmasq-dhcp[9460]: 653460281 tags: eth0<br />
+dnsmasq-dhcp[9460]: 653460281 broadcast response<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  1 option: 53 message-type  2<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  4 option: 54 server-identifier  192.168.1.102<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  9 option: 60 vendor-class  50:58:45:43:6c:69:65:6e:74<br />
+dnsmasq-dhcp[9460]: 653460281 sent size: 17 option: 97 client-machine-id  00:44:44:44:44:44:44:44:44:44:44:44:44:44...<br />
+dnsmasq-dhcp[9460]: 653460281 sent size: 32 option: 43 vendor-encap  06:01:03:0a:04:00:50:58:45:09:14:00:00:11...<br />
+dnsmasq-tftp[9460]: file /tftpboot/bootsig.bin not found<br />
+dnsmasq-tftp[9460]: sent /tftpboot/bootcode.bin to 192.168.1.112<br />
+dnsmasq-dhcp[9460]: 653460281 available DHCP subnet: 192.168.1.255/255.255.255.0<br />
+dnsmasq-dhcp[9460]: 653460281 vendor class: PXEClient:Arch:00000:UNDI:002001<br />
+dnsmasq-dhcp[9460]: 653460281 PXE(eth0) b8:27:eb:ec:46:57 proxy<br />
+dnsmasq-dhcp[9460]: 653460281 tags: eth0<br />
+dnsmasq-dhcp[9460]: 653460281 broadcast response<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  1 option: 53 message-type  2<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  4 option: 54 server-identifier  192.168.1.102<br />
+dnsmasq-dhcp[9460]: 653460281 sent size:  9 option: 60 vendor-class  50:58:45:43:6c:69:65:6e:74<br />
+dnsmasq-dhcp[9460]: 653460281 sent size: 17 option: 97 client-machine-id  00:57:46:ec:fe:57:46:ec:fe:57:46:ec:fe:57...<br />
+dnsmasq-dhcp[9460]: 653460281 sent size: 32 option: 43 vendor-encap  06:01:03:0a:04:00:50:58:45:09:14:00:00:11...<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/autoboot.txt not found<br />
+dnsmasq-tftp[9460]: error 0 Early terminate received from 192.168.1.112<br />
+dnsmasq-tftp[9460]: failed sending /tftpboot/feec4657/start.elf to 192.168.1.112<br />
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/config.txt to 192.168.1.112<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery.elf not found<br />
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/start.elf to 192.168.1.112<br />
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/fixup.dat to 192.168.1.112<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery.elf not found<br />
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/config.txt to 192.168.1.112<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/dt-blob.bin not found<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery.elf not found<br />
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/config.txt to 192.168.1.112<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/bootcfg.txt not found<br />
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/cmdline.txt to 192.168.1.112<br />
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/bcm2710-rpi-3-b.dtb to 192.168.1.112<br />
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/config.txt to 192.168.1.112<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery8.img not found<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery8-32.img not found<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery7.img not found<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery.img not found<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/kernel8-32.img not found<br />
+dnsmasq-tftp[9460]: error 0 Early terminate received from 192.168.1.112<br />
+dnsmasq-tftp[9460]: failed sending /tftpboot/feec4657/kernel8.img to 192.168.1.112<br />
+dnsmasq-tftp[9460]: error 0 Early terminate received from 192.168.1.112<br />
+dnsmasq-tftp[9460]: failed sending /tftpboot/feec4657/kernel7.img to 192.168.1.112<br />
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/armstub8-32.bin not found<br />
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/kernel7.img to 192.168.1.112<br />
+dnsmasq-dhcp[9460]: 1754635714 available DHCP subnet: 192.168.1.255/255.255.255.0<br />
+dnsmasq-dhcp[9460]: 1754635714 available DHCP subnet: 192.168.1.255/255.255.255.0<br />
+rpc.mountd[26471]: authenticated mount request from 192.168.1.112:843 for /nfs/raspi1 (/nfs/raspi1)</p>
+</blockquote>
+<p>Here we can see the following:</p>
+<ul>
+<li><code>sent /tftpboot/bootcode.bin to 192.168.1.112</code> -&gt; We successfully sent the <code>bootcode.bin</code> to the network boot client</li>
+<li><code>sent /tftpboot/feec4657/[FILENAME] to 192.168.1.112</code> -&gt; We successfully sent boot files from the device specific <code>/tftpboot</code> directory to the network boot client</li>
+<li><code>authenticated mount request from 192.168.1.112:843 for /nfs/raspi1 (/nfs/raspi1)</code> -&gt; the network boot client mounted to the system drive from the nfs share.</li>
+</ul>
+</li>
+<li><p>You should now be able to ssh into the network boot client using the following (replacing the [IP Address]) with the one you see):</p>
+<pre><code class="language-bash">ssh pi&#64;[IP Address]
+</code></pre>
+<p>Using the default password of 'raspberry'.</p>
+</li>
+</ol>
+<h2 id="additional-network-boot-clients">Additional Network Boot Clients</h2>
+<p>To add additional network boot clients, simply repeat steps 3, 6-10, 15-18 replacing all instances of <code>raspi1</code> with a new name.</p>
+<h2 id="enjoy">Enjoy</h2>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2020. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+

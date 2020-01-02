@@ -3,9 +3,226 @@
 	<id>http://ian.bebbs.co.uk/</id>
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
-	<rights>2019</rights>
-	<updated>2019-12-16T07:29:03Z</updated>
+	<rights>2020</rights>
+	<updated>2020-01-02T17:30:37Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/NetworkBootingManyRaspberryPis</id>
+		<title>Network Booting Many Raspberry Pis</title>
+		<link href="http://ian.bebbs.co.uk/posts/NetworkBootingManyRaspberryPis" />
+		<updated>2020-01-02T00:00:00Z</updated>
+		<content>&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;This is just a short post - mostly for my own benefit - on how to network boot multiple Raspberry Pis from an x86 Linux Server. While this has been covered &lt;a href="https://hackaday.com/2019/11/11/network-booting-the-pi-4/"&gt;many&lt;/a&gt; &lt;a href="https://hackaday.com/2018/10/08/hack-my-house-running-raspberry-pi-without-an-sd-card/"&gt;times&lt;/a&gt; in &lt;a href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/net_tutorial.md"&gt;other&lt;/a&gt; &lt;a href="https://github.com/raspberrypi/rpi-eeprom/blob/master/firmware/raspberry_pi4_network_boot_beta.md"&gt;posts&lt;/a&gt; none of them worked for me &amp;quot;out of the box&amp;quot;. Here's what does.&lt;/p&gt;
+&lt;h2 id="infrastructure"&gt;Infrastructure&lt;/h2&gt;
+&lt;p&gt;I will be using the following components&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Hyper-V Virtual Machine running Raspberry Pi Desktop (aka Debian Buster with Raspberry Pi Desktop) downloaded from &lt;a href="https://www.raspberrypi.org/downloads/raspberry-pi-desktop/"&gt;here&lt;/a&gt; as the network boot server.&lt;/li&gt;
+&lt;li&gt;Multiple Raspberry Pi 3B+ (the non-plus Raspberry Pi 3B requires &lt;a href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/net_tutorial.md"&gt;additional steps&lt;/a&gt;) as network boot clients&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="requirements"&gt;Requirements&lt;/h2&gt;
+&lt;p&gt;The &lt;a href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/net_tutorial.md"&gt;official Raspberry Pi Network Boot instructions&lt;/a&gt; assume you're using a Raspberry Pi as the network boot server and can therefore &amp;quot;copy&amp;quot; a Raspbian installation from an SD Card that has been installed on the network boot client Raspberry Pi. As I want to use an Linux server - running in a virtualised environment no less - I will be using additional steps from Hackaday's excellent article on &lt;a href="https://hackaday.com/2019/11/11/network-booting-the-pi-4/"&gt;Network Booting The Pi 4&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Additionally, while each of the network boot client Raspberry Pi's will be running Raspbian Buster Lite, they will be used for different purposes so must run a unique Raspbian installation.&lt;/p&gt;
+&lt;h2 id="steps"&gt;Steps&lt;/h2&gt;
+&lt;h3 id="network-boot-server"&gt;Network Boot Server&lt;/h3&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Create a virtual machine and install Debian Buster with Raspberry Pi Desktop. I will not cover instructions for doing this here as there are many virtualisation engines and instructions for each would be different; suffice to say I used a Gen 1 Hyper-V instance on Windows Server 2016 with 4 virtual cores, 8Gb of RAM and 64Gb of disk-space. Furthermore, after installation, I enabled SSH and used SSH to execute the following.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Install required software using the following command:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;sudo apt-get install unzip kpartx dnsmasq nfs-kernel-server
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Make a directory to contain the first network boot client image:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo mkdir -p /nfs/raspi1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Download and unzip the latest Raspbian Buster Lite image:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;wget https://downloads.raspberrypi.org/raspbian_lite/images/raspbian_lite-2019-09-30/2019-09-26-raspbian-buster-lite.zip
+unzip 2019-09-26-raspbian-buster-lite.zip
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Mount the Raspbian Buster Lite image to known locations:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;sudo kpartx -a -v 2019-09-26-raspbian-buster.img
+mkdir rootmnt
+mkdir bootmnt
+sudo mount /dev/mapper/loop0p2 rootmnt/
+sudo mount /dev/mapper/loop0p1 bootmnt/
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Copy the Raspbian Buster Lite image to the network boot client image directory created above:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;sudo cp -a rootmnt/* /nfs/raspi1/
+sudo cp -a bootmnt/* /nfs/raspi1/boot/
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Ensure the network boot client image doesn't attempt to look for filesystems on the SD Card:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;sudo sed -i /UUID/d /nfs/raspi1/etc/fstab
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Replace the boot command in the network boot client image to boot from a network share. Ensure you replace [IP Address] with the IP address of your network boot server (note the &lt;code&gt;modprobe.blacklist&lt;/code&gt; is required to successfully boot the Raspberry Pi 3B+ as described &lt;a href="https://raspberrypi.stackexchange.com/a/105886"&gt;here&lt;/a&gt;):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;echo &amp;quot;console=serial0,115200 console=tty root=/dev/nfs nfsroot=[IP Address]:/nfs/raspi1,vers=3 rw ip=dhcp rootwait elevator=deadline modprobe.blacklist=bcm2835_v4l2&amp;quot; | sudo tee /nfs/raspi1/boot/cmdline.txt
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Enable SSH in the network boot client image:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;sudo touch /nfs/raspi1/boot/ssh
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Create a network share containing the network boot client image:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;echo &amp;quot;/nfs/raspi1 *(rw,sync,no_subtree_check,no_root_squash)&amp;quot; | sudo tee -a /etc/exports
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Create a TrivialFTP folder containing boot code for all network boot clients&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;sudo mkdir /tftpboot
+sudo cp /nfs/raspi1/boot/bootcode.bin /tftpboot/bootcode.bin
+sudo chmod 777 /tftpboot
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Enable and restart &lt;code&gt;rpcbind&lt;/code&gt; and &lt;code&gt;nfs-kernel-server&lt;/code&gt; services:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;sudo systemctl enable rpcbind
+sudo systemctl enable nfs-kernel-server
+sudo systemctl restart rpcbind
+sudo systemctl restart nfs-kernel-server
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Reconfigure &lt;code&gt;dnsmasq&lt;/code&gt; to server TFTP files only to Raspberry Pi instances as described here:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;We need to add our settings to the dnsmasq config file, which is where most of the magic happens. Let’s talk about that “proxy” setting. What we’re asking dnsmasq to do is watch for DHCP requests, and rather than respond to those requests directly, wait for the primary DHCP server to assign an IP address. If dnsmasq sees a request for PXE information, it will send additional information to inform the PXE-capable device of the PXE server information. The upside is that this approach lets us support PXE booting without modifying the primary DHCP server.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Be sure to replace [Broadcast Address] with the broadcast address for your network (use &lt;code&gt;ip address | grep brd&lt;/code&gt; to find it):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;echo 'dhcp-range=[Broadcast Address],proxy' | sudo tee -a /etc/dnsmasq.conf
+echo 'log-dhcp' | sudo tee -a /etc/dnsmasq.conf
+echo 'enable-tftp' | sudo tee -a /etc/dnsmasq.conf
+echo 'tftp-root=/tftpboot' | sudo tee -a /etc/dnsmasq.conf
+echo 'pxe-service=0,&amp;quot;Raspberry Pi Boot&amp;quot;' | sudo tee -a /etc/dnsmasq.conf
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Enable and restart the &lt;code&gt;dnsmasq&lt;/code&gt; service:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;sudo systemctl enable dnsmasq
+sudo systemctl restart dnsmasq
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Find the serial number of the first network boot client:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Tail &lt;code&gt;daemon.log&lt;/code&gt; to :&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;sudo tail -f /var/log/daemon.log
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Plug in a network cable and power cable to the first network boot client. After 10-30 seconds you should see output like this in the daemon.log:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;dnsmasq-dhcp[9460]: 653460281 available DHCP subnet: 192.168.1.255/255.255.255.0&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 vendor class: PXEClient:Arch:00000:UNDI:002001&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 PXE(eth0) b8:27:eb:ec:46:57 proxy&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 tags: eth0&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 broadcast response&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  1 option: 53 message-type  2&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  4 option: 54 server-identifier  192.168.1.102&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  9 option: 60 vendor-class  50:58:45:43:6c:69:65:6e:74&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size: 17 option: 97 client-machine-id 00:44:44:44:44:44:44:44:44:44:44:44:44:44...&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size: 32 option: 43 vendor-encap  06:01:03:0a:04:00:50:58:45:09:14:00:00:11...&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/bootsig.bin not found&lt;br /&gt;
+dnsmasq-tftp[9460]: sent /tftpboot/bootcode.bin to 192.168.1.112&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 available DHCP subnet: 192.168.1.255/255.255.255.0&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 vendor class: PXEClient:Arch:00000:UNDI:002001&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 PXE(eth0) b8:27:eb:ec:46:57 proxy&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 tags: eth0&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 broadcast response&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  1 option: 53 message-type  2&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  4 option: 54 server-identifier  192.168.1.102&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  9 option: 60 vendor-class  50:58:45:43:6c:69:65:6e:74&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size: 17 option: 97 client-machine-id  00:57:46:ec:fe:57:46:ec:fe:57:46:ec:fe:57...&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size: 32 option: 43 vendor-encap  06:01:03:0a:04:00:50:58:45:09:14:00:00:11...&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/start.elf not found&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/autoboot.txt not found&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/config.txt not found&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/recovery.elf not found&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/start.elf not found&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/fixup.dat not found&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;This shows that the first network boot client has successfully made requests to the TFTP service on the network boot service.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Notice the &lt;code&gt;dnsmasq-tftp[9460]: file /tftpboot/feec4657/start.elf not found&lt;/code&gt; line. The 'feec4657' value is the serial number of the network boot client (it will obviously be different for you) and allows you to use different images for different devices.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Create a directory for the first network boot client in the &lt;code&gt;/tftpboot&lt;/code&gt; directory (remembering to replace &lt;code&gt;[SerialNumber]&lt;/code&gt; with the value you found above):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;sudo mkdir /tftpboot/[SerialNumber]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Copy the boot directory from the &lt;code&gt;/nfs/raspi1&lt;/code&gt; directory to the new directory in &lt;code&gt;/tftpboot&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;sudo cp -a /nfs/raspi1/boot/* /tftpboot/[SerialNumber]/
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Reconnect the power to the network boot client and it should now boot successfully. If you use &lt;code&gt;sudo tail -f /var/log/daemon.log&lt;/code&gt; again you should see something like the following:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;dnsmasq-dhcp[9460]: 653460281 vendor class: PXEClient:Arch:00000:UNDI:002001&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 PXE(eth0) b8:27:eb:ec:46:57 proxy&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 tags: eth0&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 broadcast response&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  1 option: 53 message-type  2&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  4 option: 54 server-identifier  192.168.1.102&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  9 option: 60 vendor-class  50:58:45:43:6c:69:65:6e:74&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size: 17 option: 97 client-machine-id  00:44:44:44:44:44:44:44:44:44:44:44:44:44...&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size: 32 option: 43 vendor-encap  06:01:03:0a:04:00:50:58:45:09:14:00:00:11...&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/bootsig.bin not found&lt;br /&gt;
+dnsmasq-tftp[9460]: sent /tftpboot/bootcode.bin to 192.168.1.112&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 available DHCP subnet: 192.168.1.255/255.255.255.0&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 vendor class: PXEClient:Arch:00000:UNDI:002001&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 PXE(eth0) b8:27:eb:ec:46:57 proxy&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 tags: eth0&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 broadcast response&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  1 option: 53 message-type  2&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  4 option: 54 server-identifier  192.168.1.102&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size:  9 option: 60 vendor-class  50:58:45:43:6c:69:65:6e:74&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size: 17 option: 97 client-machine-id  00:57:46:ec:fe:57:46:ec:fe:57:46:ec:fe:57...&lt;br /&gt;
+dnsmasq-dhcp[9460]: 653460281 sent size: 32 option: 43 vendor-encap  06:01:03:0a:04:00:50:58:45:09:14:00:00:11...&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/autoboot.txt not found&lt;br /&gt;
+dnsmasq-tftp[9460]: error 0 Early terminate received from 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: failed sending /tftpboot/feec4657/start.elf to 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/config.txt to 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery.elf not found&lt;br /&gt;
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/start.elf to 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/fixup.dat to 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery.elf not found&lt;br /&gt;
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/config.txt to 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/dt-blob.bin not found&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery.elf not found&lt;br /&gt;
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/config.txt to 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/bootcfg.txt not found&lt;br /&gt;
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/cmdline.txt to 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/bcm2710-rpi-3-b.dtb to 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/config.txt to 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery8.img not found&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery8-32.img not found&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery7.img not found&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/recovery.img not found&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/kernel8-32.img not found&lt;br /&gt;
+dnsmasq-tftp[9460]: error 0 Early terminate received from 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: failed sending /tftpboot/feec4657/kernel8.img to 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: error 0 Early terminate received from 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: failed sending /tftpboot/feec4657/kernel7.img to 192.168.1.112&lt;br /&gt;
+dnsmasq-tftp[9460]: file /tftpboot/feec4657/armstub8-32.bin not found&lt;br /&gt;
+dnsmasq-tftp[9460]: sent /tftpboot/feec4657/kernel7.img to 192.168.1.112&lt;br /&gt;
+dnsmasq-dhcp[9460]: 1754635714 available DHCP subnet: 192.168.1.255/255.255.255.0&lt;br /&gt;
+dnsmasq-dhcp[9460]: 1754635714 available DHCP subnet: 192.168.1.255/255.255.255.0&lt;br /&gt;
+rpc.mountd[26471]: authenticated mount request from 192.168.1.112:843 for /nfs/raspi1 (/nfs/raspi1)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Here we can see the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;sent /tftpboot/bootcode.bin to 192.168.1.112&lt;/code&gt; -&amp;gt; We successfully sent the &lt;code&gt;bootcode.bin&lt;/code&gt; to the network boot client&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;sent /tftpboot/feec4657/[FILENAME] to 192.168.1.112&lt;/code&gt; -&amp;gt; We successfully sent boot files from the device specific &lt;code&gt;/tftpboot&lt;/code&gt; directory to the network boot client&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;authenticated mount request from 192.168.1.112:843 for /nfs/raspi1 (/nfs/raspi1)&lt;/code&gt; -&amp;gt; the network boot client mounted to the system drive from the nfs share.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;You should now be able to ssh into the network boot client using the following (replacing the [IP Address]) with the one you see):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-bash"&gt;ssh pi&amp;#64;[IP Address]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Using the default password of 'raspberry'.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="additional-network-boot-clients"&gt;Additional Network Boot Clients&lt;/h2&gt;
+&lt;p&gt;To add additional network boot clients, simply repeat steps 3, 6-10, 15-18 replacing all instances of &lt;code&gt;raspi1&lt;/code&gt; with a new name.&lt;/p&gt;
+&lt;h2 id="enjoy"&gt;Enjoy&lt;/h2&gt;
+</content>
+		<summary>&lt;p&gt;This is just a short post - mostly for my own benefit - on how to network boot multiple Raspberry Pis from an x86 Linux Server. While this has been covered &lt;a href="https://hackaday.com/2019/11/11/network-booting-the-pi-4/"&gt;many&lt;/a&gt; &lt;a href="https://hackaday.com/2018/10/08/hack-my-house-running-raspberry-pi-without-an-sd-card/"&gt;times&lt;/a&gt; in &lt;a href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/net_tutorial.md"&gt;other&lt;/a&gt; &lt;a href="https://github.com/raspberrypi/rpi-eeprom/blob/master/firmware/raspberry_pi4_network_boot_beta.md"&gt;posts&lt;/a&gt; none of them worked for me "out of the box". Here's what does.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/Uno</id>
 		<title>The Seven GUIs of Christmas</title>
@@ -2742,53 +2959,5 @@ ENTRYPOINT [ &amp;quot;powershell.exe&amp;quot;, &amp;quot;C:/Start-Zookeeper.ps
 &lt;p&gt;It's been an interesting journey so far and I've not even begun to actually use the deployed services yet! Still, it is truly magical to run a docker container and see it boot an entire Windows server and service in just 10-20 seconds and a few hundred Mb.&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;For my first blog post of the new year (Happy New Year everyone!!!), I'd like to share some of my recent adventures with Docker on Windows, or, more specifically, Docker on Windows using Nanoserver as the container OS.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/CqrsEsMvvmRxEfSqlUwpPcl</id>
-		<title>CQRS/ES &amp; MVVM using RX, EF &amp; SQL in UWP &amp; PCL …</title>
-		<link href="http://ian.bebbs.co.uk/posts/CqrsEsMvvmRxEfSqlUwpPcl" />
-		<updated>2016-12-22T00:00:00Z</updated>
-		<content>&lt;p&gt;So, while ToddlerBox is riding high, I'd like to share some thoughts about another app I have in the store; &lt;a href="https://www.microsoft.com/en-gb/store/p/littlelittle/9nblggh51b1b"&gt;LittleLittle&lt;/a&gt;. This app has been the subject of most of my efforts over the last few months and is significantly more complex (and, frustratingly, less successful!) than ToddlerBox.&lt;/p&gt;
-&lt;p&gt;LittleLittle was started shortly after my baby girl started weaning and became constipated - apparently a very common occurrence. When we visited a paediatrician about it, they asked that we keep a record of her bowel movements so that we could track the condition to see if it was getting better or worse.&lt;/p&gt;
-&lt;p&gt;&amp;quot;I wonder if there's an app for that&amp;quot;, I thought. And, of course, there was.&lt;/p&gt;
-&lt;h2 id="opportunity-and-methodology"&gt;Opportunity and Methodology&lt;/h2&gt;
-&lt;p&gt;However, while there are plenty of other baby tracking apps out there, very few work across platform (I use Windows Mobile while my partner uses Android) and even fewer work as I feel they should.&lt;/p&gt;
-&lt;p&gt;Given the requirement to work across a variety of platforms, maximising code re-use was extremely desirable. As such, I decided that all of the core-logic for the app needed to be written in a PCL. Furthermore, particular care would be taken to observe a pure MVVM methodology so that ViewModels (an embodiment of the app's UX) could also be shared across platform.&lt;/p&gt;
-&lt;p&gt;Finally, following some work in the CQRS/ES space at my previous employer, I wanted to write an app that used this methodology end-to-end. LittleLittle seemed a perfect opportunity to do so.&lt;/p&gt;
-&lt;h2 id="technology-and-platform"&gt;Technology and Platform&lt;/h2&gt;
-&lt;p&gt;To partner the &lt;a href="http://martinfowler.com/bliki/CQRS.html"&gt;CQRS&lt;/a&gt;/&lt;a href="http://martinfowler.com/eaaDev/EventSourcing.html"&gt;ES&lt;/a&gt; methodology, I was keen to use &lt;a href="https://msdn.microsoft.com/en-us/library/hh242985.aspx"&gt;Rx&lt;/a&gt; as the driving technology for implementation. As readers of my blog will know, I am very much of the opinion that &amp;quot;&lt;a href="http://slides.com/robwormald/everything-is-a-stream#/" title="Everything is a stream - Rob Wormald"&gt;everything&lt;/a&gt; &lt;a href="https://gist.github.com/staltz/868e7e9bc2a7b8c1f754" title="The introduction to Reactive Programming you've been missing - andrestaltz"&gt;is&lt;/a&gt; &lt;a href="http://weareadaptive.com/blog/2014/05/05/everything-is-a-stream/" title="Reactive Trader 2: Everything is a Stream - Matt Barrett"&gt;a&lt;/a&gt; &lt;a href="http://colintheshots.com/blog/?p=85" title="Be Reactive - Colintheshots"&gt;stream&lt;/a&gt;&amp;quot; and event sourcing from &amp;quot;a stream of events&amp;quot; seemed a perfect fit for Rx.&lt;/p&gt;
-&lt;p&gt;Given that the Event Sourcing methodology - not to mention the nature of the app itself - required a persistence layer, I decided to use a recently new technology; &lt;a href="https://docs.microsoft.com/en-us/ef/core/"&gt;Entity Framework Core&lt;/a&gt;. I decided on EFCore simply because the tooling for the UWP platform was pretty good and I liked the 'code-first' approach to schema and migration generation. Coupled with this, I decided to use a &lt;a href="https://docs.microsoft.com/en-us/ef/core/providers/sqlite/"&gt;SQLite&lt;/a&gt; database as it was a proven data store for use with EFCore and across a variety of underlying platforms.&lt;/p&gt;
-&lt;p&gt;Finally, when I started LittleLittle I was studying for the &lt;a href="https://www.microsoft.com/en-us/learning/exam-70-357.aspx"&gt;Microsoft Beta Exam &amp;quot;Developing Mobile Apps&amp;quot;&lt;/a&gt;. As such, while I was keen for the app to be cross-platform, the initial platform I wanted to support was UWP. I was - and still am - amazed by how, if you craft your code and views carefully, an application can run on an amazing number for platforms including RaspberryPi, Phone, Tablet, PC, Xbox and Hololens.&lt;/p&gt;
-&lt;h2 id="and-heres-one-i-made-earlier"&gt;And here's one I made earlier…&lt;/h2&gt;
-&lt;p&gt;After many weeks of work, innumerable iterations and much refactoring, I ended up with this:&lt;/p&gt;
-  &lt;div class="horizontal_list"&gt;
-    &lt;div class="horizontal_list_item"&gt;
-      &lt;img src="https://zuimew.db.files.1drv.com/y4mPxGKydLfQk1Ja93VVxZRGwlildIyNH2fDMTFjp04v21LFIlMQTHx578Nda9AMJh7KIWCnbmwBNpY9T5gle1BeP_JAe7KDBzRvP42T2DsK9fmJo4ifh8iDOkfDE_vTcHMC7zX_0QvmyIgP2OGdehESiXc7g9uLAOzreBI9ilGXrUu6U88ZwihXsj61axEWtDv1lDfagtfUTchXA6LmvJTtw?width=371&amp;height=660&amp;cropmode=none" class="img-responsive" style="margin: auto; width:256px; margin-top: 6px; margin-bottom: 6px;" alt="Splashscreen"/&gt;
-    &lt;/div&gt;
-    &lt;div class="horizontal_list_item"&gt;
-      &lt;img src="https://zuilew.db.files.1drv.com/y4mGPImTo96llsaeRg2IeX44grX98d5Xg6iNFLUfXmKcbHFMtPW0GDKhpuIjEhZW05LjJZvvSrW5afKKgSa6QJ52QSuwqaywfrsVCvKbIl6O9cW9D1C0RUQdaQ4nrO6i2nlaNvdPWeVcqqmdmmBIK2sRdUFDEN5ZSWuC7Q-TEMdB75AuyqVNawvoftaVLTlK3HUp4zn_DL8nLTwCa_yjrChfA?width=371&amp;height=660&amp;cropmode=none" class="img-responsive" style="margin: auto; width:256px; margin-top: 6px; margin-bottom: 6px;" alt="Available actions"/&gt;
-    &lt;/div&gt;
-    &lt;div class="horizontal_list_item"&gt;
-      &lt;img src="https://zuikew.db.files.1drv.com/y4mnRXd_uXCSFousyZvXcA2mKgd0ozHg2v3xDF4yFgi4-i2JJdRikuQ-uJ8wpXI9x51Zanti6PLC5xoMT4YT4Hpt_nkixl7UeoE6Id6FO9rbor9lukD7ayTwQ7HGOVfQqBPKT9Bnq4i3RSrsa0u1ZHf1pOS246CV-16yBgrK76IC-7KeABSY8xAQyBmS03pqEwK-LTNaLjan0t4gcyQlvM6Tw?width=371&amp;height=660&amp;cropmode=none" class="img-responsive" style="margin: auto; width:256px; margin-top: 6px; margin-bottom: 6px;" alt="History"/&gt;
-    &lt;/div&gt;
-    &lt;div class="horizontal_list_item"&gt;
-      &lt;img src="https://zuiiew.db.files.1drv.com/y4mXrgwh_eTv-bKJwtV0YHiFYgOGSdXJnuv-daC4oLcKDJxuIN3NAGibmsU4xMg_jzk7NjyntfSMm8-AXK2moJvZIG-jffO_xcJKsH4HTJRB7yOIjg2nOSSPYoFbOOVrDf7PZnmyJmDxlTaDSuM4MiFEPaDsrjzpCfDRP5Q-aPpYTfM8xTvkDVN3zM_A3sHXycxf0F9i1uwrBqhogj37JEsnQ?width=371&amp;height=660&amp;cropmode=none" class="img-responsive" style="margin: auto; width:256px; margin-top: 6px; margin-bottom: 6px;" alt="Height and weight charts"/&gt;
-    &lt;/div&gt;
-    &lt;div class="horizontal_list_item"&gt;
-      &lt;img src="https://zeirew.db.files.1drv.com/y4mUWt_S4O6ysFpCRRhemi6UV4Kqpr60UBnBlE-B0ttoibVgsZM-KcTPXzw5RDBlJs7wJhayLqGn4hUyhaQtafL2A7yoMsiK_1l9MPpJGBVyyGtTQ9I8oH12hr95zY90ziB2YBnN-ow4l5phqt3kAN5Meb6YxD59ZoJH-UPdMXEUvJLjIPzAVQyygnes44KRph_GA_gdOzVYZvvT4aJ1Ev8sQ?width=371&amp;height=660&amp;cropmode=none" class="img-responsive" style="margin: auto; width:256px; margin-top: 6px; margin-bottom: 6px;" alt="Sleep and excretion charts"/&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;p&gt;And I'm extremely happy with the result. CQRS/ES and Rx are a perfect match and the technology stack in general has been extremely productive.&lt;/p&gt;
-&lt;p&gt;This morning I drew up a (retrospective) architecture to illustrate how much of the application is portable and how simple yet extensible it is.&lt;/p&gt;
-&lt;img src="https://bdliqq.db.files.1drv.com/y4mUPC3fgHhe1N8KTdz2hF-CR0GDq_Pe23GzQESO0UatcBJtZe63if9O0RL0PRo0p7tYMzQGLjjOQGPbHQ7QhUl9G-Z9eWjk9UYsXvfaOxkBOkuK0VzcFIu6-Z6kEWaw9G8WQ2vNUshGIhQJHFZkoqa5v9-e-OELFwbkFxoQOGhtdFnia0HGNLj0DVd72OJHG6E1r8_R8DJPLCAX18iRvf5dw?width=3207&amp;height=1959&amp;cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Architecture diagram"&gt;
-&lt;h2 id="the-proof-is-in-the-dog-fooding"&gt;&amp;quot;The proof is in the dog-fooding&amp;quot;&lt;/h2&gt;
-&lt;p&gt;Apologies for the mixed metaphors but, suffice to say, while the technology choices may be deemed to be a success, the app can only be consider to be so if it is fit for purpose. As such, I have been using LittleLittle everyday for the past several weeks - across a number of iterations and versions - and I'm very, very pleased with the result. The UI is fast and efficient to use and the app has yet to crash or lose any data (either at runtime or between versions).&lt;/p&gt;
-&lt;p&gt;Indeed, a little while ago my other half took our baby to stay with her grandparents for a several days and agreed to keep LittleLittle up to date while she was away. She came back with a couple of small suggestions but overall very impressed by how fast and easy to use it was.&lt;/p&gt;
-&lt;p&gt;While it has yet to see a significant number of Windows Store acquisitions, Store Analytics shows there are a few people actively using the app and, so far, I have yet to see any crashes or failures. I intend to leverage the success of ToddlerBox to promote LittleLittle in the near future so, fingers crossed, it'll start getting some serious use and useful feedback.&lt;/p&gt;
-&lt;h2 id="moving-forward"&gt;Moving forward&lt;/h2&gt;
-&lt;p&gt;While I intend to put LittleLittle on hold for a little while in order to work on some other projects I've been meaning to look at, I very much intend to return to the project early in the new year. I have a backlog full of features I'd like to implement not to mention the need to write a version which runs on Android/iOS (which will probably be in Xamarin).&lt;/p&gt;
-&lt;p&gt;In the mean time, I will be blogging about a few of the components in the architecture diagram above and sharing some of the approaches I have taken and successes (or problems!) I encountered.&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;So, while ToddlerBox is riding high, I'd like to share some thoughts about another app I have in the store; &lt;a href="https://www.microsoft.com/en-gb/store/p/littlelittle/9nblggh51b1b"&gt;LittleLittle&lt;/a&gt;. This app has been the subject of most of my efforts over the last few months and is significantly more complex (and, frustratingly, less successful!) than ToddlerBox.&lt;/p&gt;</summary>
 	</entry>
 </feed>
