@@ -1,0 +1,1007 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Less ReST, more Hot Chocolate</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Less ReST, more Hot Chocolate" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/LessReSTMoreHotChocolate" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Less ReST, more Hot Chocolate</h1>
+        <h2 class="subheading">GraphQL over ReST in .NET Core 3.1</h2>
+    <div class="meta">        
+Published on 08 January 2020<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/net-core" class="btn btn-default btn-xs">.net core</a>
+                    <a role="button" href="/tags/GraphQL" class="btn btn-default btn-xs">GraphQL</a>
+                    <a role="button" href="/tags/Rest" class="btn btn-default btn-xs">Rest</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="intro">Intro</h2>
+<p>A project I'm working on requires a microservice like evaluation environment. A brief google revealed very little that would suffice so I decided to quickly knock up my own. At the same time, I thought it would be a great opportunity to evaluate <a href="https://hotchocolate.io/">Hot Chocolate</a> by <a href="https://chillicream.com/">Chilli Cream</a>; a relative newcomer to the (very sparse) GraphQL for .NET scene. In this post I'll also be using <a href="https://github.com/RicoSuter/NSwag">NSwag</a> to generate <a href="https://www.openapis.org/">OpenAPI documents</a> and <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#how-to-use-typed-clients-with-httpclientfactory">Typed Clients</a> for downstream services and, finally, I will be containerizing the microservices using <a href="https://www.docker.com/">Docker</a> and employing <a href="https://docs.docker.com/compose/">Docker Compose</a> to run and test them.</p>
+<h2 id="contents">Contents</h2>
+<ol>
+<li><a href="#requirements">Requirements</a>
+<ol>
+<li><a href="#solution">Solution</a></li>
+<li><a href="#environment">Environment</a></li>
+</ol>
+</li>
+<li><a href="#about-hot-chocolate">About Hot Chocolate</a></li>
+<li><a href="#solution-structure">Solution Structure</a></li>
+<li><a href="#rest-services">ReST Services</a>
+<ol>
+<li><a href="#cheeze.store">Cheeze.Store</a></li>
+<li><a href="#cheeze.inventory">Cheeze.Inventory</a></li>
+<li><a href="#providing-swagger-endpoints">Providing Swagger Endpoints</a></li>
+<li><a href="#generating-typed-clients">Generating Typed Clients</a></li>
+</ol>
+</li>
+<li><a href="#graphql-service">GraphQL Service</a>
+<ol>
+<li><a href="#object-model">Object Model</a></li>
+<li><a href="#schema-resolvers">Schema &amp; Resolvers</a></li>
+<li><a href="#service-binding-configuration">Service Binding &amp; Configuration</a></li>
+</ol>
+</li>
+<li><a href="#containerization">Containerization</a>
+<ol>
+<li><a href="#docker-support">Docker Support</a></li>
+<li><a href="#container-orchestration-support">Container Orchestration Support</a></li>
+</ol>
+</li>
+<li><a href="#testing">Testing</a></li>
+<li><a href="#conclusion">Conclusion</a></li>
+</ol>
+<h2 id="requirements">Requirements</h2>
+<h3 id="solution">Solution</h3>
+<p>The requirements for the test environment were pretty simple:</p>
+<ul>
+<li>A .net core web service which, when called, fetched and collated data from two other .net core web services. As (conditionally) aggregating data from multiple sources is one of GraphQL's primary use cases I decided a GraphQL endpoint would make for a great entry point into this flow.</li>
+<li>Avoid any tight coupling between the GraphQL endpoint and the underlying web-services yet provide strong compile-time guarantees of cohesion with these services.</li>
+<li>A simple build/deployment/debug loop.</li>
+<li>Embrace 'modern' methodologies; for example asynchronous controller actions and <a href="https://docs.microsoft.com/en-us/dotnet/csharp/nullable-references">Nullable Reference Types</a></li>
+</ul>
+<h3 id="environment">Environment</h3>
+<p>To follow the following steps you will need:</p>
+<ul>
+<li><a href="https://dotnet.microsoft.com/download/dotnet-core/3.1">.Net Core 3.1 SDK</a></li>
+<li>Powershell (I'd recommend the new <a href="https://www.microsoft.com/en-us/p/windows-terminal-preview/9n0dx20hk701?activetab=pivot:overviewtab">Windows Terminal</a>)</li>
+<li>A text editor (<a href="https://code.visualstudio.com/Download">VSCode</a> perhaps?)</li>
+<li><a href="https://docs.docker.com/docker-for-windows/">Docker for Windows</a></li>
+</ul>
+<h2 id="about-hot-chocolate">About Hot Chocolate</h2>
+<p>I have only just started using Hot Chocolate but really like it. It allows code-first schema modelling using basic POCO classes leaving all the GraphQL magic to be implemented using a neat fluent syntax rooted from a <a href="https://hotchocolate.io/docs/schema"><code>SchemaBuilder</code></a> class. While this post is most certainly aimed at GraphQL beginners you may glean some additional information about Hot Chocolate from their <a href="https://hotchocolate.io/docs/introduction.html">&quot;Quick Start&quot;</a> or by watching <a href="https://www.youtube.com/watch?v=Lr6qyoAT8k4">any</a> <a href="https://www.youtube.com/watch?v=2QLhcqFYRpg">one</a> of the <a href="https://www.youtube.com/watch?v=q-5MUqLAEFs">many talks</a> by Michael Steib on it's use.</p>
+<p>Now, if you do watch/have seen any of the videos here, you will notice that <a href="https://hotchocolate.io/docs/stitching">Schema Stitching</a> is mentioned numerous times. In fact, in a couple of videos it is discussed specifically in relation to &quot;stitching&quot; ReST services into a GraphQL schema (along with other GraphQL schemas). This sounded fantastic and was certainly a desired use case when I started using Hot Chocolate. Unfortunately, there is zero documentation or guidance on how this can be achieved at the current time so the project that follows uses basic <a href="https://hotchocolate.io/docs/resolvers">resolvers</a> to fetch data from ReST services and AutoMapper to map between schemas.</p>
+<p>Before getting set up, be sure to install Hot Chocolate's template into the dotnet CLI as follows:</p>
+<pre><code class="language-powershell">dotnet new -i HotChocolate.Templates.Server
+</code></pre>
+<h2 id="solution-structure">Solution Structure</h2>
+<p>Here's how I set up my solution:</p>
+<pre><code class="language-powershell"># Create directories and initialize git
+mkdir Cheeze
+cd Cheeze
+git init
+mkdir src
+cd src
+# Create projects and remove superfluous files
+dotnet new graphql -n Cheeze.Graph
+dotnet new webapi -n Cheeze.Store
+dotnet new classlib -n Cheeze.Store.Client
+rm .\Cheeze.Store.Client\Class1.cs
+dotnet new webapi -n Cheeze.Inventory
+dotnet new classlib -n Cheeze.Inventory.Client
+rm .\Cheeze.Inventory.Client\Class1.cs
+# Create solution for easy of use from VS
+dotnet new sln -n Cheeze
+dotnet sln add .\Cheeze.Graph\Cheeze.Graph.csproj
+dotnet sln add .\Cheeze.Store\Cheeze.Store.csproj
+dotnet sln add .\Cheeze.Store.Client\Cheeze.Store.Client.csproj
+dotnet sln add .\Cheeze.Inventory\Cheeze.Inventory.csproj
+dotnet sln add .\Cheeze.Inventory.Client\Cheeze.Inventory.Client.csproj
+# Add project references
+dotnet add .\Cheeze.Graph\Cheeze.Graph.csproj reference .\Cheeze.Store.Client\Cheeze.Store.Client.csproj
+dotnet add .\Cheeze.Graph\Cheeze.Graph.csproj reference .\Cheeze.Inventory.Client\Cheeze.Inventory.Client.csproj
+</code></pre>
+<p>Unfortunately, if we do a <code>dotnet build</code> now we'll see a couple of errors due to <a href="https://github.com/ChilliCream/hotchocolate/issues/1329">a bug</a> in the Hot Chocolate server template which fails to add the HotChocolate namespace to the list of using statements in <code>Startup.cs</code>. This can be resolved with the following command:</p>
+<pre><code class="language-powershell">&#64;(Get-Content .\Cheeze.Graph\Startup.cs)[0..2] + &quot;using HotChocolate;&quot; + &#64;(Get-Content .\Cheeze.Graph\Startup.cs)[3..44] | Set-Content .\Cheeze.Graph\Startup.cs
+</code></pre>
+<p>Everything should now build correctly.</p>
+<h2 id="rest-services">ReST Services</h2>
+<p>We'll start by building out our ReST services.</p>
+<blockquote class="blockquote">
+<p>Note: These ReST services simply return static (and somewhat bare) data as that's all the need to be for my test environment. As such there is no persistence layer implemented and much of the schema for each type is unused.</p>
+</blockquote>
+<p>The two services are as follows:</p>
+<h3 id="cheeze.store">Cheeze.Store</h3>
+<p>This web api will provide a full list of all cheeses available through the store along with descriptions and image URLs. It will (for simplicity) have a single endpoint which allows a consumer to retrieve all available cheeses.</p>
+<p>To set this up, do the following:</p>
+<ol>
+<li>Delete the <code>Controllers</code> folder - We're a microservice and will be providing a single endpoint so there's no need for plurality here.</li>
+<li>Delete <code>WeatherForecast.cs</code></li>
+<li>Add the following files:
+<ol>
+<li><p>Controller.cs</p>
+<pre><code class="language-cs">using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Cheeze.Store
+{
+    [Route(&quot;api/store&quot;)]
+    public class Controller : Microsoft.AspNetCore.Mvc.Controller
+    {
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable&lt;Cheese&gt;), (int)HttpStatusCode.OK)]
+        public Task&lt;ActionResult&lt;IEnumerable&lt;Cheese&gt;&gt;&gt; Get()
+        {
+            var result = new[]
+            {
+                new Cheese
+                {
+                    Id = Guid.Parse(&quot;1468841a-5fbe-41c5-83b3-ab136b7ae70c&quot;),
+                    Name = &quot;API Cheese&quot;
+                }
+            };
+
+            return Task.FromResult&lt;ActionResult&lt;IEnumerable&lt;Cheese&gt;&gt;&gt;(Ok(result));
+        }
+    }
+}
+</code></pre>
+</li>
+<li><p>Cheese.cs</p>
+<pre><code class="language-cs">using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace Cheeze.Store
+{
+    public class Cheese
+    {
+        public Guid Id { get; set; }
+
+        public Uri? Uri { get; set; }
+
+        [Required]
+        public string Name { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty;
+
+        public decimal Price { get; set; }
+    }
+}
+</code></pre>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="cheeze.inventory">Cheeze.Inventory</h3>
+<p>This web api provides up to date inventory information for cheeses available through the store. It will have two endpoints which allow a consumer to get the availability of a specific cheese or a list of cheeses by id.</p>
+<p>To set this up, do the following:</p>
+<ol>
+<li>Delete the <code>Controllers</code> folder - same as above</li>
+<li>Delete <code>WeatherForecast.cs</code></li>
+<li>Add the following files:
+<ol>
+<li><p>Controller.cs</p>
+<pre><code class="language-cs">using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+
+namespace Cheeze.Inventory
+{
+    [Route(&quot;api/inventory&quot;)]
+    public class Controller : Microsoft.AspNetCore.Mvc.Controller
+    {
+        private static readonly Random Random = new Random();
+
+        [HttpGet(&quot;{id}&quot;)]
+        [ProducesResponseType(typeof(uint), (int)HttpStatusCode.OK)]
+        public Task&lt;ActionResult&lt;uint&gt;&gt; Get(Guid id)
+        {
+            return Task.FromResult&lt;ActionResult&lt;uint&gt;&gt;(Ok((uint)Random.Next(10)));
+        }
+
+        [HttpPost]
+        [ProducesResponseType(typeof(IEnumerable&lt;Available&gt;), (int)HttpStatusCode.OK)]
+        public Task&lt;ActionResult&lt;IEnumerable&lt;Available&gt;&gt;&gt; Post([FromBody] Request request)
+        {
+            var available = request.Ids
+                .Select(id =&gt; new Available { Id = id, Quantity = (uint)Random.Next(10) }) 
+                .ToArray();
+
+            return Task.FromResult&lt;ActionResult&lt;IEnumerable&lt;Available&gt;&gt;&gt;(Ok(available));
+        }
+    }
+}
+</code></pre>
+</li>
+<li><p>Request.cs</p>
+<pre><code class="language-cs">using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Cheeze.Inventory
+{
+    public class Request
+    {
+        public IEnumerable&lt;Guid&gt; Ids { get; set; } = Enumerable.Empty&lt;Guid&gt;();
+    }
+}
+</code></pre>
+</li>
+<li><p>Available.cs</p>
+<pre><code class="language-cs">using System;
+
+namespace Cheeze.Inventory
+{
+    public class Available
+    {
+        public Guid Id { get; set; }
+
+        public uint Quantity { get; set; }
+    }
+}
+</code></pre>
+</li>
+</ol>
+</li>
+</ol>
+<h3 id="providing-swagger-endpoints">Providing Swagger Endpoints</h3>
+<p>Both ReST services will provide a swagger endpoints to facilitate their use. We're using <a href="https://github.com/RicoSuter/NSwag">'NSwag'</a> to generate these endpoints for each project as follows:</p>
+<ol>
+<li>Add the required packages to each project:</li>
+</ol>
+<pre><code class="language-powershell">dotnet add .\Cheeze.Store\Cheeze.Store.csproj package NSwag.AspNetCore
+dotnet add .\Cheeze.Inventory\Cheeze.Inventory.csproj package NSwag.AspNetCore
+</code></pre>
+<ol>
+<li><p>In the <code>Startup.ConfigureServices</code> method, register the required Swagger services:</p>
+<pre><code class="language-cs">public void ConfigureServices(IServiceCollection services)
+{
+    services.AddControllers();
+
+    // Register the Swagger services
+    services.AddOpenApiDocument();
+}
+</code></pre>
+</li>
+<li><p>In the <code>Startup.Configure</code> method, enable the middleware for serving the generated Swagger specification and the Swagger UI:</p>
+<pre><code class="language-cs">public void Configure(IApplicationBuilder app)
+{
+    if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+
+    // Remove HTTP-&gt;HTTPS redirection for simplified hosting in Docker
+    //app.UseHttpsRedirection();
+
+    app.UseRouting();
+
+    // Register the Swagger generator and the Swagger UI middlewares
+    app.UseOpenApi();
+    app.UseSwaggerUi3();
+
+    app.UseAuthorization();
+
+    app.UseEndpoints(endpoints =&gt;
+    {
+        endpoints.MapControllers();
+    });
+}
+</code></pre>
+</li>
+</ol>
+<p>Build the solution to restore all dependencies:</p>
+<pre><code class="language-powershell">dotnet build
+</code></pre>
+<p>If you now build and run either project you should now be able to navigate to the swagger endpoint UI. For example:</p>
+<pre><code class="language-powershell">dotnet run --project .\Cheeze.Store\Cheeze.Store.csproj
+start &quot;microsoft-edge:http://localhost:5000/swagger&quot;
+</code></pre>
+<h3 id="generating-typed-clients">Generating Typed Clients</h3>
+<p>We're now going to use NSwag`s MSBuild package to generate a <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#how-to-use-typed-clients-with-httpclientfactory">Typed Client</a> for each project at build time. To do this:</p>
+<ol>
+<li><p>Install the required packages</p>
+<pre><code class="language-powershell">dotnet add .\Cheeze.Store\Cheeze.Store.csproj package NSwag.MSBuild
+dotnet add .\Cheeze.Inventory\Cheeze.Inventory.csproj package NSwag.MSBuild
+</code></pre>
+</li>
+<li><p>Build project to restore packages</p>
+</li>
+<li><p>Edit the project file to enable Nullable Reference Types and include all assemblies on build:</p>
+<pre><code class="language-csproj">&lt;Project Sdk=&quot;Microsoft.NET.Sdk.Web&quot;&gt;
+    &lt;PropertyGroup&gt;
+        &lt;TargetFramework&gt;netcoreapp3.1&lt;/TargetFramework&gt;
+        &lt;Nullable&gt;enable&lt;/Nullable&gt; &lt;!-- Add this line --&gt;
+        &lt;CopyLocalLockFileAssemblies&gt;true&lt;/CopyLocalLockFileAssemblies&gt; &lt;!-- And this line --&gt;
+    &lt;/PropertyGroup&gt;
+    ...
+&lt;/Project&gt;
+</code></pre>
+</li>
+<li><p>Generate an NSwag configuration file</p>
+<p>Building the solution after adding the <code>NSwag.MSBuild</code> package should have added the NSwag tools to your nuget package cache (usually in the following directory: <code>%userprofile%\.nuget\packages\nswag.msbuild\13.2.0\tools\NetCore31</code>). Using these build tools we can generate the required configuration file for each project with the following command:</p>
+<pre><code class="language-powershell">cd .\Cheeze.Inventory
+~\.nuget\packages\nswag.msbuild\13.2.0\tools\NetCore31\dotnet-nswag.exe new
+cd ..\Cheeze.Store
+~\.nuget\packages\nswag.msbuild\13.2.0\tools\NetCore31\dotnet-nswag.exe new
+cd ..
+</code></pre>
+<p>Now we need to replace sections the generated configuration file with populated values. In each of files do the following:</p>
+<ol>
+<li><p>Set the <code>runtime</code> version:</p>
+<pre><code class="language-json">{
+    &quot;runtime&quot;: &quot;NetCore31&quot;,
+    ...
+}
+</code></pre>
+</li>
+<li><p>Modify the <code>documentGenerator</code> section to generate an OpenAPI document from the generated web assembly. Do this by replacing the <code>documentGenerator</code> section with the following (ensuring to replace the <code>controllerNames</code>, <code>defaultUrlTemplate</code> and <code>assemblyPaths</code> to the correct values for each project):</p>
+<pre><code class="language-json">{
+    ...
+    &quot;documentGenerator&quot;: {
+        &quot;webApiToOpenApi&quot;: {
+            &quot;controllerNames&quot;: [
+                &quot;Cheeze.Store.Controller&quot;
+            ],
+            &quot;isAspNetCore&quot;: true,
+            &quot;resolveJsonOptions&quot;: false,
+            &quot;defaultUrlTemplate&quot;: &quot;api/store&quot;,
+            &quot;addMissingPathParameters&quot;: false,
+            &quot;includedVersions&quot;: null,
+            &quot;defaultPropertyNameHandling&quot;: &quot;Default&quot;,
+            &quot;defaultReferenceTypeNullHandling&quot;: &quot;Null&quot;,
+            &quot;defaultDictionaryValueReferenceTypeNullHandling&quot;: &quot;NotNull&quot;,
+            &quot;defaultResponseReferenceTypeNullHandling&quot;: &quot;NotNull&quot;,
+            &quot;defaultEnumHandling&quot;: &quot;Integer&quot;,
+            &quot;flattenInheritanceHierarchy&quot;: false,
+            &quot;generateKnownTypes&quot;: true,
+            &quot;generateEnumMappingDescription&quot;: false,
+            &quot;generateXmlObjects&quot;: false,
+            &quot;generateAbstractProperties&quot;: false,
+            &quot;generateAbstractSchemas&quot;: true,
+            &quot;ignoreObsoleteProperties&quot;: false,
+            &quot;allowReferencesWithProperties&quot;: false,
+            &quot;excludedTypeNames&quot;: [],
+            &quot;serviceHost&quot;: null,
+            &quot;serviceBasePath&quot;: null,
+            &quot;serviceSchemes&quot;: [],
+            &quot;infoTitle&quot;: &quot;My Title&quot;,
+            &quot;infoDescription&quot;: null,
+            &quot;infoVersion&quot;: &quot;1.0.0&quot;,
+            &quot;documentTemplate&quot;: null,
+            &quot;documentProcessorTypes&quot;: [],
+            &quot;operationProcessorTypes&quot;: [],
+            &quot;typeNameGeneratorType&quot;: null,
+            &quot;schemaNameGeneratorType&quot;: null,
+            &quot;contractResolverType&quot;: null,
+            &quot;serializerSettingsType&quot;: null,
+            &quot;useDocumentProvider&quot;: true,
+            &quot;documentName&quot;: &quot;v1&quot;,
+            &quot;aspNetCoreEnvironment&quot;: null,
+            &quot;createWebHostBuilderMethod&quot;: null,
+            &quot;startupType&quot;: null,
+            &quot;allowNullableBodyParameters&quot;: true,
+            &quot;output&quot;: null,
+            &quot;outputType&quot;: &quot;Swagger2&quot;,
+            &quot;assemblyPaths&quot;: [
+                &quot;bin/$(Configuration)/netcoreapp3.1/Cheeze.Store.dll&quot;
+            ],
+            &quot;assemblyConfig&quot;: null,
+            &quot;referencePaths&quot;: [],
+            &quot;useNuGetCache&quot;: true
+        }
+    },
+    ...
+}
+</code></pre>
+</li>
+<li><p>Remove the <code>openApiToTypeScriptClient</code> and <code>openApiToCSharpController</code> sections from within the <code>codeGenerators</code> section of each file.</p>
+</li>
+<li><p>Modify the <code>openApiToCSharpClient</code> section to generate C# typed clients from the OpenAPI document. Do this by replacing the <code>openApiToCSharpClient</code> section with the following (ensuring to replace the <code>className</code>, <code>namespace</code> and <code>output</code> to the correct values for each project):</p>
+<pre><code class="language-json">{
+    ...
+    &quot;codeGenerators&quot;: {
+        &quot;openApiToCSharpClient&quot;: {
+            &quot;clientBaseClass&quot;: null,
+            &quot;configurationClass&quot;: null,
+            &quot;generateClientClasses&quot;: true,
+            &quot;generateClientInterfaces&quot;: true,
+            &quot;injectHttpClient&quot;: true,
+            &quot;disposeHttpClient&quot;: true,
+            &quot;protectedMethods&quot;: [],
+            &quot;generateExceptionClasses&quot;: true,
+            &quot;exceptionClass&quot;: &quot;ApiException&quot;,
+            &quot;wrapDtoExceptions&quot;: true,
+            &quot;useHttpClientCreationMethod&quot;: false,
+            &quot;httpClientType&quot;: &quot;System.Net.Http.HttpClient&quot;,
+            &quot;useHttpRequestMessageCreationMethod&quot;: false,
+            &quot;useBaseUrl&quot;: false,
+            &quot;generateBaseUrlProperty&quot;: false,
+            &quot;generateSyncMethods&quot;: false,
+            &quot;exposeJsonSerializerSettings&quot;: false,
+            &quot;clientClassAccessModifier&quot;: &quot;public&quot;,
+            &quot;typeAccessModifier&quot;: &quot;public&quot;,
+            &quot;generateContractsOutput&quot;: false,
+            &quot;contractsNamespace&quot;: null,
+            &quot;contractsOutputFilePath&quot;: null,
+            &quot;parameterDateTimeFormat&quot;: &quot;s&quot;,
+            &quot;parameterDateFormat&quot;: &quot;yyyy-MM-dd&quot;,
+            &quot;generateUpdateJsonSerializerSettingsMethod&quot;: true,
+            &quot;serializeTypeInformation&quot;: false,
+            &quot;queryNullValue&quot;: &quot;&quot;,
+            &quot;className&quot;: &quot;StoreClient&quot;,
+            &quot;operationGenerationMode&quot;: &quot;MultipleClientsFromOperationId&quot;,
+            &quot;additionalNamespaceUsages&quot;: [],
+            &quot;additionalContractNamespaceUsages&quot;: [],
+            &quot;generateOptionalParameters&quot;: false,
+            &quot;generateJsonMethods&quot;: false,
+            &quot;enforceFlagEnums&quot;: false,
+            &quot;parameterArrayType&quot;: &quot;System.Collections.Generic.IEnumerable&quot;,
+            &quot;parameterDictionaryType&quot;: &quot;System.Collections.Generic.IDictionary&quot;,
+            &quot;responseArrayType&quot;: &quot;System.Collections.Generic.ICollection&quot;,
+            &quot;responseDictionaryType&quot;: &quot;System.Collections.Generic.IDictionary&quot;,
+            &quot;wrapResponses&quot;: false,
+            &quot;wrapResponseMethods&quot;: [],
+            &quot;generateResponseClasses&quot;: true,
+            &quot;responseClass&quot;: &quot;SwaggerResponse&quot;,
+            &quot;namespace&quot;: &quot;Cheeze.Store.Client&quot;,
+            &quot;requiredPropertiesMustBeDefined&quot;: true,
+            &quot;dateType&quot;: &quot;System.DateTimeOffset&quot;,
+            &quot;jsonConverters&quot;: null,
+            &quot;anyType&quot;: &quot;object&quot;,
+            &quot;dateTimeType&quot;: &quot;System.DateTimeOffset&quot;,
+            &quot;timeType&quot;: &quot;System.TimeSpan&quot;,
+            &quot;timeSpanType&quot;: &quot;System.TimeSpan&quot;,
+            &quot;arrayType&quot;: &quot;System.Collections.Generic.ICollection&quot;,
+            &quot;arrayInstanceType&quot;: &quot;System.Collections.ObjectModel.Collection&quot;,
+            &quot;dictionaryType&quot;: &quot;System.Collections.Generic.IDictionary&quot;,
+            &quot;dictionaryInstanceType&quot;: &quot;System.Collections.Generic.Dictionary&quot;,
+            &quot;arrayBaseType&quot;: &quot;System.Collections.ObjectModel.Collection&quot;,
+            &quot;dictionaryBaseType&quot;: &quot;System.Collections.Generic.Dictionary&quot;,
+            &quot;classStyle&quot;: &quot;Poco&quot;,
+            &quot;generateDefaultValues&quot;: true,
+            &quot;generateDataAnnotations&quot;: true,
+            &quot;excludedTypeNames&quot;: [],
+            &quot;excludedParameterNames&quot;: [],
+            &quot;handleReferences&quot;: false,
+            &quot;generateImmutableArrayProperties&quot;: false,
+            &quot;generateImmutableDictionaryProperties&quot;: false,
+            &quot;jsonSerializerSettingsTransformationMethod&quot;: null,
+            &quot;inlineNamedArrays&quot;: false,
+            &quot;inlineNamedDictionaries&quot;: false,
+            &quot;inlineNamedTuples&quot;: true,
+            &quot;inlineNamedAny&quot;: false,
+            &quot;generateDtoTypes&quot;: true,
+            &quot;generateOptionalPropertiesAsNullable&quot;: false,
+            &quot;templateDirectory&quot;: null,
+            &quot;typeNameGeneratorType&quot;: null,
+            &quot;propertyNameGeneratorType&quot;: null,
+            &quot;enumNameGeneratorType&quot;: null,
+            &quot;serviceHost&quot;: null,
+            &quot;serviceSchemes&quot;: null,
+            &quot;output&quot;: &quot;$(Target)/StoreClient.Generated.cs&quot;
+        }
+    }
+}
+</code></pre>
+</li>
+</ol>
+</li>
+<li><p>Edit the project file to use the configuration file to generate the typed client for each project (replacing <code>[PROJECT_NAME]</code> with <code>Cheeze.Store.Client</code> or <code>Cheeze.Inventory.Client</code> as appropriate):</p>
+<pre><code class="language-csproj">&lt;Project Sdk=&quot;Microsoft.NET.Sdk.Web&quot;&gt;
+    ...
+    &lt;Target Name=&quot;NSwag&quot; AfterTargets=&quot;Build&quot;&gt;
+        &lt;Copy SourceFiles=&quot;&#64;(ReferencePath)&quot; DestinationFolder=&quot;$(OutDir)References&quot; /&gt;
+        &lt;Exec Condition=&quot;'$(NSwag)'=='true'&quot; Command=&quot;$(NSwagExe_Core31) run nswag.json /variables:Configuration=$(Configuration),OutDir=$(OutDir),Target=$(SolutionDir)[PROJECT_NAME]&quot; /&gt;
+        &lt;RemoveDir Directories=&quot;$(OutDir)References&quot; /&gt;
+    &lt;/Target&gt;
+    ...
+&lt;/Project&gt;
+</code></pre>
+</li>
+<li><p>Add a <code>build.ps1</code> file to the <code>src</code> directory containing:</p>
+<pre><code class="language-powershell">$solutionDir = Get-Location
+dotnet build .\Cheeze.Store\Cheeze.Store.csproj /p:NSwag=true /p:SolutionDir=$solutionDir
+dotnet build .\Cheeze.Inventory\Cheeze.Inventory.csproj /p:NSwag=true /p:SolutionDir=$solutionDir
+dotnet build .\Cheeze.Store.Client\Cheeze.Store.Client.csproj
+dotnet build .\Cheeze.Inventory.Client\Cheeze.Inventory.Client.csproj
+dotnet build .\Cheeze.Graph\Cheeze.Graph.csproj
+</code></pre>
+<p>The build script is required to ensure projects are built in the correct order and to ensure we don't try to regenerate our typed clients while containerizing our projects (see below).</p>
+</li>
+<li><p>Adding <code>Newtonsoft.Json</code> and <code>System.ComponentModel.Annotations</code> packages to the client projects:</p>
+<pre><code class="language-powershell">dotnet add .\Cheeze.Store.Client\Cheeze.Store.Client.csproj package Newtonsoft.Json
+dotnet add .\Cheeze.Store.Client\Cheeze.Store.Client.csproj package System.ComponentModel.Annotations
+dotnet add .\Cheeze.Inventory.Client\Cheeze.Inventory.Client.csproj package Newtonsoft.Json
+dotnet add .\Cheeze.Inventory.Client\Cheeze.Inventory.Client.csproj package System.ComponentModel.Annotations
+</code></pre>
+</li>
+<li><p>Build!</p>
+<pre><code class="language-powershell">.\build.ps1
+</code></pre>
+<p>If all the above is correct, we should have a successful build and see that <code>StoreClient.Generated.cs</code> and <code>InventoryClient.Generated.cs</code> appear in the <code>Cheeze.Store</code> and <code>Cheeze.Inventory</code> directories respectively.</p>
+</li>
+</ol>
+<h2 id="graphql-service">GraphQL Service</h2>
+<p>Finally we can get around to implementing our GraphQL service. We'll undertake the following steps to get this service running as expected:</p>
+<ol>
+<li>Create an object model of our DTOs and Graph Query as POCO objects</li>
+<li>Build a GraphQL schema from these objects using the SchemaBuilder</li>
+<li>Configure the .Net Core host to correctly run the GraphQL Service</li>
+</ol>
+<p>First however, as we're not currently able to use Schema Stitching, we need to perform mapping between the <code>Cheeze.Store</code> and <code>Cheeze.Graph</code> schemas ourselves. To facilitate this, we're going to use <a href="https://automapper.org/">Automapper</a> so we need to add the package to <code>Cheeze.Graph</code> using:</p>
+<pre><code class="language-powershell">dotnet add .\Cheeze.Graph\Cheeze.Graph.csproj package AutoMapper
+</code></pre>
+<h3 id="object-model">Object Model</h3>
+<p>Add a <code>Cheese.cs</code> to <code>Cheeze.Graph</code> with the following content:</p>
+<pre><code class="language-cs">using System;
+
+namespace Cheeze.Graph
+{
+    public class Cheese
+    {
+        public Guid Id { get; set; }
+
+        public Uri? Uri { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty;
+
+        public decimal Price { get; set; }
+
+        public int Available { get; set; }
+    }
+}
+</code></pre>
+<p>There are two things to note here:</p>
+<p>Firstly, the Cheese type is very similar - <strong>but not identical</strong> - to the Cheese type declared in <code>Cheeze.Store</code>. Crucially this Cheese type has an Available property which is not in the data provided by <code>Cheeze.Store</code> and instead will be populated by dependent calls to <code>Cheeze.Inventory</code>.</p>
+<p>Secondly this type does not implement any behaviour, it merely declares the shape (i.e. schema) of the data that can be provided by this service. All GraphQL functionality is provided via the SchemaBuilder and associated Resolvers as see below.</p>
+<h3 id="schema-resolvers">Schema &amp; Resolvers</h3>
+<p>Add a <code>Schema.cs</code> file to <code>Cheeze.Graph</code> with the following content:</p>
+<pre><code class="language-cs">using AutoMapper;
+using HotChocolate;
+using HotChocolate.Resolvers;
+using HotChocolate.Types;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Cheeze.Graph
+{
+    public static class Schema
+    {
+        private static readonly IMapper Mapper;
+
+        static Schema()
+        {
+            var mapping = new MapperConfiguration(
+                configuration =&gt;
+                {
+                    configuration.CreateMap&lt;Cheeze.Store.Client.Cheese, Cheese&gt;()
+                        .ForMember(cheese =&gt; cheese.Available, options =&gt; options.Ignore());
+                }
+            );
+
+            Mapper = mapping.CreateMapper();
+        }
+        private static async Task&lt;IReadOnlyDictionary&lt;Guid, int&gt;&gt; FetchInventory(this Cheeze.Inventory.Client.IInventoryClient inventoryClient, IReadOnlyList&lt;Guid&gt; cheeses)
+        {
+            var response = await inventoryClient.PostAsync(new Cheeze.Inventory.Client.Request { Ids = cheeses.ToArray() });
+
+            return cheeses
+                .GroupJoin(response, id =&gt; id, available =&gt; available.Id, (id, available) =&gt; (Id: id, Available: available.Select(a =&gt; a.Quantity).FirstOrDefault()))
+                .ToDictionary(tuple =&gt; tuple.Id, tuple =&gt; tuple.Available);
+        }
+
+        private static async Task&lt;int&gt; ResolveInventory(this IResolverContext context)
+        {
+            var dataLoader = context.BatchDataLoader&lt;Guid, int&gt;(
+                &quot;availableById&quot;,
+                context.Service&lt;Cheeze.Inventory.Client.IInventoryClient&gt;().FetchInventory);
+
+            return await dataLoader.LoadAsync(context.Parent&lt;Cheese&gt;().Id, context.RequestAborted);
+        }
+
+        private static async Task&lt;IEnumerable&lt;Cheese&gt;&gt; ResolveCheeses(this IResolverContext context)
+        {
+            var results = await context.Service&lt;Cheeze.Store.Client.IStoreClient&gt;().GetAsync();
+
+            return results.Select(source =&gt; Mapper.Map&lt;Cheeze.Store.Client.Cheese, Cheese&gt;(source));
+        }
+
+        public static ISchemaBuilder Build()
+        {
+            return SchemaBuilder.New()
+                .AddQueryType(
+                    typeDescriptor =&gt; typeDescriptor
+                        .Field(&quot;Cheese&quot;)
+                            .Resolver(context =&gt; context.ResolveCheeses()))
+                .AddObjectType&lt;Cheese&gt;(
+                    cheese =&gt; cheese
+                        .Field(f =&gt; f.Available)
+                            .Resolver(context =&gt; context.ResolveInventory()))
+                .ModifyOptions(o =&gt; o.RemoveUnreachableTypes = true);
+        }
+    }
+}
+</code></pre>
+<p>Amazingly, this single class implements <strong>all</strong> the functionality needed to provide a GraphQL compliant endpoint in ~70 SLoC. There is rather a lot going on though so lets break it down starting with the static public method <code>Build</code>.</p>
+<p>The <code>Build</code> method uses (and returns) a <code>SchemaBuilder</code> to define the schema that will be presented through the GraphQL endpoint. This comprises two main elements: the <code>QueryType</code> - provided by the <code>.AddQueryType()</code> fluent method - and the <code>Cheese</code> object type - provided by the <code>.AddObjectType&lt;Cheese&gt;()</code> fluent method. We'll dig into each of these here.</p>
+<p>The <code>AddQueryType</code> defines the types of queries that can be executed by this GraphQL endpoint in a purely code-first manner. The code above adds a field <code>Cheese</code> which, when used in the query, uses the <code>ResolveCheeses()</code> extension method to provide data for the query. The <code>ResolveCheeses()</code> extension method uses the <code>IResolverContext</code> to retrieve the typed client for the <code>Cheeze.Store</code> ReST endpoint and calls the <code>GetAsync()</code> method on it. Finally, AutoMapper is used to map between the <code>Cheeze.Store.Client.Cheese</code> and <code>Cheeze.Graph.Cheese</code> types, specifically ignoring the <code>Available</code> property of <code>Cheeze.Graph.Cheese</code>.</p>
+<p>Similarly, the <code>AddObjectType&lt;Cheese&gt;</code> method intercepts objects of type <code>Cheese</code> and uses the <code>ResolveInventory()</code> extension method to populate the <code>Available</code> property. This time however, a <code>BatchDataLoader</code> is used from within the extension method to neatly avoid the <a href="https://itnext.io/what-is-the-n-1-problem-in-graphql-dd4921cb3c1a">N+1 problem</a>.</p>
+<h3 id="service-binding-configuration">Service Binding &amp; Configuration</h3>
+<p>Finally we need to bind required service and configuration types so, again in <code>Cheeze.Graph</code> add the following:</p>
+<ol>
+<li><p>A <code>Configuration.cs</code> file in an <code>Inventory</code> folder containing:</p>
+<pre><code class="language-cs">using System;
+
+namespace Cheeze.Graph.Inventory
+{
+    public class Configuration
+    {
+        public Uri BaseAddress { get; set; } = new Uri(&quot;https://inventory&quot;);
+    }
+}
+</code></pre>
+</li>
+<li><p>A <code>Configuration.cs</code> file in a <code>Store</code> folder containing:</p>
+<pre><code class="language-cs">using System;
+
+namespace Cheeze.Graph.Store
+{
+    public class Configuration
+    {
+        public Uri BaseAddress { get; set; } = new Uri(&quot;https://store&quot;);
+    }
+}
+</code></pre>
+</li>
+<li><p>In <code>Program.cs</code> refactor <code>CreateWebHostBuilder</code> method to the following:</p>
+<pre><code class="language-cs">public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+{
+    return WebHost
+        .CreateDefaultBuilder(args)
+        .ConfigureAppConfiguration((hostingContext, config) =&gt; config.AddEnvironmentVariables(&quot;Cheeze:Graph:&quot;))
+        .ConfigureServices(
+            (hostContext, services) =&gt;
+            {
+                services.AddOptions&lt;Store.Configuration&gt;().Bind(hostContext.Configuration.GetSection(&quot;Store&quot;));
+                services.AddOptions&lt;Inventory.Configuration&gt;().Bind(hostContext.Configuration.GetSection(&quot;Inventory&quot;));
+            })
+        .UseStartup&lt;Startup&gt;();
+}
+</code></pre>
+<p>And add the two required usings:</p>
+<pre><code class="language-cs">using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+</code></pre>
+<p>Here we're adding configuration from Environment Variables (prefixed with <code>Cheeze:Graph</code>) to our application and binding this configuration to the types added above.</p>
+</li>
+<li><p>In <code>Startup.cs</code> refactor the <code>ConfigureServices</code> method to the following:</p>
+<pre><code class="language-cs">public void ConfigureServices(IServiceCollection services)
+{
+    services.AddHttpClient&lt;Cheeze.Store.Client.IStoreClient, Cheeze.Store.Client.StoreClient&gt;(
+        (serviceProvider, httpClient) =&gt; httpClient.BaseAddress = serviceProvider.GetRequiredService&lt;IOptions&lt;Store.Configuration&gt;&gt;().Value.BaseAddress
+    );
+
+    services.AddHttpClient&lt;Cheeze.Inventory.Client.IInventoryClient, Cheeze.Inventory.Client.InventoryClient&gt;(
+        (serviceProvider, httpClient) =&gt; httpClient.BaseAddress = serviceProvider.GetRequiredService&lt;IOptions&lt;Inventory.Configuration&gt;&gt;().Value.BaseAddress
+    );
+
+    // this enables you to use DataLoader in your resolvers.
+    services.AddDataLoaderRegistry();
+
+    // Add GraphQL Services
+    services.AddGraphQL(Schema.Build());
+}
+</code></pre>
+<p>And again add the required using:</p>
+<pre><code class="language-cs">using Microsoft.Extensions.Options;
+</code></pre>
+<p>Here we're binding the typed clients for <code>Cheeze.Store</code> and <code>Cheeze.Inventory</code> and ensuring they're configured with the appropriate base addresses. Finally we're using the <code>Schema.Build()</code> method to provide the GraphQL schema to the <code>services.AddGraphQL()</code> method.</p>
+</li>
+</ol>
+<p>And that - as the say - is that. If we run our build script now we should find everything builds successfully.</p>
+<h2 id="containerization">Containerization</h2>
+<p>Now, rather than configuring and spinning up all the services manually, we'll simplify our debug/deploy loop by containerizing our services and using <a href="https://docs.docker.com/compose/">Docker Compose</a> to do the job for us. From Visual Studio this would be a simple case of using the &quot;Add &gt; Docker Support&quot; and &quot;Add &gt; Container Orchestration Support&quot; options from the &quot;Solution Explorer&quot; as described <a href="https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/docker/visual-studio-tools-for-docker?view=aspnetcore-3.1">here</a>. However, as we've so far done pretty much everything from the command-line, lets try carrying that on.</p>
+<h3 id="docker-support">Docker Support</h3>
+<p>First we'll add docker support to each of the top-level projects by using the standard multi-stage dockerfile template. I was unable to find an official source for this template so uploaded a version to my <a href="https://github.com/ibebbs/DotnetCliDocker">DotnetCliDocker</a> repository which we're be using here.</p>
+<pre><code class="language-powershell">&#64;(Invoke-WebRequest &quot;https://raw.githubusercontent.com/ibebbs/DotnetCliDocker/master/Dockerfile3_1&quot; | Select-Object -ExpandProperty Content) -replace &quot;\(ProjectName\)&quot;,&quot;Cheeze.Graph&quot; | Set-Content .\Cheeze.Graph\Dockerfile
+&#64;(Invoke-WebRequest &quot;https://raw.githubusercontent.com/ibebbs/DotnetCliDocker/master/Dockerfile3_1&quot; | Select-Object -ExpandProperty Content) -replace &quot;\(ProjectName\)&quot;,&quot;Cheeze.Store&quot; | Set-Content .\Cheeze.Store\Dockerfile
+&#64;(Invoke-WebRequest &quot;https://raw.githubusercontent.com/ibebbs/DotnetCliDocker/master/Dockerfile3_1&quot; | Select-Object -ExpandProperty Content) -replace &quot;\(ProjectName\)&quot;,&quot;Cheeze.Inventory&quot; | Set-Content .\Cheeze.Inventory\Dockerfile
+</code></pre>
+<h3 id="container-orchestration-support">Container Orchestration Support</h3>
+<p>Now lets add a couple of files so that we can use Docker Compose to run our microservice environment</p>
+<ol>
+<li><p>Add a <code>docker-compose.yml</code> file to the <code>src</code> directory containing:</p>
+<pre><code class="language-yaml">version: '3.4'
+
+services:
+cheeze.store:
+    image: ${DOCKER_REGISTRY-}cheezestore
+    build:
+    context: .
+    dockerfile: Cheeze.Store/Dockerfile
+
+cheeze.inventory:
+    image: ${DOCKER_REGISTRY-}cheezeinventory
+    build:
+    context: .
+    dockerfile: Cheeze.Inventory/Dockerfile
+
+cheeze.graph:
+    image: ${DOCKER_REGISTRY-}cheezegraph
+    build:
+    context: .
+    dockerfile: Cheeze.Graph/Dockerfile
+    ports:
+    - &quot;8081:80&quot;
+    environment:
+    - Cheeze__Graph__Store__BaseAddress=http://cheeze.store
+    - Cheeze__Graph__Inventory__BaseAddress=http://cheeze.inventory
+    depends_on:
+    - cheeze.store
+    - cheeze.inventory
+</code></pre>
+</li>
+<li><p>Add a <code>.dockerignore</code> to the <code>src</code> directory by running:</p>
+<pre><code class="language-powershell">&#64;(Invoke-WebRequest &quot;https://raw.githubusercontent.com/ibebbs/DotnetCliDocker/master/.dockerignore&quot;) | Set-Content .\.dockerignore
+</code></pre>
+</li>
+<li><p>Build and run our containers</p>
+<pre><code class="language-powershell">docker-compose build
+</code></pre>
+<p>This might take some time but should result in a successful build afterwhich you can run the containers using:</p>
+<pre><code class="language-powershell">docker-compose run
+</code></pre>
+</li>
+</ol>
+<h2 id="testing">Testing</h2>
+<p>With our composed containers running, open up a browser and navigate to <code>http://localhost:8081/playground</code>. You should see something like the following:</p>
+<img src="/Content/LessReSTMoreHotChocolate/Playground.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="GraphQL Playground">
+<p>The two tabs on the right hand side of the screen - &quot;Docs&quot; &amp; &quot;Schema&quot; - allow you to examine the GraphQL endpoint to determine the queries you can execute and the content the service is able to receive. As we've got very little data in our services, we'll just use a basic query to retrieve the data we've defined. In the left pain of the playground (underneath &quot;# Write your query or mutation here&quot;) enter the following:</p>
+<pre><code class="language-graphql">{
+  Cheese {
+    id,
+    name,
+    available
+  }
+}
+</code></pre>
+<blockquote class="blockquote">
+<p>Note: As you're typing this, you should see that auto-complete is available and extremely quick.</p>
+</blockquote>
+<p>Finally, once the query is complete, click the &quot;Play&quot; button in the centre of the screen. If everything has compiled and build correctly, you should see the following in the right hand pane:</p>
+<pre><code>{
+  &quot;data&quot;: {
+    &quot;Cheese&quot;: [
+      {
+        &quot;id&quot;: &quot;1468841a-5fbe-41c5-83b3-ab136b7ae70c&quot;,
+        &quot;name&quot;: &quot;API Cheese&quot;,
+        &quot;available&quot;: 9
+      }
+    ]
+  }
+}
+</code></pre>
+<p>And there we go. We've successfully used GraphQL to integrate and intelligently query two independent ReST services. Nice!</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>If you're hitting up against some of the limitations of ReST - particularly for mobile client applications - I would very much recommend taking a look at GraphQL and <a href="https://chillicream.com/">ChilliCream's</a> Hot Chocolate library in particular. Hot Chocolate makes setting up a GraphQL endpoint incredibly easy, and it's code-first capabilities allow you to concentrate on modelling a domain that works for you and your customers rather than the GraphQL framework.</p>
+<p>Hot Chocolate is under <strong>very</strong> heavy development with fantastic new features getting added at an amazing cadence (hopefully ReST based Schema Stitching will bubble to the top of ChilliCream's priority list soon). Furthermore support for this library is excellent; in point of fact, while authoring this article I posted a question in their Slack workspace only to get it answered by Michael Steib himself just moments later and which culminated in a discussion that lasted the better part of an hour.</p>
+<p>ChilliCream also have a <a href="https://www.nuget.org/packages/StrawberryShake/11.0.0-preview.75">client-side library</a> for GraphQL called <a href="https://chillicream.com/blog/2019/11/25/strawberry-shake_2">&quot;Strawberry Shake&quot;</a>. While currently in alpha it looks extremely promising for creating strongly-typed GraphQL clients as it will - apparently - provide <a href="https://grpc.io/blog/grpc-dotnet-build/">&quot;protobuff style&quot;</a> code generation for the client direct from a GraphQL service's schema.</p>
+<p>Lastly, if you are authoring ReST endpoints, I would very much recommend considering <a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-nswag?view=aspnetcore-3.1&amp;tabs=visual-studio">NSwag</a> over <a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-3.1&amp;tabs=visual-studio">Swashbuckle</a>. For me, NSwag's integration is a bit nicer than Swashbuckle and has a greater focus on the OpenAPI toolchain. Furthermore NSwag's tooling is first class allowing you to generate OpenAPI documents and/or client side libraries (in a number of languages) using a variety of tools, not least of which being the MSBuild target we used here.</p>
+<p>All code for from this post can be found in my <a href="https://github.com/ibebbs/Cheeze">&quot;Cheeze&quot;</a> repository on GitHub.</p>
+<p>As always, if you have any questions or comments on the above or would like to discuss any point further, please don't hesitate to contact me using any of the links below or from my <a href="https://ian.bebbs.co.uk/about">about page</a>.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2020. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+

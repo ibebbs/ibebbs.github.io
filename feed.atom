@@ -4,8 +4,801 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-01-02T17:30:37Z</updated>
+	<updated>2020-01-08T17:29:51Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/LessReSTMoreHotChocolate</id>
+		<title>Less ReST, more Hot Chocolate</title>
+		<link href="http://ian.bebbs.co.uk/posts/LessReSTMoreHotChocolate" />
+		<updated>2020-01-08T00:00:00Z</updated>
+		<content>&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;A project I'm working on requires a microservice like evaluation environment. A brief google revealed very little that would suffice so I decided to quickly knock up my own. At the same time, I thought it would be a great opportunity to evaluate &lt;a href="https://hotchocolate.io/"&gt;Hot Chocolate&lt;/a&gt; by &lt;a href="https://chillicream.com/"&gt;Chilli Cream&lt;/a&gt;; a relative newcomer to the (very sparse) GraphQL for .NET scene. In this post I'll also be using &lt;a href="https://github.com/RicoSuter/NSwag"&gt;NSwag&lt;/a&gt; to generate &lt;a href="https://www.openapis.org/"&gt;OpenAPI documents&lt;/a&gt; and &lt;a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#how-to-use-typed-clients-with-httpclientfactory"&gt;Typed Clients&lt;/a&gt; for downstream services and, finally, I will be containerizing the microservices using &lt;a href="https://www.docker.com/"&gt;Docker&lt;/a&gt; and employing &lt;a href="https://docs.docker.com/compose/"&gt;Docker Compose&lt;/a&gt; to run and test them.&lt;/p&gt;
+&lt;h2 id="contents"&gt;Contents&lt;/h2&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="#requirements"&gt;Requirements&lt;/a&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="#solution"&gt;Solution&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#environment"&gt;Environment&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#about-hot-chocolate"&gt;About Hot Chocolate&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#solution-structure"&gt;Solution Structure&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#rest-services"&gt;ReST Services&lt;/a&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="#cheeze.store"&gt;Cheeze.Store&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#cheeze.inventory"&gt;Cheeze.Inventory&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#providing-swagger-endpoints"&gt;Providing Swagger Endpoints&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#generating-typed-clients"&gt;Generating Typed Clients&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#graphql-service"&gt;GraphQL Service&lt;/a&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="#object-model"&gt;Object Model&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#schema-resolvers"&gt;Schema &amp;amp; Resolvers&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#service-binding-configuration"&gt;Service Binding &amp;amp; Configuration&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#containerization"&gt;Containerization&lt;/a&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="#docker-support"&gt;Docker Support&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#container-orchestration-support"&gt;Container Orchestration Support&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a href="#testing"&gt;Testing&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="#conclusion"&gt;Conclusion&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="requirements"&gt;Requirements&lt;/h2&gt;
+&lt;h3 id="solution"&gt;Solution&lt;/h3&gt;
+&lt;p&gt;The requirements for the test environment were pretty simple:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;A .net core web service which, when called, fetched and collated data from two other .net core web services. As (conditionally) aggregating data from multiple sources is one of GraphQL's primary use cases I decided a GraphQL endpoint would make for a great entry point into this flow.&lt;/li&gt;
+&lt;li&gt;Avoid any tight coupling between the GraphQL endpoint and the underlying web-services yet provide strong compile-time guarantees of cohesion with these services.&lt;/li&gt;
+&lt;li&gt;A simple build/deployment/debug loop.&lt;/li&gt;
+&lt;li&gt;Embrace 'modern' methodologies; for example asynchronous controller actions and &lt;a href="https://docs.microsoft.com/en-us/dotnet/csharp/nullable-references"&gt;Nullable Reference Types&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id="environment"&gt;Environment&lt;/h3&gt;
+&lt;p&gt;To follow the following steps you will need:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://dotnet.microsoft.com/download/dotnet-core/3.1"&gt;.Net Core 3.1 SDK&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Powershell (I'd recommend the new &lt;a href="https://www.microsoft.com/en-us/p/windows-terminal-preview/9n0dx20hk701?activetab=pivot:overviewtab"&gt;Windows Terminal&lt;/a&gt;)&lt;/li&gt;
+&lt;li&gt;A text editor (&lt;a href="https://code.visualstudio.com/Download"&gt;VSCode&lt;/a&gt; perhaps?)&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://docs.docker.com/docker-for-windows/"&gt;Docker for Windows&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="about-hot-chocolate"&gt;About Hot Chocolate&lt;/h2&gt;
+&lt;p&gt;I have only just started using Hot Chocolate but really like it. It allows code-first schema modelling using basic POCO classes leaving all the GraphQL magic to be implemented using a neat fluent syntax rooted from a &lt;a href="https://hotchocolate.io/docs/schema"&gt;&lt;code&gt;SchemaBuilder&lt;/code&gt;&lt;/a&gt; class. While this post is most certainly aimed at GraphQL beginners you may glean some additional information about Hot Chocolate from their &lt;a href="https://hotchocolate.io/docs/introduction.html"&gt;&amp;quot;Quick Start&amp;quot;&lt;/a&gt; or by watching &lt;a href="https://www.youtube.com/watch?v=Lr6qyoAT8k4"&gt;any&lt;/a&gt; &lt;a href="https://www.youtube.com/watch?v=2QLhcqFYRpg"&gt;one&lt;/a&gt; of the &lt;a href="https://www.youtube.com/watch?v=q-5MUqLAEFs"&gt;many talks&lt;/a&gt; by Michael Steib on it's use.&lt;/p&gt;
+&lt;p&gt;Now, if you do watch/have seen any of the videos here, you will notice that &lt;a href="https://hotchocolate.io/docs/stitching"&gt;Schema Stitching&lt;/a&gt; is mentioned numerous times. In fact, in a couple of videos it is discussed specifically in relation to &amp;quot;stitching&amp;quot; ReST services into a GraphQL schema (along with other GraphQL schemas). This sounded fantastic and was certainly a desired use case when I started using Hot Chocolate. Unfortunately, there is zero documentation or guidance on how this can be achieved at the current time so the project that follows uses basic &lt;a href="https://hotchocolate.io/docs/resolvers"&gt;resolvers&lt;/a&gt; to fetch data from ReST services and AutoMapper to map between schemas.&lt;/p&gt;
+&lt;p&gt;Before getting set up, be sure to install Hot Chocolate's template into the dotnet CLI as follows:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;dotnet new -i HotChocolate.Templates.Server
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="solution-structure"&gt;Solution Structure&lt;/h2&gt;
+&lt;p&gt;Here's how I set up my solution:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;# Create directories and initialize git
+mkdir Cheeze
+cd Cheeze
+git init
+mkdir src
+cd src
+# Create projects and remove superfluous files
+dotnet new graphql -n Cheeze.Graph
+dotnet new webapi -n Cheeze.Store
+dotnet new classlib -n Cheeze.Store.Client
+rm .\Cheeze.Store.Client\Class1.cs
+dotnet new webapi -n Cheeze.Inventory
+dotnet new classlib -n Cheeze.Inventory.Client
+rm .\Cheeze.Inventory.Client\Class1.cs
+# Create solution for easy of use from VS
+dotnet new sln -n Cheeze
+dotnet sln add .\Cheeze.Graph\Cheeze.Graph.csproj
+dotnet sln add .\Cheeze.Store\Cheeze.Store.csproj
+dotnet sln add .\Cheeze.Store.Client\Cheeze.Store.Client.csproj
+dotnet sln add .\Cheeze.Inventory\Cheeze.Inventory.csproj
+dotnet sln add .\Cheeze.Inventory.Client\Cheeze.Inventory.Client.csproj
+# Add project references
+dotnet add .\Cheeze.Graph\Cheeze.Graph.csproj reference .\Cheeze.Store.Client\Cheeze.Store.Client.csproj
+dotnet add .\Cheeze.Graph\Cheeze.Graph.csproj reference .\Cheeze.Inventory.Client\Cheeze.Inventory.Client.csproj
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Unfortunately, if we do a &lt;code&gt;dotnet build&lt;/code&gt; now we'll see a couple of errors due to &lt;a href="https://github.com/ChilliCream/hotchocolate/issues/1329"&gt;a bug&lt;/a&gt; in the Hot Chocolate server template which fails to add the HotChocolate namespace to the list of using statements in &lt;code&gt;Startup.cs&lt;/code&gt;. This can be resolved with the following command:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;&amp;#64;(Get-Content .\Cheeze.Graph\Startup.cs)[0..2] + &amp;quot;using HotChocolate;&amp;quot; + &amp;#64;(Get-Content .\Cheeze.Graph\Startup.cs)[3..44] | Set-Content .\Cheeze.Graph\Startup.cs
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Everything should now build correctly.&lt;/p&gt;
+&lt;h2 id="rest-services"&gt;ReST Services&lt;/h2&gt;
+&lt;p&gt;We'll start by building out our ReST services.&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;Note: These ReST services simply return static (and somewhat bare) data as that's all the need to be for my test environment. As such there is no persistence layer implemented and much of the schema for each type is unused.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;The two services are as follows:&lt;/p&gt;
+&lt;h3 id="cheeze.store"&gt;Cheeze.Store&lt;/h3&gt;
+&lt;p&gt;This web api will provide a full list of all cheeses available through the store along with descriptions and image URLs. It will (for simplicity) have a single endpoint which allows a consumer to retrieve all available cheeses.&lt;/p&gt;
+&lt;p&gt;To set this up, do the following:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Delete the &lt;code&gt;Controllers&lt;/code&gt; folder - We're a microservice and will be providing a single endpoint so there's no need for plurality here.&lt;/li&gt;
+&lt;li&gt;Delete &lt;code&gt;WeatherForecast.cs&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Add the following files:
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Controller.cs&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;using System;
+using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
+
+namespace Cheeze.Store
+{
+    [Route(&amp;quot;api/store&amp;quot;)]
+    public class Controller : Microsoft.AspNetCore.Mvc.Controller
+    {
+        [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable&amp;lt;Cheese&amp;gt;), (int)HttpStatusCode.OK)]
+        public Task&amp;lt;ActionResult&amp;lt;IEnumerable&amp;lt;Cheese&amp;gt;&amp;gt;&amp;gt; Get()
+        {
+            var result = new[]
+            {
+                new Cheese
+                {
+                    Id = Guid.Parse(&amp;quot;1468841a-5fbe-41c5-83b3-ab136b7ae70c&amp;quot;),
+                    Name = &amp;quot;API Cheese&amp;quot;
+                }
+            };
+
+            return Task.FromResult&amp;lt;ActionResult&amp;lt;IEnumerable&amp;lt;Cheese&amp;gt;&amp;gt;&amp;gt;(Ok(result));
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Cheese.cs&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;using System;
+using System.ComponentModel.DataAnnotations;
+
+namespace Cheeze.Store
+{
+    public class Cheese
+    {
+        public Guid Id { get; set; }
+
+        public Uri? Uri { get; set; }
+
+        [Required]
+        public string Name { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty;
+
+        public decimal Price { get; set; }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="cheeze.inventory"&gt;Cheeze.Inventory&lt;/h3&gt;
+&lt;p&gt;This web api provides up to date inventory information for cheeses available through the store. It will have two endpoints which allow a consumer to get the availability of a specific cheese or a list of cheeses by id.&lt;/p&gt;
+&lt;p&gt;To set this up, do the following:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Delete the &lt;code&gt;Controllers&lt;/code&gt; folder - same as above&lt;/li&gt;
+&lt;li&gt;Delete &lt;code&gt;WeatherForecast.cs&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Add the following files:
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Controller.cs&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+
+namespace Cheeze.Inventory
+{
+    [Route(&amp;quot;api/inventory&amp;quot;)]
+    public class Controller : Microsoft.AspNetCore.Mvc.Controller
+    {
+        private static readonly Random Random = new Random();
+
+        [HttpGet(&amp;quot;{id}&amp;quot;)]
+        [ProducesResponseType(typeof(uint), (int)HttpStatusCode.OK)]
+        public Task&amp;lt;ActionResult&amp;lt;uint&amp;gt;&amp;gt; Get(Guid id)
+        {
+            return Task.FromResult&amp;lt;ActionResult&amp;lt;uint&amp;gt;&amp;gt;(Ok((uint)Random.Next(10)));
+        }
+
+        [HttpPost]
+        [ProducesResponseType(typeof(IEnumerable&amp;lt;Available&amp;gt;), (int)HttpStatusCode.OK)]
+        public Task&amp;lt;ActionResult&amp;lt;IEnumerable&amp;lt;Available&amp;gt;&amp;gt;&amp;gt; Post([FromBody] Request request)
+        {
+            var available = request.Ids
+                .Select(id =&amp;gt; new Available { Id = id, Quantity = (uint)Random.Next(10) }) 
+                .ToArray();
+
+            return Task.FromResult&amp;lt;ActionResult&amp;lt;IEnumerable&amp;lt;Available&amp;gt;&amp;gt;&amp;gt;(Ok(available));
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Request.cs&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace Cheeze.Inventory
+{
+    public class Request
+    {
+        public IEnumerable&amp;lt;Guid&amp;gt; Ids { get; set; } = Enumerable.Empty&amp;lt;Guid&amp;gt;();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Available.cs&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;using System;
+
+namespace Cheeze.Inventory
+{
+    public class Available
+    {
+        public Guid Id { get; set; }
+
+        public uint Quantity { get; set; }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id="providing-swagger-endpoints"&gt;Providing Swagger Endpoints&lt;/h3&gt;
+&lt;p&gt;Both ReST services will provide a swagger endpoints to facilitate their use. We're using &lt;a href="https://github.com/RicoSuter/NSwag"&gt;'NSwag'&lt;/a&gt; to generate these endpoints for each project as follows:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Add the required packages to each project:&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;dotnet add .\Cheeze.Store\Cheeze.Store.csproj package NSwag.AspNetCore
+dotnet add .\Cheeze.Inventory\Cheeze.Inventory.csproj package NSwag.AspNetCore
+&lt;/code&gt;&lt;/pre&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;In the &lt;code&gt;Startup.ConfigureServices&lt;/code&gt; method, register the required Swagger services:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddControllers();
+
+    // Register the Swagger services
+    services.AddOpenApiDocument();
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In the &lt;code&gt;Startup.Configure&lt;/code&gt; method, enable the middleware for serving the generated Swagger specification and the Swagger UI:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;public void Configure(IApplicationBuilder app)
+{
+    if (env.IsDevelopment())
+    {
+        app.UseDeveloperExceptionPage();
+    }
+
+    // Remove HTTP-&amp;gt;HTTPS redirection for simplified hosting in Docker
+    //app.UseHttpsRedirection();
+
+    app.UseRouting();
+
+    // Register the Swagger generator and the Swagger UI middlewares
+    app.UseOpenApi();
+    app.UseSwaggerUi3();
+
+    app.UseAuthorization();
+
+    app.UseEndpoints(endpoints =&amp;gt;
+    {
+        endpoints.MapControllers();
+    });
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Build the solution to restore all dependencies:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;dotnet build
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If you now build and run either project you should now be able to navigate to the swagger endpoint UI. For example:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;dotnet run --project .\Cheeze.Store\Cheeze.Store.csproj
+start &amp;quot;microsoft-edge:http://localhost:5000/swagger&amp;quot;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="generating-typed-clients"&gt;Generating Typed Clients&lt;/h3&gt;
+&lt;p&gt;We're now going to use NSwag`s MSBuild package to generate a &lt;a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#how-to-use-typed-clients-with-httpclientfactory"&gt;Typed Client&lt;/a&gt; for each project at build time. To do this:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Install the required packages&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;dotnet add .\Cheeze.Store\Cheeze.Store.csproj package NSwag.MSBuild
+dotnet add .\Cheeze.Inventory\Cheeze.Inventory.csproj package NSwag.MSBuild
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Build project to restore packages&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Edit the project file to enable Nullable Reference Types and include all assemblies on build:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-csproj"&gt;&amp;lt;Project Sdk=&amp;quot;Microsoft.NET.Sdk.Web&amp;quot;&amp;gt;
+    &amp;lt;PropertyGroup&amp;gt;
+        &amp;lt;TargetFramework&amp;gt;netcoreapp3.1&amp;lt;/TargetFramework&amp;gt;
+        &amp;lt;Nullable&amp;gt;enable&amp;lt;/Nullable&amp;gt; &amp;lt;!-- Add this line --&amp;gt;
+        &amp;lt;CopyLocalLockFileAssemblies&amp;gt;true&amp;lt;/CopyLocalLockFileAssemblies&amp;gt; &amp;lt;!-- And this line --&amp;gt;
+    &amp;lt;/PropertyGroup&amp;gt;
+    ...
+&amp;lt;/Project&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Generate an NSwag configuration file&lt;/p&gt;
+&lt;p&gt;Building the solution after adding the &lt;code&gt;NSwag.MSBuild&lt;/code&gt; package should have added the NSwag tools to your nuget package cache (usually in the following directory: &lt;code&gt;%userprofile%\.nuget\packages\nswag.msbuild\13.2.0\tools\NetCore31&lt;/code&gt;). Using these build tools we can generate the required configuration file for each project with the following command:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;cd .\Cheeze.Inventory
+~\.nuget\packages\nswag.msbuild\13.2.0\tools\NetCore31\dotnet-nswag.exe new
+cd ..\Cheeze.Store
+~\.nuget\packages\nswag.msbuild\13.2.0\tools\NetCore31\dotnet-nswag.exe new
+cd ..
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we need to replace sections the generated configuration file with populated values. In each of files do the following:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Set the &lt;code&gt;runtime&lt;/code&gt; version:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-json"&gt;{
+    &amp;quot;runtime&amp;quot;: &amp;quot;NetCore31&amp;quot;,
+    ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Modify the &lt;code&gt;documentGenerator&lt;/code&gt; section to generate an OpenAPI document from the generated web assembly. Do this by replacing the &lt;code&gt;documentGenerator&lt;/code&gt; section with the following (ensuring to replace the &lt;code&gt;controllerNames&lt;/code&gt;, &lt;code&gt;defaultUrlTemplate&lt;/code&gt; and &lt;code&gt;assemblyPaths&lt;/code&gt; to the correct values for each project):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-json"&gt;{
+    ...
+    &amp;quot;documentGenerator&amp;quot;: {
+        &amp;quot;webApiToOpenApi&amp;quot;: {
+            &amp;quot;controllerNames&amp;quot;: [
+                &amp;quot;Cheeze.Store.Controller&amp;quot;
+            ],
+            &amp;quot;isAspNetCore&amp;quot;: true,
+            &amp;quot;resolveJsonOptions&amp;quot;: false,
+            &amp;quot;defaultUrlTemplate&amp;quot;: &amp;quot;api/store&amp;quot;,
+            &amp;quot;addMissingPathParameters&amp;quot;: false,
+            &amp;quot;includedVersions&amp;quot;: null,
+            &amp;quot;defaultPropertyNameHandling&amp;quot;: &amp;quot;Default&amp;quot;,
+            &amp;quot;defaultReferenceTypeNullHandling&amp;quot;: &amp;quot;Null&amp;quot;,
+            &amp;quot;defaultDictionaryValueReferenceTypeNullHandling&amp;quot;: &amp;quot;NotNull&amp;quot;,
+            &amp;quot;defaultResponseReferenceTypeNullHandling&amp;quot;: &amp;quot;NotNull&amp;quot;,
+            &amp;quot;defaultEnumHandling&amp;quot;: &amp;quot;Integer&amp;quot;,
+            &amp;quot;flattenInheritanceHierarchy&amp;quot;: false,
+            &amp;quot;generateKnownTypes&amp;quot;: true,
+            &amp;quot;generateEnumMappingDescription&amp;quot;: false,
+            &amp;quot;generateXmlObjects&amp;quot;: false,
+            &amp;quot;generateAbstractProperties&amp;quot;: false,
+            &amp;quot;generateAbstractSchemas&amp;quot;: true,
+            &amp;quot;ignoreObsoleteProperties&amp;quot;: false,
+            &amp;quot;allowReferencesWithProperties&amp;quot;: false,
+            &amp;quot;excludedTypeNames&amp;quot;: [],
+            &amp;quot;serviceHost&amp;quot;: null,
+            &amp;quot;serviceBasePath&amp;quot;: null,
+            &amp;quot;serviceSchemes&amp;quot;: [],
+            &amp;quot;infoTitle&amp;quot;: &amp;quot;My Title&amp;quot;,
+            &amp;quot;infoDescription&amp;quot;: null,
+            &amp;quot;infoVersion&amp;quot;: &amp;quot;1.0.0&amp;quot;,
+            &amp;quot;documentTemplate&amp;quot;: null,
+            &amp;quot;documentProcessorTypes&amp;quot;: [],
+            &amp;quot;operationProcessorTypes&amp;quot;: [],
+            &amp;quot;typeNameGeneratorType&amp;quot;: null,
+            &amp;quot;schemaNameGeneratorType&amp;quot;: null,
+            &amp;quot;contractResolverType&amp;quot;: null,
+            &amp;quot;serializerSettingsType&amp;quot;: null,
+            &amp;quot;useDocumentProvider&amp;quot;: true,
+            &amp;quot;documentName&amp;quot;: &amp;quot;v1&amp;quot;,
+            &amp;quot;aspNetCoreEnvironment&amp;quot;: null,
+            &amp;quot;createWebHostBuilderMethod&amp;quot;: null,
+            &amp;quot;startupType&amp;quot;: null,
+            &amp;quot;allowNullableBodyParameters&amp;quot;: true,
+            &amp;quot;output&amp;quot;: null,
+            &amp;quot;outputType&amp;quot;: &amp;quot;Swagger2&amp;quot;,
+            &amp;quot;assemblyPaths&amp;quot;: [
+                &amp;quot;bin/$(Configuration)/netcoreapp3.1/Cheeze.Store.dll&amp;quot;
+            ],
+            &amp;quot;assemblyConfig&amp;quot;: null,
+            &amp;quot;referencePaths&amp;quot;: [],
+            &amp;quot;useNuGetCache&amp;quot;: true
+        }
+    },
+    ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Remove the &lt;code&gt;openApiToTypeScriptClient&lt;/code&gt; and &lt;code&gt;openApiToCSharpController&lt;/code&gt; sections from within the &lt;code&gt;codeGenerators&lt;/code&gt; section of each file.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Modify the &lt;code&gt;openApiToCSharpClient&lt;/code&gt; section to generate C# typed clients from the OpenAPI document. Do this by replacing the &lt;code&gt;openApiToCSharpClient&lt;/code&gt; section with the following (ensuring to replace the &lt;code&gt;className&lt;/code&gt;, &lt;code&gt;namespace&lt;/code&gt; and &lt;code&gt;output&lt;/code&gt; to the correct values for each project):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-json"&gt;{
+    ...
+    &amp;quot;codeGenerators&amp;quot;: {
+        &amp;quot;openApiToCSharpClient&amp;quot;: {
+            &amp;quot;clientBaseClass&amp;quot;: null,
+            &amp;quot;configurationClass&amp;quot;: null,
+            &amp;quot;generateClientClasses&amp;quot;: true,
+            &amp;quot;generateClientInterfaces&amp;quot;: true,
+            &amp;quot;injectHttpClient&amp;quot;: true,
+            &amp;quot;disposeHttpClient&amp;quot;: true,
+            &amp;quot;protectedMethods&amp;quot;: [],
+            &amp;quot;generateExceptionClasses&amp;quot;: true,
+            &amp;quot;exceptionClass&amp;quot;: &amp;quot;ApiException&amp;quot;,
+            &amp;quot;wrapDtoExceptions&amp;quot;: true,
+            &amp;quot;useHttpClientCreationMethod&amp;quot;: false,
+            &amp;quot;httpClientType&amp;quot;: &amp;quot;System.Net.Http.HttpClient&amp;quot;,
+            &amp;quot;useHttpRequestMessageCreationMethod&amp;quot;: false,
+            &amp;quot;useBaseUrl&amp;quot;: false,
+            &amp;quot;generateBaseUrlProperty&amp;quot;: false,
+            &amp;quot;generateSyncMethods&amp;quot;: false,
+            &amp;quot;exposeJsonSerializerSettings&amp;quot;: false,
+            &amp;quot;clientClassAccessModifier&amp;quot;: &amp;quot;public&amp;quot;,
+            &amp;quot;typeAccessModifier&amp;quot;: &amp;quot;public&amp;quot;,
+            &amp;quot;generateContractsOutput&amp;quot;: false,
+            &amp;quot;contractsNamespace&amp;quot;: null,
+            &amp;quot;contractsOutputFilePath&amp;quot;: null,
+            &amp;quot;parameterDateTimeFormat&amp;quot;: &amp;quot;s&amp;quot;,
+            &amp;quot;parameterDateFormat&amp;quot;: &amp;quot;yyyy-MM-dd&amp;quot;,
+            &amp;quot;generateUpdateJsonSerializerSettingsMethod&amp;quot;: true,
+            &amp;quot;serializeTypeInformation&amp;quot;: false,
+            &amp;quot;queryNullValue&amp;quot;: &amp;quot;&amp;quot;,
+            &amp;quot;className&amp;quot;: &amp;quot;StoreClient&amp;quot;,
+            &amp;quot;operationGenerationMode&amp;quot;: &amp;quot;MultipleClientsFromOperationId&amp;quot;,
+            &amp;quot;additionalNamespaceUsages&amp;quot;: [],
+            &amp;quot;additionalContractNamespaceUsages&amp;quot;: [],
+            &amp;quot;generateOptionalParameters&amp;quot;: false,
+            &amp;quot;generateJsonMethods&amp;quot;: false,
+            &amp;quot;enforceFlagEnums&amp;quot;: false,
+            &amp;quot;parameterArrayType&amp;quot;: &amp;quot;System.Collections.Generic.IEnumerable&amp;quot;,
+            &amp;quot;parameterDictionaryType&amp;quot;: &amp;quot;System.Collections.Generic.IDictionary&amp;quot;,
+            &amp;quot;responseArrayType&amp;quot;: &amp;quot;System.Collections.Generic.ICollection&amp;quot;,
+            &amp;quot;responseDictionaryType&amp;quot;: &amp;quot;System.Collections.Generic.IDictionary&amp;quot;,
+            &amp;quot;wrapResponses&amp;quot;: false,
+            &amp;quot;wrapResponseMethods&amp;quot;: [],
+            &amp;quot;generateResponseClasses&amp;quot;: true,
+            &amp;quot;responseClass&amp;quot;: &amp;quot;SwaggerResponse&amp;quot;,
+            &amp;quot;namespace&amp;quot;: &amp;quot;Cheeze.Store.Client&amp;quot;,
+            &amp;quot;requiredPropertiesMustBeDefined&amp;quot;: true,
+            &amp;quot;dateType&amp;quot;: &amp;quot;System.DateTimeOffset&amp;quot;,
+            &amp;quot;jsonConverters&amp;quot;: null,
+            &amp;quot;anyType&amp;quot;: &amp;quot;object&amp;quot;,
+            &amp;quot;dateTimeType&amp;quot;: &amp;quot;System.DateTimeOffset&amp;quot;,
+            &amp;quot;timeType&amp;quot;: &amp;quot;System.TimeSpan&amp;quot;,
+            &amp;quot;timeSpanType&amp;quot;: &amp;quot;System.TimeSpan&amp;quot;,
+            &amp;quot;arrayType&amp;quot;: &amp;quot;System.Collections.Generic.ICollection&amp;quot;,
+            &amp;quot;arrayInstanceType&amp;quot;: &amp;quot;System.Collections.ObjectModel.Collection&amp;quot;,
+            &amp;quot;dictionaryType&amp;quot;: &amp;quot;System.Collections.Generic.IDictionary&amp;quot;,
+            &amp;quot;dictionaryInstanceType&amp;quot;: &amp;quot;System.Collections.Generic.Dictionary&amp;quot;,
+            &amp;quot;arrayBaseType&amp;quot;: &amp;quot;System.Collections.ObjectModel.Collection&amp;quot;,
+            &amp;quot;dictionaryBaseType&amp;quot;: &amp;quot;System.Collections.Generic.Dictionary&amp;quot;,
+            &amp;quot;classStyle&amp;quot;: &amp;quot;Poco&amp;quot;,
+            &amp;quot;generateDefaultValues&amp;quot;: true,
+            &amp;quot;generateDataAnnotations&amp;quot;: true,
+            &amp;quot;excludedTypeNames&amp;quot;: [],
+            &amp;quot;excludedParameterNames&amp;quot;: [],
+            &amp;quot;handleReferences&amp;quot;: false,
+            &amp;quot;generateImmutableArrayProperties&amp;quot;: false,
+            &amp;quot;generateImmutableDictionaryProperties&amp;quot;: false,
+            &amp;quot;jsonSerializerSettingsTransformationMethod&amp;quot;: null,
+            &amp;quot;inlineNamedArrays&amp;quot;: false,
+            &amp;quot;inlineNamedDictionaries&amp;quot;: false,
+            &amp;quot;inlineNamedTuples&amp;quot;: true,
+            &amp;quot;inlineNamedAny&amp;quot;: false,
+            &amp;quot;generateDtoTypes&amp;quot;: true,
+            &amp;quot;generateOptionalPropertiesAsNullable&amp;quot;: false,
+            &amp;quot;templateDirectory&amp;quot;: null,
+            &amp;quot;typeNameGeneratorType&amp;quot;: null,
+            &amp;quot;propertyNameGeneratorType&amp;quot;: null,
+            &amp;quot;enumNameGeneratorType&amp;quot;: null,
+            &amp;quot;serviceHost&amp;quot;: null,
+            &amp;quot;serviceSchemes&amp;quot;: null,
+            &amp;quot;output&amp;quot;: &amp;quot;$(Target)/StoreClient.Generated.cs&amp;quot;
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Edit the project file to use the configuration file to generate the typed client for each project (replacing &lt;code&gt;[PROJECT_NAME]&lt;/code&gt; with &lt;code&gt;Cheeze.Store.Client&lt;/code&gt; or &lt;code&gt;Cheeze.Inventory.Client&lt;/code&gt; as appropriate):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-csproj"&gt;&amp;lt;Project Sdk=&amp;quot;Microsoft.NET.Sdk.Web&amp;quot;&amp;gt;
+    ...
+    &amp;lt;Target Name=&amp;quot;NSwag&amp;quot; AfterTargets=&amp;quot;Build&amp;quot;&amp;gt;
+        &amp;lt;Copy SourceFiles=&amp;quot;&amp;#64;(ReferencePath)&amp;quot; DestinationFolder=&amp;quot;$(OutDir)References&amp;quot; /&amp;gt;
+        &amp;lt;Exec Condition=&amp;quot;'$(NSwag)'=='true'&amp;quot; Command=&amp;quot;$(NSwagExe_Core31) run nswag.json /variables:Configuration=$(Configuration),OutDir=$(OutDir),Target=$(SolutionDir)[PROJECT_NAME]&amp;quot; /&amp;gt;
+        &amp;lt;RemoveDir Directories=&amp;quot;$(OutDir)References&amp;quot; /&amp;gt;
+    &amp;lt;/Target&amp;gt;
+    ...
+&amp;lt;/Project&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Add a &lt;code&gt;build.ps1&lt;/code&gt; file to the &lt;code&gt;src&lt;/code&gt; directory containing:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;$solutionDir = Get-Location
+dotnet build .\Cheeze.Store\Cheeze.Store.csproj /p:NSwag=true /p:SolutionDir=$solutionDir
+dotnet build .\Cheeze.Inventory\Cheeze.Inventory.csproj /p:NSwag=true /p:SolutionDir=$solutionDir
+dotnet build .\Cheeze.Store.Client\Cheeze.Store.Client.csproj
+dotnet build .\Cheeze.Inventory.Client\Cheeze.Inventory.Client.csproj
+dotnet build .\Cheeze.Graph\Cheeze.Graph.csproj
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The build script is required to ensure projects are built in the correct order and to ensure we don't try to regenerate our typed clients while containerizing our projects (see below).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Adding &lt;code&gt;Newtonsoft.Json&lt;/code&gt; and &lt;code&gt;System.ComponentModel.Annotations&lt;/code&gt; packages to the client projects:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;dotnet add .\Cheeze.Store.Client\Cheeze.Store.Client.csproj package Newtonsoft.Json
+dotnet add .\Cheeze.Store.Client\Cheeze.Store.Client.csproj package System.ComponentModel.Annotations
+dotnet add .\Cheeze.Inventory.Client\Cheeze.Inventory.Client.csproj package Newtonsoft.Json
+dotnet add .\Cheeze.Inventory.Client\Cheeze.Inventory.Client.csproj package System.ComponentModel.Annotations
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Build!&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;.\build.ps1
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If all the above is correct, we should have a successful build and see that &lt;code&gt;StoreClient.Generated.cs&lt;/code&gt; and &lt;code&gt;InventoryClient.Generated.cs&lt;/code&gt; appear in the &lt;code&gt;Cheeze.Store&lt;/code&gt; and &lt;code&gt;Cheeze.Inventory&lt;/code&gt; directories respectively.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="graphql-service"&gt;GraphQL Service&lt;/h2&gt;
+&lt;p&gt;Finally we can get around to implementing our GraphQL service. We'll undertake the following steps to get this service running as expected:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Create an object model of our DTOs and Graph Query as POCO objects&lt;/li&gt;
+&lt;li&gt;Build a GraphQL schema from these objects using the SchemaBuilder&lt;/li&gt;
+&lt;li&gt;Configure the .Net Core host to correctly run the GraphQL Service&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;First however, as we're not currently able to use Schema Stitching, we need to perform mapping between the &lt;code&gt;Cheeze.Store&lt;/code&gt; and &lt;code&gt;Cheeze.Graph&lt;/code&gt; schemas ourselves. To facilitate this, we're going to use &lt;a href="https://automapper.org/"&gt;Automapper&lt;/a&gt; so we need to add the package to &lt;code&gt;Cheeze.Graph&lt;/code&gt; using:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;dotnet add .\Cheeze.Graph\Cheeze.Graph.csproj package AutoMapper
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="object-model"&gt;Object Model&lt;/h3&gt;
+&lt;p&gt;Add a &lt;code&gt;Cheese.cs&lt;/code&gt; to &lt;code&gt;Cheeze.Graph&lt;/code&gt; with the following content:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;using System;
+
+namespace Cheeze.Graph
+{
+    public class Cheese
+    {
+        public Guid Id { get; set; }
+
+        public Uri? Uri { get; set; }
+
+        public string Name { get; set; } = string.Empty;
+
+        public string Description { get; set; } = string.Empty;
+
+        public decimal Price { get; set; }
+
+        public int Available { get; set; }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There are two things to note here:&lt;/p&gt;
+&lt;p&gt;Firstly, the Cheese type is very similar - &lt;strong&gt;but not identical&lt;/strong&gt; - to the Cheese type declared in &lt;code&gt;Cheeze.Store&lt;/code&gt;. Crucially this Cheese type has an Available property which is not in the data provided by &lt;code&gt;Cheeze.Store&lt;/code&gt; and instead will be populated by dependent calls to &lt;code&gt;Cheeze.Inventory&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Secondly this type does not implement any behaviour, it merely declares the shape (i.e. schema) of the data that can be provided by this service. All GraphQL functionality is provided via the SchemaBuilder and associated Resolvers as see below.&lt;/p&gt;
+&lt;h3 id="schema-resolvers"&gt;Schema &amp;amp; Resolvers&lt;/h3&gt;
+&lt;p&gt;Add a &lt;code&gt;Schema.cs&lt;/code&gt; file to &lt;code&gt;Cheeze.Graph&lt;/code&gt; with the following content:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;using AutoMapper;
+using HotChocolate;
+using HotChocolate.Resolvers;
+using HotChocolate.Types;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Cheeze.Graph
+{
+    public static class Schema
+    {
+        private static readonly IMapper Mapper;
+
+        static Schema()
+        {
+            var mapping = new MapperConfiguration(
+                configuration =&amp;gt;
+                {
+                    configuration.CreateMap&amp;lt;Cheeze.Store.Client.Cheese, Cheese&amp;gt;()
+                        .ForMember(cheese =&amp;gt; cheese.Available, options =&amp;gt; options.Ignore());
+                }
+            );
+
+            Mapper = mapping.CreateMapper();
+        }
+        private static async Task&amp;lt;IReadOnlyDictionary&amp;lt;Guid, int&amp;gt;&amp;gt; FetchInventory(this Cheeze.Inventory.Client.IInventoryClient inventoryClient, IReadOnlyList&amp;lt;Guid&amp;gt; cheeses)
+        {
+            var response = await inventoryClient.PostAsync(new Cheeze.Inventory.Client.Request { Ids = cheeses.ToArray() });
+
+            return cheeses
+                .GroupJoin(response, id =&amp;gt; id, available =&amp;gt; available.Id, (id, available) =&amp;gt; (Id: id, Available: available.Select(a =&amp;gt; a.Quantity).FirstOrDefault()))
+                .ToDictionary(tuple =&amp;gt; tuple.Id, tuple =&amp;gt; tuple.Available);
+        }
+
+        private static async Task&amp;lt;int&amp;gt; ResolveInventory(this IResolverContext context)
+        {
+            var dataLoader = context.BatchDataLoader&amp;lt;Guid, int&amp;gt;(
+                &amp;quot;availableById&amp;quot;,
+                context.Service&amp;lt;Cheeze.Inventory.Client.IInventoryClient&amp;gt;().FetchInventory);
+
+            return await dataLoader.LoadAsync(context.Parent&amp;lt;Cheese&amp;gt;().Id, context.RequestAborted);
+        }
+
+        private static async Task&amp;lt;IEnumerable&amp;lt;Cheese&amp;gt;&amp;gt; ResolveCheeses(this IResolverContext context)
+        {
+            var results = await context.Service&amp;lt;Cheeze.Store.Client.IStoreClient&amp;gt;().GetAsync();
+
+            return results.Select(source =&amp;gt; Mapper.Map&amp;lt;Cheeze.Store.Client.Cheese, Cheese&amp;gt;(source));
+        }
+
+        public static ISchemaBuilder Build()
+        {
+            return SchemaBuilder.New()
+                .AddQueryType(
+                    typeDescriptor =&amp;gt; typeDescriptor
+                        .Field(&amp;quot;Cheese&amp;quot;)
+                            .Resolver(context =&amp;gt; context.ResolveCheeses()))
+                .AddObjectType&amp;lt;Cheese&amp;gt;(
+                    cheese =&amp;gt; cheese
+                        .Field(f =&amp;gt; f.Available)
+                            .Resolver(context =&amp;gt; context.ResolveInventory()))
+                .ModifyOptions(o =&amp;gt; o.RemoveUnreachableTypes = true);
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Amazingly, this single class implements &lt;strong&gt;all&lt;/strong&gt; the functionality needed to provide a GraphQL compliant endpoint in ~70 SLoC. There is rather a lot going on though so lets break it down starting with the static public method &lt;code&gt;Build&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;Build&lt;/code&gt; method uses (and returns) a &lt;code&gt;SchemaBuilder&lt;/code&gt; to define the schema that will be presented through the GraphQL endpoint. This comprises two main elements: the &lt;code&gt;QueryType&lt;/code&gt; - provided by the &lt;code&gt;.AddQueryType()&lt;/code&gt; fluent method - and the &lt;code&gt;Cheese&lt;/code&gt; object type - provided by the &lt;code&gt;.AddObjectType&amp;lt;Cheese&amp;gt;()&lt;/code&gt; fluent method. We'll dig into each of these here.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;AddQueryType&lt;/code&gt; defines the types of queries that can be executed by this GraphQL endpoint in a purely code-first manner. The code above adds a field &lt;code&gt;Cheese&lt;/code&gt; which, when used in the query, uses the &lt;code&gt;ResolveCheeses()&lt;/code&gt; extension method to provide data for the query. The &lt;code&gt;ResolveCheeses()&lt;/code&gt; extension method uses the &lt;code&gt;IResolverContext&lt;/code&gt; to retrieve the typed client for the &lt;code&gt;Cheeze.Store&lt;/code&gt; ReST endpoint and calls the &lt;code&gt;GetAsync()&lt;/code&gt; method on it. Finally, AutoMapper is used to map between the &lt;code&gt;Cheeze.Store.Client.Cheese&lt;/code&gt; and &lt;code&gt;Cheeze.Graph.Cheese&lt;/code&gt; types, specifically ignoring the &lt;code&gt;Available&lt;/code&gt; property of &lt;code&gt;Cheeze.Graph.Cheese&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Similarly, the &lt;code&gt;AddObjectType&amp;lt;Cheese&amp;gt;&lt;/code&gt; method intercepts objects of type &lt;code&gt;Cheese&lt;/code&gt; and uses the &lt;code&gt;ResolveInventory()&lt;/code&gt; extension method to populate the &lt;code&gt;Available&lt;/code&gt; property. This time however, a &lt;code&gt;BatchDataLoader&lt;/code&gt; is used from within the extension method to neatly avoid the &lt;a href="https://itnext.io/what-is-the-n-1-problem-in-graphql-dd4921cb3c1a"&gt;N+1 problem&lt;/a&gt;.&lt;/p&gt;
+&lt;h3 id="service-binding-configuration"&gt;Service Binding &amp;amp; Configuration&lt;/h3&gt;
+&lt;p&gt;Finally we need to bind required service and configuration types so, again in &lt;code&gt;Cheeze.Graph&lt;/code&gt; add the following:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;A &lt;code&gt;Configuration.cs&lt;/code&gt; file in an &lt;code&gt;Inventory&lt;/code&gt; folder containing:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;using System;
+
+namespace Cheeze.Graph.Inventory
+{
+    public class Configuration
+    {
+        public Uri BaseAddress { get; set; } = new Uri(&amp;quot;https://inventory&amp;quot;);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;A &lt;code&gt;Configuration.cs&lt;/code&gt; file in a &lt;code&gt;Store&lt;/code&gt; folder containing:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;using System;
+
+namespace Cheeze.Graph.Store
+{
+    public class Configuration
+    {
+        public Uri BaseAddress { get; set; } = new Uri(&amp;quot;https://store&amp;quot;);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In &lt;code&gt;Program.cs&lt;/code&gt; refactor &lt;code&gt;CreateWebHostBuilder&lt;/code&gt; method to the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;public static IWebHostBuilder CreateWebHostBuilder(string[] args)
+{
+    return WebHost
+        .CreateDefaultBuilder(args)
+        .ConfigureAppConfiguration((hostingContext, config) =&amp;gt; config.AddEnvironmentVariables(&amp;quot;Cheeze:Graph:&amp;quot;))
+        .ConfigureServices(
+            (hostContext, services) =&amp;gt;
+            {
+                services.AddOptions&amp;lt;Store.Configuration&amp;gt;().Bind(hostContext.Configuration.GetSection(&amp;quot;Store&amp;quot;));
+                services.AddOptions&amp;lt;Inventory.Configuration&amp;gt;().Bind(hostContext.Configuration.GetSection(&amp;quot;Inventory&amp;quot;));
+            })
+        .UseStartup&amp;lt;Startup&amp;gt;();
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And add the two required usings:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we're adding configuration from Environment Variables (prefixed with &lt;code&gt;Cheeze:Graph&lt;/code&gt;) to our application and binding this configuration to the types added above.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;In &lt;code&gt;Startup.cs&lt;/code&gt; refactor the &lt;code&gt;ConfigureServices&lt;/code&gt; method to the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;public void ConfigureServices(IServiceCollection services)
+{
+    services.AddHttpClient&amp;lt;Cheeze.Store.Client.IStoreClient, Cheeze.Store.Client.StoreClient&amp;gt;(
+        (serviceProvider, httpClient) =&amp;gt; httpClient.BaseAddress = serviceProvider.GetRequiredService&amp;lt;IOptions&amp;lt;Store.Configuration&amp;gt;&amp;gt;().Value.BaseAddress
+    );
+
+    services.AddHttpClient&amp;lt;Cheeze.Inventory.Client.IInventoryClient, Cheeze.Inventory.Client.InventoryClient&amp;gt;(
+        (serviceProvider, httpClient) =&amp;gt; httpClient.BaseAddress = serviceProvider.GetRequiredService&amp;lt;IOptions&amp;lt;Inventory.Configuration&amp;gt;&amp;gt;().Value.BaseAddress
+    );
+
+    // this enables you to use DataLoader in your resolvers.
+    services.AddDataLoaderRegistry();
+
+    // Add GraphQL Services
+    services.AddGraphQL(Schema.Build());
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And again add the required using:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cs"&gt;using Microsoft.Extensions.Options;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we're binding the typed clients for &lt;code&gt;Cheeze.Store&lt;/code&gt; and &lt;code&gt;Cheeze.Inventory&lt;/code&gt; and ensuring they're configured with the appropriate base addresses. Finally we're using the &lt;code&gt;Schema.Build()&lt;/code&gt; method to provide the GraphQL schema to the &lt;code&gt;services.AddGraphQL()&lt;/code&gt; method.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;And that - as the say - is that. If we run our build script now we should find everything builds successfully.&lt;/p&gt;
+&lt;h2 id="containerization"&gt;Containerization&lt;/h2&gt;
+&lt;p&gt;Now, rather than configuring and spinning up all the services manually, we'll simplify our debug/deploy loop by containerizing our services and using &lt;a href="https://docs.docker.com/compose/"&gt;Docker Compose&lt;/a&gt; to do the job for us. From Visual Studio this would be a simple case of using the &amp;quot;Add &amp;gt; Docker Support&amp;quot; and &amp;quot;Add &amp;gt; Container Orchestration Support&amp;quot; options from the &amp;quot;Solution Explorer&amp;quot; as described &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/host-and-deploy/docker/visual-studio-tools-for-docker?view=aspnetcore-3.1"&gt;here&lt;/a&gt;. However, as we've so far done pretty much everything from the command-line, lets try carrying that on.&lt;/p&gt;
+&lt;h3 id="docker-support"&gt;Docker Support&lt;/h3&gt;
+&lt;p&gt;First we'll add docker support to each of the top-level projects by using the standard multi-stage dockerfile template. I was unable to find an official source for this template so uploaded a version to my &lt;a href="https://github.com/ibebbs/DotnetCliDocker"&gt;DotnetCliDocker&lt;/a&gt; repository which we're be using here.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;&amp;#64;(Invoke-WebRequest &amp;quot;https://raw.githubusercontent.com/ibebbs/DotnetCliDocker/master/Dockerfile3_1&amp;quot; | Select-Object -ExpandProperty Content) -replace &amp;quot;\(ProjectName\)&amp;quot;,&amp;quot;Cheeze.Graph&amp;quot; | Set-Content .\Cheeze.Graph\Dockerfile
+&amp;#64;(Invoke-WebRequest &amp;quot;https://raw.githubusercontent.com/ibebbs/DotnetCliDocker/master/Dockerfile3_1&amp;quot; | Select-Object -ExpandProperty Content) -replace &amp;quot;\(ProjectName\)&amp;quot;,&amp;quot;Cheeze.Store&amp;quot; | Set-Content .\Cheeze.Store\Dockerfile
+&amp;#64;(Invoke-WebRequest &amp;quot;https://raw.githubusercontent.com/ibebbs/DotnetCliDocker/master/Dockerfile3_1&amp;quot; | Select-Object -ExpandProperty Content) -replace &amp;quot;\(ProjectName\)&amp;quot;,&amp;quot;Cheeze.Inventory&amp;quot; | Set-Content .\Cheeze.Inventory\Dockerfile
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="container-orchestration-support"&gt;Container Orchestration Support&lt;/h3&gt;
+&lt;p&gt;Now lets add a couple of files so that we can use Docker Compose to run our microservice environment&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;p&gt;Add a &lt;code&gt;docker-compose.yml&lt;/code&gt; file to the &lt;code&gt;src&lt;/code&gt; directory containing:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-yaml"&gt;version: '3.4'
+
+services:
+cheeze.store:
+    image: ${DOCKER_REGISTRY-}cheezestore
+    build:
+    context: .
+    dockerfile: Cheeze.Store/Dockerfile
+
+cheeze.inventory:
+    image: ${DOCKER_REGISTRY-}cheezeinventory
+    build:
+    context: .
+    dockerfile: Cheeze.Inventory/Dockerfile
+
+cheeze.graph:
+    image: ${DOCKER_REGISTRY-}cheezegraph
+    build:
+    context: .
+    dockerfile: Cheeze.Graph/Dockerfile
+    ports:
+    - &amp;quot;8081:80&amp;quot;
+    environment:
+    - Cheeze__Graph__Store__BaseAddress=http://cheeze.store
+    - Cheeze__Graph__Inventory__BaseAddress=http://cheeze.inventory
+    depends_on:
+    - cheeze.store
+    - cheeze.inventory
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Add a &lt;code&gt;.dockerignore&lt;/code&gt; to the &lt;code&gt;src&lt;/code&gt; directory by running:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;&amp;#64;(Invoke-WebRequest &amp;quot;https://raw.githubusercontent.com/ibebbs/DotnetCliDocker/master/.dockerignore&amp;quot;) | Set-Content .\.dockerignore
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;Build and run our containers&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;docker-compose build
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This might take some time but should result in a successful build afterwhich you can run the containers using:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-powershell"&gt;docker-compose run
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="testing"&gt;Testing&lt;/h2&gt;
+&lt;p&gt;With our composed containers running, open up a browser and navigate to &lt;code&gt;http://localhost:8081/playground&lt;/code&gt;. You should see something like the following:&lt;/p&gt;
+&lt;img src="/Content/LessReSTMoreHotChocolate/Playground.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="GraphQL Playground"&gt;
+&lt;p&gt;The two tabs on the right hand side of the screen - &amp;quot;Docs&amp;quot; &amp;amp; &amp;quot;Schema&amp;quot; - allow you to examine the GraphQL endpoint to determine the queries you can execute and the content the service is able to receive. As we've got very little data in our services, we'll just use a basic query to retrieve the data we've defined. In the left pain of the playground (underneath &amp;quot;# Write your query or mutation here&amp;quot;) enter the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-graphql"&gt;{
+  Cheese {
+    id,
+    name,
+    available
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;Note: As you're typing this, you should see that auto-complete is available and extremely quick.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Finally, once the query is complete, click the &amp;quot;Play&amp;quot; button in the centre of the screen. If everything has compiled and build correctly, you should see the following in the right hand pane:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;{
+  &amp;quot;data&amp;quot;: {
+    &amp;quot;Cheese&amp;quot;: [
+      {
+        &amp;quot;id&amp;quot;: &amp;quot;1468841a-5fbe-41c5-83b3-ab136b7ae70c&amp;quot;,
+        &amp;quot;name&amp;quot;: &amp;quot;API Cheese&amp;quot;,
+        &amp;quot;available&amp;quot;: 9
+      }
+    ]
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And there we go. We've successfully used GraphQL to integrate and intelligently query two independent ReST services. Nice!&lt;/p&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;If you're hitting up against some of the limitations of ReST - particularly for mobile client applications - I would very much recommend taking a look at GraphQL and &lt;a href="https://chillicream.com/"&gt;ChilliCream's&lt;/a&gt; Hot Chocolate library in particular. Hot Chocolate makes setting up a GraphQL endpoint incredibly easy, and it's code-first capabilities allow you to concentrate on modelling a domain that works for you and your customers rather than the GraphQL framework.&lt;/p&gt;
+&lt;p&gt;Hot Chocolate is under &lt;strong&gt;very&lt;/strong&gt; heavy development with fantastic new features getting added at an amazing cadence (hopefully ReST based Schema Stitching will bubble to the top of ChilliCream's priority list soon). Furthermore support for this library is excellent; in point of fact, while authoring this article I posted a question in their Slack workspace only to get it answered by Michael Steib himself just moments later and which culminated in a discussion that lasted the better part of an hour.&lt;/p&gt;
+&lt;p&gt;ChilliCream also have a &lt;a href="https://www.nuget.org/packages/StrawberryShake/11.0.0-preview.75"&gt;client-side library&lt;/a&gt; for GraphQL called &lt;a href="https://chillicream.com/blog/2019/11/25/strawberry-shake_2"&gt;&amp;quot;Strawberry Shake&amp;quot;&lt;/a&gt;. While currently in alpha it looks extremely promising for creating strongly-typed GraphQL clients as it will - apparently - provide &lt;a href="https://grpc.io/blog/grpc-dotnet-build/"&gt;&amp;quot;protobuff style&amp;quot;&lt;/a&gt; code generation for the client direct from a GraphQL service's schema.&lt;/p&gt;
+&lt;p&gt;Lastly, if you are authoring ReST endpoints, I would very much recommend considering &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-nswag?view=aspnetcore-3.1&amp;amp;tabs=visual-studio"&gt;NSwag&lt;/a&gt; over &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/getting-started-with-swashbuckle?view=aspnetcore-3.1&amp;amp;tabs=visual-studio"&gt;Swashbuckle&lt;/a&gt;. For me, NSwag's integration is a bit nicer than Swashbuckle and has a greater focus on the OpenAPI toolchain. Furthermore NSwag's tooling is first class allowing you to generate OpenAPI documents and/or client side libraries (in a number of languages) using a variety of tools, not least of which being the MSBuild target we used here.&lt;/p&gt;
+&lt;p&gt;All code for from this post can be found in my &lt;a href="https://github.com/ibebbs/Cheeze"&gt;&amp;quot;Cheeze&amp;quot;&lt;/a&gt; repository on GitHub.&lt;/p&gt;
+&lt;p&gt;As always, if you have any questions or comments on the above or would like to discuss any point further, please don't hesitate to contact me using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;A project I'm working on requires a microservice like evaluation environment. A brief google revealed very little that would suffice so I decided to quickly knock up my own. At the same time, I thought it would be a great opportunity to evaluate &lt;a href="https://hotchocolate.io/"&gt;Hot Chocolate&lt;/a&gt; by &lt;a href="https://chillicream.com/"&gt;Chilli Cream&lt;/a&gt;; a relative newcomer to the (very sparse) GraphQL for .NET scene. In this post I'll also be using &lt;a href="https://github.com/RicoSuter/NSwag"&gt;NSwag&lt;/a&gt; to generate &lt;a href="https://www.openapis.org/"&gt;OpenAPI documents&lt;/a&gt; and &lt;a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#how-to-use-typed-clients-with-httpclientfactory"&gt;Typed Clients&lt;/a&gt; for downstream services and, finally, I will be containerizing the microservices using &lt;a href="https://www.docker.com/"&gt;Docker&lt;/a&gt; and employing &lt;a href="https://docs.docker.com/compose/"&gt;Docker Compose&lt;/a&gt; to run and test them.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/NetworkBootingManyRaspberryPis</id>
 		<title>Network Booting Many Raspberry Pis</title>
@@ -2544,420 +3337,5 @@ void main() {
 &lt;p&gt;Have fun.&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;Visual Studio Code is rapidly becoming my go-to editor for anything not project-oriented C#/F#. I've switched from &lt;a href="https://atom.io/"&gt;Atom&lt;/a&gt; to &lt;a href="(https://code.visualstudio.com/)"&gt;VSC&lt;/a&gt; for editing my (&lt;a href="http://ian.bebbs.co.uk/posts/NewBlogUsingWyam"&gt;statically-generated, Markdown driven&lt;/a&gt;) blog and have used it for authoring powershell scripts, dockerfiles and much, much more. So, when I decided I wanted to write some &lt;a href="https://www.dartlang.org/"&gt;Dart&lt;/a&gt; code, it was the obvious choice.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/DockerAndKafka</id>
-		<title>Getting started with Docker and Apache Kafka</title>
-		<link href="http://ian.bebbs.co.uk/posts/DockerAndKafka" />
-		<updated>2017-01-04T00:00:00Z</updated>
-		<content>&lt;p&gt;For my first blog post of the new year (Happy New Year everyone!!!), I'd like to share some of my recent adventures with Docker on Windows, or, more specifically, Docker on Windows using Nanoserver as the container OS.&lt;/p&gt;
-&lt;p&gt;I've been meaning to get up to speed with Docker for a while and, having &lt;a href="http://ian.bebbs.co.uk/posts/ARipStoringTime"&gt;recently acquired a decent new server for the purpose&lt;/a&gt;, decided that a festive period break from some of my &lt;a href="http://ian.bebbs.co.uk/posts/CqrsEsMvvmRxEfSqlUwpPcl"&gt;longer term projects&lt;/a&gt;, would be an ideal time to finally dive in. In typical Bebbs style, &amp;quot;diving in&amp;quot; invariably involves the &amp;quot;deep end&amp;quot; and, as such, it seemed that a great initiation into the containerization waters would be to take &lt;a href="https://kafka.apache.org/"&gt;Apache Kafka&lt;/a&gt; - a service typically run on Linux - and deploy it within a Windows &lt;a href="https://blogs.technet.microsoft.com/windowsserver/2015/04/08/microsoft-announces-nano-server-for-modern-apps-and-cloud/"&gt;Nanoserver&lt;/a&gt; container - a recent release from Microsoft and still a very-much bleeding-edge OS.&lt;/p&gt;
-&lt;p&gt;I've been interested in Apache Kafka for quite a while. Described as a &amp;quot;distributed streaming platform&amp;quot; it very much resonates with my &amp;quot;everything is a stream&amp;quot; philosophy. Furthermore, some of &lt;a href="https://www.confluent.io/product/connectors/"&gt;it's connectors&lt;/a&gt; to various traditional RDBMS's offer an intriguing means of moving between 'state store' and 'event store' methodologies.&lt;/p&gt;
-&lt;h2 id="getting-started"&gt;Getting started&lt;/h2&gt;
-&lt;p&gt;For the host system, I started with a fresh install of Windows Server 2016 (Desktop Experience for convenience) on a &lt;a href="http://www.dell.com/uk/business/p/poweredge-t20/pd"&gt;Dell T20 Xeon&lt;/a&gt;. Following &lt;a href="https://msdn.microsoft.com/en-gb/virtualization/windowscontainers/quick_start/quick_start_windows_server"&gt;this quick start guide&lt;/a&gt; quickly led to an issue whereby the Docker package couldn't be verified by it's SHA256 hash and therefore refused to install. Fortunately I found a report of the issue and a work around &lt;a href="https://github.com/OneGet/MicrosoftDockerProvider/issues/15"&gt;here&lt;/a&gt;.&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;I have since reinstalled docker on Windows Server 2016 and did not experience the issue again so it must have been resolved.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;With Docker installed and the &lt;a href="https://hub.docker.com/r/microsoft/dotnet-samples/"&gt;dotnet-samples&lt;/a&gt; example container running, my attention turned to Nanoserver.&lt;/p&gt;
-&lt;p&gt;A quick pull and run of the &lt;a href="https://hub.docker.com/r/microsoft/nanoserver/"&gt;Nanoserver image&lt;/a&gt; and I found myself at an interactive command prompt of a deployed container running Nanoserver. This can be done as follows:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;docker pull microsoft/nanoserver:latest
-docker run -it --rm microsoft/nanoserver:latest cmd
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id="kafka-zookeeper"&gt;Kafka &amp;amp; Zookeeper&lt;/h2&gt;
-&lt;p&gt;While looking for a pre-built image of Kafka running on Nanoserver, it quickly became apparent that in order to get an instance of &lt;a href="https://kafka.apache.org/"&gt;Apache Kafka&lt;/a&gt; running, you first need a running instance of &lt;a href="https://zookeeper.apache.org/"&gt;Apache Zookeeper&lt;/a&gt;. While you could technically run both services from within a single container (indeed, Kafka is pre-configured to look for a Zookeeper instance on localhost) I wanted to utilize the core value propositions of containers vs VM instances; namely minimal overhead and composability.&lt;/p&gt;
-&lt;p&gt;This meant that I would therefore be building two container images, one for Zookeeper and one for Kafka, both of which would be running on Nanoserver.&lt;/p&gt;
-&lt;h2 id="building-the-zookeeper-image"&gt;Building the Zookeeper image&lt;/h2&gt;
-&lt;h3 id="take-1"&gt;Take 1&lt;/h3&gt;
-&lt;img src="https://mbt4mw.db.files.1drv.com/y4mwGowFjnDW_kYoMAx77RqJvYQ1qLT1X2m3zCD4aDb3EnkwJpwZ8fE03MwNlRTssPAlxLQ7E8TXAFpurKGAZL6KQgHgPS93Jgbo_yoaoLKt81ipcBn0YWgFl7gaeW6KDaCDT1taNRnwNWgxa4sOnOdY9ZStw1ihnv0djLL_-LZgQ6xzuM7H3X73DfOs0tk0orevmh8a4NgpHSl-2hI44900Q?width=690&amp;height=380&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="I built this container up from nothing. When I started here, all there was was nanoserver. Other developers said it was daft to build Zookeeper on nanoserver, but I did it all the same. Just to show'em."&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;I built this [container] up from nothing. When I started here, all there was was [nanoserver]. Other [developers] said it was daft to build [Zookeeper] on [nanoserver], but I did it all the same. Just to show'em.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;So, from most of everything I have read about building docker images, it seemed the thing to do was use a &lt;a href="https://docs.docker.com/engine/reference/builder/"&gt;Dockerfile&lt;/a&gt; to start an intermediate container based on the source image (Microsoft/Nanoserver in this instance) then run a script within the intermediate container (as part of the dockerfile) to download, install and configure all the required components. The output of this docker build process would be a new image with the appropriate services running on startup.&lt;/p&gt;
-&lt;p&gt;I therefore started by preparing a powershell script that would do just that. Following &lt;a href="http://stackoverflow.com/a/38895811"&gt;this post on StackOverflow&lt;/a&gt; I developed and tested a script on a Windows Server 2016 (Desktop Experience) Virtual Machine. This was done so that I could use &lt;a href="https://technet.microsoft.com/en-us/library/dn818483(v=ws.11).aspx"&gt;snapshotting&lt;/a&gt; in order to roll-back to a clean image anytime a issue with the script was encountered.&lt;/p&gt;
-&lt;p&gt;Unfortunately, when it came time to try running Zookeeper I hit the following error at start-up:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;log4j:WARN No appenders could be found for logger (org.apache.zookeeper.server.quorum.QuorumPeerConfig).
-log4j:WARN Please initialize the log4j system properly.
-log4j:WARN See http://logging.apache.org/log4j/1.2/faq.html#noconfig for more info.
-Invalid config, exiting abnormally
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Some quick googling turned up &lt;a href="https://bugzilla.redhat.com/show_bug.cgi?id=1181487#c5"&gt;this issue&lt;/a&gt; but every subsequent comment seemed to suggest that the issue had been resolved. I tried a &lt;a href="https://bugzilla.redhat.com/show_bug.cgi?id=1181487#c8"&gt;frustrating&lt;/a&gt; &lt;a href="https://bugzilla.redhat.com/show_bug.cgi?id=1181487#c9"&gt;number&lt;/a&gt; of &lt;a href="https://bugzilla.redhat.com/show_bug.cgi?id=1181487#c4"&gt;unsuccessful&lt;/a&gt; &lt;a href="http://tech.donghao.org/tag/zookeeper/"&gt;workarounds&lt;/a&gt; until I realized that it was a &lt;a href="https://en.wiktionary.org/wiki/PICNIC"&gt;PICNIC error&lt;/a&gt;. Specifically, while following the StackOverflow post above, I had failed to realize that the version of Zookeeper they specified wasn't actually the latest version and that the issue really had been resolved in a later version. This took a frustratingly and embarrassingly long time but hey, &lt;a href="http://www.goodreads.com/quotes/7678-when-people-say-it-s-always-the-last-place-you-look"&gt;it's always the last place you look&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Anyway, a morning of trial and error resulted in a thing of beauty; a script that would - completely automatically - download, extract, configure, install (as a service!) and run a Zookeeper instance. This is shown below:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;## Download sources
-$zipUri = &amp;quot;http://homeserver/download/7z1604-x64.exe&amp;quot; # http://www.7-zip.org/a/7z1604-x64.exe&amp;quot;;
-$nssmUri = &amp;quot;http://homeserver/download/nssm-2.24.zip&amp;quot; # &amp;quot;https://nssm.cc/release/nssm-2.24.zip&amp;quot;
-$javaUri = &amp;quot;http://homeserver/download/jre-8u111-windows-x64.exe&amp;quot; # &amp;quot;http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jre-8u111-windows-x64.exe&amp;quot;
-$zookeeperUri = &amp;quot;http://homeserver/download/zookeeper-3.4.9.tar.gz&amp;quot; # &amp;quot;http://apache.mirrors.nublue.co.uk/zookeeper/zookeeper-3.4.9/zookeeper-3.4.9.tar.gz&amp;quot;
-$kafkaUri = &amp;quot;http://homeserver/download/kafka_2.11-0.10.1.0.tgz&amp;quot; # &amp;quot;http://apache.mirror.anlx.net/kafka/0.10.1.0/kafka_2.11-0.10.1.0.tgz&amp;quot;
-
-## Application locations
-$appDir = &amp;quot;c:\Apps&amp;quot;
-$zipDir = $appDir + &amp;quot;\7zip&amp;quot;
-$nssmDir = $appDir + &amp;quot;\nssm&amp;quot;
-$zookeeperDir = $appDir + &amp;quot;\Zookeeper&amp;quot;
-
-## Data locations
-$zookeeperDataDir = $zookeeperDir + &amp;quot;\Data&amp;quot;
-
-## Application executables
-$zip = $zipDir + &amp;quot;\7z.exe&amp;quot;
-$nssm = $nssmDir + &amp;quot;\nssm.exe&amp;quot;
-$zookeeper = $zookeeperDir + &amp;quot;\bin\zkServer.cmd&amp;quot;
-
-function New-TempPath()
-{
-    if (!(Test-Path -Path C:\Temp))
-    {
-        New-Item c:\Temp -ItemType Directory
-    }
-}
-
-function Expand-File($zipFile, $targetPath)
-{
-    $args = &amp;#64;(&amp;quot;e&amp;quot;, $zipFile, &amp;quot;-o$targetPath&amp;quot;, '-y')
-    &amp;amp;$zip $args
-}
-
-function Expand-Directory($zipFile, $targetPath)
-{
-    $args = &amp;#64;(&amp;quot;x&amp;quot;, $zipFile, &amp;quot;-o$targetPath&amp;quot;, '-aoa')
-    &amp;amp;$zip $args
-}
-
-function Install-7zip()
-{
-    New-Item &amp;quot;c:\Temp\7zip&amp;quot; -ItemType Directory -Force
-    Invoke-WebRequest -Uri $zipUri -OutFile c:\Temp\7zip\7zip.exe
-    &amp;amp;&amp;quot;C:\Temp\7zip\7zip.exe&amp;quot; /S /D=$zipDir | Out-Null
-    Remove-Item -Path &amp;quot;c:\Temp\7zip\7zip.exe&amp;quot;
-}
-
-function Install-NSSM()
-{
-    New-Item &amp;quot;c:\Temp\NSSM&amp;quot; -ItemType Directory -Force
-    Invoke-WebRequest -Uri $nssmUri -OutFile c:\Temp\NSSM\NSSM.zip
-
-    Expand-Directory c:\Temp\NSSM\NSSM.zip c:\Temp\NSSM
-
-    ## Above will expand to a directory containing version name which we want to remove
-    ## so we'll move everything up a directory
-    $folder = Get-ChildItem -Path c:\Temp\NSSM -Filter &amp;quot;nssm-*&amp;quot;
-    Get-ChildItem -Path $folder.FullName -Recurse | Move-Item -destination c:\Temp\NSSM -Force
-
-    New-Item $nssmDir -ItemType Directory -Force
-    Copy-Item -Path &amp;quot;c:\Temp\NSSM\win64\nssm.exe&amp;quot; $nssm -Force
-}
-
-function Install-Java()
-{
-    New-Item c:\Temp\Java -ItemType Directory -Force
-    Invoke-WebRequest -Uri $javaUri -OutFile c:\temp\Java\Java.exe
-
-    Start-Process &amp;quot;C:\Temp\Java\Java.exe&amp;quot; -ArgumentList &amp;quot;INSTALL_SILENT=Enable INSTALLDIR=C:\Java\Jre AUTO_UPDATE=Disable WEB_JAVA=Disable WEB_ANALYTICS=Disable EULA=Disable REBOOT=Disable NOSTARTMENU=Enable SPONSORS=Disable REMOVEOUTOFDATEJRES=0&amp;quot; -NoNewWindow -Wait
-
-    [Environment]::SetEnvironmentVariable(&amp;quot;JAVA_HOME&amp;quot;, &amp;quot;C:\Java\Jre&amp;quot;, &amp;quot;Machine&amp;quot;)
-
-    Remove-Item -Path &amp;quot;C:\Temp\Java\Java.exe&amp;quot;
-}
-
-function Get-Zookeeper()
-{
-    New-Item c:\Temp\Zookeeper -ItemType Directory -Force
-    Invoke-WebRequest -Uri $zookeeperUri -OutFile c:\temp\Zookeeper\Zookeeper.tar.gz
-    Expand-File c:\temp\Zookeeper\Zookeeper.tar.gz c:\temp\Zookeeper
-    Expand-Directory c:\temp\Zookeeper\Zookeeper.tar $zookeeperDir
-
-    ## Above will expand to a directory containing version name which we want to remove
-    ## so we'll move everything up a directory
-    $folder = Get-ChildItem -Path $zookeeperDir -Filter &amp;quot;zookeeper-*&amp;quot;
-    Get-ChildItem -Path $folder.FullName -Recurse | Move-Item -destination $zookeeperDir -Force
-
-    Remove-Item -Path $folder.FullName
-    Remove-Item -Path &amp;quot;c:\temp\Zookeeper&amp;quot; -Recurse
-}
-
-function Initialize-Zookeeper()
-{
-    New-Item -Path $zookeeperDataDir -ItemType Directory -Force
-    $zookeeperDataLinuxDir = $zookeeperDataDir.Replace('\', '/')
-
-    Copy-Item -Path ($zookeeperDir + '\conf\zoo_sample.cfg') -Destination ($zookeeperDir + '\conf\zoo.cfg') -Force
-
-    $configFile = $zookeeperDir + '\conf\zoo.cfg'
-    $logFile = $zookeeperDir + '\conf\log4j.properties'
-
-    $config = [IO.File]::ReadAllText($configFile) -replace &amp;quot;dataDir=[\/\w]*&amp;quot;, (&amp;quot;dataDir=&amp;quot; + $zookeeperDataLinuxDir)
-    [IO.File]::WriteAllText($configFile, $config)
-
-    $logProperties = [IO.File]::ReadAllText($logFile) -replace &amp;quot;#log4j.rootLogger=DEBUG, CONSOLE, ROLLINGFILE&amp;quot;, &amp;quot;log4j.rootLogger=DEBUG, CONSOLE, ROLLINGFILE&amp;quot;
-    [IO.File]::WriteAllText($logFile, $logProperties)
-}
-
-function Install-Zookeeper()
-{
-    &amp;amp;$nssm install Zookeeper $zookeeper | Out-Null
-    &amp;amp;$nssm set Zookeeper AppDirectory $zookeeperDir | Out-Null
-
-    &amp;amp;$nssm set Zookeeper DisplayName &amp;quot;Zookeeper&amp;quot; | Out-Null
-    &amp;amp;$nssm set Zookeeper Description &amp;quot;Apache Zookeeper. Running from $zookeeperDir&amp;quot; | Out-Null
-    &amp;amp;$nssm set Zookeeper Start SERVICE_AUTO_START | Out-Null
-    &amp;amp;$nssm set Zookeeper ObjectName LocalSystem | Out-Null
-    &amp;amp;$nssm set Zookeeper Type SERVICE_WIN32_OWN_PROCESS | Out-Null
-}
-
-function Start-Zookeeper()
-{
-    &amp;amp;$nssm start Zookeeper | Out-Null
-}
-
-function Stop-Zookeeper()
-{
-    &amp;amp;$nssm stop Zookeeper | Out-Null
-}
-
-New-TempPath
-
-Install-7zip
-Install-NSSM
-Install-Java
-
-Get-Zookeeper
-Initialize-Zookeeper
-Install-Zookeeper
-Start-Zookeeper
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;With this mighty script in hand I prepared the following dockerfile:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;FROM microsoft/nanoserver
-MAINTAINER Ian Bebbington &amp;lt;docker&amp;#64;bebbs.co.uk&amp;gt;
-LABEL Description=&amp;quot;Zookeeper running on Microsoft Nanoserver&amp;quot; Version=&amp;quot;0.1&amp;quot;
-ADD Install-Zookeeper.ps1 /
-RUN [ &amp;quot;powershell.exe&amp;quot;, &amp;quot;C:/Install-Zookeeper.ps1&amp;quot; ]
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;And watched in dismay as it completely failed to build a container.&lt;/p&gt;
-&lt;p&gt;You see, while the script ran perfectly on Windows Server 2016, Nanoserver is a far more constrained environment. It has neither support for 32-bit assemblies nor any graphic stack to speak of so, in short-order, the 7zip utility, Java installer and &lt;a href="https://nssm.cc/"&gt;Non-Sucking Service Manager&lt;/a&gt; executables all failed.&lt;/p&gt;
-&lt;p&gt;Well, crap.&lt;/p&gt;
-&lt;h3 id="take-2"&gt;Take 2&lt;/h3&gt;
-&lt;img src="https://mbt5mw.db.files.1drv.com/y4mxZXjdiHWlj0ey3Kb-IAePEYBT4Ii7wJP05J4x8byzM1Dh9EqI0hF29753PbOEWnQYmlIbbpCl-o1Rbk4AbYXbFUil-V-UHTMZd9s82a3ZzAvN9D86YIT21nX8SNNrGR1HXdY1W2xGKihnZ1IW49HpXNSQL9sfjrs0dMtAzZ9Gm9EbrMIxJqfwYKCTFzo8IbRT9mrcj4WBsNQRYpD5XKveA?width=690&amp;height=460&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="So! I built a second one!"&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;So! I built a second one!&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;My next thought was to try salvaging as much of the script as possible by using &lt;a href="https://technet.microsoft.com/en-us/library/ff700227.aspx"&gt;Powershell Remoting&lt;/a&gt; to interactively install the required components and then &lt;a href="https://docs.docker.com/engine/reference/commandline/commit/"&gt;committing&lt;/a&gt; the changes to a new image.&lt;/p&gt;
-&lt;p&gt;While, in retrospect, this was undoubtedly the wrong way forward, I was simultaneously fortunate and frustrated by the fact that it simply doesn't seem possible to use powershell remoting with Nanoserver when running within a container. Indeed, after learning more about &lt;a href="https://msdn.microsoft.com/en-us/library/aa384426(v=vs.85).aspx"&gt;WinRM&lt;/a&gt; than I thought possible, posting on &lt;a href="https://social.msdn.microsoft.com/Forums/en-US/e0652324-30e4-4ebb-8689-55205e6d8bc9/enterpssession-to-nanoserver-container-in-docker-access-is-denied?forum=windowscontainers"&gt;Microsoft's Windows Container forums&lt;/a&gt; and even offering my &lt;a href="http://stackoverflow.com/questions/39195068/powershell-remote-access-to-nanoserver-on-docker"&gt;first bounty on StackOverflow&lt;/a&gt; I simply could not find an answer to why it wasn't possible to establish a remote session.&lt;/p&gt;
-&lt;p&gt;In the mean time...&lt;/p&gt;
-&lt;h3 id="take-3"&gt;Take 3&lt;/h3&gt;
-&lt;img src="https://mbt3mw.db.files.1drv.com/y4mAv0zjXUvVibhWqQEmH18FMtheebIg4cFV62i4APNEgm2eDQQ82ifHDQaRsU9xQD966EIcnmaUVA-CPms3_YhIBO4-AVk4tPt0_eoI4EUJgEcQqHZmvpzXgcVoegRGcJrMSOki5E6XNbwBCgNciaCqe25tEI3264z-EyBAz20V4Lz_ZMWzD6boo3fWUCfKc8Oit8Fj2UxQofTs1r-AQjQ-w?width=690&amp;height=461&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="So, I built a third one..."&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;I built a third one...&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Powershell remoting works beautifully with Nanoserver when running in a Hyper-V virtual machine but Hyper-V networking and Docker networking configurations don't seem to play well together. Indeed, after creating a new virtual-router so that I could access the Nanoserver virtual machine from the host PC, the Docker NAT network became inaccessible. Now, I'm sure it would be possible to dig into the virtual networking configuration and find a way to resolve this but, having spent an incredibly frustrating few hours reconfiguring WinRM, I decided it would be quicker to simply re-install the host OS and start from scratch.&lt;/p&gt;
-&lt;h3 id="take-4"&gt;Take 4&lt;/h3&gt;
-&lt;img src="https://oltxmw.db.files.1drv.com/y4mUljkhpGUqQULtuT0FcXzTOATDaeuixGBsY3Dy330TLnYARIubLRWshHYQ9s23uU4SeP5wn3t4Bsxlu0-_M_8NGBinr-N3crNs0pFIcsCtkMoZHSfrwI8kqCgRX-nHWXYVQcJRPb_nHVLERHJwCQ3mVoIjqeQ7mIQ_ab-gS0SdtJpwDjAYtZvlQ_cYvOyAOpFESPWHlq1FRjCPK04frsRCg?width=666&amp;height=500&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="But the fourth one stayed up!"&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;But the fourth one stayed up!&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;To accompany the fresh host environment, I decided to employ a fresh approach to building the container image. Namely, use a script to build the container's file system structure on the host PC and then simply copy it wholesale to the container from within the dockerfile. This meant deploying the Java Runtime Environment from a compressed archive rather than silent executable and using the &lt;a href="https://docs.docker.com/engine/reference/builder/#/entrypoint"&gt;dockerfile entrypoint&lt;/a&gt; instruction to run Zookeeper rather than installing it as a service.&lt;/p&gt;
-&lt;p&gt;After all the faff and frustration of the previous two attempts (not to mention reinstallation of OS on host PC), this approach was remarkably smooth. Again, in retrospect this was undoubtedly the correct approach but this approach almost certainly benefited from all the knowledge I had accrued from the previous failed attempts. As always, &lt;a href="http://www.goodreads.com/quotes/390439-we-learn-wisdom-from-failure-much-more-than-from-success"&gt;you can learn more from failure than success&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Anyway, in relatively short order, I had a script that prepared and configured the container's file system structure on the host PC and a dockerfile that copied this structure to a new image and set the Zookeeper service as the entrypoint for the image. These are shown below:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;## Download sources
-$zipUri = &amp;quot;http://homeserver/download/7z1604-x64.exe&amp;quot; # http://www.7-zip.org/a/7z1604-x64.exe&amp;quot;;
-$javaUri = &amp;quot;http://homeserver/download/jre-8u111-windows-x64.tar.gz&amp;quot; # &amp;quot;http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jre-8u111-windows-x64.tar.gz&amp;quot;
-$zookeeperUri = &amp;quot;http://homeserver/download/zookeeper-3.4.9.tar.gz&amp;quot; # &amp;quot;http://apache.mirrors.nublue.co.uk/zookeeper/zookeeper-3.4.9/zookeeper-3.4.9.tar.gz&amp;quot;
-$dockerModuleUri = &amp;quot;http://homeserver/download/Docker.0.1.0.zip&amp;quot; # &amp;quot;https://github.com/Microsoft/Docker-PowerShell/releases/download/v0.1.0/Docker.0.1.0.zip&amp;quot;
-
-## Build location
-$buildDir = Get-Location
-$tmpDir = $buildDir.Path + &amp;quot;\Temp&amp;quot;
-$rootDir = $buildDir.Path + &amp;quot;\Root&amp;quot;
-$biuldAppDir = $rootDir + &amp;quot;\Apps&amp;quot;
-$buildDataDir = $rootDir + &amp;quot;\Data&amp;quot;
-$buildDockerZip = $tmpDir + &amp;quot;\Docker.zip&amp;quot;
-$buildDockerModule = $tmpDir + &amp;quot;\Docker&amp;quot;
-$buildZipDir = $tmpDir + &amp;quot;\7zip&amp;quot;
-$buildJreDir = $biuldAppDir + &amp;quot;\Jre&amp;quot;
-$buildZookeeperDir = $biuldAppDir + &amp;quot;\Zookeeper&amp;quot;
-$buildZookeeperDataDir = $buildDataDir + &amp;quot;\Zookeeper&amp;quot;
-
-## Temp files
-$zipInstaller = $tmpDir + &amp;quot;\7zInstaller.exe&amp;quot;
-$jreGzip = $tmpDir + &amp;quot;\Jre.tar.gz&amp;quot;
-$jreTar = $tmpDir + &amp;quot;\Jre.tar&amp;quot;
-$zooKeeperGzip = $tmpDir + &amp;quot;\Zookeeper.tar.gz&amp;quot;
-$zooKeeperTar = $tmpDir + &amp;quot;\Zookeeper.tar&amp;quot;
-
-## Target locations
-$targetDir = &amp;quot;C:\&amp;quot;
-$appDir = $targetDir + &amp;quot;\Apps&amp;quot;
-$dataDir = $targetDir + &amp;quot;\Data&amp;quot;
-$jreDir = $appDir + &amp;quot;\Jre&amp;quot;
-$zookeeperDir = $appDir + &amp;quot;\Zookeeper&amp;quot;
-$zookeeperDataDir = $dataDir + &amp;quot;\Zookeeper&amp;quot;
-
-## Executables
-$zip = $buildZipDir + &amp;quot;\7z.exe&amp;quot;
-$zookeeper = $zookeeperDir + &amp;quot;\bin\zkServer.cmd&amp;quot;
-$docker = &amp;quot;docker&amp;quot;
-
-function New-TempPath()
-{
-    if (!(Test-Path -Path $tmpDir))
-    {
-        New-Item $tmpDir -ItemType Directory
-    }
-}
-
-function Remove-TempPath()
-{
-    Remove-Item $tmpDir -Recurse -Force
-}
-
-function New-RootPath()
-{
-    Remove-Item $rootDir -Recurse -Force
-    New-Item $rootDir -ItemType Directory
-}
-
-function Remove-RootPath()
-{
-    Remove-Item $rootDir -Recurse -Force
-}
-
-function Expand-File($zipFile, $targetPath)
-{
-    $args = &amp;#64;(&amp;quot;e&amp;quot;, $zipFile, &amp;quot;-o$targetPath&amp;quot;, '-y')
-    &amp;amp;$zip $args | Out-Host
-}
-
-function Expand-Directory($zipFile, $targetPath)
-{
-    $args = &amp;#64;(&amp;quot;x&amp;quot;, $zipFile, &amp;quot;-o$targetPath&amp;quot;, '-aoa')
-    &amp;amp;$zip $args | Out-Host
-}
-
-function Install-DockerModule()
-{
-    Invoke-WebRequest -Uri $dockerModuleUri -OutFile $buildDockerZip
-    Expand-Archive -Path $buildDockerZip -DestinationPath $buildDockerModule -Force
-
-    Import-Module $buildDockerModule
-}
-
-function Remove-DockerModule()
-{
-    Remove-Module $buildDockerModule
-}
-
-function Install-7zip()
-{
-    $folder = New-Item $buildZipDir -ItemType Directory -Force
-    Invoke-WebRequest -Uri $zipUri -OutFile $zipInstaller
-    &amp;amp;$zipInstaller /S /D=$folder | Out-Null
-    Remove-Item -Path $zipInstaller
-}
-
-function Remove-7zip()
-{
-    Remove-Item $buildZipDir -Recurse -Force
-}
-
-function Get-Java()
-{
-    Invoke-WebRequest -Uri $javaUri -OutFile $jreGzip
-    Expand-File $jreGzip $tmpDir
-    Expand-Directory $jreTar $buildJreDir
-
-    ## Above will expand to a directory containing version name which we want to remove
-    ## so we'll move everything up a directory
-    $folder = Get-ChildItem -Path $buildJreDir -Filter &amp;quot;jre*&amp;quot;
-    Get-ChildItem -Path $folder.FullName -Recurse | Move-Item -destination $buildJreDir -Force
-
-    Remove-Item -Path $folder.FullName -Force
-    Remove-Item -Path $jreGzip -Force
-    Remove-Item -Path $jreTar -Force
-}
-
-function Get-Zookeeper()
-{
-    Invoke-WebRequest -Uri $zookeeperUri -OutFile $zooKeeperGzip
-    Expand-File $zooKeeperGzip $tmpDir
-    Expand-Directory $zooKeeperTar $buildZookeeperDir
-
-    ## Above will expand to a directory containing version name which we want to remove
-    ## so we'll move everything up a directory
-    $folder = Get-ChildItem -Path $buildZookeeperDir -Filter &amp;quot;zookeeper-*&amp;quot;
-    Get-ChildItem -Path $folder.FullName -Recurse | Move-Item -destination $buildZookeeperDir -Force
-
-    Remove-Item -Path $folder.FullName -Force
-    Remove-Item -Path $zooKeeperTar -Force
-    Remove-Item -Path $zooKeeperGzip -Force
-}
-
-function Initialize-Zookeeper()
-{
-    New-Item -Path $buildDataDir -ItemType Directory -Force
-    New-Item -Path $buildZookeeperDataDir -ItemType Directory -Force
-
-    $zookeeperDataLinuxDir = $zookeeperDataDir.Replace('\', '/')
-
-    Copy-Item -Path ($buildZookeeperDir + '\conf\zoo_sample.cfg') -Destination ($buildZookeeperDir + '\conf\zoo.cfg') -Force
-
-    $configFile = $buildZookeeperDir + '\conf\zoo.cfg'
-    $logFile = $buildZookeeperDir + '\conf\log4j.properties'
-
-    $config = [IO.File]::ReadAllText($configFile) -replace &amp;quot;dataDir=[\/\w]*&amp;quot;, (&amp;quot;dataDir=&amp;quot; + $zookeeperDataLinuxDir)
-    [IO.File]::WriteAllText($configFile, $config)
-
-    $logProperties = [IO.File]::ReadAllText($logFile) -replace &amp;quot;#log4j.rootLogger=DEBUG, CONSOLE, ROLLINGFILE&amp;quot;, &amp;quot;log4j.rootLogger=DEBUG, CONSOLE, ROLLINGFILE&amp;quot;
-    [IO.File]::WriteAllText($logFile, $logProperties)
-}
-
-function New-DockerImage()
-{
-    Build-ContainerImage -Path $buildDir -Repository &amp;quot;ibebbs/nanozoo:latest&amp;quot;
-}
-
-
-# Setup directory structure
-New-TempPath
-New-RootPath
-
-# Install required tools
-Install-DockerModule
-Install-7zip
-
-# Get components
-Get-Java
-Get-Zookeeper
-Initialize-Zookeeper
-
-# Build docker image
-New-DockerImage
-
-# Cleanup
-Remove-DockerModule
-Remove-7zip
-Remove-TempPath
-Remove-RootPath
-&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code&gt;FROM microsoft/nanoserver
-MAINTAINER Ian Bebbington &amp;lt;docker&amp;#64;bebbs.co.uk&amp;gt;
-LABEL Description=&amp;quot;Zookeeper running on Microsoft Nanoserver&amp;quot; Version=&amp;quot;0.1&amp;quot;
-ADD Root /
-ADD Start-Zookeeper.ps1 /
-RUN setx /M JAVA_HOME C:\Apps\Jre
-EXPOSE 2181
-ENTRYPOINT [ &amp;quot;powershell.exe&amp;quot;, &amp;quot;C:/Start-Zookeeper.ps1&amp;quot; ]
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;And this one worked. This one started. This one stayed up!&lt;/p&gt;
-&lt;h2 id="building-the-kafka-image"&gt;Building the Kafka image&lt;/h2&gt;
-&lt;p&gt;With the Zookeeper scripts as a pattern, it was ludicrously easy to script up another image for Kafka. Just a few changes to file names and configuration parameters and Kafka started almost first time.&lt;/p&gt;
-&lt;p&gt;I won't copy the script or dockerfile here as they're extremely similar to the Zookeeper versions. Instead, all scripts and files used above can be found in my &lt;a href="https://github.com/ibebbs/Docker"&gt;Docker repository on Github&lt;/a&gt; and the resultant images can be found on &lt;a href="https://hub.docker.com/r/ibebbs/"&gt;Docker hub&lt;/a&gt;.&lt;/p&gt;
-&lt;h2 id="moving-forward"&gt;Moving forward&lt;/h2&gt;
-&lt;img src="https://oltymw.db.files.1drv.com/y4mI-m7GTvfSqDTdYfKQO6D0X9Yazi0fEvyfPNeD6grW3Xb88GvXNAhGmIZTQvpnGkFWtNQNkzQRX7i-uEBLeWj5fgtyJ1Y8fbP2VW0LI-HmKIM54Ojfkb_bbtImP41FGHPclzIq2IHCxXGbV78CpNSiOtdC8YjQGhqkh4cnHKgB623cjqmOiJafQxTcFbn0g3GfaDqJOxncoPfzxnf8K9aLQ?width=690&amp;height=388&amp;cropmode=none" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="But I don't want any of that!"&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;But I don't want any of that!&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Moving forward, I need to address a couple of short-comings in the Kafka script (specifically the hard-coded IP address for the Zookeeper container) and then look to use Docker Compose to automatically bring up Zookeeper and Kafka on demand.&lt;/p&gt;
-&lt;p&gt;It's been an interesting journey so far and I've not even begun to actually use the deployed services yet! Still, it is truly magical to run a docker container and see it boot an entire Windows server and service in just 10-20 seconds and a few hundred Mb.&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;For my first blog post of the new year (Happy New Year everyone!!!), I'd like to share some of my recent adventures with Docker on Windows, or, more specifically, Docker on Windows using Nanoserver as the container OS.&lt;/p&gt;</summary>
 	</entry>
 </feed>

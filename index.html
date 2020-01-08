@@ -118,6 +118,14 @@
 <div class="row">
     <div class="col-sm-8 right-border">
                 <div class="post-preview">
+                    <a href="/posts/LessReSTMoreHotChocolate">
+                        <h2 class="post-title">Less ReST, more Hot Chocolate</h2>
+                            <h3 class="post-subtitle">GraphQL over ReST in .NET Core 3.1</h3>
+                    </a>
+                    <p class="post-meta">Posted on 08 January 2020</p>
+<p>A project I'm working on requires a microservice like evaluation environment. A brief google revealed very little that would suffice so I decided to quickly knock up my own. At the same time, I thought it would be a great opportunity to evaluate <a href="https://hotchocolate.io/">Hot Chocolate</a> by <a href="https://chillicream.com/">Chilli Cream</a>; a relative newcomer to the (very sparse) GraphQL for .NET scene. In this post I'll also be using <a href="https://github.com/RicoSuter/NSwag">NSwag</a> to generate <a href="https://www.openapis.org/">OpenAPI documents</a> and <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#how-to-use-typed-clients-with-httpclientfactory">Typed Clients</a> for downstream services and, finally, I will be containerizing the microservices using <a href="https://www.docker.com/">Docker</a> and employing <a href="https://docs.docker.com/compose/">Docker Compose</a> to run and test them.</p>                </div>       
+                    <hr /> 
+                <div class="post-preview">
                     <a href="/posts/NetworkBootingManyRaspberryPis">
                         <h2 class="post-title">Network Booting Many Raspberry Pis</h2>
                             <h3 class="post-subtitle">A guide that works for me... mileage may vary</h3>
@@ -148,14 +156,6 @@
                     </a>
                     <p class="post-meta">Posted on 11 November 2019</p>
 <p><a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition">Cogenity.Extensions.Hosting.Composition</a> can provide lightweight, runtime composition for the <a href="(https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0)">.NET Core 3.0 Generic Host</a>... with some caveats. <a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5">An issue</a> has been created as an RFC on how best to address these caveats with comments/contributions welcomed.</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/BuildingDotNetCore3WithAzurePipelines">
-                        <h2 class="post-title">Building .NET Core 3.0 With Azure Pipelines</h2>
-                            <h3 class="post-subtitle">Without giving away the keys to the castle!</h3>
-                    </a>
-                    <p class="post-meta">Posted on 04 October 2019</p>
-<p>My "go to" build system and package repository - <a href="https://www.myget.org/">MyGet</a> - doesn't yet support building .NET Core 3.0 (or more specifically .NET Standard 2.1) projects. Having recently read about some of the features Microsoft have been adding to Azure DevOps I thought I'd see how easy (or not) it was to get a Pipeline setup to build my project and publish the package back to MyGet.</p>                </div>       
         <ul class="pager">
             <li class="previous">                
             </li>
@@ -229,13 +229,13 @@
                     <a role="button" href="/tags/UWP" class="btn btn-default btn-sm"> UWP (8)</a>
                     <a role="button" href="/tags/Rx" class="btn btn-default btn-sm"> Rx (7)</a>
                     <a role="button" href="/tags/Reactive" class="btn btn-default btn-sm"> Reactive (7)</a>
-                    <a role="button" href="/tags/net-core" class="btn btn-default btn-sm"> .net core (4)</a>
-                    <a role="button" href="/tags/Syslog" class="btn btn-default btn-sm"> Syslog (4)</a>
-                    <a role="button" href="/tags/IoT" class="btn btn-default btn-sm"> IoT (4)</a>
+                    <a role="button" href="/tags/net-core" class="btn btn-default btn-sm"> .net core (5)</a>
                     <a role="button" href="/tags/LogStash" class="btn btn-default btn-sm"> LogStash (4)</a>
-                    <a role="button" href="/tags/ElasticSearch" class="btn btn-default btn-sm"> ElasticSearch (4)</a>
-                    <a role="button" href="/tags/Kibana" class="btn btn-default btn-sm"> Kibana (4)</a>
                     <a role="button" href="/tags/Networking" class="btn btn-default btn-sm"> Networking (4)</a>
+                    <a role="button" href="/tags/Docker" class="btn btn-default btn-sm"> Docker (4)</a>
+                    <a role="button" href="/tags/IoT" class="btn btn-default btn-sm"> IoT (4)</a>
+                    <a role="button" href="/tags/Kibana" class="btn btn-default btn-sm"> Kibana (4)</a>
+                    <a role="button" href="/tags/Monitoring" class="btn btn-default btn-sm"> Monitoring (4)</a>
             </div>
             <ul class="pager">
                 <li class="next">
@@ -246,10 +246,10 @@
 
             <h5>Older Posts</h5>
             <ul class="list-unstyled">
+                    <li><a href="/posts/BuildingDotNetCore3WithAzurePipelines">Building .NET Core 3.0 With Azure Pipelines</a></li>
                     <li><a href="/posts/UsingATouchOverlayInPortrainOnRaspbian">Using A Touch Overlay, In Portrait, On Raspbian Buster</a></li>
                     <li><a href="/posts/TechAdventuresInSustainability-PartI">Tech Adventures in Sustainability</a></li>
                     <li><a href="/posts/BeBraveLikeBATMan">Be Brave. Like BAT, man!</a></li>
-                    <li><a href="/posts/IgnoringABillionDollarMistakeIsNotAnOption">Ignoring a Billion-Dollar Mistake is simply not an Option</a></li>
             </ul>
                 <ul class="pager">
                     <li class="next">
