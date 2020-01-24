@@ -4,8 +4,72 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-01-08T17:29:51Z</updated>
+	<updated>2020-01-24T16:33:32Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/UnoDuoHey</id>
+		<title>Uno, Duo, Hey!</title>
+		<link href="http://ian.bebbs.co.uk/posts/UnoDuoHey" />
+		<link rel="enclosure" type="image" href="http://ian.bebbs.co.uk/Content/UnoDuoHey/SurfaceDuo-Title.jpg" />
+		<updated>2020-01-24T00:00:00Z</updated>
+		<content>&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;Last December I wrote &lt;a href="https://ian.bebbs.co.uk/posts/Uno"&gt;a blog post&lt;/a&gt; called &amp;quot;The Seven GUIs of Christmas&amp;quot; as part of the &lt;a href="https://crosscuttingconcerns.com/The-Third-Annual-csharp-Advent"&gt;Third Annual C# Advent&lt;/a&gt; series. This post showed the use of the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; to write cross-platform apps in UWP. One of the major drivers behind this blog post a desire to write apps for Microsoft's &lt;a href="https://news.microsoft.com/october-2-2019/"&gt;recently announced Surface Neo and Surface Duo devices&lt;/a&gt; which run Windows 10X and Android respectively. Well, a couple of days ago, Microsoft finally released a &lt;a href="https://blogs.windows.com/windowsdeveloper/2020/01/22/announcing-dual-screen-preview-sdks-and-microsoft-365-developer-day/"&gt;preview SDK for the Surface Duo&lt;/a&gt; which included an Android Emulator with a preview Surface Duo image. Today I finally got a chance to see whether the Uno Platform really could deliver on these new form-factors.&lt;/p&gt;
+&lt;h2 id="installing-the-emulator"&gt;Installing the Emulator&lt;/h2&gt;
+&lt;p&gt;If, like me, you don't have Android Studio installed and/or you want to install the Surface Duo SDK in a non-standard location (my super-speedy Intel Optane 900P C:\ drive is getting a little crowded!), you're going to face issues running the emulator. This is mostly due to the &lt;code&gt;run.bat&lt;/code&gt; file used to launch the emulator not looking in the correct location for the Android SDK and not supporting installation of the Surface Duo SDK in a path that contains spaces.&lt;/p&gt;
+&lt;p&gt;If you're encountering issues launching the emulator, navigate to the &lt;code&gt;artifacts&lt;/code&gt; directory within the Surface Duo SDK installation directory and edit the &lt;code&gt;run.bat&lt;/code&gt; file to the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-cmd"&gt;&amp;#64;echo off
+
+rem ##### ENSURE THE SDK LOCATION BELOW IS CORRECT: #######
+set ANDROID_SDK_LOCATION=C:\Program Files (x86)\Android\android-sdk
+
+rem ############ DO NOT Modify below this line ############
+
+set DIRNAME=%~dp0
+if &amp;quot;%DIRNAME%&amp;quot; == &amp;quot;&amp;quot; set DIRNAME=.\
+
+echo %DIRNAME%
+
+rem Check if emulator is installed
+set EMULATOR=%ANDROID_SDK_LOCATION%\emulator\emulator.exe
+echo &amp;quot;%EMULATOR%&amp;quot;
+if exist %EMULATOR% (
+    set ANDROID_PRODUCT_OUT=%DIRNAME%
+    &amp;quot;%EMULATOR%&amp;quot; -verbose -accel auto %* -sysdir &amp;quot;%DIRNAME%\bin&amp;quot; -kernel &amp;quot;%DIRNAME%\bin\kernel-ranchu&amp;quot; -datadir &amp;quot;%DIRNAME%\bin\data&amp;quot; -initdata &amp;quot;%DIRNAME%\bin\userdata.img&amp;quot; -vendor &amp;quot;%DIRNAME%\bin\vendor-qemu.img&amp;quot; -system &amp;quot;%DIRNAME%\bin\system-qemu.img&amp;quot; -initdata &amp;quot;%DIRNAME%\bin\userdata.img&amp;quot; -data &amp;quot;%DIRNAME%\bin\userdata.img&amp;quot;
+) else (
+    echo &amp;quot;Can't find emulator executable, make sure its installed&amp;quot;
+)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;TBH, the changes are mostly just encapsulating paths within quotes but hopefully this'll save you a little time.&lt;/p&gt;
+&lt;p&gt;Hopefully now, when you launch the emulator, you'll be greeted by this:&lt;/p&gt;
+&lt;img src="/Content/UnoDuoHey/DuoEmulator.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Android Duo Emulator"/&gt;
+&lt;p&gt;Hmm... dual screens!&lt;/p&gt;
+&lt;h2 id="getting-started"&gt;Getting Started&lt;/h2&gt;
+&lt;p&gt;Microsoft have done a great job of helping developers get started on this platform by supplying some great &lt;a href="https://docs.microsoft.com/en-gb/dual-screen/android/"&gt;code-snippets and samples&lt;/a&gt; in both &lt;a href="https://github.com/microsoft/surface-duo-sdk-samples"&gt;Java&lt;/a&gt; and &lt;a href="https://github.com/microsoft/surface-duo-sdk-xamarin-samples"&gt;C# (using the Xamarin platform)&lt;/a&gt;. Furthermore, the emulator &amp;quot;just works&amp;quot; with the Visual Studio IDE such that, once running, it appears as a standard deployment target allowing you to quickly get apps running within the Surface Duo image.&lt;/p&gt;
+&lt;img src="/Content/UnoDuoHey/VisualStudioTargettingDuoEmulator.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="VisualStudio Targetting The Duo Emulator"/&gt;
+&lt;h2 id="cross-platform-dual-screen"&gt;Cross-Platform Dual-Screen&lt;/h2&gt;
+&lt;p&gt;My first priority with Uno was to make sure I could correctly interpret when the app was running on a single screen or across both screens. To do this, I took a look at the Xamarin samples and quickly saw that they used a &lt;code&gt;ScreenHelper&lt;/code&gt; class to collate information on the current state of the app. This class is provided as part of the (very new - just two days old at time of writing!) &lt;a href="https://www.nuget.org/packages/Xamarin.DuoSdk/0.0.3.2"&gt;Xamarin.DuoSdk nuget package&lt;/a&gt;. Fortunately, when running on Android (or iOS), Uno runs on top of Xamarin meaning I could just add a reference to this package from the &lt;code&gt;Droid&lt;/code&gt; head project of my Uno solution and start using this class right away.&lt;/p&gt;
+&lt;p&gt;The main functions of the &lt;code&gt;ScreenHelper&lt;/code&gt; class were abstracted behind an &lt;code&gt;IDeviceHelper&lt;/code&gt; interface so that each head project could provide a platform specific implementation and a small shim written around the &lt;code&gt;ScreenHelper&lt;/code&gt; class to satisfy this interface. Finally, to provide responsiveness to changes, I again used my &lt;a href="https://www.nuget.org/packages/MVx.Observable/"&gt;MVx.Observable nuget package&lt;/a&gt; to dynamically call &lt;code&gt;IDeviceHelper&lt;/code&gt; members and update properties on a view model whenever the application changed modes.&lt;/p&gt;
+&lt;p&gt;In very short order, I had this working:&lt;/p&gt;
+&lt;iframe width="560" height="315" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" src="https://www.youtube.com/embed/MBPo9GvnX-Q" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen&gt;&lt;/iframe&gt;
+&lt;p&gt;Just to highlight: this is completely standard UWP / C# code, running &lt;em&gt;unchanged&lt;/em&gt; on a dual-screen Android device.&lt;/p&gt;
+&lt;p&gt;A few comments / caveats:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;The loading time of the Uno app in the emulator was due to the app being run, as debug, directly from the Visual Studio IDE and is not indicative of Uno Platform app start times.&lt;/li&gt;
+&lt;li&gt;The app disappearing when switching between screens or between single and dual screen modes is not due to the Uno Platform; this happen with apps that come as part of the Duo image.&lt;/li&gt;
+&lt;li&gt;Occasionally, when switching between single and dual screen modes, the app will just disappear. Again, this is nothing to do with the Uno Platform and happens with apps that come as part of the Duo image.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;h3 id="surface-duo"&gt;Surface Duo&lt;/h3&gt;
+&lt;p&gt;While the Surface Duo Android Emulator image is undoubtedly rough around the edges (it is, after all, a preview) it manages to provide a tantalising taste of what using dual-screen devices could be like. Indeed, just running the Contacts and Calendar apps side-by-side boggles the mind with possible interactions between the two. Furthermore Microsoft have, in relatively short order, delivered a preview SDK from which it is possible to start developing new dual-screen apps or enhance existing apps to take advantage of a second screen. Exciting times!&lt;/p&gt;
+&lt;h3 id="uno-platform"&gt;Uno Platform&lt;/h3&gt;
+&lt;p&gt;Per my experience while writing &amp;quot;The Seven GUIs of Christmas&amp;quot; post, the Uno Platform has continued to preform admirably and shows great promise for writing apps that will run natively across platforms &lt;strong&gt;and&lt;/strong&gt; on dual screens. The only issue I had with Uno while writing the app above was the use of a &amp;quot;Shared Project&amp;quot; to share the Xaml/ViewModel between the various head projects. This approach (which &lt;a href="https://ian.bebbs.co.uk/posts/Uno#six-points-opining"&gt;I recommended against&lt;/a&gt; in my previous post) resulted in Visual Studio stubbornly refusing to show the Xaml editor and countless errors being shown in the error window despite everything compiling and running fine.&lt;/p&gt;
+&lt;h3 id="code"&gt;Code&lt;/h3&gt;
+&lt;p&gt;All code for this post can be found in my &lt;a href="https://github.com/ibebbs/UnoDuoHey"&gt;UnoDuoHey repository&lt;/a&gt; on Github.&lt;/p&gt;
+&lt;h2 id="lastly"&gt;Lastly...&lt;/h2&gt;
+&lt;p&gt;I am currently eager to find potential new clients interested in using the Uno Platform to deliver cross-platform apps and those looking to capitalise on the amazing potential of dual-screen devices in particular. If this sounds like you or your company, please feel free to drop me a line to discuss your project/ideas using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;Last December I wrote &lt;a href="https://ian.bebbs.co.uk/posts/Uno"&gt;a blog post&lt;/a&gt; called "The Seven GUIs of Christmas" as part of the &lt;a href="https://crosscuttingconcerns.com/The-Third-Annual-csharp-Advent"&gt;Third Annual C# Advent&lt;/a&gt; series. This post showed the use of the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; to write cross-platform apps in UWP. One of the major drivers behind this blog post a desire to write apps for Microsoft's &lt;a href="https://news.microsoft.com/october-2-2019/"&gt;recently announced Surface Neo and Surface Duo devices&lt;/a&gt; which run Windows 10X and Android respectively. Well, a couple of days ago, Microsoft finally released a &lt;a href="https://blogs.windows.com/windowsdeveloper/2020/01/22/announcing-dual-screen-preview-sdks-and-microsoft-365-developer-day/"&gt;preview SDK for the Surface Duo&lt;/a&gt; which included an Android Emulator with a preview Surface Duo image. Today I finally got a chance to see whether the Uno Platform really could deliver on these new form-factors.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/LessReSTMoreHotChocolate</id>
 		<title>Less ReST, more Hot Chocolate</title>
@@ -3187,155 +3251,5 @@ stream.statuses.filter(track='#INWED17')
 &lt;p&gt;It's been an amazing year and one I will remember for a long time. Regardless of what I end up doing, it is my aim to take another career break in the not too distant future in which I will endeavor to repeat the successes of this year, remedy the failures and remind myself that it's good to look up from the computer from time to time.&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;Saturday morning, having realized that we had no commitments or prior engagements until the following Tuesday, my partner and I decided to go on a trip. We rapidly packed bags for ourselves and our little girl, threw them in the van and set off with no set destination other than "the south-west". We ended up staying in a small farm on Exmoor and having a terrific time walking on the moor and visiting nearby sites.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/DartInVisualStudioCode</id>
-		<title>Dart web development with Visual Studio Code</title>
-		<link href="http://ian.bebbs.co.uk/posts/DartInVisualStudioCode" />
-		<updated>2017-01-17T00:00:00Z</updated>
-		<content>&lt;p&gt;Visual Studio Code is rapidly becoming my go-to editor for anything not project-oriented C#/F#. I've switched from &lt;a href="https://atom.io/"&gt;Atom&lt;/a&gt; to &lt;a href="(https://code.visualstudio.com/)"&gt;VSC&lt;/a&gt; for editing my (&lt;a href="http://ian.bebbs.co.uk/posts/NewBlogUsingWyam"&gt;statically-generated, Markdown driven&lt;/a&gt;) blog and have used it for authoring powershell scripts, dockerfiles and much, much more. So, when I decided I wanted to write some &lt;a href="https://www.dartlang.org/"&gt;Dart&lt;/a&gt; code, it was the obvious choice.&lt;/p&gt;
-&lt;h2 id="why-dart"&gt;Why Dart?&lt;/h2&gt;
-&lt;p&gt;Why did I decide on Dart? Well, I had project I wanted to undertake that featured some... shock horror... dynamic web content. If that isn't enough to send chills down your spine, you've either &lt;a href="https://hackernoon.com/how-it-feels-to-learn-javascript-in-2016-d3a717dd577f#.fqoett4pt"&gt;never had to look at getting started with modern web development&lt;/a&gt; or &lt;a href="https://medium.com/&amp;#64;pistacchio/i-m-a-web-developer-and-i-ve-been-stuck-with-the-simplest-app-for-the-last-10-days-fb5c50917df#.glf30ovv1"&gt;you've already drunk the cool-aid&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Either way, most rational people in the industry will (in the moments of clarity between writing off the last framework as dated and evangelising the next) reluctantly admit that &lt;a href="https://medium.com/&amp;#64;wob/the-sad-state-of-web-development-1603a861d29f#.lqu2r4xup"&gt;modern web development is a mess&lt;/a&gt;. But this is the world we live in and the best one can do is dodge the analysis paralysis and mitigate the majority of the risks. For me, this was adopting a &lt;a href="https://www.dartlang.org/guides/language/language-tour"&gt;strongly-typed modern development language&lt;/a&gt; that has a &lt;a href="https://webdev.dartlang.org/"&gt;strong web pedegry&lt;/a&gt; and just get on with it.&lt;/p&gt;
-&lt;h2 id="but-in-visual-studio-code"&gt;But in Visual Studio Code?&lt;/h2&gt;
-&lt;p&gt;Why not? It's a great editor and already has great support for Dart courtesy of Danny Tuppeny's &lt;a href="https://marketplace.visualstudio.com/items?itemName=DanTup.DartVS-VisualStudiosupportforGooglesDart"&gt;excellent Dart extension&lt;/a&gt;. Furthermore, I try to keep my development machine as lean and clean as possible so I didn't want to have to &lt;a href="https://www.jetbrains.com/webstorm/"&gt;install an IDE specifically for Dart development&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Fortunately, as you'll see, getting set up for Dart development with Visual Studio Code is very easy, doesn't require any installation (everything is &amp;quot;xcopy&amp;quot; deployed) and you can start being productive almost right away.&lt;/p&gt;
-&lt;h2 id="ingredients"&gt;Ingredients&lt;/h2&gt;
-&lt;p&gt;You will need the following:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="http://code.visualstudio.com/Download"&gt;Visual Studio Code&lt;/a&gt; - obviously&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://marketplace.visualstudio.com/items?itemName=DanTup.dart-code"&gt;DartVS&lt;/a&gt; - the Dart language extension for Visual Studio Code&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://storage.googleapis.com/dart-archive/channels/stable/release/1.21.0/sdk/dartsdk-windows-x64-release.zip"&gt;The Dart SDK&lt;/a&gt; - the code Dart binaries and tools needed for dart development&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://storage.googleapis.com/dart-archive/channels/stable/release/latest/dartium/dartium-windows-ia32-release.zip"&gt;Dartium&lt;/a&gt; - a version of Chrome (even called &amp;quot;Chrome.exe&amp;quot;) with a built in Dart runtime&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id="steps"&gt;Steps&lt;/h2&gt;
-&lt;ol&gt;
-&lt;li&gt;Download and extract the Dart SDK to a location on your HD (I use &lt;code&gt;C:\Apps&lt;/code&gt; for &amp;quot;manually&amp;quot; installed tools/applications so will be using the path &lt;code&gt;C:\Apps\dart-sdk&lt;/code&gt;).&lt;/li&gt;
-&lt;li&gt;Download and extract Dartium to a location on your HD (&lt;code&gt;C:\Apps\chromium&lt;/code&gt; for me).&lt;/li&gt;
-&lt;li&gt;Create a new directory wherever you keep your source files and name it &lt;code&gt;GettingStartedWithDart&lt;/code&gt;.&lt;/li&gt;
-&lt;li&gt;In this directory, create two further directories named &lt;code&gt;lib&lt;/code&gt; and &lt;code&gt;web&lt;/code&gt; (this structure follows the &lt;a href="https://www.dartlang.org/tools/pub/package-layout"&gt;Pub Package Layout Conventions&lt;/a&gt;).&lt;/li&gt;
-&lt;li&gt;Start Visual Studio Code and open the &lt;code&gt;GettingStartedWithDart&lt;/code&gt; folder. You should see something like this:&lt;/li&gt;
-&lt;/ol&gt;
-&lt;img src="https://plt6eg.db.files.1drv.com/y4mKg-ed9pObuENRzhGZ4GomuDQEjP2uHxuIzDXoEcHXN8mvay-Ql0iHgo8vZsvkg0cKsqEyYC-1gmu6vbSt0Av3vw8Z9DnUKHp4w94uDv_g7niiD8i9M6n13gPFcsr7yDNA3RQQu8VIm_9mXDlxhmdvnVjptoOr0aVLsgz2yfqO_lLhmTnp1zZnr-5pPyy_ZCT_rqq_V_SLZlp0XZ05mQcUw?width=1010&amp;height=761&amp;cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Empty Project"/&gt;
-&lt;ol start="6"&gt;
-&lt;li&gt;If you haven't already, install the DartVS extension by hitting &lt;code&gt;Ctrl-Shift-X&lt;/code&gt; (the keyboard shortcut for &amp;quot;View-&amp;gt;Extensions&amp;quot;) and type Dart in the search box. This should show the &amp;quot;Dart Code&amp;quot; extension by &amp;quot;Danny Tuppeny&amp;quot;. Click install and reload the window when complete.&lt;/li&gt;
-&lt;li&gt;As we haven't elected to add the Dart SDK to the path, we need to tell the Dart extension where it can find the SDK. This is done by editing the User Settings (&lt;code&gt;File-&amp;gt;Preferences-&amp;gt;User Settings&lt;/code&gt;) and adding the following settings:&lt;/li&gt;
-&lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;    &amp;quot;dart.sdkPath&amp;quot;: &amp;quot;C:\\Apps\\dart-sdk&amp;quot;,
-    &amp;quot;dart.debugSdkLibraries&amp;quot;: false,
-    &amp;quot;dart.debugExternalLibraries&amp;quot;: false
-&lt;/code&gt;&lt;/pre&gt;
-&lt;ol start="8"&gt;
-&lt;li&gt;Back in the Explorer view (&lt;code&gt;Ctrl-Shift-E&lt;/code&gt;) add a new file to the &lt;code&gt;web&lt;/code&gt; directory named &lt;code&gt;main.dart&lt;/code&gt;. We'll populate this file shortly but, for now, it's just so that VSC (and DartVS) realises that this is a Dart project.&lt;/li&gt;
-&lt;li&gt;Add another new file named &lt;code&gt;pubspec.yaml&lt;/code&gt; to the root directory. This file tells the Dart compiler (named &lt;code&gt;Pub&lt;/code&gt;) how to build your Dart project and follows a very &lt;a href="https://www.dartlang.org/tools/pub/pubspec"&gt;simply format&lt;/a&gt;. In this file add &lt;code&gt;name&lt;/code&gt;, &lt;code&gt;dependencies&lt;/code&gt; and &lt;code&gt;transformers&lt;/code&gt; as shown below:&lt;/li&gt;
-&lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;name: GettingStartedWithDart
-dependencies:
-transformers:
-&lt;/code&gt;&lt;/pre&gt;
-&lt;ol start="10"&gt;
-&lt;li&gt;When you save this file, you should see the &lt;code&gt;Output&lt;/code&gt; panel appear showing the output of the &lt;code&gt;Pub&lt;/code&gt; command. This is a feature of the DartVS extension which runs a &lt;code&gt;pub get&lt;/code&gt; command whenever you save the &lt;code&gt;pubspec.yaml&lt;/code&gt; file. As you can probably guess from the output (shown below) the purpose of this command is to retrieve/update any dependencies you've declared in the &lt;code&gt;dependencies&lt;/code&gt; section. Also, once the &lt;code&gt;pub get&lt;/code&gt; command has run, you should see a new &lt;code&gt;pubspec.lock&lt;/code&gt; file appear in the root directory.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;img src="https://plt5eg.db.files.1drv.com/y4mnwQgOQd0b-9lA5T51HFDekSWJ33mcHaDaf-912HYnOcjL03IAbJMlG6IdpxYTwSW8vYOgdVv57ifpcn0PbFiT5xR1u-ymMcaGwZtRrt_a6SWPNUEro9hPfVXen1XPk2OyvtfZpBCE5I6gCV5cEAsyLCh4n8PsDoO_Mb6MRb_YvtMMWDqKuYPz0agq0colZF8we3biVaeKTJOQ387A-CqOw?width=1010&amp;height=761&amp;cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Get Dependencies"/&gt;
-&lt;ol start="11"&gt;
-&lt;li&gt;As we're focusing on using Dart for web development, we'll also add an HTML document we'll manipulate using Dart. To do this, simply add new file named &lt;code&gt;index.html&lt;/code&gt; to the &lt;code&gt;web&lt;/code&gt; directory and populate it with the following:&lt;/li&gt;
-&lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;&amp;lt;html&amp;gt;
-  &amp;lt;head&amp;gt;
-    &amp;lt;title&amp;gt;Getting Started With Dart&amp;lt;/title&amp;gt;
-    &amp;lt;script type=&amp;quot;application/dart&amp;quot; src=&amp;quot;main.dart&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;
-  &amp;lt;/head&amp;gt;
-  &amp;lt;body&amp;gt;
-    &amp;lt;h1 id=&amp;quot;header&amp;quot;&amp;gt;Hmm... what should I say?&amp;lt;/h1&amp;gt;
-  &amp;lt;/body&amp;gt;
-&amp;lt;/html&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;ol start="12"&gt;
-&lt;li&gt;At this point you should have the following layout in your project and we're ready start start writing some Dart.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;pre&gt;
-    [Source Directory]
-    |-&gt; [Project Name] (i.e. "GettingStartedWithDart")
-    | | -&gt; lib
-    | | -&gt; web
-    | | | -&gt; index.html
-    | | | -&gt; main.dart
-    | | -&gt; pubspec.lock
-    | | -&gt; pubspec.yaml
-&lt;/pre&gt;
-&lt;ol start="13"&gt;
-&lt;li&gt;In the &lt;code&gt;main.dart&lt;/code&gt; file, add the following code. (Note, if you type this code rather than copy-pasting it, you'll notice the excellent intellisense features provided by VSC and implemented beautifully by Dart VS.)&lt;/li&gt;
-&lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;import 'dart:html';
-
-void main() {
-  querySelector('#header').text = 'Ah yes... Hello World!!!';
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;ol start="14"&gt;
-&lt;li&gt;Right, now we have an HTML file and some Dart code and we're ready to run. While you could run this code manually from the command line, if you're intending on doing more than just this getting started guide, I'd very much recommend setting up some task runners in VSC. This is done by opening the command palette (&lt;code&gt;Ctrl-Shift-P&lt;/code&gt;) and typing &lt;code&gt;Configure Task Runner&lt;/code&gt;, which should show you the command &lt;code&gt;Tasks: Configure Task Runner&lt;/code&gt;. Select this and you will see a list of build systems VSC can automatically create a task runner for (shown below). As Dart isn't one of the predefined templates, select &amp;quot;Others&amp;quot; to create an empty Tasks file.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;img src="https://plt4eg.db.files.1drv.com/y4mSM6y7mv-TeKZnWpnN0u40gfrHfe4UcGyWVrUBd9wpbJO6ifkhJsaqUUdFgdNKSZQCS2pRyMfWO78V_ysrOwwzyTqEMUXQ8LpI5I1yCibae5ROkRepy7sQqhQdYweI44xwt6WppsdMPMQu-LQRkUUpvnypu4RUO1V4IqTBtvdfyeuYu-za7s1pU6LIFH2TqmUsF1Yu39hxBFnFYGTW3r8DQ?width=1010&amp;height=761&amp;cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Configure Task Runner"/&gt;
-&lt;ol start="15"&gt;
-&lt;li&gt;This command should create a new file called &lt;code&gt;tasks.json&lt;/code&gt; in a new &lt;code&gt;.vscode&lt;/code&gt; directory and will contain the following json.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;{
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
-    &amp;quot;version&amp;quot;: &amp;quot;0.1.0&amp;quot;,
-    &amp;quot;command&amp;quot;: &amp;quot;echo&amp;quot;,
-    &amp;quot;isShellCommand&amp;quot;: true,
-    &amp;quot;args&amp;quot;: [&amp;quot;Hello World&amp;quot;],
-    &amp;quot;showOutput&amp;quot;: &amp;quot;always&amp;quot;
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;ol start="16"&gt;
-&lt;li&gt;If you're not familiar with configuring VSC task runners, I'd very much recommend clicking the link in this file to see what the task runner is able to do and how to configure it. However, for your convenience, I have provided my configuration below:&lt;/li&gt;
-&lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;{
-    // See https://go.microsoft.com/fwlink/?LinkId=733558
-    // for the documentation about the tasks.json format
-    &amp;quot;version&amp;quot;: &amp;quot;0.1.0&amp;quot;,
-    &amp;quot;command&amp;quot;: &amp;quot;C:\\Apps\\dart-sdk\\bin\\pub.bat&amp;quot;,
-    &amp;quot;isShellCommand&amp;quot;: true,
-    &amp;quot;args&amp;quot;: [],
-    &amp;quot;showOutput&amp;quot;: &amp;quot;always&amp;quot;,
-    &amp;quot;echoCommand&amp;quot;: true,
-    &amp;quot;tasks&amp;quot;: [
-        {
-            &amp;quot;taskName&amp;quot;: &amp;quot;build&amp;quot;,
-            &amp;quot;args&amp;quot;: [],
-            &amp;quot;isWatching&amp;quot;: false
-         },
-        {
-            &amp;quot;taskName&amp;quot;: &amp;quot;serve&amp;quot;,
-            &amp;quot;args&amp;quot;: [],
-            &amp;quot;isWatching&amp;quot;: true
-         }
-    ]
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;ol start="17"&gt;
-&lt;li&gt;&lt;p&gt;As you will probably be able to determine, this file contains two tasks; one named &lt;code&gt;build&lt;/code&gt; and the other named &lt;code&gt;serve&lt;/code&gt;. The &lt;code&gt;build&lt;/code&gt; command compiles your code and checks for errors while the &lt;code&gt;serve&lt;/code&gt; command sets up a local web-server (by default bound to port 8080) capable of serving the content of the &lt;code&gt;web&lt;/code&gt; directory. Lets try both.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Open the command palette (&lt;code&gt;Ctrl-Shift-P&lt;/code&gt;), delete the '&amp;gt;' prompt and then type &lt;code&gt;task&lt;/code&gt; followed by a space. You should see the two tasks defined above appear. Continue to &lt;code&gt;build&lt;/code&gt; and then hit return. At this point, the output pane should appear displaying the &lt;code&gt;Tasks&lt;/code&gt; output and your code should be compiled (and, transpiled into JS!). This is shown below:&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;img src="https://plt3eg.db.files.1drv.com/y4mL94jJczcWL7B2XhFHUxWsy27bBtRuANSUOLFONy2wOKkHeVYP_u5RDKlFD8qpdY679iDyfmqksumkLDQVJ_0z81Ur7xxBxewxL5cLHkVe1q1AMqthsufldLgA5YPcxF49t6SNi8ue18mGTmp8wSZtkem5aFk4rkn1DD1X2yZuPIpHKFbqd9xoNv8TLN7tRtqOraClK2Le9ns6b4Joswnqg?width=1010&amp;height=761&amp;cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Tasks and Build output"/&gt;
-&lt;ol start="19"&gt;
-&lt;li&gt;&lt;p&gt;If everything is successful, you should see the message '&lt;code&gt;Built 2 files to &amp;quot;build&amp;quot;&lt;/code&gt;'. Now we can test our Dart code by serving it through &lt;code&gt;pub server&lt;/code&gt;. To do this, start the &lt;code&gt;task serve&lt;/code&gt; task in a similar manner to the &lt;code&gt;task build&lt;/code&gt; above. As this task is an &lt;code&gt;isWatching&lt;/code&gt; command, the task won't complete when run but will emit messages to the output pane when changes occur. This is shown below:&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;With a local web-server serving out HTML file and Dart code, we can finally start to use Dartium to run the code. Note that, we're using Dartium because we'll be executing the Dart code directly (rather than the transpiled JavaScript) and Dartium has a built-in Dart runtime which allows for advanced debugging of our Dart code. Start Dartium but executing it from either command line or GUI (exists at &lt;code&gt;C:\Apps\chromium\chrome.exe&lt;/code&gt; for me) and, once started, navigate to &lt;code&gt;http://localhost:8080&lt;/code&gt; and you should see the following:&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;img src="https://nbtqeg.db.files.1drv.com/y4mWPsDJhQ9U-zvjoYwHuKOyw3q27w6U5hQb5e6yI4GNU9foPKXg1iMCZiRP4xAIjKjIfmWktUhv2iQtOjsG2CDsxsPFW8fY0-BqIGpnQphayCe_otBIrKip_zXH_g2W_FTMQFAwiH1rHCxdnv3pxtTGr-pq9qcmMA34AMVPCDu4wLaR6MRzLFQgqAByrfTtYS4UGKZw8uEoOP4MYfpB2UFeQ?width=813&amp;height=668&amp;cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Success!!"/&gt;
-&lt;p&gt;Congratulations, you've just run your first Dart code.&lt;/p&gt;
-&lt;p&gt;If something went wrong and you don't see the header text change from 'Hmm... what should I say?' to 'Ah yes... Hello World!!!' then you can use Dartium's Developer Tools (&lt;code&gt;Ctrl-Shift-I&lt;/code&gt;) to view errors and add breakpoints so you can work out what has gone wrong. The developer tools are shown here:&lt;/p&gt;
-&lt;img src="https://nbtpeg.db.files.1drv.com/y4mwRipCZE2K6E8BtWUFbeXmT_LHXc5GQoQ7ecYNO8Zo_9pqX5vi9-IRlSaEb_ONm5AU7TsKiqnil90PcWLbSSCH5vKCLuMURGYRsVUM1qcmyiei7q_-uGI21Sw8pbWnftGwPXtW2UxSq6KQHwTfxuSSIWZl4g3cy4s0bTEO_gzdp2815a37XYw8FaMoGlWH_WBpQUvTCD58RuIFWe13j3I5w?width=813&amp;height=668&amp;cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Dartium Developer Tools"/&gt;
-&lt;p&gt;You can find loads more information online about the &lt;a href="https://www.dartlang.org/"&gt;Dart Language&lt;/a&gt; and &lt;a href="https://webdev.dartlang.org/"&gt;Dart Web Development&lt;/a&gt;. Versions of Dart are changing rapidly (there was a minor update while writing this post!) and a thriving &lt;a href="https://www.dartlang.org/community"&gt;support community&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;As a (mainly) C# developer I found Dart super easy to get up to speed with and the Visual Studio Code/Dartium combo to be extremely productive. Hopefully you will too.&lt;/p&gt;
-&lt;p&gt;Have fun.&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;Visual Studio Code is rapidly becoming my go-to editor for anything not project-oriented C#/F#. I've switched from &lt;a href="https://atom.io/"&gt;Atom&lt;/a&gt; to &lt;a href="(https://code.visualstudio.com/)"&gt;VSC&lt;/a&gt; for editing my (&lt;a href="http://ian.bebbs.co.uk/posts/NewBlogUsingWyam"&gt;statically-generated, Markdown driven&lt;/a&gt;) blog and have used it for authoring powershell scripts, dockerfiles and much, much more. So, when I decided I wanted to write some &lt;a href="https://www.dartlang.org/"&gt;Dart&lt;/a&gt; code, it was the obvious choice.&lt;/p&gt;</summary>
 	</entry>
 </feed>
