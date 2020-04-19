@@ -118,6 +118,14 @@
 <div class="row">
     <div class="col-sm-8 right-border">
                 <div class="post-preview">
+                    <a href="/posts/COduo-Part1">
+                        <h2 class="post-title">Many platforms, one world - Part 1</h2>
+                            <h3 class="post-subtitle">Using the Uno platform to build a cross-platform, dual-screen ready app to help promote environmental awareness.</h3>
+                    </a>
+                    <p class="post-meta">Posted on 19 April 2020</p>
+<p>This is part 1 of a series of posts in which I chronical how the Uno Platform was used to write an app which runs natively on all major platforms and naturally on modern dual-screen devices (such as the forthcoming Surface Neo and Surface Duo). I will endeavour to detail how the Uno Platform makes it possible to achieve "99% shared code" across operating system and form-factor, all without having to leave the comfort of basic C# nor needing to learn a new dialect of XAML. And finally, through the app, I hope to provide the means to better understand - and help mitigate - the impact our energy usage is having on the environment.</p>                </div>       
+                    <hr /> 
+                <div class="post-preview">
                     <a href="/posts/UnoDuoHey">
                         <h2 class="post-title">Uno, Duo, Hey!</h2>
                             <h3 class="post-subtitle">Writing apps for the Surface Duo using the Uno platform</h3>
@@ -132,30 +140,6 @@
                     </a>
                     <p class="post-meta">Posted on 08 January 2020</p>
 <p>A project I'm working on requires a microservice like evaluation environment. A brief google revealed very little that would suffice so I decided to quickly knock up my own. At the same time, I thought it would be a great opportunity to evaluate <a href="https://hotchocolate.io/">Hot Chocolate</a> by <a href="https://chillicream.com/">Chilli Cream</a>; a relative newcomer to the (very sparse) GraphQL for .NET scene. In this post I'll also be using <a href="https://github.com/RicoSuter/NSwag">NSwag</a> to generate <a href="https://www.openapis.org/">OpenAPI documents</a> and <a href="https://docs.microsoft.com/en-us/dotnet/architecture/microservices/implement-resilient-applications/use-httpclientfactory-to-implement-resilient-http-requests#how-to-use-typed-clients-with-httpclientfactory">Typed Clients</a> for downstream services and, finally, I will be containerizing the microservices using <a href="https://www.docker.com/">Docker</a> and employing <a href="https://docs.docker.com/compose/">Docker Compose</a> to run and test them.</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/NetworkBootingManyRaspberryPis">
-                        <h2 class="post-title">Network Booting Many Raspberry Pis</h2>
-                            <h3 class="post-subtitle">A guide that works for me... mileage may vary</h3>
-                    </a>
-                    <p class="post-meta">Posted on 02 January 2020</p>
-<p>This is just a short post - mostly for my own benefit - on how to network boot multiple Raspberry Pis from an x86 Linux Server. While this has been covered <a href="https://hackaday.com/2019/11/11/network-booting-the-pi-4/">many</a> <a href="https://hackaday.com/2018/10/08/hack-my-house-running-raspberry-pi-without-an-sd-card/">times</a> in <a href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/net_tutorial.md">other</a> <a href="https://github.com/raspberrypi/rpi-eeprom/blob/master/firmware/raspberry_pi4_network_boot_beta.md">posts</a> none of them worked for me "out of the box". Here's what does.</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/Uno">
-                        <h2 class="post-title">The Seven GUIs of Christmas</h2>
-                            <h3 class="post-subtitle">Using the Uno platform to implement the 7GUIs &quot;programming benchmark&quot;.</h3>
-                    </a>
-                    <p class="post-meta">Posted on 01 December 2019</p>
-<p>The <a href="https://platform.uno/">Uno platform</a> allows native UWP code to be run across Windows, Android, iOS and even in the browser. In this post I will cover the use of the Uno Platform to implement the <a href="https://eugenkiss.github.io/7guis/">7GUIs: A GUI Programming Benchmark</a>, across 5 platforms, employing FRP paradigms and all in a (mostly) seasonal style! Will it all hang together? Read on to find out.</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/AugmentingTheGenericHost">
-                        <h2 class="post-title">Augmenting the .NET Core 3.0 Generic Host</h2>
-                            <h3 class="post-subtitle">Battling a SOLID implementation of the Open-closed Principle</h3>
-                    </a>
-                    <p class="post-meta">Posted on 18 November 2019</p>
-<p>I love the .NET Core 3.0 Generic Host, I really do. As a framework for simplifying common scaffolding and lifetime management of long-running services, it's <em>almost</em> faultless. Unfortunately, the mere fact of <a href="http://tomasp.net/blog/2015/library-frameworks/">being a framework rather than a library</a> can lead to issues where, as a user of the framework, you're unable to accomplish a specific goal. For me, this happened while trying to get instrumentation written to a various <a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource">EventSource</a> instances to be output - in a configurable manner - through the Generic Host's logging infrastructure. Sounds simple huh, and it really ought to be. But it wasn't. Here's why:</p>                </div>       
         <ul class="pager">
             <li class="previous">                
             </li>
@@ -213,6 +197,11 @@
     </li>
 </ul>
         <hr />
+
+        <h2><img src="Content/BeBraveLikeBATman/BraveLogo.png" alt="Brave Browser Logo" /></h2>
+        <p>I recommend using the <a href="https://brave.com/beb095">Brave browser</a>.</p>
+        <p><a href="posts/BeBraveLikeBATMan.html">Here</a> is my blog post outlining why you should consider changing browser and <a href="https://brave.com/beb095">here</a> is my referral link should you wish to do so.</p>
+        <hr />
         
         <h5>Top Posts</h5>
         <ul class="list-unstyled">
@@ -226,16 +215,16 @@
 
             <h5>Top Tags</h5>
             <div>
-                    <a role="button" href="/tags/UWP" class="btn btn-default btn-sm"> UWP (8)</a>
-                    <a role="button" href="/tags/Rx" class="btn btn-default btn-sm"> Rx (7)</a>
+                    <a role="button" href="/tags/uwp" class="btn btn-default btn-sm"> uwp (11)</a>
+                    <a role="button" href="/tags/net-core" class="btn btn-default btn-sm"> .net core (7)</a>
                     <a role="button" href="/tags/Reactive" class="btn btn-default btn-sm"> Reactive (7)</a>
-                    <a role="button" href="/tags/net-core" class="btn btn-default btn-sm"> .net core (6)</a>
+                    <a role="button" href="/tags/Rx" class="btn btn-default btn-sm"> Rx (7)</a>
+                    <a role="button" href="/tags/xaml" class="btn btn-default btn-sm"> xaml (5)</a>
+                    <a role="button" href="/tags/Docker" class="btn btn-default btn-sm"> Docker (4)</a>
                     <a role="button" href="/tags/Monitoring" class="btn btn-default btn-sm"> Monitoring (4)</a>
-                    <a role="button" href="/tags/Elastic-Stack" class="btn btn-default btn-sm"> Elastic Stack (4)</a>
                     <a role="button" href="/tags/Networking" class="btn btn-default btn-sm"> Networking (4)</a>
-                    <a role="button" href="/tags/IoT" class="btn btn-default btn-sm"> IoT (4)</a>
-                    <a role="button" href="/tags/ElasticSearch" class="btn btn-default btn-sm"> ElasticSearch (4)</a>
-                    <a role="button" href="/tags/Kibana" class="btn btn-default btn-sm"> Kibana (4)</a>
+                    <a role="button" href="/tags/Syslog" class="btn btn-default btn-sm"> Syslog (4)</a>
+                    <a role="button" href="/tags/LogStash" class="btn btn-default btn-sm"> LogStash (4)</a>
             </div>
             <ul class="pager">
                 <li class="next">
@@ -246,10 +235,10 @@
 
             <h5>Older Posts</h5>
             <ul class="list-unstyled">
+                    <li><a href="/posts/NetworkBootingManyRaspberryPis">Network Booting Many Raspberry Pis</a></li>
+                    <li><a href="/posts/Uno">The Seven GUIs of Christmas</a></li>
+                    <li><a href="/posts/AugmentingTheGenericHost">Augmenting the .NET Core 3.0 Generic Host</a></li>
                     <li><a href="/posts/LightweightRuntimeCompositionForGenericHost">Light-weight run-time composition for the .NET Core 3.0 Generic Host</a></li>
-                    <li><a href="/posts/BuildingDotNetCore3WithAzurePipelines">Building .NET Core 3.0 With Azure Pipelines</a></li>
-                    <li><a href="/posts/UsingATouchOverlayInPortrainOnRaspbian">Using A Touch Overlay, In Portrait, On Raspbian Buster</a></li>
-                    <li><a href="/posts/TechAdventuresInSustainability-PartI">Tech Adventures in Sustainability</a></li>
             </ul>
                 <ul class="pager">
                     <li class="next">

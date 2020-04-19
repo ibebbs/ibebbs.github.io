@@ -1,0 +1,326 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Many platforms, one world - Part 1</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Many platforms, one world - Part 1" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/COduo-Part1" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header" style="background-image: url(&quot;/Content/CODuo/Header.png&quot;)">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Many platforms, one world - Part 1</h1>
+        <h2 class="subheading">Using the Uno platform to build a cross-platform, dual-screen ready app to help promote environmental awareness.</h2>
+    <div class="meta">        
+Published on 19 April 2020<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/android" class="btn btn-default btn-xs">android</a>
+                    <a role="button" href="/tags/dual-screen" class="btn btn-default btn-xs">dual-screen</a>
+                    <a role="button" href="/tags/iOS" class="btn btn-default btn-xs">iOS</a>
+                    <a role="button" href="/tags/surface" class="btn btn-default btn-xs">surface</a>
+                    <a role="button" href="/tags/uno-platform" class="btn btn-default btn-xs">uno platform</a>
+                    <a role="button" href="/tags/uwp" class="btn btn-default btn-xs">uwp</a>
+                    <a role="button" href="/tags/xaml" class="btn btn-default btn-xs">xaml</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="tldr">TL;DR</h2>
+<p>This is part 1 of a series of posts in which I chronical how the Uno Platform was used to write an app which runs natively on all major platforms and naturally on modern dual-screen devices (such as the forthcoming Surface Neo and Surface Duo). I will endeavour to detail how the Uno Platform makes it possible to achieve &quot;99% shared code&quot; across operating system and form-factor, all without having to leave the comfort of basic C# nor needing to learn a new dialect of XAML. And finally, through the app, I hope to provide the means to better understand - and help mitigate - the impact our energy usage is having on the environment.</p>
+<h2 id="part-1">Part 1</h2>
+<p>In this post I cover the app's conceptualization, why I chose to implement it using the Uno Platform, how you can get the app for your device and where you can examine it's source code. Later posts detail the various conundra of designing, implementing and deploying an app targeting multiple platforms using the Uno Platform.</p>
+<p>Below is a (preliminary) list of posts I intend to write. It will be updated as each post is completed and published:</p>
+<ul>
+<li><a href="./COduo-Part1">Part 1 - Background</a></li>
+<li>Part 2 - Infrastructure</li>
+<li>Part 3 - Client Architecture</li>
+<li>Part 4 - Using the TwoPaneView</li>
+<li>Part 5 - Implementing the interactive UK Map</li>
+<li>Part 6 - Charts on the Uno Platform</li>
+<li>Part 7 - Windows, Win10X and releasing to the Microsoft Store</li>
+<li>Part 8 - Android and releasing to the Google Play Store</li>
+<li>Part 9 - iOS and releasing to the Apple App Store</li>
+</ul>
+<h2 id="background">Background</h2>
+<p>Back in January I wrote a <a href="https://ian.bebbs.co.uk/posts/UnoDuoHey">blog post</a> showing how the <a href="https://platform.uno/">Uno Platform</a> could be used to write native, cross-platform apps that can leverage the unique UX opportunities afforded by dual and multi-screen devices such as the forthcoming Surface Duo and Surface Neo. This article was received well and the Uno Platform team dropped me a line after reading it suggesting that, if I could develop the PoC into a &quot;real app&quot;, they'd feature it on their <a href="https://platform.uno/showcases/">showcases page</a>. This seemed like a great idea but, as I was in the middle of a project at the time and couldn't immediately think of an app I wanted to write, I thanked them and left it there...</p>
+<p>Until, that is, I read that <a href="https://blogs.microsoft.com/blog/2020/01/16/microsoft-will-be-carbon-negative-by-2030/">Microsoft had committed to going carbon negative by 2030</a>. As regular readers of my blog will know, I have a penchant for <a href="https://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI">using technology to help promote sustainable living</a> and thought an app combining this with Microsoft's current focus on dual-screen devices could be the showcase app the Uno Platform team  were looking for.</p>
+<p>And so it was that CO<sub><em>duo</em></sub> came to be:</p>
+<img src="/Content/CODuo/RunningOnSurface.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Running On Surface.png"/>
+<blockquote class="blockquote">
+<p>An early version of CO<sub><em>duo</em></sub> running on Surface Pro (Windows 10), Surface Duo (Android 10) and Surface Neo (Windows 10X)</p>
+</blockquote>
+<h2 id="so-what-is-coduo">So what is CO<sub><em>duo</em></sub>?</h2>
+<p>CO<sub><em>duo</em></sub> is an app which presents data about electricity generation and carbon emissions across the UK in a user-friendly way.</p>
+<p>With CO<sub><em>duo</em></sub> I wanted to not only increase people's awareness of the impact their energy usage was having on the environment - particularly the CO<sub>2</sub> emissions - but also empower them to change their energy usage in ways which might help mitigate this impact. In short, my design goals could be summarised with the following two user stories:</p>
+<blockquote class="blockquote">
+<p>&quot;As a domestic user of electricity, I need to understand the impact my energy usage has on the environment so that I am incentivized to change this usage&quot;</p>
+</blockquote>
+<blockquote class="blockquote">
+<p>&quot;As a domestic user of electricity, I need to understand how I can change my energy usage so that it's impact on the environment is minimized&quot;.</p>
+</blockquote>
+<p>I started this project by searching for appropriate sources of data and was pleased to find that, for the UK at least, there were numerous free - and extremely detailed - public APIs available. I then spent some time prototyping a data visualisation that could show the carbon intensity of current and forecast energy generation and illustrate when might be best to use energy-intensive appliances (i.e. washing machines, dish washers, tumble dryers, etc).</p>
+<p>Using Syncfusion's Essential Studio I got the below working in a UWP app in single evening:</p>
+<img src="/Content/CODuo/Prototype.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Prototype of COduo"/>
+<p>&quot;Great&quot;, I thought, &quot;Now to make it run across every platform, on every screen and in every configuration. How difficult can it be?&quot;.</p>
+<p>Well, lets find out.</p>
+<h2 id="why-the-uno-platform">Why the Uno Platform?</h2>
+<p>This is my third blog post about the Uno Platform. The first two - <a href="https://ian.bebbs.co.uk/posts/Uno">The Seven GUIs of Christmas</a> about Uno's cross-platform capabilities &amp; <a href="https://ian.bebbs.co.uk/posts/UnoDuoHey">Uno, Duo, Hey!</a> about Uno's dual-screen capabilities - showed a platform that had incredible potential and which was rapidly maturing to the point where it could deliver on this potential for &quot;real world&quot; apps.</p>
+<p>Given I wanted to write an app that would work natively on both the Surface Duo - which runs Android - and Surface Neo - which runs Windows 10X - the Uno Platform was an obvious choice as it would reduce my technology stack from this:
+<img src="/Content/CODuo/MultipleApps.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Multiple Apps"/></p>
+<p>To this:
+<img src="/Content/CODuo/UnoAllTheThings.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Uno All The Things!"/></p>
+<p>As we will see in the following series, this choice really has paid dividends. In fact, it has been so successful that I feel I must issue a correction:</p>
+<p>My first blog post about the Uno Platform - <a href="https://ian.bebbs.co.uk/posts/Uno">The Seven GUIs of Christmas</a> - contained the following:</p>
+<pre><code>The Uno platform is, somewhat amazingly, able to display (almost) the exact same XAML page across multiple platforms (or 'heads' to use Uno parlance) with a very high degree of fidelity. This is quite an achievement and the team at nventive are rightly proud of this capability.
+
+However, from the perspective of someone looking to write large applications on this platform, I don't believe this facility is particularly important nor - to a certain extent - even desirable. You see, in my experience, it is often the case that each platform and/or form-factor requires such different UI and/or UX that trying to shoe-horn everything into a single XAML page results in a page that is difficult, if not impossible, to maintain.
+</code></pre>
+<p>In contrast to this statement, CO<sub><em>duo</em></sub> has been written with a single code-base - from infrastructure through to view-models <em>and</em> views - shared across all devices. This has led to neither code bloat nor maintainability issues due, in most part, to the Uno Platform's faithful reproduction of a few key UWP tenets.</p>
+<p>To explain: Whereas previously I had been used to writing cross-platform apps using multiple different display technologies, the Uno Platform is just UWP and UWP was designed to be... well... universal. Out of the gate, UWP ran on everything from desktop PCs and tablets through to mobile phones and IoT devices. It successfully abstracted away many technical difficulties of designing for multiple platforms ensuring the developer was able to write a single &quot;adaptive&quot; UI which would then be able to capitalize on the display surface(s) available.</p>
+<p>Uno have very successfully reproduced this capability across multiple disparate platforms and while not quite pixel-perfect - as we will see in future posts - it is close enough that any differences can be smoothed over with a little creative design.</p>
+<h2 id="which-platforms-does-coduo-run-on">Which platforms does CO<sub><em>duo</em></sub> run on?</h2>
+<p>CO<sub><em>duo</em></sub> currently runs on the following platforms:</p>
+<ul>
+<li>Via UWP
+<ul>
+<li>Windows 10 PC</li>
+<li>Windows 10 Tablet</li>
+<li>Windows 10 Mobile/Phone</li>
+<li>Windows 10 IoT</li>
+<li>XBox One</li>
+<li>Hololens</li>
+<li>Surface Hub</li>
+<li>Windows 10X PC/Tablet (i.e. Surface Neo)</li>
+</ul>
+</li>
+<li>Via Android (Oreo - version 8 - or above)
+<ul>
+<li>Android Phone</li>
+<li>Android Tablet</li>
+<li>Android TV</li>
+<li>Dual-Screen Android Devices (i.e. Surface Duo)</li>
+</ul>
+</li>
+</ul>
+<p>Furthermore, CO<sub><em>duo</em></sub> will be updated to run on the following platforms when time and resources allow:</p>
+<ul>
+<li>Via iOS
+<ul>
+<li>iPhone</li>
+<li>iPad</li>
+</ul>
+</li>
+<li>Via WebAssembly
+<ul>
+<li>Any <a href="https://en.wikipedia.org/wiki/WebAssembly">WebAssembly compatible browser</a></li>
+</ul>
+</li>
+</ul>
+<h2 id="where-can-i-get-coduo">Where can I get CO<sub><em>duo</em></sub>?</h2>
+<p>Beta versions of CO<sub><em>duo</em></sub> are currently available in the following apps stores:</p>
+<ul>
+<li><a href="https://www.microsoft.com/en-gb/p/coduo/9php2cf3z997">Microsoft Store</a> - for PC, Tablet, XBox, Hololens and Surface Hub</li>
+<li><a href="https://play.google.com/store/apps/details?id=solutions.onecog.coduo">Google Play</a> - for Android Phone, Table, and TV.</li>
+<li>Apple App Store - Coming soon</li>
+</ul>
+<p>As promised, the Uno Platform Team have also featured CO<sub><em>duo</em></sub> on their <a href="https://platform.uno/showcases/">showcases page</a> and as part of their introduction to using the <a href="https://platform.uno/surface-duo-neo/">Uno Platform for Surface Duo and Surface Neo</a>.</p>
+<h2 id="will-you-be-open-sourcing-coduo">Will you be open-sourcing CO<sub><em>duo</em></sub>?</h2>
+<p>Yes, <em>mostly</em>. In addition to detailing lots of the design and implementation considerations that went into writing CO<sub><em>duo</em></sub> in various posts for this series, the code for CO<sub><em>duo</em></sub> has been published under a &quot;shared source&quot; license; specifically <a href="https://www.gnu.org/licenses/gpl-3.0.en.html">GPLv3</a> with the <a href="https://commonsclause.com/">&quot;Commons Clause&quot;</a>.</p>
+<blockquote class="blockquote">
+<p>The Commons Clause is a license condition drafted by Heather Meeker that applies a narrow, minimal-form commercial restriction on top of an existing open source license to transition the project to a source-availability licensing scheme. The combined text replaces the existing license, allowing all permissions of the original license to remain except the ability to &quot;Sell&quot; the software as defined in the text.</p>
+</blockquote>
+<p>It is my hope that transitioning the CO<sub><em>duo</em></sub> project to a &quot;source-available&quot; license scheme will allow others to understand how to use the Uno Platform to develop a cross-platform app without me having to worry about numerous clones of the app appearing in various app stores laden with ads.</p>
+<p>The source code for CO<sub><em>duo</em></sub> can be found in my <a href="https://github.com/ibebbs/CODuo">COduo repository on Github</a>. If you like or use the source-code, please take the time to &quot;star&quot; the repository; it's a small gesture which really fuels developers's enthusiasm for projects such as these.</p>
+<h2 id="when-will-new-posts-about-coduo-be-made-available">When will new posts about CO<sub><em>duo</em></sub> be made available?</h2>
+<p>I intend to write/release a new post in the series every few days.</p>
+<p>My plan is for parts 2 and 3 to provide a high level overview of the service-side infrastructure and client app architecture respectively. These posts won't specifically discuss the Uno Platform but will instead provide insight into how the project was designed and how this design simplifies the development of a cross-platform app such as CO<sub><em>duo</em></sub>.</p>
+<p>After parts 2 and 3 I will be diving into the various considerations of using the Uno Platform to deliver a cross-platform app. Part 4 will detail how to use the TwoPaneView to develop an app that runs natively on dual-screen devices and part 5 onwards will discuss how other UI components were implemented.</p>
+<p>I will round out the series by highlighting platform differences you need to be aware of while using the Uno Platform and my experience of deploying CO<sub><em>duo</em></sub> to each of the various apps stores.</p>
+<h2 id="finally">Finally</h2>
+<p>I hope you enjoy this series and that it goes some way to demonstrating the massive potential presented by the Uno Platform for delivering cross-platform experiences without having to invest in additional staff training nor bifurcating your development efforts.</p>
+<p>If you or your company are interested in building apps that can leverage the dual screen capabilities of new devices such as the Surface Duo and Surface Neo, or are keen to understand how a single code-base can deliver apps to <em>every platform from mobile phones to web sites</em>, then please feel free to drop me a line using any of the links below or from my <a href="https://ian.bebbs.co.uk/about">about page</a>. I am actively seeking new clients in this space and would be happy to discuss any ideas you have or projects you're planning.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2020. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+

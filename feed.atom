@@ -4,8 +4,131 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-01-24T16:33:32Z</updated>
+	<updated>2020-04-19T21:34:58Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/COduo-Part1</id>
+		<title>Many platforms, one world - Part 1</title>
+		<link href="http://ian.bebbs.co.uk/posts/COduo-Part1" />
+		<link rel="enclosure" type="image" href="http://ian.bebbs.co.uk/Content/CODuo/Header.png" />
+		<updated>2020-04-19T00:00:00Z</updated>
+		<content>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;This is part 1 of a series of posts in which I chronical how the Uno Platform was used to write an app which runs natively on all major platforms and naturally on modern dual-screen devices (such as the forthcoming Surface Neo and Surface Duo). I will endeavour to detail how the Uno Platform makes it possible to achieve &amp;quot;99% shared code&amp;quot; across operating system and form-factor, all without having to leave the comfort of basic C# nor needing to learn a new dialect of XAML. And finally, through the app, I hope to provide the means to better understand - and help mitigate - the impact our energy usage is having on the environment.&lt;/p&gt;
+&lt;h2 id="part-1"&gt;Part 1&lt;/h2&gt;
+&lt;p&gt;In this post I cover the app's conceptualization, why I chose to implement it using the Uno Platform, how you can get the app for your device and where you can examine it's source code. Later posts detail the various conundra of designing, implementing and deploying an app targeting multiple platforms using the Uno Platform.&lt;/p&gt;
+&lt;p&gt;Below is a (preliminary) list of posts I intend to write. It will be updated as each post is completed and published:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="./COduo-Part1"&gt;Part 1 - Background&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Part 2 - Infrastructure&lt;/li&gt;
+&lt;li&gt;Part 3 - Client Architecture&lt;/li&gt;
+&lt;li&gt;Part 4 - Using the TwoPaneView&lt;/li&gt;
+&lt;li&gt;Part 5 - Implementing the interactive UK Map&lt;/li&gt;
+&lt;li&gt;Part 6 - Charts on the Uno Platform&lt;/li&gt;
+&lt;li&gt;Part 7 - Windows, Win10X and releasing to the Microsoft Store&lt;/li&gt;
+&lt;li&gt;Part 8 - Android and releasing to the Google Play Store&lt;/li&gt;
+&lt;li&gt;Part 9 - iOS and releasing to the Apple App Store&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="background"&gt;Background&lt;/h2&gt;
+&lt;p&gt;Back in January I wrote a &lt;a href="https://ian.bebbs.co.uk/posts/UnoDuoHey"&gt;blog post&lt;/a&gt; showing how the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; could be used to write native, cross-platform apps that can leverage the unique UX opportunities afforded by dual and multi-screen devices such as the forthcoming Surface Duo and Surface Neo. This article was received well and the Uno Platform team dropped me a line after reading it suggesting that, if I could develop the PoC into a &amp;quot;real app&amp;quot;, they'd feature it on their &lt;a href="https://platform.uno/showcases/"&gt;showcases page&lt;/a&gt;. This seemed like a great idea but, as I was in the middle of a project at the time and couldn't immediately think of an app I wanted to write, I thanked them and left it there...&lt;/p&gt;
+&lt;p&gt;Until, that is, I read that &lt;a href="https://blogs.microsoft.com/blog/2020/01/16/microsoft-will-be-carbon-negative-by-2030/"&gt;Microsoft had committed to going carbon negative by 2030&lt;/a&gt;. As regular readers of my blog will know, I have a penchant for &lt;a href="https://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI"&gt;using technology to help promote sustainable living&lt;/a&gt; and thought an app combining this with Microsoft's current focus on dual-screen devices could be the showcase app the Uno Platform team  were looking for.&lt;/p&gt;
+&lt;p&gt;And so it was that CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; came to be:&lt;/p&gt;
+&lt;img src="/Content/CODuo/RunningOnSurface.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Running On Surface.png"/&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;An early version of CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; running on Surface Pro (Windows 10), Surface Duo (Android 10) and Surface Neo (Windows 10X)&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="so-what-is-coduo"&gt;So what is CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt;?&lt;/h2&gt;
+&lt;p&gt;CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; is an app which presents data about electricity generation and carbon emissions across the UK in a user-friendly way.&lt;/p&gt;
+&lt;p&gt;With CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; I wanted to not only increase people's awareness of the impact their energy usage was having on the environment - particularly the CO&lt;sub&gt;2&lt;/sub&gt; emissions - but also empower them to change their energy usage in ways which might help mitigate this impact. In short, my design goals could be summarised with the following two user stories:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;&amp;quot;As a domestic user of electricity, I need to understand the impact my energy usage has on the environment so that I am incentivized to change this usage&amp;quot;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;&amp;quot;As a domestic user of electricity, I need to understand how I can change my energy usage so that it's impact on the environment is minimized&amp;quot;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;I started this project by searching for appropriate sources of data and was pleased to find that, for the UK at least, there were numerous free - and extremely detailed - public APIs available. I then spent some time prototyping a data visualisation that could show the carbon intensity of current and forecast energy generation and illustrate when might be best to use energy-intensive appliances (i.e. washing machines, dish washers, tumble dryers, etc).&lt;/p&gt;
+&lt;p&gt;Using Syncfusion's Essential Studio I got the below working in a UWP app in single evening:&lt;/p&gt;
+&lt;img src="/Content/CODuo/Prototype.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Prototype of COduo"/&gt;
+&lt;p&gt;&amp;quot;Great&amp;quot;, I thought, &amp;quot;Now to make it run across every platform, on every screen and in every configuration. How difficult can it be?&amp;quot;.&lt;/p&gt;
+&lt;p&gt;Well, lets find out.&lt;/p&gt;
+&lt;h2 id="why-the-uno-platform"&gt;Why the Uno Platform?&lt;/h2&gt;
+&lt;p&gt;This is my third blog post about the Uno Platform. The first two - &lt;a href="https://ian.bebbs.co.uk/posts/Uno"&gt;The Seven GUIs of Christmas&lt;/a&gt; about Uno's cross-platform capabilities &amp;amp; &lt;a href="https://ian.bebbs.co.uk/posts/UnoDuoHey"&gt;Uno, Duo, Hey!&lt;/a&gt; about Uno's dual-screen capabilities - showed a platform that had incredible potential and which was rapidly maturing to the point where it could deliver on this potential for &amp;quot;real world&amp;quot; apps.&lt;/p&gt;
+&lt;p&gt;Given I wanted to write an app that would work natively on both the Surface Duo - which runs Android - and Surface Neo - which runs Windows 10X - the Uno Platform was an obvious choice as it would reduce my technology stack from this:
+&lt;img src="/Content/CODuo/MultipleApps.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Multiple Apps"/&gt;&lt;/p&gt;
+&lt;p&gt;To this:
+&lt;img src="/Content/CODuo/UnoAllTheThings.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Uno All The Things!"/&gt;&lt;/p&gt;
+&lt;p&gt;As we will see in the following series, this choice really has paid dividends. In fact, it has been so successful that I feel I must issue a correction:&lt;/p&gt;
+&lt;p&gt;My first blog post about the Uno Platform - &lt;a href="https://ian.bebbs.co.uk/posts/Uno"&gt;The Seven GUIs of Christmas&lt;/a&gt; - contained the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;The Uno platform is, somewhat amazingly, able to display (almost) the exact same XAML page across multiple platforms (or 'heads' to use Uno parlance) with a very high degree of fidelity. This is quite an achievement and the team at nventive are rightly proud of this capability.
+
+However, from the perspective of someone looking to write large applications on this platform, I don't believe this facility is particularly important nor - to a certain extent - even desirable. You see, in my experience, it is often the case that each platform and/or form-factor requires such different UI and/or UX that trying to shoe-horn everything into a single XAML page results in a page that is difficult, if not impossible, to maintain.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In contrast to this statement, CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; has been written with a single code-base - from infrastructure through to view-models &lt;em&gt;and&lt;/em&gt; views - shared across all devices. This has led to neither code bloat nor maintainability issues due, in most part, to the Uno Platform's faithful reproduction of a few key UWP tenets.&lt;/p&gt;
+&lt;p&gt;To explain: Whereas previously I had been used to writing cross-platform apps using multiple different display technologies, the Uno Platform is just UWP and UWP was designed to be... well... universal. Out of the gate, UWP ran on everything from desktop PCs and tablets through to mobile phones and IoT devices. It successfully abstracted away many technical difficulties of designing for multiple platforms ensuring the developer was able to write a single &amp;quot;adaptive&amp;quot; UI which would then be able to capitalize on the display surface(s) available.&lt;/p&gt;
+&lt;p&gt;Uno have very successfully reproduced this capability across multiple disparate platforms and while not quite pixel-perfect - as we will see in future posts - it is close enough that any differences can be smoothed over with a little creative design.&lt;/p&gt;
+&lt;h2 id="which-platforms-does-coduo-run-on"&gt;Which platforms does CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; run on?&lt;/h2&gt;
+&lt;p&gt;CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; currently runs on the following platforms:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Via UWP
+&lt;ul&gt;
+&lt;li&gt;Windows 10 PC&lt;/li&gt;
+&lt;li&gt;Windows 10 Tablet&lt;/li&gt;
+&lt;li&gt;Windows 10 Mobile/Phone&lt;/li&gt;
+&lt;li&gt;Windows 10 IoT&lt;/li&gt;
+&lt;li&gt;XBox One&lt;/li&gt;
+&lt;li&gt;Hololens&lt;/li&gt;
+&lt;li&gt;Surface Hub&lt;/li&gt;
+&lt;li&gt;Windows 10X PC/Tablet (i.e. Surface Neo)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Via Android (Oreo - version 8 - or above)
+&lt;ul&gt;
+&lt;li&gt;Android Phone&lt;/li&gt;
+&lt;li&gt;Android Tablet&lt;/li&gt;
+&lt;li&gt;Android TV&lt;/li&gt;
+&lt;li&gt;Dual-Screen Android Devices (i.e. Surface Duo)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Furthermore, CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; will be updated to run on the following platforms when time and resources allow:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Via iOS
+&lt;ul&gt;
+&lt;li&gt;iPhone&lt;/li&gt;
+&lt;li&gt;iPad&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;Via WebAssembly
+&lt;ul&gt;
+&lt;li&gt;Any &lt;a href="https://en.wikipedia.org/wiki/WebAssembly"&gt;WebAssembly compatible browser&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="where-can-i-get-coduo"&gt;Where can I get CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt;?&lt;/h2&gt;
+&lt;p&gt;Beta versions of CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; are currently available in the following apps stores:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="https://www.microsoft.com/en-gb/p/coduo/9php2cf3z997"&gt;Microsoft Store&lt;/a&gt; - for PC, Tablet, XBox, Hololens and Surface Hub&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://play.google.com/store/apps/details?id=solutions.onecog.coduo"&gt;Google Play&lt;/a&gt; - for Android Phone, Table, and TV.&lt;/li&gt;
+&lt;li&gt;Apple App Store - Coming soon&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;As promised, the Uno Platform Team have also featured CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; on their &lt;a href="https://platform.uno/showcases/"&gt;showcases page&lt;/a&gt; and as part of their introduction to using the &lt;a href="https://platform.uno/surface-duo-neo/"&gt;Uno Platform for Surface Duo and Surface Neo&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="will-you-be-open-sourcing-coduo"&gt;Will you be open-sourcing CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt;?&lt;/h2&gt;
+&lt;p&gt;Yes, &lt;em&gt;mostly&lt;/em&gt;. In addition to detailing lots of the design and implementation considerations that went into writing CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; in various posts for this series, the code for CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; has been published under a &amp;quot;shared source&amp;quot; license; specifically &lt;a href="https://www.gnu.org/licenses/gpl-3.0.en.html"&gt;GPLv3&lt;/a&gt; with the &lt;a href="https://commonsclause.com/"&gt;&amp;quot;Commons Clause&amp;quot;&lt;/a&gt;.&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;The Commons Clause is a license condition drafted by Heather Meeker that applies a narrow, minimal-form commercial restriction on top of an existing open source license to transition the project to a source-availability licensing scheme. The combined text replaces the existing license, allowing all permissions of the original license to remain except the ability to &amp;quot;Sell&amp;quot; the software as defined in the text.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;It is my hope that transitioning the CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; project to a &amp;quot;source-available&amp;quot; license scheme will allow others to understand how to use the Uno Platform to develop a cross-platform app without me having to worry about numerous clones of the app appearing in various app stores laden with ads.&lt;/p&gt;
+&lt;p&gt;The source code for CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; can be found in my &lt;a href="https://github.com/ibebbs/CODuo"&gt;COduo repository on Github&lt;/a&gt;. If you like or use the source-code, please take the time to &amp;quot;star&amp;quot; the repository; it's a small gesture which really fuels developers's enthusiasm for projects such as these.&lt;/p&gt;
+&lt;h2 id="when-will-new-posts-about-coduo-be-made-available"&gt;When will new posts about CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; be made available?&lt;/h2&gt;
+&lt;p&gt;I intend to write/release a new post in the series every few days.&lt;/p&gt;
+&lt;p&gt;My plan is for parts 2 and 3 to provide a high level overview of the service-side infrastructure and client app architecture respectively. These posts won't specifically discuss the Uno Platform but will instead provide insight into how the project was designed and how this design simplifies the development of a cross-platform app such as CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt;.&lt;/p&gt;
+&lt;p&gt;After parts 2 and 3 I will be diving into the various considerations of using the Uno Platform to deliver a cross-platform app. Part 4 will detail how to use the TwoPaneView to develop an app that runs natively on dual-screen devices and part 5 onwards will discuss how other UI components were implemented.&lt;/p&gt;
+&lt;p&gt;I will round out the series by highlighting platform differences you need to be aware of while using the Uno Platform and my experience of deploying CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; to each of the various apps stores.&lt;/p&gt;
+&lt;h2 id="finally"&gt;Finally&lt;/h2&gt;
+&lt;p&gt;I hope you enjoy this series and that it goes some way to demonstrating the massive potential presented by the Uno Platform for delivering cross-platform experiences without having to invest in additional staff training nor bifurcating your development efforts.&lt;/p&gt;
+&lt;p&gt;If you or your company are interested in building apps that can leverage the dual screen capabilities of new devices such as the Surface Duo and Surface Neo, or are keen to understand how a single code-base can deliver apps to &lt;em&gt;every platform from mobile phones to web sites&lt;/em&gt;, then please feel free to drop me a line using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;. I am actively seeking new clients in this space and would be happy to discuss any ideas you have or projects you're planning.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;This is part 1 of a series of posts in which I chronical how the Uno Platform was used to write an app which runs natively on all major platforms and naturally on modern dual-screen devices (such as the forthcoming Surface Neo and Surface Duo). I will endeavour to detail how the Uno Platform makes it possible to achieve "99% shared code" across operating system and form-factor, all without having to leave the comfort of basic C# nor needing to learn a new dialect of XAML. And finally, through the app, I hope to provide the means to better understand - and help mitigate - the impact our energy usage is having on the environment.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/UnoDuoHey</id>
 		<title>Uno, Duo, Hey!</title>
@@ -3107,149 +3230,5 @@ stream.statuses.filter(track='#INWED17')
 &lt;p&gt;Do &lt;a href="https://twitter.com/ibebbs"&gt;get in touch&lt;/a&gt; if you find this code helpful or have suggestions for improving it.&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;Synchronicity is a wonderful thing.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/TheYearInReview</id>
-		<title>The Year In Review</title>
-		<link href="http://ian.bebbs.co.uk/posts/TheYearInReview" />
-		<updated>2017-01-18T00:00:00Z</updated>
-		<content>&lt;p&gt;Saturday morning, having realized that we had no commitments or prior engagements until the following Tuesday, my partner and I decided to go on a trip. We rapidly packed bags for ourselves and our little girl, threw them in the van and set off with no set destination other than &amp;quot;the south-west&amp;quot;. We ended up staying in a small farm on Exmoor and having a terrific time walking on the moor and visiting nearby sites.&lt;/p&gt;
-&lt;p&gt;&lt;em&gt;Other than the liberty of being able to just &amp;quot;get away&amp;quot;, this weekend was notable as the previous week marked exactly one year since I left full-time employment.&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;Back in July, following an epic road-trip around Europe with my girls, I wrote &lt;a href="http://ian.bebbs.co.uk/posts/WotNoBlogPosts"&gt;a long blog post&lt;/a&gt; about the trip and my plans for the future. These plans centred on taking the rest of the year off as a career-break and using this time to support my family while investigating/evaluating emerging technologies in the .NET ecosystem.&lt;/p&gt;
-&lt;p&gt;Now, six months on, it's time to look back over the last year and perform a retrospective; what went well, what could have been better and what should be changed moving forward.&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Note: This is a long, detailed post with a lot of information/reflection about the previous year. As such I have published it as a MVP (Minimal Viable Post) and will iterate additional information into the post in the future.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h2 id="a-timeline"&gt;A Timeline&lt;/h2&gt;
-&lt;p&gt;To aid the retrospective process, I spent last week learning &lt;a href="https://www.dartlang.org/"&gt;Dart&lt;/a&gt; and &lt;a href="http://www.pixijs.com/"&gt;Pixi.js&lt;/a&gt; in order to create a timeline visualization of the year. I'm not going to go into the process of making this visualization here as I want to focus on the retrospective, however I will be writing a &amp;quot;making of&amp;quot; follow-up post as the process was both very interesting and thoroughly enjoyable.&lt;/p&gt;
-&lt;p&gt;Below you can see the visualization; a timeline covering the entirity of last year and showing the various aspects of my behaviour / productivity on a day-by-day basis. In order to fit into the horizontal space available in most browsers/platforms, the timeline is scaled-down along the horizontal axis. As this obscures much of the data, the timeline was designed to allow you to use your mouse or finger to interactively zoom in and and pan across the it. Give it a go.&lt;/p&gt;
-&lt;p&gt;In the following sections I will discuss the various datasets displayed along with a summary of what they represent.&lt;/p&gt;
-&lt;script defer="" src="../Content/Scripts/timeline.dart.js"&gt;&lt;/script&gt;
-&lt;div id="timeline"&gt;&lt;/div&gt;
-&lt;h2 id="state"&gt;State&lt;/h2&gt;
-&lt;p&gt;This timeline represents my primary oocupation at any given time. From a high-level, last year can be broadly split into two halves, travelling for the first half and working for the latter. However, the detail is more telling so the timeline has been further split into seven disctinct states:&lt;/p&gt;
-&lt;h3 id="employment"&gt;Employment&lt;/h3&gt;
-&lt;p&gt;My last day of employment was Friday 15th January, 2016. I had worked at my previous company for over four years and very much enjoyed my time there. Unfortunately an &lt;a href="http://www.daedtech.com/top-heavy-department-growth/"&gt;internal power struggle&lt;/a&gt; resulted in a change of senior management and a move away the progressive development methodologes which had made the company such a great place to work. This, to me, signalled that it was time to move on.&lt;/p&gt;
-&lt;h3 id="sabatical"&gt;Sabatical&lt;/h3&gt;
-&lt;p&gt;I considered the couple of months following ending full time employment as a sabatical; time to reflect, get my affairs in order and spend time with my young family before  considering how to move forward.&lt;/p&gt;
-&lt;p&gt;At this time my daughter was just 4 months old so this presented a great opportunity to support my partner and engage with my baby. Having also taken 6 weeks of &lt;a href="https://www.gov.uk/shared-parental-leave-and-pay/overview"&gt;Shared Parental Leave&lt;/a&gt; the previous year, this meant that, of her first six months of life, I'd been able to spend almost four with her. I feel incredibly fortunate to be in a situation where this is could be the case. The first few months of a baby's life are incredibly tough for both the parents and the baby and I'm very happy that I was able to be with my girls throughout this time.&lt;/p&gt;
-&lt;p&gt;It was towards the end of this period that my partner and I decided to capitalise on our unique situation and put the remainder of her maternity leave to use by taking our little girl on a road-trip around Europe. The implications of this decision were to dominate and, to a large degree, consume the entirity of the next three months.&lt;/p&gt;
-&lt;h3 id="preparation"&gt;Preparation&lt;/h3&gt;
-&lt;p&gt;Having made the decision to spend a significant amount of time touring Europe, with an 8 month old baby no less, it became apparent that there would be a whole lot of preparation required to make this happen. In March we decided to buy a Nissan Elgrand E51 Rider Autech (shown below) and April onwards was spent preparing it for our trip.&lt;/p&gt;
-&lt;img src="https://zdfcta.db.files.1drv.com/y4mQKizez_l7UqminQJ370W0zOqSjgp8dzr9A6BJzxI7FYaFdaYeD57W4wemr8e-owerWw7fUQEXBQGf1qnZHAh6isrlvzMILL48wBWU0xnvlTkwB-cbw6R0AYZpCIT8zCKnjtp9fk6jSNRgzQR7ezNV3TKgT_cunpk9Cma-S5A5N2Z6tPzb21HxzhRQLvfF7z5fcshZnxaVzmuOIlkiUpnVA?width=660&amp;height=495&amp;cropmode=none" class="img-responsive" style="margin: auto; width:800; margin-top: 6px; margin-bottom: 6px;" alt="Nissan Elgrand E51 Rider Autech"/&gt;
-&lt;p&gt;This preparation was complex, with numerous requirements, constraints and learning curves across a variety of disciplines... but also a whole lot of fun. On our return I wrote a &lt;a href="http://elgrandoc.uk/forum/index.php?threads/touring-europe-in-an-elgrand-part-i-to-v.3311"&gt;very long post&lt;/a&gt; for the &lt;a href="http://elgrandoc.uk/forum/index.php"&gt;Elgrand Owners Club&lt;/a&gt; which detailed all the work I had done on the van. While the post took a significant amount of time to write, the forums were invaluable in providing the information I needed to do the work in the first place so I thought it was worth investing this time in case the post helped someone else in the same manner. To this day, the post is still one of the most viewed and commented on posts in the forum and  well worth a read a read.&lt;/p&gt;
-&lt;p&gt;During this time I learned a lot about carpentry, electronics and engineering... but I almost didn't. Prior to undertaking the work, I had looked to find a conversion specialist who would do the work for me but most either only provided pattern-part conversions or were too busy to undertake a bespoke project. Well, &amp;quot;necessity being the mother of invention&amp;quot;, I set to it and, in retrospect, am extremely glad I did.&lt;/p&gt;
-&lt;p&gt;Despite barely having used an electric drill previously and never having dabbled in 240v electronics, I enjoyed every aspect of the work and am immensely proud of it. We didn't experience a single issue with my work while we were away and, even if we had, it was extremely comforting knowing that I could have resolved the issue in the field if I'd had to.&lt;/p&gt;
-&lt;p&gt;Should a similar challenge ever present itself again, I would certainly look at taking it on and, furthermore, would encourage others to do so also as you undoubtedly &lt;a href="https://hbr.org/2016/07/if-youre-not-outside-your-comfort-zone-you-wont-learn-anything"&gt;learn a lot more when working outside of your comfort zone&lt;/a&gt;.&lt;/p&gt;
-&lt;h3 id="touring-europe"&gt;Touring Europe&lt;/h3&gt;
-&lt;p&gt;All the prep done - well, as much as was possible in the time available - we left home on May 20th and didn't return again until July 17; totaling just over 8 weeks on the road. In this time we traveled &lt;strong&gt;in excess of 8000 miles and visited 22 countries&lt;/strong&gt; seeing numerous friends en-route and making many more in the process.&lt;/p&gt;
-&lt;p&gt;Perhaps it was all the prep or perhaps we were just lucky but the trip went off without a hitch and everyone - including our little girl - had an amazing time. Both &lt;a href="https://bigspune.wordpress.com/"&gt;my partner&lt;/a&gt; and &lt;a href="http://ian.bebbs.co.uk/posts/WotNoBlogPosts"&gt;I&lt;/a&gt; blogged about the trip - for ourselves as much for any potential reader - and, six months on, are still reflecting on what a fantastic adventure it was.&lt;/p&gt;
-&lt;p&gt;Without a shadow of a doubt, and even when considering the week's of preparation before leaving, this trip was time well spent. My partner and I learned a lot about each other (&amp;quot;hey, we &lt;em&gt;can&lt;/em&gt; spend several weeks in a confined space together, 24/7&amp;quot;) and our daughter and have accumulated memories that will last a lifetime. We have already talked about doing another similar trip in the future and have begun planning shorter breaks around the UK as a stop-gap until an opportunity for a new adventure comes along.&lt;/p&gt;
-&lt;h3 id="study"&gt;Study&lt;/h3&gt;
-&lt;p&gt;Upon my return, I came across a code for a free &lt;a href="https://borntolearn.mslearn.net/b/weblog/posts/sign-up-to-take-the-beta-exam-for-developing-mobile-apps-70-357-today"&gt;Microsoft beta exam about mobile application development&lt;/a&gt;. As I was interested in UWP app development and had already taken loads of these beta exams in previous years, I decided to sit the exam even though the code was only valid for a few weeks after signing up, which left very little time to study!!&lt;/p&gt;
-&lt;p&gt;As I &lt;a href="https://en.wikipedia.org/wiki/Experiential_learning"&gt;learn&lt;/a&gt; &lt;a href="http://psycnet.apa.org/journals/bdb/17/1/1.pdf&amp;amp;productCode=pa"&gt;best&lt;/a&gt; &lt;a href="https://www.virgin.com/richard-branson/you-learn-by-doing-and-by-falling-over"&gt;by&lt;/a&gt; &lt;a href="https://news.uchicago.edu/article/2015/04/29/learning-doing-helps-students-perform-better-science"&gt;doing&lt;/a&gt; my study focused on writing a UWP app that incorporated as many of the &lt;a href="https://www.microsoft.com/en-us/learning/exam-70-357.aspx"&gt;examined technical aspects&lt;/a&gt; as possible. While the methodologies I used for this app were relatively new (i.e. CQRS/ES) the learning curve for this exam really came from some of the unique aspects of UWP app development such as designing for multiple devices/screen sizes, using &lt;a href="https://docs.microsoft.com/en-us/ef/core/"&gt;new persistence technologies&lt;/a&gt; and leveraging the huge new API surface available to UWP apps.&lt;/p&gt;
-&lt;p&gt;Due to an awful dashboard implementation which &lt;a href="https://borntolearn.mslearn.net/b/weblog/posts/more-tips-about-beta-exams-what-to-expect-when-you-39-re-expecting-your-beta-results-that-is"&gt;causes much confusion for students who sit beta exams&lt;/a&gt;, I am still unsure as to whether I passed this exam or not. My dashboard has not changed to say I have passed the exam but I have not received a summary sheet from Microsoft with my scores nor am I able to access them from my MCP dashboard. In short, the current beta exam process is extremely poor and much worse than it was five or six years ago when I took (and passed) around a dozen such beta exams.&lt;/p&gt;
-&lt;p&gt;Regardless, time spent on this study was a huge win. I learned a lot about a platform which is becoming increasingly prevalent in the Windows ecosystem. UWP apps are able to run on everything from Raspberry Pi to Hololens, and I have since deployed/released UWP apps for Raspberry Pi, Mobile (phone/table), PC and XBox. Indeed, after completing the exam, I continued to develop my UWP study app over the next few months.&lt;/p&gt;
-&lt;h3 id="holiday"&gt;Holiday&lt;/h3&gt;
-&lt;p&gt;Across the year, I allocated around 40 days (including bank-holidays and weekends) as non-work days (aka holiday). This included snowboarding with friends, trips abroad, visiting relatives and a long festive break over Xmas. Although more than the holiday allowance at most full time jobs (depending on how it's allocated), I feel this represents a fairly decent split between work and play.&lt;/p&gt;
-&lt;h3 id="onecog.solutions"&gt;OneCog.Solutions&lt;/h3&gt;
-&lt;p&gt;Once life had returned to normal following our tour of Europe and taking the Microsoft beta exam, I decided to work on a few projects that were interesting to me.&lt;/p&gt;
-&lt;p&gt;Firstly, this was continuing my investigation of UWP, initially to &lt;a href="http://ian.bebbs.co.uk/posts/CqrsEsMvvmRxEfSqlUwpPcl"&gt;flesh out&lt;/a&gt; and &lt;a href="https://www.microsoft.com/en-us/store/p/littlelittle/9nblggh51b1b"&gt;release&lt;/a&gt; the UWP app I had written while studying for the UWP exam but then to also evaluate UWP as a &lt;a href="http://ian.bebbs.co.uk/posts/MonsterPi"&gt;platform for IoT devices&lt;/a&gt;. I then proceeded to broaden my area of investigation into &lt;a href="http://ian.bebbs.co.uk/posts/DockerAndKafka"&gt;non-Microsoft technologies&lt;/a&gt; and even into areas that, while still technical, were &lt;a href="http://ian.bebbs.co.uk/posts/3DPrintingWithTheCelRobox"&gt;not directly involved with software development&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;During this time I endeavored to keep an up-to-date public profile. Through a &lt;a href="https://trello.com/b/KoTWuFUi/public-board"&gt;public Trello board&lt;/a&gt;, products I had released (&lt;a href="https://www.microsoft.com/en-gb/store/p/littlelittle/9nblggh51b1b"&gt;LittleLittle&lt;/a&gt; &amp;amp; &lt;a href="https://www.microsoft.com/en-gb/store/p/toddlerbox/9nblggh3zr4l"&gt;ToddlerBox&lt;/a&gt;), posts to &lt;a href="http://ian.bebbs.co.uk/"&gt;my blog&lt;/a&gt; and contributions to both &lt;a href="https://github.com/ibebbs"&gt;Github&lt;/a&gt; and &lt;a href="http://stackoverflow.com/users/628821/ibebbs"&gt;StackOverflow&lt;/a&gt; I tried to make sure as much of my time as possible was surfaced publicly. Indeed, having become extremely delivery-oriented since first drinking the agile (&lt;a href="https://medium.com/swlh/agile-is-the-new-waterfall-f7baef5d026d#.jpmks6gi4"&gt;lower-case 'a'&lt;/a&gt;) kool-aid several years ago, I feel the public-facing nature of these interactions substituted as a form of delivery; or, in Agile parlance, became my &lt;a href="https://www.agilealliance.org/glossary/definition-of-done/"&gt;&amp;quot;definition of done&amp;quot;&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;While, in retrospect, I had hoped to have investigated many more technologies than I actually managed during this time, overall I would consider this time well spent. In addition to releasing two applications to the Windows Store and contributing to several public Github projects (more on this later) I managed to rack up over 1000 rep on StackOverflow in just a couple of months.&lt;/p&gt;
-&lt;p&gt;Unfortunately, during this time, I didn't achieve my primary goal; namely finding a project that could potentially be grown into a marketable product and form the basis of a company. While there were no shortage of ideas and there still remain a couple of &amp;quot;coals in the fire&amp;quot;, I don't think I've yet found the gap in the market I'm looking for. One slight positive note here is that I have, at the very least, determined a couple of markets I'm very keen on investigating further and in which I'd like to work in the future.&lt;/p&gt;
-&lt;h2 id="health"&gt;Health&lt;/h2&gt;
-&lt;p&gt;For this visualization I have employed step count (vertical bars), weight (yellow line with dotted yellow representing ideal weight) and fat-mass (red line with dotted red representing ideal fat-mass) as a (very rough) approximation of health. While, in theory, I should have had more leisure time available to exercise over the course of the year, in real terms I found that I did far less than expected. This was due to a number of factors:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;My previous employer, being a company that revolves around football, had regular football matches/tournaments between company staff which were of a very high standard. I played in as many of these as possible and, once I left, I very much missed the exercise.&lt;/li&gt;
-&lt;li&gt;My commute to work each day involved a (voluntary) walk from St Pancras station to Camden Lock - and back again - every day. This constituted 30 minutes/5000 steps of valuable exercise each day that was no longer necessary when I started working from home.&lt;/li&gt;
-&lt;li&gt;I ran a football team for my village that played in the local Bedfordshire league. Unfortunately, due to lack of players this team folded at the end of last season leaving me entirely bereft of football for the majority of the year.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;At punching-weight, I aim to be 11st and 15% fat-mass. This used to be a fairly common occurrence while playing football regularly but, as can be seen, I've not managed to get back into a similar condition this year. Fortunately, I &lt;em&gt;have&lt;/em&gt; managed to avoid devolving into a complete bucket of lard thanks to several things:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Parenthood - As any parent will tell you, being a parent is both exhausting and relentless. While previously I would undertake very little exercise in the evening, nowadays I expend a significant amount of energy each evening running around after my daughter. While not often recognised, this constitutes a fairly high level of activity.&lt;/li&gt;
-&lt;li&gt;Preparation for Touring Europe - During this time I did &lt;strong&gt;a lot&lt;/strong&gt; of very physical work. From lugging construction materials and tools around to disassembling and reassembling the van, the average day was extremely active, especially when compared to sitting in an office chair for eight hours.&lt;/li&gt;
-&lt;li&gt;European Tour - as can be seen from the step count, although a great deal of time was spent driving, our time away involved a lot of other activity. This activity (particularly loading and unloading the van each day!) provided a lot of exercise and helped keep me fit over the summer.&lt;/li&gt;
-&lt;li&gt;Swimming - In a desperate attempt to remain in some sort of shape, I have recently started swimming semi-regularly.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;In retrospect, something that came as no surprise but for which I failed to anticipate the true impact, was the effect of not exercising on my state of mind and general happiness. Having always been an active and optimistic individual, I completely underestimated the tight correlation between these two characteristics. Mid-November saw me at my least active and, as I've come to realise, my least productive/focused (as evidenced by the sudden surge in StackOverflow rep!). Fortunately I try be somewhat self-reflective and, recognising that my diminished level of activity might be a possible cause for a perceived lack of progress, I decided to start swimming again as a means to address this.&lt;/p&gt;
-&lt;p&gt;Now, while I'm still not exercise as much as I would like, I at least feel like my activity levels are sufficient to allow me to focus on projects and achieve my deliverables. Moving forward I very much hope to re-establish the village football team in time for next season or join another team such that I get at least a couple of games a month.&lt;/p&gt;
-&lt;h2 id="finances"&gt;Finances&lt;/h2&gt;
-&lt;p&gt;In counterpoint to the Health visualization described above, the Finances visualization shows a relative interpretation of my financial health across the year.&lt;/p&gt;
-&lt;p&gt;At the beginning of the year, when considering a career-break, I tried to calculate a monthly &amp;quot;burn-rate&amp;quot; (i.e. total out-goings per month). Given I was not planning to change my lifestyle at all and my partner and I had already planned a number of holidays, I arrived at a rough estimate of £3k per month. This was affordable and, while it would put a dent in my savings, wouldn't leave me worrying about money at the end of the year.&lt;/p&gt;
-&lt;p&gt;Through-out the year there were a number of factors that further affected my finances:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Touring Europe in the van cost significantly more than I estimated.&lt;/li&gt;
-&lt;li&gt;My daughter's nursery care was cheaper than expected since moving her from four days a week to three (instead having an additional 'daddy-day-care' day).&lt;/li&gt;
-&lt;li&gt;While I typically spend a significant amount on computer hardware, this year I required very little but for a relatively cheap new server.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Now, looking back across the year (and excluding large one-off payments like buying the van) it seems my burn-rate was closer to £2k, one third less than I had planned. This coupled with receiving returns on previous investments meant I actually ended the year significantly better off than I started it. While this definitely wouldn't be the case were I to continue the career-break for a second year, it is very reassuring to know that I could, should I decide to do so.&lt;/p&gt;
-&lt;h2 id="github-contributions"&gt;Github contributions&lt;/h2&gt;
-&lt;p&gt;Across the year - although predominantly in the last few months - I made 368 commits to Github. These were spread across a couple of dozen repositories but mostly focused on the (private) repository for &lt;a href="https://www.microsoft.com/en-gb/store/p/littlelittle/9nblggh51b1b"&gt;LittleLittle&lt;/a&gt; and my (statically generated &amp;amp; github-pages hosted) &lt;a href="https://github.com/ibebbs/ibebbs.github.io"&gt;blog&lt;/a&gt;. Additionally, I contributed to several open source repositories, most notably the &lt;a href="https://github.com/Microsoft/UWPCommunityToolkit"&gt;UWP Community Toolkit&lt;/a&gt; (1000 stars) and &lt;a href="https://github.com/beto-rodriguez/Live-Charts"&gt;Live-Charts&lt;/a&gt; (875 stars).&lt;/p&gt;
-&lt;p&gt;Given 2016 was a leap-year, 368 commits in 366 days averages (just!) over one a day. Overall I'm quite pleased with this level of commitment and the quantity of work it represents, especially considering the amount of time this year spent not working. Additionally, for the last three months of this year, my partner and I have both elected to work four-day weeks as we felt it represented a better balance between parental and nursery care for our daughter. For me this meant Thursdays became &amp;quot;daddy-day-care&amp;quot; so that I could take my daughter swimming - something we both really enjoy - but which adversely affected my productivity.&lt;/p&gt;
-&lt;p&gt;Moving forward I intend to start publishing much more of my work to public repositories including regular updates to my &lt;a href="https://github.com/ibebbs/Spikes"&gt;&amp;quot;Spikes&amp;quot;&lt;/a&gt; repository which contains investigative projects and examples for solutions to various StackOverflow questions.&lt;/p&gt;
-&lt;h2 id="stackoverflow"&gt;StackOverflow&lt;/h2&gt;
-&lt;p&gt;Talking of StackOverflow questions, the next visualization shows StackOverflow Reputation accumulation across the year (light blue line) with gains shown day-by-day (dark blue boxes). While I predominantly consider it a distraction, I really enjoy answering questions on StackOverflow, probably due to the awesome &lt;a href="https://en.wikipedia.org/wiki/Gamification"&gt;gamification&lt;/a&gt; employed on the &lt;a href="http://stackexchange.com/"&gt;StackExchange&lt;/a&gt; sites.&lt;/p&gt;
-&lt;p&gt;While there is a low level of fairly constant reputation gain, most of the gains came in short bursts. As discussed above, I attribute this losing focus on my main projects due to inactivity. Still, there are far worse forms of procrastination than helping people and I consider this a relatively good use of time.&lt;/p&gt;
-&lt;p&gt;I am currently endeavoring to get the 'Fanatic' badge (visit StackOverflow for 100 days consecutively) but trying not to let it get in the way of other work. This usually means only answering questions when I can quickly point the asker in the right direction but I will occasionally field a more challenging question when it's &lt;a href="http://stackoverflow.com/questions/tagged/system.reactive"&gt;something I'm particularly interested in&lt;/a&gt;.&lt;/p&gt;
-&lt;h2 id="blog-posts"&gt;Blog posts&lt;/h2&gt;
-&lt;p&gt;Over the course of the year I have written and published 22 blog posts - totaling nearly 24,000 words - across a range of subjects including:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;3D PRINTING (1) APACHE KAFKA (1) APACHE ZOOKEEPER (1) ATTACHED PROPERTY (1) BDD (1) BEHAVIORAL (1) BLOG (3) CAREER BREAK (1) CLIENT-SIDE FRAMEWORK (2) CQRS (1) DART (1) DATAFLOW (1) DOCKER (1) DVD RIPPING (1) EF (1) ELASTIC STACK (4) ELASTICSEARCH (4) EVENT SOURCING (1) EVENTS (1) EVENTSOURCING (1) FUTURE (1) GITHUB (2) GROWTH (1) HYPERLINK (1) IOT (1) JAVASCRIPT (2) JS (1) KIBANA (4) LITTLELITTLE (1) LOGSTASH (4) MAPLIN (1) MONITORING (4) MVVM (1) NANOSERVER (1) NETWORKING (4) PARENTHOOD (1) PATTERNS (1) PRODUCTIVITY (1) RASPBERRYPI (1) REACTIVE (7) REST (1) ROBOX (1) RX (7) SQL (1) STATE MACHINES (1) SVG (1) SYSLOG (4) TESTING (1) TODDLERBOX (3) TOOLKIT (2) TPL (2) TRAVEL (1) TYPESCRIPT (1) UWP (7) VISUAL STUDIO (2) VISUAL STUDIO CODE (1) WEBRX (2) WINDOWS SERVER 2016 (1) WYAM (1) XAML (2) XBOX (3)&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;This content garners an average of around 110 unique visitors and 400 page views every month.&lt;/p&gt;
-&lt;p&gt;One of these posts - &lt;a href="https://blogs.msdn.microsoft.com/dotnet/2016/09/07/the-week-in-net-972016/"&gt;&amp;quot;The absolute easiest way to use SVG icons in UWP apps&amp;quot;&lt;/a&gt; was featured in &lt;a href="https://blogs.msdn.microsoft.com/dotnet/2016/09/07/the-week-in-net-972016/"&gt;&amp;quot;The week in .NET – 9/7/2016&amp;quot;&lt;/a&gt;. Furthermore, blog posts I have shared with people on other platforms (i.e. StackOverflow, MSDN, etc) have been understood and well received.&lt;/p&gt;
-&lt;p&gt;All in, I think I've added some valuable content to my blog this last year but feel like I should have tried harder to increase it's reach. While writing these blog posts inevitably takes a considerably amount of time, I intend to continue making as many new posts as possible, hopefully across an increased range of subjects and - by submitting to various aggregation blogs - with increased readership.&lt;/p&gt;
-&lt;h2 id="commitments"&gt;Commitments&lt;/h2&gt;
-&lt;p&gt;This timeline displays any days I had expected to work yet was unable to for a variety of reasons. Over the course of the year this accounted for 42 days, mostly the Thursdays that have become my &amp;quot;daddy-day-care&amp;quot; day and during which I take my daughter swimming. While these &amp;quot;commitments&amp;quot; would have been worked around had I been in full-time employment, the flexibility of working when I can as opposed to when I have to has undoubtedly led to a greater degree of motiviation and concentration when I am in front of the computer.&lt;/p&gt;
-&lt;h1 id="summary"&gt;Summary&lt;/h1&gt;
-&lt;p&gt;Given this fairly comprehensive look back across the year, it's time to perform the retrospective.&lt;/p&gt;
-&lt;h3 id="what-went-well"&gt;What went well?&lt;/h3&gt;
-&lt;p&gt;There were numerous wins across the year including:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Getting to spend the year with my partner and baby which included spending two months traveling Europe in a camper-van.&lt;/li&gt;
-&lt;li&gt;Releasing applications to the Windows Store for phone, tablet, PC and XBox.&lt;/li&gt;
-&lt;li&gt;Furthering the breadth of my technical knowledge of various platforms, technologies and methodologies.&lt;/li&gt;
-&lt;li&gt;Adding a significant amount of content to my blog.&lt;/li&gt;
-&lt;li&gt;Contributing to numerous repositories on Github including several for popular open-source projects.&lt;/li&gt;
-&lt;li&gt;Increasing my StackOverflow Reputation level by answering questions on a variety of subjects.&lt;/li&gt;
-&lt;li&gt;Fully realising the importance of exercise on productivity.&lt;/li&gt;
-&lt;li&gt;Completing the year in better financial health than I had expected.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id="what-didnt-go-so-well"&gt;What didn't go so well?&lt;/h3&gt;
-&lt;p&gt;Given that, despite taking a career break, I continued to be productive in a variety of ways, I don't feel like too many things went badly this year. However there are a few things I would have liked to have achieved but didn't such as:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Not finding the &amp;quot;market gap&amp;quot; or having the &amp;quot;killer idea&amp;quot; I had hoped to translate into a start-up.&lt;/li&gt;
-&lt;li&gt;Not investigating as many technologies as I had hoped across the course of the year.&lt;/li&gt;
-&lt;li&gt;Lacking a significant amount of exercise and thereby loosing focus and momentum for ongoing projects.&lt;/li&gt;
-&lt;li&gt;Shying away from increasing the exposure of my blog content via news aggregators, social media, etc.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id="what-needs-to-change-moving-forward"&gt;What needs to change moving forward&lt;/h3&gt;
-&lt;p&gt;Well, I gave myself the year to come up with the &amp;quot;killer idea&amp;quot; but didn't manage it so now it's time to change tack. In the coming months I will be starting to look for contract work which, ideally, I can do remotely. Fortunately there is no pressure for me to return to work so I can be quite picky about the roles I take. The ideal contract would ideally feature one or all of the following:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;UWP/WPF&lt;/li&gt;
-&lt;li&gt;Rx/Streaming technologies&lt;/li&gt;
-&lt;li&gt;.NET Core&lt;/li&gt;
-&lt;li&gt;IoT&lt;/li&gt;
-&lt;li&gt;NoSQL datastores&lt;/li&gt;
-&lt;li&gt;CQRS/ES&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Ideally in the following markets:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Baby/Toddler/Child care/entertainment&lt;/li&gt;
-&lt;li&gt;Social Justice&lt;/li&gt;
-&lt;li&gt;Automation&lt;/li&gt;
-&lt;li&gt;Agriculture&lt;/li&gt;
-&lt;li&gt;Renewable Energy&lt;/li&gt;
-&lt;li&gt;Automotive&lt;/li&gt;
-&lt;li&gt;Economics&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;That said, given the large number of &lt;a href="https://blog.rjmetrics.com/2014/04/30/the-big-opportunities-in-the-unknown-unknowns/"&gt;&amp;quot;unknown unknowns&amp;quot;&lt;/a&gt;, perhaps there are other technologies / markets I've not encountered yet that would be equally enthralling.&lt;/p&gt;
-&lt;p&gt;In the mean time, I will continue to investigate other interesting technologies and release updates to my existing products as appropriate.&lt;/p&gt;
-&lt;p&gt;Regarding family life, well, in this respect I hope to continue the extremely rewarding work/life balance my partner and I have achieved over the last year. This could be difficult once the demands of external deadlines become a reality again but it's something I would be extremely reluctant to change.&lt;/p&gt;
-&lt;h2 id="in-conclusion"&gt;In conclusion&lt;/h2&gt;
-&lt;p&gt;It's been an amazing year and one I will remember for a long time. Regardless of what I end up doing, it is my aim to take another career break in the not too distant future in which I will endeavor to repeat the successes of this year, remedy the failures and remind myself that it's good to look up from the computer from time to time.&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;Saturday morning, having realized that we had no commitments or prior engagements until the following Tuesday, my partner and I decided to go on a trip. We rapidly packed bags for ourselves and our little girl, threw them in the van and set off with no set destination other than "the south-west". We ended up staying in a small farm on Exmoor and having a terrific time walking on the moor and visiting nearby sites.&lt;/p&gt;</summary>
 	</entry>
 </feed>
