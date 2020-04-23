@@ -5,8 +5,72 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2020</copyright>
-		<pubDate>Sun, 19 Apr 2020 21:34:58 GMT</pubDate>
-		<lastBuildDate>Sun, 19 Apr 2020 21:34:58 GMT</lastBuildDate>
+		<pubDate>Thu, 23 Apr 2020 19:41:45 GMT</pubDate>
+		<lastBuildDate>Thu, 23 Apr 2020 19:41:45 GMT</lastBuildDate>
+		<item>
+			<title>Many platforms, one world - Part 2</title>
+			<link>http://ian.bebbs.co.uk/posts/COduo-Part2</link>
+			<description>&lt;p&gt;This is part 2 of my series on using the Uno Platform to write a cross-platform app, able to target both single and dual-screen devices. In this post I cover the infrastructure used to collate and aggregate the data used by CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; as a prelude to a deeper dive into the implementation of the app itself which I will cover in later posts.&lt;/p&gt;</description>
+			<enclosure url="http://ian.bebbs.co.uk/Content/CODuo/Header.png" length="0" type="image" />
+			<guid>http://ian.bebbs.co.uk/posts/COduo-Part2</guid>
+			<pubDate>Thu, 23 Apr 2020 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;This is part 2 of my series on using the Uno Platform to write a cross-platform app, able to target both single and dual-screen devices. In this post I cover the infrastructure used to collate and aggregate the data used by CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; as a prelude to a deeper dive into the implementation of the app itself which I will cover in later posts.&lt;/p&gt;
+&lt;p&gt;Here are links to all the posts I have written - or intend to write - for this series:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="./COduo-Part1"&gt;Part 1 - Background&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part2"&gt;Part 2 - Infrastructure&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Part 3 - Client Architecture&lt;/li&gt;
+&lt;li&gt;Part 4 - Using the TwoPaneView&lt;/li&gt;
+&lt;li&gt;Part 5 - Implementing the interactive UK Map&lt;/li&gt;
+&lt;li&gt;Part 6 - Charts on the Uno Platform&lt;/li&gt;
+&lt;li&gt;Part 7 - Windows, Win10X and releasing to the Microsoft Store&lt;/li&gt;
+&lt;li&gt;Part 8 - Android and releasing to the Google Play Store&lt;/li&gt;
+&lt;li&gt;Part 9 - iOS and releasing to the Apple App Store&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="infrastructure"&gt;Infrastructure&lt;/h2&gt;
+&lt;p&gt;While considering how to implement CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt;, I needed to ensure the app could retrieve all the data it required quickly, efficiently, securely and - most importantly - cheaply. As such, I decided to introduce service infrastructure that would perform all the required data collation, aggregation and serialization such that the app merely had to retrieve a single file from a know URI.&lt;/p&gt;
+&lt;p&gt;Here is a mile-high view of the infrastructure used to operate CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; and the architecture of the app's various components:&lt;/p&gt;
+&lt;img src="/Content/CODuo/Infrastructure.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Infrastructure.png"/&gt;
+&lt;p&gt;As the primary focus of this series of posts is the Uno Platform I won't be digging into the service-side components too deeply but I feel it's important to show how the infrastructure delivers on the requirements above in order to understand how this simplifies the app's implementation.&lt;/p&gt;
+&lt;h2 id="serverless"&gt;Server[less]&lt;/h2&gt;
+&lt;p&gt;Fundamentally, the infrastructure is provided by two, timer-triggered &lt;a href="https://azure.microsoft.com/en-us/services/functions/"&gt;Azure Functions&lt;/a&gt;: &amp;quot;Weather Collection&amp;quot; and &amp;quot;Energy Aggregation&amp;quot;. These 'serverless' functions collate, process and store all the data required by the app, greatly simplifying client data access.&lt;/p&gt;
+&lt;p&gt;Here's the (&lt;a href="https://docs.microsoft.com/en-us/azure/azure-monitor/app/app-map?tabs=net"&gt;Application Insights&lt;/a&gt; generated) application map:&lt;/p&gt;
+&lt;img src="/Content/CODuo/AzureFunctionsApplicationMap.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Azure Functions Application Map"/&gt;
+&lt;h3 id="weather-collection"&gt;Weather Collection&lt;/h3&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;[FunctionName(&amp;quot;WeatherV1&amp;quot;)]
+public static async Task Weather(
+    [TimerTrigger(WeatherNormal)] TimerInfo timer, 
+    [CosmosDB(databaseName: CosmosDatabase, collectionName: WeatherCollection, ConnectionStringSetting = CosmosConnectionStringKey)] IAsyncCollector&amp;lt;Weather.Common.Document&amp;gt; documentsOut, 
+    ILogger log)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The Weather Collection function is triggered every hour and retrieves data from the &lt;a href="https://metoffice.apiconnect.ibmcloud.com/metoffice/production/"&gt;Met Office Weather Data Hub&lt;/a&gt;. It collects 48 hours worth of forecast data for each of 14 locations around the UK (one city in each of the 14 &lt;a href="https://www.ovoenergy.com/guides/energy-guides/dno.html"&gt;Distributed Network Operator regions&lt;/a&gt;) then transposes this to generate weather data for each hour containing the forecast in each region.&lt;/p&gt;
+&lt;p&gt;This was done for many reasons but mostly to provide numerous small, easily indexed documents that can be cheaply written to, read from and updated within Cosmos DB. This has worked well and each hour documents are saved to a &lt;a href="https://azure.microsoft.com/en-us/updates/azure-cosmos-db-free-tier-is-now-available/"&gt;free tier CosmosDB container&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Persisting these documents does occasionally exceed the free tier's 400ru/s quota which means writes to Cosmos need to be retried until they succeed. While all the retries are transparently handled by the SDK, the retries cause the function to run longer than it otherwise would and, as such, I will probably modify the function to only persist 24 hours worth of forecast data in the next version.&lt;/p&gt;
+&lt;h3 id="energy-aggregator"&gt;Energy Aggregator&lt;/h3&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;[FunctionName(&amp;quot;EnergyV1&amp;quot;)]
+public static async Task Energy(
+    [TimerTrigger(EnergyNormal)]TimerInfo timer,
+    [CosmosDB(
+        databaseName: CosmosDatabase,
+        collectionName: WeatherCollection,
+        ConnectionStringSetting = CosmosConnectionStringKey)] DocumentClient client,
+    [Blob(EnergyOutputFile, FileAccess.Write, Connection = EnergyStorage)] Stream blob, 
+    ILogger log)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The Energy Aggregation function runs every 15 minutes and requests electricity generation and composition information from a few different API's, most notably Elexon's &lt;a href="https://www.elexon.co.uk/knowledgebase/what-is-bmreports-com/"&gt;Balancing Mechanism Reporting Service&lt;/a&gt;. This is collated with weather data generated by the Weather Collection function then aggregated and serialized into a JSON document easily consumed by the CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; client application.&lt;/p&gt;
+&lt;p&gt;The serialized document is then persisted in a publicly accessible &lt;a href="https://docs.microsoft.com/en-us/azure/storage/blobs/storage-blob-storage-tiers?tabs=azure-portal"&gt;'Hot' Azure Blob&lt;/a&gt; meaning the client application can retrieve it with a single, unauthenticated HTTPS request.&lt;/p&gt;
+&lt;h3 id="conclusion"&gt;Conclusion&lt;/h3&gt;
+&lt;p&gt;At current levels (and using the CosmosDB free-tier) it is currently costing less than £1 per month to run this infrastructure with only small increases (due to bandwidth costs) as application usage scales. As such, I feel it satisfies CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt;'s requirements very neatly. Furthermore, Visual Studio's impressive tooling for developing and testing Azure Functions locally (including local emulators of all storage) streamlines the delivery of features and regression testing of changes such that I've been able to iterate on this project extremely quickly.&lt;/p&gt;
+&lt;h3 id="more-information"&gt;More information&lt;/h3&gt;
+&lt;p&gt;I've deliberately kept this post at a &amp;quot;mile-high&amp;quot; level as the series is focused on the use of the Uno Platform to deliver a cross platform application. However, if you're keen to understand more of how these service-side components operate then drop me a line (contact links at the bottom of the page) and, if enough people are interested, I'll write a blog post detailing these approaches further.&lt;/p&gt;
+&lt;h2 id="part-3"&gt;Part 3&lt;/h2&gt;
+&lt;p&gt;&lt;a href="./COduo-Part3"&gt;Part 3&lt;/a&gt; will examine the architecture of CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; with an aim to providing an understanding of how it's primary components interoperate to provide a robust and testable experience across multiple platforms and dual-screens.&lt;/p&gt;
+&lt;h2 id="finally"&gt;Finally&lt;/h2&gt;
+&lt;p&gt;I hope you enjoy this series and that it goes some way to demonstrating the massive potential presented by the Uno Platform for delivering cross-platform experiences without having to invest in additional staff training nor bifurcating your development efforts.&lt;/p&gt;
+&lt;p&gt;If you or your company are interested in building apps that can leverage the dual screen capabilities of new devices such as the Surface Duo and Surface Neo, or are keen to understand how a single code-base can deliver apps to &lt;em&gt;every platform from mobile phones to web sites&lt;/em&gt;, then please feel free to drop me a line using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;. I am actively seeking new clients in this space and would be happy to discuss any ideas you have or projects you're planning.&lt;/p&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>Many platforms, one world - Part 1</title>
 			<link>http://ian.bebbs.co.uk/posts/COduo-Part1</link>
@@ -21,7 +85,7 @@
 &lt;p&gt;Below is a (preliminary) list of posts I intend to write. It will be updated as each post is completed and published:&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="./COduo-Part1"&gt;Part 1 - Background&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Part 2 - Infrastructure&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part2"&gt;Part 2 - Infrastructure&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Part 3 - Client Architecture&lt;/li&gt;
 &lt;li&gt;Part 4 - Using the TwoPaneView&lt;/li&gt;
 &lt;li&gt;Part 5 - Implementing the interactive UK Map&lt;/li&gt;
@@ -3110,126 +3174,6 @@ stream.statuses.filter(track='#INWED17')
 &lt;/ul&gt;
 &lt;p&gt;This provided a fair stab at correlating episode rating with the overall decline in Red Dwarf's humourousness but is a long way short of any form of &amp;quot;data science&amp;quot;. It was both enlightening and a lot of fun doing this small project and I will certainly consider Azure Notebooks as a valuable tool in my toolbox.&lt;/p&gt;
 &lt;p&gt;Should I find the time, I would certainly like to return to this project and use &lt;a href="http://www.quanttec.com/fparsec/"&gt;FParsec&lt;/a&gt; and &lt;a href="https://azure.microsoft.com/en-gb/services/cognitive-services/text-analytics/"&gt;Azure Text Analytics&lt;/a&gt; to perform an actual sentiment analysis. Hopefully it'll overturn, or at least help justify, my somewhat disturbing conclusion!&lt;/p&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>Combining the UWP SpeechSynthesizer and AudioGraph APIs</title>
-			<link>http://ian.bebbs.co.uk/posts/CombiningUwpSpeechSynthesizerWithAudioGraph</link>
-			<description>&lt;p&gt;Synchronicity is a wonderful thing.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/CombiningUwpSpeechSynthesizerWithAudioGraph</guid>
-			<pubDate>Wed, 25 Jan 2017 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;p&gt;Synchronicity is a wonderful thing.&lt;/p&gt;
-&lt;p&gt;Just this morning I was considering using the new &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.speechsynthesis.speechsynthesizer.aspx"&gt;SpeechSynthesizer&lt;/a&gt; capabilities of the UWP platform to add spoken language to my &lt;a href="https://www.microsoft.com/en-gb/store/p/toddlerbox/9nblggh3zr4l"&gt;ToddlerBox app for Xbox&lt;/a&gt;. I had already started using the &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.audiograph.aspx"&gt;AudioGraph&lt;/a&gt; classes to play sounds in the app so ideally wanted to continue using this API to emit speech.&lt;/p&gt;
-&lt;p&gt;Then, during my morning... ahem... ablutions, I came across &lt;a href="https://mtaulty.com/2017/01/15/windows-10-uwp-iot-core-speechsynthesizer-raspberry-pi-and-audio-popping/"&gt;this post&lt;/a&gt; by Mike Taulty who was looking to do the same thing but for different reasons. It seems that the RaspberryPi has a firmware issue that causes a &lt;a href="https://social.msdn.microsoft.com/Forums/en-US/7c312972-6a09-4acd-8a3f-c59485a81d74/clicking-sound-during-start-and-stop-of-audio-playback?forum=WindowsIoT"&gt;popping noise&lt;/a&gt;  every time speech is emitted using the MediaPlayer and AudioGraph seems to be a way of resolving it.&lt;/p&gt;
-&lt;h2 id="the-problem"&gt;The problem&lt;/h2&gt;
-&lt;p&gt;Mike had implemented a means of emitting speech via AudioGraph by saving the &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.speechsynthesis.speechsynthesisstream.aspx?f=255&amp;amp;MSPPError=-2147217396"&gt;SpeechSynthesisStream&lt;/a&gt; to a  temporary file and then using multiple &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.audiofileinputnode.aspx"&gt;AudioFileInputNode&lt;/a&gt; instances to render the speech to the AudioGraph.&lt;/p&gt;
-&lt;p&gt;&amp;quot;Well&amp;quot;, I thought, &amp;quot;there's got to be a better way. How hard can this be...&amp;quot;&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Turns out the answer is: &amp;quot;Not all that hard, but...&amp;quot;.&lt;/strong&gt;&lt;/p&gt;
-&lt;h2 id="my-approach"&gt;My approach&lt;/h2&gt;
-&lt;p&gt;I wanted to find a way to eliminate the need for the temporary files and render the speech stream directly to the graph.&lt;/p&gt;
-&lt;p&gt;To do this, I first saved the SpeechSynthesisStream to a file so that I could examine the content. As expected, the file turned out to be a simple 32-bit, mono, ADPCM waveform in &lt;a href="http://soundfile.sapp.org/doc/WaveFormat/"&gt;WAV/RIFF format&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Having previously messed about with AudioGraph I knew there was a way of creating an in-memory waveform and that the &lt;a href="https://github.com/Microsoft/Windows-universal-samples"&gt;Windows-Universal-Samples github repository&lt;/a&gt; had an &lt;a href="https://github.com/Microsoft/Windows-universal-samples/tree/master/Samples/AudioCreation"&gt;AudioCreation sample&lt;/a&gt; that &lt;a href="https://github.com/Microsoft/Windows-universal-samples/blob/master/Samples/AudioCreation/cs/AudioCreation/Scenario3_FrameInputNode.xaml.cs"&gt;showed how to do this&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Fundamentally, this sample shows how to use the &lt;a href="https://msdn.microsoft.com/en-gb/library/windows/apps/windows.media.audio.audioframeinputnode.quantumstarted"&gt;QuantumStarted event&lt;/a&gt; of the &lt;a href="https://msdn.microsoft.com/library/windows/apps/dn914147"&gt;AudioFrameInputNode&lt;/a&gt; to dynamically add &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audioframe.aspx"&gt;AudioFrame&lt;/a&gt; to the AudioFrameInputNode which are then rendered to the &lt;a href="https://msdn.microsoft.com/en-gb/library/windows/apps/dn914151"&gt;output node&lt;/a&gt;. An extract from the sample is shown here:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;  unsafe private AudioFrame GenerateAudioData(uint samples)
-  {
-      // Buffer size is (number of samples) * (size of each sample)
-      // We choose to generate single channel (mono) audio. For multi-channel, multiply by number of channels
-      uint bufferSize = samples * sizeof(float);
-      AudioFrame frame = new Windows.Media.AudioFrame(bufferSize);
-
-      using (AudioBuffer buffer = frame.LockBuffer(AudioBufferAccessMode.Write))
-      using (IMemoryBufferReference reference = buffer.CreateReference())
-      {
-          byte* dataInBytes;
-          uint capacityInBytes;
-          float* dataInFloat;
-
-          // Get the buffer from the AudioFrame
-          ((IMemoryBufferByteAccess)reference).GetBuffer(out dataInBytes, out capacityInBytes);
-
-          // Cast to float since the data we are generating is float
-          dataInFloat = (float*)dataInBytes;
-
-          float freq = 1000; // choosing to generate frequency of 1kHz
-          float amplitude = 0.3f;
-          int sampleRate = (int)graph.EncodingProperties.SampleRate;
-          double sampleIncrement = (freq * (Math.PI * 2)) / sampleRate;
-
-          // Generate a 1kHz sine wave and populate the values in the memory buffer
-          for (int i = 0; i &amp;lt; samples; i++)
-          {
-              double sinValue = amplitude * Math.Sin(theta);
-              dataInFloat[i] = (float)sinValue;
-              theta += sampleIncrement;
-          }
-      }
-
-      return frame;
-  }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Imitation being the sincerest form of flattery, I then refactored this code to read the binary data from the SpeechSynthesisStream rather than generate a sine wave as shown above. This was greatly facilited by the &lt;a href="https://msdn.microsoft.com/en-us/library/hh582142.aspx"&gt;WindowsRuntimeStreamExtensions.AsStreamForRead&lt;/a&gt; method which allowed me to use basic &lt;a href="https://msdn.microsoft.com/en-us/library/system.io.stream.aspx"&gt;Stream&lt;/a&gt; methods  (specifically &lt;a href="https://msdn.microsoft.com/en-us/library/system.io.stream.readbyte.aspx"&gt;Stream.ReadByte()&lt;/a&gt;) instead of having to mess about with &lt;a href="https://msdn.microsoft.com/en-us/library/windows.media.speechsynthesis.speechsynthesisstream.readasync.aspx"&gt;IBuffer&lt;/a&gt; instances.&lt;/p&gt;
-&lt;p&gt;In short order, I ended up with the code below (where &lt;code&gt;_stream&lt;/code&gt; is a member of the containing class pointing to the underlying SpeechSynthesisStream):&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;    private unsafe void QuantumStarted(AudioFrameInputNode sender, FrameInputNodeQuantumStartedEventArgs args)
-    {
-        uint numSamplesNeeded = (uint)args.RequiredSamples;
-
-        if (numSamplesNeeded != 0 &amp;amp;&amp;amp; _stream.Position &amp;lt; _stream.Length)
-        {
-            uint bufferSize = numSamplesNeeded * sizeof(float);
-            AudioFrame frame = new AudioFrame(bufferSize);
-
-            using (AudioBuffer buffer = frame.LockBuffer(AudioBufferAccessMode.Write))
-            {
-                using (IMemoryBufferReference reference = buffer.CreateReference())
-                {
-                    byte* dataInBytes;
-                    uint capacityInBytes;
-
-                    // Get the buffer from the AudioFrame
-                    ((IMemoryBufferByteAccess)reference).GetBuffer(out dataInBytes, out capacityInBytes);
-
-                    for (int i = 0; i &amp;lt; bufferSize; i++)
-                    {
-                        if (_stream.Position &amp;lt; _stream.Length)
-                        {
-                            dataInBytes[i] = (byte)_stream.ReadByte();
-                        }
-                        else
-                        {
-                            dataInBytes[i] = 0;
-                        }
-                    }
-                }
-            }
-
-            _frameInputNode.AddFrame(frame);
-        }
-    }
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;And to my surprised, it worked!&lt;/p&gt;
-&lt;p&gt;I encapsulated this code into a class named &lt;a href="https://github.com/ibebbs/BlogProjects/blob/master/UwpSpeechAudio/GraphExtensions.cs"&gt;AudioSpeechInputNode&lt;/a&gt; and made this class implement &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.iaudioinputnode.aspx"&gt;IAudioInputNode&lt;/a&gt; so it could be treated like any other node in the AudioGraph. Finally I added an extension method to AudioGraph that created instance of this node in the same way that other nodes are created. This is shown below:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;    AudioSpeechInputNode speechInputNode = await _graph.CreateSpeechInputNodeAsync(new SpeechSynthesizer(), &amp;quot;As input node&amp;quot;);
-    speechInputNode.AddOutgoingConnection(_outputNode); // device output node
-    speechInputNode.Stop();
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;With this node in hand you're then at liberty to call the &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.iaudionode.start.aspx"&gt;Start&lt;/a&gt;, &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.iaudionode.stop.aspx"&gt;Stop&lt;/a&gt; and &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.iaudionode.reset.aspx"&gt;Reset&lt;/a&gt; methods as you see fit.&lt;/p&gt;
-&lt;p&gt;Et voila, a SpeechSynthesisStream rendered in an AudioGraph without the need for an intermediary file.&lt;/p&gt;
-&lt;h2 id="you-said-there-was-a-but"&gt;You said there was a 'but' ...&lt;/h2&gt;
-&lt;p&gt;Well, yes. Three of them actually.&lt;/p&gt;
-&lt;h3 id="the-big-but"&gt;The big 'but'&lt;/h3&gt;
-&lt;p&gt;While this approach certainly solves the issue with needing temporary files and a 'popping' sound each time speech is emitted, I'm afraid to say it does not resolve the 'popping' noise encountered when the application starts on a RaspberryPi.&lt;/p&gt;
-&lt;p&gt;Being a good nerd, I had a spare RaspberryPi 3 hanging around with a recent version of Windows 10 IoT Core installed. It took just a few minutes to recompile my &lt;a href="https://github.com/ibebbs/BlogProjects/tree/master/UwpSpeechAudio"&gt;sample app&lt;/a&gt; to ARM and deploy it to the Pi whereupon I could confirm that there is no popping when emitting speech but there is when the application starts. In fact, I receive three distinct 'pops' during application start-up which, by studiously placing breakpoints, I isolated to &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.audiograph.createasync.aspx"&gt;AudioGraph.CreateAsync&lt;/a&gt; (two pops) and &lt;a href="https://msdn.microsoft.com/en-us/library/windows/apps/windows.media.audio.audiograph.start.aspx"&gt;AudioGraph.Start&lt;/a&gt; (one pop).&lt;/p&gt;
-&lt;p&gt;Microsoft would have us believe that this is an issue with the RaspberryPi firmware but, as it also occurs on &lt;a href="https://developer.qualcomm.com/hardware/dragonboard-410c"&gt;DragonBoard 410c&lt;/a&gt; I'm more inclined to believe it's an issue with the Windows drivers. On a hunch, I've just ordered a &lt;a href="https://www.amazon.co.uk/dp/B016CU2PEU"&gt;USB Sound Adapter from Amazon&lt;/a&gt;. This device is &lt;em&gt;meant&lt;/em&gt; to be Windows and RaspberryPi compatible (which doesn't necessarily mean it'll work with IoT Core on RPi) and, if it works, I'll be very interested to see if I still get the popping noises when the application starts. I'll update this post once I have an answer...&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Update: I'm pleased to say that, not only does &lt;a href="https://www.amazon.co.uk/dp/B016CU2PEU"&gt;this device&lt;/a&gt; work with Windows 10 IoT Core running on the RaspberryPi 3, but it also resolves the issue with popping noises when the application starts. Of course, this would probably also solve the issue with popping noises when rendering speech through MediaPlayer too making my solution above less necessary.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;h3 id="the-intermediate-but"&gt;The intermediate 'but'&lt;/h3&gt;
-&lt;p&gt;My code makes a number of assumptions about the format of the SpeechSynthesisStream and encapsulates these as constants. It would be much better to read the format from the WAVE 'fmt ' chunk of the underlying RIFF structures in the stream but, being a pragmatic, &lt;a href="https://martinfowler.com/bliki/Yagni.html"&gt;YAGNI principled&lt;/a&gt; developer... I skipped this for now.&lt;/p&gt;
-&lt;h3 id="the-small-but"&gt;The small 'but'&lt;/h3&gt;
-&lt;p&gt;As is probably very obvious, the code above is in no way optimised. I'm sure there are &lt;em&gt;much&lt;/em&gt; better and faster ways of storing and copying the binary data from the SpeechSynthesisStream into the AudioBuffer (perhaps just using an intermediate byte array would help) but, for now, this code works fine.&lt;/p&gt;
-&lt;h2 id="show-me-the-code"&gt;Show me the code&lt;/h2&gt;
-&lt;p&gt;All the code for the above can be found in a &lt;a href="https://github.com/ibebbs/BlogProjects/tree/master/UwpSpeechAudio"&gt;UWP sample app&lt;/a&gt; within the &lt;a href="https://github.com/ibebbs/BlogProjects"&gt;BlogProjects&lt;/a&gt; repository of my &lt;a href="https://github.com/ibebbs"&gt;Github&lt;/a&gt; account.&lt;/p&gt;
-&lt;p&gt;Do &lt;a href="https://twitter.com/ibebbs"&gt;get in touch&lt;/a&gt; if you find this code helpful or have suggestions for improving it.&lt;/p&gt;
 </content:encoded>
 		</item>
 	</channel>
