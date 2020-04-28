@@ -4,8 +4,157 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-04-23T19:41:45Z</updated>
+	<updated>2020-04-28T20:26:18Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/COduo-Part3</id>
+		<title>Many platforms, one world - Part 3</title>
+		<link href="http://ian.bebbs.co.uk/posts/COduo-Part3" />
+		<link rel="enclosure" type="image" href="http://ian.bebbs.co.uk/Content/CODuo/Header.png" />
+		<updated>2020-04-28T00:00:00Z</updated>
+		<content>&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;This is part 3 of my series on using the Uno Platform to write a cross-platform app, able to target both single and dual-screen devices. In this post I cover the architecture of the CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; app with an aim to providing an understanding of how it's primary components interoperate to provide a robust and testable experience across multiple platforms and screen configurations.&lt;/p&gt;
+&lt;p&gt;For an introduction to CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; or to find further posts in this series, please use the links below:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="./COduo-Part1"&gt;Part 1 - Background&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part2"&gt;Part 2 - Infrastructure&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part3"&gt;Part 3 - Client Architecture&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Part 4 - Using the TwoPaneView&lt;/li&gt;
+&lt;li&gt;Part 5 - Implementing the interactive UK Map&lt;/li&gt;
+&lt;li&gt;Part 6 - Charts on the Uno Platform&lt;/li&gt;
+&lt;li&gt;Part 7 - Windows, Win10X and releasing to the Microsoft Store&lt;/li&gt;
+&lt;li&gt;Part 8 - Android and releasing to the Google Play Store&lt;/li&gt;
+&lt;li&gt;Part 9 - iOS and releasing to the Apple App Store&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="architecture"&gt;Architecture&lt;/h2&gt;
+&lt;p&gt;In part 2 I presented the following diagram and discussed the service-side infrastructure components.&lt;/p&gt;
+&lt;img src="/Content/CODuo/Infrastructure.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Infrastructure.png"/&gt;
+&lt;p&gt;This post will be focussing on the architectural components of the app. Again, this isn't specifically about how the Uno Platform was used to implement the app so I will endeavour to keep these discussions at a high level. However, in order to understand how the app functions, I think it's important to understand it's various components and interactions.&lt;/p&gt;
+&lt;p&gt;To do this we should first outline some of the conventions and libraries used within CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; in order to facilitate further discussion around the actual implementation.&lt;/p&gt;
+&lt;h2 id="conventions-libraries"&gt;Conventions &amp;amp; Libraries&lt;/h2&gt;
+&lt;h3 id="fluent-namespacing"&gt;Fluent Namespacing&lt;/h3&gt;
+&lt;p&gt;CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; employs &amp;quot;Fluent Namespacing&amp;quot;, an introduction to which can be found in my blog post &lt;a href="https://ian.bebbs.co.uk/posts/FluentNamespacing"&gt;here&lt;/a&gt;. To summarise, Fluent Namespacing promotes the practise of grouping classes by functional domain, &lt;em&gt;not&lt;/em&gt; functional pattern.&lt;/p&gt;
+&lt;p&gt;For example, the Application State Machine is a class named &lt;code&gt;Machine&lt;/code&gt; in the &lt;code&gt;Application.State&lt;/code&gt; namespace; therefore having a full-name of &lt;code&gt;Application.State.Machine&lt;/code&gt;. This is in contrast to a conventional grouping of classes by functional pattern where - for example - there would typically be a class named &lt;code&gt;ApplicationStateMachine&lt;/code&gt; in the &lt;code&gt;StateMachines&lt;/code&gt; namespace.&lt;/p&gt;
+&lt;p&gt;While this might initially take some getting used to, as you examine the source code for CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; you should hopefully see how this approach simplifies class names, eases navigation and promotes good practices.&lt;/p&gt;
+&lt;h3 id="reactive-extensions-mvvm-mvx.observable"&gt;Reactive Extensions, MVVM &amp;amp; MVx.Observable&lt;/h3&gt;
+&lt;p&gt;The &lt;a href="https://github.com/dotnet/reactive"&gt;Reactive Extensions&lt;/a&gt; (Rx) library is used throughout CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; to implement many different types of component from &lt;a href="#state-lifetime-management"&gt;State Machines&lt;/a&gt; to the &lt;a href="#communication"&gt;Event Bus&lt;/a&gt;. One area where Rx shines particularly brightly however is as a means to write &lt;a href="https://en.wikipedia.org/wiki/Reactive_programming"&gt;functional, declarative and reactive user interfaces&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; does just this by implementing &lt;a href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel"&gt;MVVM style ViewModels&lt;/a&gt; as collections of &lt;a href="https://ian.bebbs.co.uk/posts/ReactiveBehaviors"&gt;Reactive Behaviours&lt;/a&gt; via the &lt;a href="https://www.nuget.org/packages/MVx.Observable/"&gt;MVx.Observable&lt;/a&gt; library.&lt;/p&gt;
+&lt;p&gt;If you are unfamiliar with Rx I would certainly suggest taking the time to learn about it. Not only will you understand more of how CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; hangs together but, once you &amp;quot;get&amp;quot; it, I almost guarantee you'll start to see programming problems in a different light. Lee Campbell has a great introduction to Rx on his aptly named website &lt;a href="http://introtorx.com/"&gt;&amp;quot;IntroToRx.com&amp;quot;&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="implementation"&gt;Implementation&lt;/h2&gt;
+&lt;h3 id="shared"&gt;99% Shared&lt;/h3&gt;
+&lt;p&gt;As can be seen from the diagram above, while CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; comprises many &amp;quot;head&amp;quot; projects (i.e. UWP, Android, iOS, etc), all application code - except for a very small &amp;quot;Platform Services&amp;quot; layer - is shared across all platforms. This includes all state and application lifetime management, navigation and data access and View/ViewModel implementations. I believe this is quite an achievement and speaks volumes about the potential for the Uno Platform to lower TCO when implementing and maintaining a cross-platform solution.&lt;/p&gt;
+&lt;p&gt;The &amp;quot;Platform Services&amp;quot; layer comprises a couple of interface implementations in each head project which provides platform specific functionality. For example, the use of &lt;a href="https://github.com/dotnet/reactive"&gt;Reactive Extensions&lt;/a&gt; requires &lt;a href="http://introtorx.com/Content/v1.0.10621.0/15_SchedulingAndThreading.html"&gt;IScheduler&lt;/a&gt; implementations for correctly marshalling events to and from the platform's &amp;quot;UI thread&amp;quot;. The implementation of (and access to) the correct IScheduler implementation is different for each platform so each head project contains an implementation of the &lt;a href="https://github.com/ibebbs/CODuo/blob/master/src/CODuo/CODuo.Shared/Platform/ISchedulers.cs"&gt;&lt;code&gt;Platform.ISchedulers&lt;/code&gt;&lt;/a&gt; interface. Shown below is the &lt;a href="https://github.com/ibebbs/CODuo/blob/master/src/CODuo/CODuo.Droid/Platform/Schedulers.cs"&gt;&lt;code&gt;Platform.ISchedulers&lt;/code&gt;&lt;/a&gt; implementation for Android:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public class Schedulers : ISchedulers
+{
+    private static readonly Lazy&amp;lt;IScheduler&amp;gt; DispatchScheduler = new Lazy&amp;lt;IScheduler&amp;gt;(() =&amp;gt; new SynchronizationContextScheduler(SynchronizationContext.Current));
+
+    public IScheduler Default =&amp;gt; Scheduler.Default;
+
+    public IScheduler Dispatcher =&amp;gt; DispatchScheduler.Value;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="views-view-models"&gt;Views &amp;amp; View Models&lt;/h3&gt;
+&lt;p&gt;As mentioned above, CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; employs the MVVM pattern to separate GUI and business logic. Each View uses data-binding to declaratively bind information provided by the ViewModel to the various controls presented in the UI. The ViewModel uses &lt;a href="https://ian.bebbs.co.uk/posts/ReactiveBehaviors"&gt;Reactive Behaviours&lt;/a&gt; and &lt;a href="https://www.nuget.org/packages/MVx.Observable/"&gt;MVx.Observable&lt;/a&gt; properties to react to user interactions and changes in application state.&lt;/p&gt;
+&lt;p&gt;The example below shows how current value for &amp;quot;Tonnes Of CO&lt;sub&gt;2&lt;/sub&gt; per hour&amp;quot; is implemented in the &lt;code&gt;Home.ViewModel&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public class ViewModel : IViewModel, INotifyPropertyChanged
+{
+    private readonly Data.IProvider _dataProvider;
+    private readonly Platform.ISchedulers _schedulers;
+    
+    ...
+
+    private readonly MVx.Observable.Property&amp;lt;int&amp;gt; _selectedRegion;
+    private readonly MVx.Observable.Property&amp;lt;Common.Period&amp;gt; _currentPeriod;
+    private readonly MVx.Observable.Property&amp;lt;double&amp;gt; _tonnesOfCO2PerHour;
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public ViewModel(Data.IProvider dataProvider, Platform.ISchedulers schedulers)
+    {
+        _dataProvider = dataProvider;
+        _schedulers = schedulers;
+        
+        ...
+
+        _currentPeriod = new MVx.Observable.Property&amp;lt;Common.Period&amp;gt;(nameof(CurrentPeriod), args =&amp;gt; PropertyChanged?.Invoke(this, args));
+        _selectedRegion = new MVx.Observable.Property&amp;lt;int&amp;gt;(0, nameof(SelectedRegion), args =&amp;gt; PropertyChanged?.Invoke(this, args));
+        _tonnesOfCO2PerHour = new MVx.Observable.Property&amp;lt;double&amp;gt;(nameof(TonnesOfCO2PerHour), args =&amp;gt; PropertyChanged?.Invoke(this, args));
+        
+        ...
+    }
+
+    private IDisposable ShouldRefreshTonnesOfCO2PerHourWhenPeriodOrSelectedRegionChanges()
+    {
+        return Observable
+            // When the current value of either `_currentPeriod` or `_selectedRegion` changes ...
+            .CombineLatest(_currentPeriod, _selectedRegion, (period, regionId) =&amp;gt; period?.Regions
+                // ... retreive the data for the selected region from the current period ...
+                .Where(region =&amp;gt; region.RegionId == regionId)
+                // ... and use this data to calculate Tonnes Of CO2 Per Hour
+                .Select(region =&amp;gt; (region.Estimated.TotalMW * MegaWattsToKiloWatts * region.Estimated.GramsOfCO2PerkWh) / GramsInAMetricTonne ?? 0.0)
+                // ... returning the first value or 0
+                .FirstOrDefault() ?? 0.0)
+            // ... then move onto the UI thread
+            .ObserveOn(_schedulers.Dispatcher)
+            // ... and update the _tonnesOfCO2PerHour value with the value 
+            // calculated above causing the PropertyChanged event to be 
+            // raised for the `TonnesOfCO2PerHour` property
+            .Subscribe(_tonnesOfCO2PerHour);
+    }
+
+    public IDisposable Activate()
+    {
+        return new CompositeDisposable(
+            ...
+            ShouldRefreshTonnesOfCO2PerHourWhenPeriodOrSelectedRegionChanges()
+            ...
+        );
+    }
+
+    ...
+
+    public Common.Period CurrentPeriod
+    {
+        get { return _currentPeriod.Get(); }
+    }
+
+    public double TonnesOfCO2PerHour
+    {
+        get { return _tonnesOfCO2PerHour.Get(); }
+    }
+
+    public int SelectedRegion
+    {
+        get { return _selectedRegion.Get(); }
+        set { _selectedRegion.Set(value); }
+    }
+
+    ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As you can see, all source data and logic for implementing this behaviour is wrapped into a single, appropriately named method called 'ShouldRefreshTonnesOfCO2PerHourWhenPeriodOrSelectedRegionChanges'. While the code in this method should be comprehensible to anyone fluent with LINQ extension-method syntax, it has been annotated for clarity.&lt;/p&gt;
+&lt;p&gt;This pattern is repeated for each behaviour the ViewModel is required to implement.&lt;/p&gt;
+&lt;h3 id="application-navigation-state"&gt;Application &amp;amp; Navigation State&lt;/h3&gt;
+&lt;p&gt;Similar to how we employ MVVM to separate view and business logic, I find it beneficial to separate view and application/navigation logic which all too often are conflated together. Doing this brings benefits similar to the adoption of MVVM in the view layer (i.e. simplified logic, enhanced testability, etc) to the application layer.&lt;/p&gt;
+&lt;p&gt;As such, application state and navigation state are managed by a dedicated &lt;a href="https://en.wikipedia.org/wiki/Finite-state_machine"&gt;state machines&lt;/a&gt;. These are implemented as &lt;a href="https://ian.bebbs.co.uk/posts/ReactiveStateMachines"&gt;Reactive State Machines&lt;/a&gt; and designed to mirror lifetime and navigation states in the app. Stateful application and navigation data is passed between states via a mutable &lt;code&gt;Application.Aggregate.Root&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;These approaches allow the app to elegantly manage lifetime events such as the app being suspended / resumed and to transparently restore navigation state and data.&lt;/p&gt;
+&lt;p&gt;Here is CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt;'s current state diagram:&lt;/p&gt;
+&lt;img src="/Content/CODuo/StateChart.png" class="img-responsive" style="margin: auto; margin-top: 6px; margin-bottom: 6px;" alt="COduo State Diagram"/&gt;
+&lt;h3 id="communication"&gt;Communication&lt;/h3&gt;
+&lt;p&gt;All communication between disparate app components (for example between the state-machine and a view model) occurs via events published through an Event Bus. This promotes decoupling by ensuring that the component that raises an event requires no knowledge of a component which might consume the event, and vice versa.&lt;/p&gt;
+&lt;h3 id="data"&gt;Data&lt;/h3&gt;
+&lt;p&gt;Data for the application is retrieved and deserialized by the &lt;code&gt;Data.Provider&lt;/code&gt;. The &lt;code&gt;Data.Provider&lt;/code&gt; sets up an Rx subscription to acquire new data every 15 minutes or whenever a &lt;code&gt;Data.Requested&lt;/code&gt; event is received from the event bus. This data is exposed to the rest of the application as an &lt;code&gt;IObservable&amp;lt;&amp;gt;&lt;/code&gt; which has been designed to immediately return the current value whenever a new consumer subscribes.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;Data.Provider&lt;/code&gt; starts fetching data when the &lt;code&gt;Activate&lt;/code&gt; method is called and will continue to fetch data - regardless of whether there currently exists any subscribers - until the &lt;code&gt;IDisposable&lt;/code&gt; result of the &lt;code&gt;Activate&lt;/code&gt; method is disposed. This ensures data is immediately available to ViewModels when they need it (i.e. after navigation) and allows data acquisition to be correctly managed through Suspend/Resume transitions.&lt;/p&gt;
+&lt;h2 id="source-code"&gt;Source Code&lt;/h2&gt;
+&lt;p&gt;You can find the source code for CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; in my &lt;a href="https://github.com/ibebbs/CODuo"&gt;Github repository&lt;/a&gt;. Should you like or use it, please take the time to &amp;quot;star&amp;quot; the repository; it's a small gesture which really fuels developers's enthusiasm for projects such as these.&lt;/p&gt;
+&lt;h2 id="part-4"&gt;Part 4&lt;/h2&gt;
+&lt;p&gt;Now we understand how the application hangs together, in &lt;a href="./COduo-Part4"&gt;Part 4&lt;/a&gt; I will detail how to setup an Uno Platform solution such that you're able to use a &lt;code&gt;TwoPaneView&lt;/code&gt; control and how the TwoPaneView control is used within CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt;.&lt;/p&gt;
+&lt;h2 id="finally"&gt;Finally&lt;/h2&gt;
+&lt;p&gt;I hope you enjoy this series and that it goes some way to demonstrating the massive potential presented by the Uno Platform for delivering cross-platform experiences without having to invest in additional staff training nor bifurcating your development efforts.&lt;/p&gt;
+&lt;p&gt;If you or your company are interested in building apps that can leverage the dual screen capabilities of new devices such as the Surface Duo and Surface Neo, or are keen to understand how a single code-base can deliver apps to &lt;em&gt;every platform from mobile phones to web sites&lt;/em&gt;, then please feel free to drop me a line using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;. I am actively seeking new clients in this space and would be happy to discuss any ideas you have or projects you're planning.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;This is part 3 of my series on using the Uno Platform to write a cross-platform app, able to target both single and dual-screen devices. In this post I cover the architecture of the CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; app with an aim to providing an understanding of how it's primary components interoperate to provide a robust and testable experience across multiple platforms and screen configurations.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/COduo-Part2</id>
 		<title>Many platforms, one world - Part 2</title>
@@ -18,7 +167,7 @@
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="./COduo-Part1"&gt;Part 1 - Background&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="./COduo-Part2"&gt;Part 2 - Infrastructure&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Part 3 - Client Architecture&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part3"&gt;Part 3 - Client Architecture&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Part 4 - Using the TwoPaneView&lt;/li&gt;
 &lt;li&gt;Part 5 - Implementing the interactive UK Map&lt;/li&gt;
 &lt;li&gt;Part 6 - Charts on the Uno Platform&lt;/li&gt;
@@ -84,7 +233,7 @@ public static async Task Energy(
 &lt;ul&gt;
 &lt;li&gt;&lt;a href="./COduo-Part1"&gt;Part 1 - Background&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="./COduo-Part2"&gt;Part 2 - Infrastructure&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Part 3 - Client Architecture&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part3"&gt;Part 3 - Client Architecture&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Part 4 - Using the TwoPaneView&lt;/li&gt;
 &lt;li&gt;Part 5 - Implementing the interactive UK Map&lt;/li&gt;
 &lt;li&gt;Part 6 - Charts on the Uno Platform&lt;/li&gt;
@@ -3125,54 +3274,5 @@ stream.statuses.filter(track='#INWED17')
 &lt;p&gt;The best bit of all (note: spoilers ahead!) is that it seems my original conclusion may indeed have been wrong... or at least mis-attributed.&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;I've recently been working on a project that required some natural language processing. After a surprisingly brief search I came upon the &lt;a href="https://stanfordnlp.github.io/CoreNLP/"&gt;Stanford CoreNLP&lt;/a&gt; suite of tools and after playing with their &lt;a href="http://corenlp.run/"&gt;online demo&lt;/a&gt; was astounded at the capabilities it provided. Furthermore, it was free, could be run such that it provided a basic HTTP API and came packaged with everything it needed save a copy of the JRE.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/ASentimentalAnalysisOfRedDwarf</id>
-		<title>A sentiment(al) analysis of why Red Dwarf is no longer funny</title>
-		<link href="http://ian.bebbs.co.uk/posts/ASentimentalAnalysisOfRedDwarf" />
-		<updated>2017-01-31T00:00:00Z</updated>
-		<content>&lt;p&gt;Yesterday I had a lot of fun playing with &lt;a href="http://jupyter.org/"&gt;Project Jupyter&lt;/a&gt;. For those that aren't aware of this project, it's an effort to provide a workspace for performing repeatable experimentation with data. In short it mixes markdown editing capabilities with a &lt;a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop"&gt;REPL&lt;/a&gt; environment for a large number of languages. From the website:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;&amp;quot;a web application that allows you to create and share documents that contain live code, equations, visualizations and explanatory text. Uses include: data cleaning and transformation, numerical simulation, statistical modeling, machine learning and much more&amp;quot;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;After having my interest tweaked by the &lt;a href="https://try.jupyter.org/"&gt;browser version&lt;/a&gt; I bit the bullet and spent ages downloading and installing the &lt;a href="http://jupyter.org/install.html"&gt;full version&lt;/a&gt; to a virtual machine. It's a Python based web-app so requires quite a bit of setup and unfortunately I found the documentation to be a bit sparse.&lt;/p&gt;
-&lt;p&gt;And so it was that while trying to work out how to install the &lt;a href="https://github.com/fsprojects/IfSharp"&gt;FSharp module&lt;/a&gt; I came across &lt;a href="https://notebooks.azure.com/"&gt;Azure Notebooks&lt;/a&gt;. This is a free, Azure hosted version of Jupyter that has almost all the features of a local installation but with none of the faff. After quickly spinning up a new notebook here I didn't even look back at the local installation.&lt;/p&gt;
-&lt;h2 id="a-jupyter-data-mining-core-project"&gt;A Jupyter [Data] Mining Core Project&lt;/h2&gt;
-&lt;p&gt;As per the title and lead of this post, I decided to use Jupyter to have a little fun.&lt;/p&gt;
-&lt;p&gt;Back in September, while grinding my way through &lt;a href="http://www.imdb.com/title/tt0094535/episodes?season=11&amp;amp;ref_=tt_eps_sn_11"&gt;season 11 of Red Dwarf&lt;/a&gt;, I began to wonder why it wasn't as funny as it used to be. Had the writing deteriorated? Were the actors past it? Or were these elements still as great as they used to be and it was me who had changed?&lt;/p&gt;
-&lt;p&gt;I started thinking about ways this could be investigated such as:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Using IMDB rating as a measure of humour in each episode of Red Dwarf&lt;/li&gt;
-&lt;li&gt;Performing semantic analysis of episode's transcript to see if the sentiment had changed&lt;/li&gt;
-&lt;li&gt;Using word-count to determine whether there was a correlation between character participation and overall humour&lt;/li&gt;
-&lt;li&gt;etc&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Well, it was a funny notion and provided a pleasant distraction from the &lt;a href="http://www.imdb.com/title/tt5218266"&gt;pretty awful episode&lt;/a&gt; of Red Dwarf I was watching at the time. I added it to my &amp;quot;ideas&amp;quot; list in &lt;a href="https://trello.com/b/KoTWuFUi/public-board"&gt;Trello&lt;/a&gt;, finished the episode and went to bed.&lt;/p&gt;
-&lt;p&gt;Yesterday, when I came across Project Jupyter, I knew it'd be a great medium for performing this investigation so shifted the analysis from &amp;quot;Ideas&amp;quot; to &amp;quot;In progress&amp;quot; and got cracking.&lt;/p&gt;
-&lt;h2 id="data-science-using-f"&gt;Data Science using F#&lt;/h2&gt;
-&lt;p&gt;Now, while in relation to this investigation I use the term &amp;quot;data science&amp;quot; to basically mean &amp;quot;munging a few numbers and drawing a few graphs&amp;quot;, I do think F# makes a fantastic language for the discipline in general. It has some incredible mechanisms for &lt;a href="https://docs.microsoft.com/en-us/dotnet/articles/fsharp/tutorials/type-providers/"&gt;acquiring&lt;/a&gt; and &lt;a href="http://fsharpforfunandprofit.com/posts/the-option-type/"&gt;cleaning&lt;/a&gt; data as well as for &lt;a href="http://www.quanttec.com/fparsec/"&gt;parsing natural language&lt;/a&gt;. Couple this with it's concise, functional, elegant language and the ability to leverage components from the entire breadth of .NET ecosystem and you have quite a significant offering.&lt;/p&gt;
-&lt;h2 id="azure-notebooks"&gt;Azure Notebooks&lt;/h2&gt;
-&lt;p&gt;The Azure implementation of Project Jupyter is first class and, for now at least, totally free. Getting started is as simple as logging in with Microsoft credentials and then clicking 'Add notebook'. Being an MS implementation, I used Edge to edit the notebook and found the experience extremely robust, especially given it's a &amp;quot;Preview&amp;quot; program.&lt;/p&gt;
-&lt;p&gt;In fact I experience just two issues while authoring my notebook:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Data Store - It's not currently possible to upload or store data within the Azure notebook library (despite having functionality to do this in the web-interface). Instead you need to host your data on one of a small number of whitelisted sites. Fortunately Github is one of these sites so this doesn't prove to be much of an issue.&lt;/li&gt;
-&lt;li&gt;Packages - While Azure Notebooks provides access to a large number of packages &amp;quot;out-of-the-box&amp;quot; (i.e. FSharp.Data, XPlot.Plotly, etc) it can be tricky to add/use other packages. For example, I wanted to use the XPlot.GoogleCharts package (as it provided trendline capabilities) and ended up having to write a custom display printer for it to work (due to an &lt;a href="https://github.com/fsprojects/IfSharp/issues/118"&gt;open issue&lt;/a&gt; on Github).&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;Apart from these issues, authoring and scripting F# in an Azure Notebook was almost as fast as using &lt;a href="https://docs.microsoft.com/en-us/dotnet/articles/fsharp/tutorials/fsharp-interactive/"&gt;&amp;quot;F# Interactive&amp;quot;&lt;/a&gt;. It even provides Intellisense capabilities but, in practice, these are usually too slow to be of actual use.&lt;/p&gt;
-&lt;h2 id="sharing-notebooks"&gt;Sharing Notebooks&lt;/h2&gt;
-&lt;p&gt;From Azure Notebooks you're able to download your notebook as a native &amp;quot;.ipynb&amp;quot; file (in fact this is encouraged as MS reserves the right to remove unused notebooks after 60 days). You can then share this file to other people who have Jupyter installed or, preferably, commit it to a repository in Github which has excellent support for Jupyter Notebooks.&lt;/p&gt;
-&lt;p&gt;You can find my notebook &amp;quot;A sentiment(al) analysis of why Red Dwarf is no longer funny (to me)&amp;quot; &lt;a href="https://github.com/ibebbs/RedDwarfAnalysis/blob/master/Investigation.ipynb"&gt;here&lt;/a&gt;. As you will see when you click the link, Github not only shows you the static parts of the notebook but actually tries to spin up a kernel and execute the code parts too. This is a &amp;quot;limited rendering only&amp;quot; so Github also provides a link to open the notebook in 'nbviewer' &lt;a href="http://nbviewer.jupyter.org/github/ibebbs/RedDwarfAnalysis/blob/2712285e1f9c69fc347bdfe6404792101eaea5f1/Investigation.ipynb"&gt;web-app&lt;/a&gt;. This link is shown below:&lt;/p&gt;
-&lt;img src="https://mvpfyw-dm2306.files.1drv.com/y3mppldGfaYEhvWkV7mdUw26-lP3SOzlMTGFbf8slchIfjBL57IH-GrJev6ai_rISiHBKrom7Abg9YFjfhZ1ArOFT7a7mh4gJuGq-CErv1dun48GQC_BdhMV08fh6hbw400d9nHSEXJ0jA2nPBIrpOPNrOz0I3lVY1tu_L656ylQKg?width=660&amp;height=283&amp;cropmode=none" class="img-responsive" style="margin: auto; width:660; margin-top: 6px; margin-bottom: 6px;" alt="Open external view with nbviewer"/&gt;
-&lt;h2 id="the-analysis"&gt;The analysis&lt;/h2&gt;
-&lt;p&gt;I had timeboxed my investigation into Project Jupyter and therefore didn't get round to performing an actual sentiment anaylsis of the content of each episode. However I did manage to do the following:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Programmatically download episode information from several sources in JSON format and use &lt;a href="http://fsharp.github.io/FSharp.Data/library/JsonValue.html"&gt;JsonValue&lt;/a&gt; to dynamically query these sources&lt;/li&gt;
-&lt;li&gt;Scrape demographically categorized rating information from IMDB and use &lt;a href="http://fsharp.github.io/FSharp.Data/reference/fsharp-data-htmldocument.html"&gt;HtmlDocument&lt;/a&gt; to parse the data into strong types&lt;/li&gt;
-&lt;li&gt;Resolve issue with rendering XPlot.GoogleCharts charts within the notebook and use these charts to provide an interactive visualisation of the decline in rating of Red Dwarf across time and demographic categories.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;This provided a fair stab at correlating episode rating with the overall decline in Red Dwarf's humourousness but is a long way short of any form of &amp;quot;data science&amp;quot;. It was both enlightening and a lot of fun doing this small project and I will certainly consider Azure Notebooks as a valuable tool in my toolbox.&lt;/p&gt;
-&lt;p&gt;Should I find the time, I would certainly like to return to this project and use &lt;a href="http://www.quanttec.com/fparsec/"&gt;FParsec&lt;/a&gt; and &lt;a href="https://azure.microsoft.com/en-gb/services/cognitive-services/text-analytics/"&gt;Azure Text Analytics&lt;/a&gt; to perform an actual sentiment analysis. Hopefully it'll overturn, or at least help justify, my somewhat disturbing conclusion!&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;Yesterday I had a lot of fun playing with &lt;a href="http://jupyter.org/"&gt;Project Jupyter&lt;/a&gt;. For those that aren't aware of this project, it's an effort to provide a workspace for performing repeatable experimentation with data. In short it mixes markdown editing capabilities with a &lt;a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop"&gt;REPL&lt;/a&gt; environment for a large number of languages. From the website:&lt;/p&gt;</summary>
 	</entry>
 </feed>

@@ -1,0 +1,353 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Many platforms, one world - Part 3</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Many platforms, one world - Part 3" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/COduo-Part3" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header" style="background-image: url(&quot;/Content/CODuo/Header.png&quot;)">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Many platforms, one world - Part 3</h1>
+        <h2 class="subheading">Using the Uno platform to build a cross-platform, dual-screen ready app, promoting environmental awareness.</h2>
+    <div class="meta">        
+Published on 28 April 2020<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/android" class="btn btn-default btn-xs">android</a>
+                    <a role="button" href="/tags/dual-screen" class="btn btn-default btn-xs">dual-screen</a>
+                    <a role="button" href="/tags/iOS" class="btn btn-default btn-xs">iOS</a>
+                    <a role="button" href="/tags/rx" class="btn btn-default btn-xs">rx</a>
+                    <a role="button" href="/tags/surface" class="btn btn-default btn-xs">surface</a>
+                    <a role="button" href="/tags/uno-platform" class="btn btn-default btn-xs">uno platform</a>
+                    <a role="button" href="/tags/uwp" class="btn btn-default btn-xs">uwp</a>
+                    <a role="button" href="/tags/xaml" class="btn btn-default btn-xs">xaml</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="intro">Intro</h2>
+<p>This is part 3 of my series on using the Uno Platform to write a cross-platform app, able to target both single and dual-screen devices. In this post I cover the architecture of the CO<sub><em>duo</em></sub> app with an aim to providing an understanding of how it's primary components interoperate to provide a robust and testable experience across multiple platforms and screen configurations.</p>
+<p>For an introduction to CO<sub><em>duo</em></sub> or to find further posts in this series, please use the links below:</p>
+<ul>
+<li><a href="./COduo-Part1">Part 1 - Background</a></li>
+<li><a href="./COduo-Part2">Part 2 - Infrastructure</a></li>
+<li><a href="./COduo-Part3">Part 3 - Client Architecture</a></li>
+<li>Part 4 - Using the TwoPaneView</li>
+<li>Part 5 - Implementing the interactive UK Map</li>
+<li>Part 6 - Charts on the Uno Platform</li>
+<li>Part 7 - Windows, Win10X and releasing to the Microsoft Store</li>
+<li>Part 8 - Android and releasing to the Google Play Store</li>
+<li>Part 9 - iOS and releasing to the Apple App Store</li>
+</ul>
+<h2 id="architecture">Architecture</h2>
+<p>In part 2 I presented the following diagram and discussed the service-side infrastructure components.</p>
+<img src="/Content/CODuo/Infrastructure.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Infrastructure.png"/>
+<p>This post will be focussing on the architectural components of the app. Again, this isn't specifically about how the Uno Platform was used to implement the app so I will endeavour to keep these discussions at a high level. However, in order to understand how the app functions, I think it's important to understand it's various components and interactions.</p>
+<p>To do this we should first outline some of the conventions and libraries used within CO<sub><em>duo</em></sub> in order to facilitate further discussion around the actual implementation.</p>
+<h2 id="conventions-libraries">Conventions &amp; Libraries</h2>
+<h3 id="fluent-namespacing">Fluent Namespacing</h3>
+<p>CO<sub><em>duo</em></sub> employs &quot;Fluent Namespacing&quot;, an introduction to which can be found in my blog post <a href="https://ian.bebbs.co.uk/posts/FluentNamespacing">here</a>. To summarise, Fluent Namespacing promotes the practise of grouping classes by functional domain, <em>not</em> functional pattern.</p>
+<p>For example, the Application State Machine is a class named <code>Machine</code> in the <code>Application.State</code> namespace; therefore having a full-name of <code>Application.State.Machine</code>. This is in contrast to a conventional grouping of classes by functional pattern where - for example - there would typically be a class named <code>ApplicationStateMachine</code> in the <code>StateMachines</code> namespace.</p>
+<p>While this might initially take some getting used to, as you examine the source code for CO<sub><em>duo</em></sub> you should hopefully see how this approach simplifies class names, eases navigation and promotes good practices.</p>
+<h3 id="reactive-extensions-mvvm-mvx.observable">Reactive Extensions, MVVM &amp; MVx.Observable</h3>
+<p>The <a href="https://github.com/dotnet/reactive">Reactive Extensions</a> (Rx) library is used throughout CO<sub><em>duo</em></sub> to implement many different types of component from <a href="#state-lifetime-management">State Machines</a> to the <a href="#communication">Event Bus</a>. One area where Rx shines particularly brightly however is as a means to write <a href="https://en.wikipedia.org/wiki/Reactive_programming">functional, declarative and reactive user interfaces</a>.</p>
+<p>CO<sub><em>duo</em></sub> does just this by implementing <a href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel">MVVM style ViewModels</a> as collections of <a href="https://ian.bebbs.co.uk/posts/ReactiveBehaviors">Reactive Behaviours</a> via the <a href="https://www.nuget.org/packages/MVx.Observable/">MVx.Observable</a> library.</p>
+<p>If you are unfamiliar with Rx I would certainly suggest taking the time to learn about it. Not only will you understand more of how CO<sub><em>duo</em></sub> hangs together but, once you &quot;get&quot; it, I almost guarantee you'll start to see programming problems in a different light. Lee Campbell has a great introduction to Rx on his aptly named website <a href="http://introtorx.com/">&quot;IntroToRx.com&quot;</a>.</p>
+<h2 id="implementation">Implementation</h2>
+<h3 id="shared">99% Shared</h3>
+<p>As can be seen from the diagram above, while CO<sub><em>duo</em></sub> comprises many &quot;head&quot; projects (i.e. UWP, Android, iOS, etc), all application code - except for a very small &quot;Platform Services&quot; layer - is shared across all platforms. This includes all state and application lifetime management, navigation and data access and View/ViewModel implementations. I believe this is quite an achievement and speaks volumes about the potential for the Uno Platform to lower TCO when implementing and maintaining a cross-platform solution.</p>
+<p>The &quot;Platform Services&quot; layer comprises a couple of interface implementations in each head project which provides platform specific functionality. For example, the use of <a href="https://github.com/dotnet/reactive">Reactive Extensions</a> requires <a href="http://introtorx.com/Content/v1.0.10621.0/15_SchedulingAndThreading.html">IScheduler</a> implementations for correctly marshalling events to and from the platform's &quot;UI thread&quot;. The implementation of (and access to) the correct IScheduler implementation is different for each platform so each head project contains an implementation of the <a href="https://github.com/ibebbs/CODuo/blob/master/src/CODuo/CODuo.Shared/Platform/ISchedulers.cs"><code>Platform.ISchedulers</code></a> interface. Shown below is the <a href="https://github.com/ibebbs/CODuo/blob/master/src/CODuo/CODuo.Droid/Platform/Schedulers.cs"><code>Platform.ISchedulers</code></a> implementation for Android:</p>
+<pre><code class="language-c#">public class Schedulers : ISchedulers
+{
+    private static readonly Lazy&lt;IScheduler&gt; DispatchScheduler = new Lazy&lt;IScheduler&gt;(() =&gt; new SynchronizationContextScheduler(SynchronizationContext.Current));
+
+    public IScheduler Default =&gt; Scheduler.Default;
+
+    public IScheduler Dispatcher =&gt; DispatchScheduler.Value;
+}
+</code></pre>
+<h3 id="views-view-models">Views &amp; View Models</h3>
+<p>As mentioned above, CO<sub><em>duo</em></sub> employs the MVVM pattern to separate GUI and business logic. Each View uses data-binding to declaratively bind information provided by the ViewModel to the various controls presented in the UI. The ViewModel uses <a href="https://ian.bebbs.co.uk/posts/ReactiveBehaviors">Reactive Behaviours</a> and <a href="https://www.nuget.org/packages/MVx.Observable/">MVx.Observable</a> properties to react to user interactions and changes in application state.</p>
+<p>The example below shows how current value for &quot;Tonnes Of CO<sub>2</sub> per hour&quot; is implemented in the <code>Home.ViewModel</code>:</p>
+<pre><code class="language-c#">public class ViewModel : IViewModel, INotifyPropertyChanged
+{
+    private readonly Data.IProvider _dataProvider;
+    private readonly Platform.ISchedulers _schedulers;
+    
+    ...
+
+    private readonly MVx.Observable.Property&lt;int&gt; _selectedRegion;
+    private readonly MVx.Observable.Property&lt;Common.Period&gt; _currentPeriod;
+    private readonly MVx.Observable.Property&lt;double&gt; _tonnesOfCO2PerHour;
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public ViewModel(Data.IProvider dataProvider, Platform.ISchedulers schedulers)
+    {
+        _dataProvider = dataProvider;
+        _schedulers = schedulers;
+        
+        ...
+
+        _currentPeriod = new MVx.Observable.Property&lt;Common.Period&gt;(nameof(CurrentPeriod), args =&gt; PropertyChanged?.Invoke(this, args));
+        _selectedRegion = new MVx.Observable.Property&lt;int&gt;(0, nameof(SelectedRegion), args =&gt; PropertyChanged?.Invoke(this, args));
+        _tonnesOfCO2PerHour = new MVx.Observable.Property&lt;double&gt;(nameof(TonnesOfCO2PerHour), args =&gt; PropertyChanged?.Invoke(this, args));
+        
+        ...
+    }
+
+    private IDisposable ShouldRefreshTonnesOfCO2PerHourWhenPeriodOrSelectedRegionChanges()
+    {
+        return Observable
+            // When the current value of either `_currentPeriod` or `_selectedRegion` changes ...
+            .CombineLatest(_currentPeriod, _selectedRegion, (period, regionId) =&gt; period?.Regions
+                // ... retreive the data for the selected region from the current period ...
+                .Where(region =&gt; region.RegionId == regionId)
+                // ... and use this data to calculate Tonnes Of CO2 Per Hour
+                .Select(region =&gt; (region.Estimated.TotalMW * MegaWattsToKiloWatts * region.Estimated.GramsOfCO2PerkWh) / GramsInAMetricTonne ?? 0.0)
+                // ... returning the first value or 0
+                .FirstOrDefault() ?? 0.0)
+            // ... then move onto the UI thread
+            .ObserveOn(_schedulers.Dispatcher)
+            // ... and update the _tonnesOfCO2PerHour value with the value 
+            // calculated above causing the PropertyChanged event to be 
+            // raised for the `TonnesOfCO2PerHour` property
+            .Subscribe(_tonnesOfCO2PerHour);
+    }
+
+    public IDisposable Activate()
+    {
+        return new CompositeDisposable(
+            ...
+            ShouldRefreshTonnesOfCO2PerHourWhenPeriodOrSelectedRegionChanges()
+            ...
+        );
+    }
+
+    ...
+
+    public Common.Period CurrentPeriod
+    {
+        get { return _currentPeriod.Get(); }
+    }
+
+    public double TonnesOfCO2PerHour
+    {
+        get { return _tonnesOfCO2PerHour.Get(); }
+    }
+
+    public int SelectedRegion
+    {
+        get { return _selectedRegion.Get(); }
+        set { _selectedRegion.Set(value); }
+    }
+
+    ...
+}
+</code></pre>
+<p>As you can see, all source data and logic for implementing this behaviour is wrapped into a single, appropriately named method called 'ShouldRefreshTonnesOfCO2PerHourWhenPeriodOrSelectedRegionChanges'. While the code in this method should be comprehensible to anyone fluent with LINQ extension-method syntax, it has been annotated for clarity.</p>
+<p>This pattern is repeated for each behaviour the ViewModel is required to implement.</p>
+<h3 id="application-navigation-state">Application &amp; Navigation State</h3>
+<p>Similar to how we employ MVVM to separate view and business logic, I find it beneficial to separate view and application/navigation logic which all too often are conflated together. Doing this brings benefits similar to the adoption of MVVM in the view layer (i.e. simplified logic, enhanced testability, etc) to the application layer.</p>
+<p>As such, application state and navigation state are managed by a dedicated <a href="https://en.wikipedia.org/wiki/Finite-state_machine">state machines</a>. These are implemented as <a href="https://ian.bebbs.co.uk/posts/ReactiveStateMachines">Reactive State Machines</a> and designed to mirror lifetime and navigation states in the app. Stateful application and navigation data is passed between states via a mutable <code>Application.Aggregate.Root</code>.</p>
+<p>These approaches allow the app to elegantly manage lifetime events such as the app being suspended / resumed and to transparently restore navigation state and data.</p>
+<p>Here is CO<sub><em>duo</em></sub>'s current state diagram:</p>
+<img src="/Content/CODuo/StateChart.png" class="img-responsive" style="margin: auto; margin-top: 6px; margin-bottom: 6px;" alt="COduo State Diagram"/>
+<h3 id="communication">Communication</h3>
+<p>All communication between disparate app components (for example between the state-machine and a view model) occurs via events published through an Event Bus. This promotes decoupling by ensuring that the component that raises an event requires no knowledge of a component which might consume the event, and vice versa.</p>
+<h3 id="data">Data</h3>
+<p>Data for the application is retrieved and deserialized by the <code>Data.Provider</code>. The <code>Data.Provider</code> sets up an Rx subscription to acquire new data every 15 minutes or whenever a <code>Data.Requested</code> event is received from the event bus. This data is exposed to the rest of the application as an <code>IObservable&lt;&gt;</code> which has been designed to immediately return the current value whenever a new consumer subscribes.</p>
+<p>The <code>Data.Provider</code> starts fetching data when the <code>Activate</code> method is called and will continue to fetch data - regardless of whether there currently exists any subscribers - until the <code>IDisposable</code> result of the <code>Activate</code> method is disposed. This ensures data is immediately available to ViewModels when they need it (i.e. after navigation) and allows data acquisition to be correctly managed through Suspend/Resume transitions.</p>
+<h2 id="source-code">Source Code</h2>
+<p>You can find the source code for CO<sub><em>duo</em></sub> in my <a href="https://github.com/ibebbs/CODuo">Github repository</a>. Should you like or use it, please take the time to &quot;star&quot; the repository; it's a small gesture which really fuels developers's enthusiasm for projects such as these.</p>
+<h2 id="part-4">Part 4</h2>
+<p>Now we understand how the application hangs together, in <a href="./COduo-Part4">Part 4</a> I will detail how to setup an Uno Platform solution such that you're able to use a <code>TwoPaneView</code> control and how the TwoPaneView control is used within CO<sub><em>duo</em></sub>.</p>
+<h2 id="finally">Finally</h2>
+<p>I hope you enjoy this series and that it goes some way to demonstrating the massive potential presented by the Uno Platform for delivering cross-platform experiences without having to invest in additional staff training nor bifurcating your development efforts.</p>
+<p>If you or your company are interested in building apps that can leverage the dual screen capabilities of new devices such as the Surface Duo and Surface Neo, or are keen to understand how a single code-base can deliver apps to <em>every platform from mobile phones to web sites</em>, then please feel free to drop me a line using any of the links below or from my <a href="https://ian.bebbs.co.uk/about">about page</a>. I am actively seeking new clients in this space and would be happy to discuss any ideas you have or projects you're planning.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2020. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
