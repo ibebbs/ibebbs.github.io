@@ -4,8 +4,111 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-04-28T20:26:18Z</updated>
+	<updated>2020-05-02T15:20:54Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartII</id>
+		<title>Tech Adventures in Sustainability</title>
+		<link href="http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartII" />
+		<updated>2020-05-02T00:00:00Z</updated>
+		<content>&lt;h2 id="background"&gt;Background&lt;/h2&gt;
+&lt;p&gt;I'm taking a quick break from my &lt;a href="https://ian.bebbs.co.uk/tags/uno-platform"&gt;&amp;quot;Many Platforms, one world&amp;quot; blog series&lt;/a&gt; to reprise an old - but related - series on using technology to promote sustainability. In &lt;a href="http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI"&gt;Part 1 of this series&lt;/a&gt; I showed how my family uses &lt;a href="https://github.com/ibebbs/SolarEdge.Monitor"&gt;SolarEdge.Monitor&lt;/a&gt; to extract, persist and visualize the energy being produced by our solar panels. In this post I aim to show how I use the data produced by SolarEdge.Monitor to automatically optimize our electricity usage.&lt;/p&gt;
+&lt;h2 id="maximizing-self-consumption-minimizing-imported-energy"&gt;Maximizing Self-Consumption / Minimizing Imported Energy&lt;/h2&gt;
+&lt;p&gt;The data collected by SolarEdge.Monitor shows the best times to turn on electrical appliances around the house like the washing machine and dish washer. Unfortunately, over the summer we still end up with generation/consumption patterns that look like this:&lt;/p&gt;
+&lt;img src="../Content/TechAdventuresInSustainability-PartII/SolarGenerationAndImportExport.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Generation And Consumption"&gt;
+&lt;p&gt;As you can see, on sunny days, we generate way more electricity than we consume and over night we consume more electricity than we would like.&lt;/p&gt;
+&lt;p&gt;The obvious answer here would be to supplement our solar power system with a battery which would be charged with the excess energy we generate during the day and discharged during the evening. We have discussed this at length and, unfortunately, we still don't feel the cost / RoI balance is there to justify buying a solar battery at this time.&lt;/p&gt;
+&lt;h2 id="working-smarter"&gt;Working Smarter&lt;/h2&gt;
+&lt;p&gt;So if the obvious answer isn't the right answer (yet), what can we do? Well, when we thought about this problem, we realised that there are a lot of electrical appliances/devices that are used during the day but that sit in standby overnight sipping energy. If we turned these off rather than being on standby we could potentially cut our overnight consumption.&lt;/p&gt;
+&lt;p&gt;Furthermore, from a sustainability point of view, we have a number of devices around the house that use normal domestic batteries ('AA' or 'AAA'). If we moved to using rechargeable batteries and charged them with excess solar energy then we could further maximise our self-consumption and reduce the number of batteries we buy.&lt;/p&gt;
+&lt;p&gt;Again these are fairly obvious actions to take but extremely onerous to perform on a daily basis. If only there were something that could detect when we're exporting energy and turn these devices on or, conversely, when we're importing energy and turn these devices off.&lt;/p&gt;
+&lt;h2 id="powerfull"&gt;PowerFull&lt;/h2&gt;
+&lt;p&gt;And so I wrote &lt;a href="https://github.com/ibebbs/PowerFull"&gt;PowerFull&lt;/a&gt;.&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;An open-source .NET Core utility for automatically controlling device power via MQTT.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Once supplied with MQTT and device information, PowerFull is able to monitor the levels of electricity being imported or exported and turn devices on or off appropriately.&lt;/p&gt;
+&lt;p&gt;As with SolarEdge.Monitor, PowerFull is a .NET Core application which can natively be &lt;a href="https://hub.docker.com/r/ibebbs/powerfull"&gt;containerized&lt;/a&gt; and composed with other applications. A full description of how to configure and run PowerFull is available is both the &lt;a href="https://github.com/ibebbs/PowerFull"&gt;source code repository&lt;/a&gt; and the &lt;a href="https://hub.docker.com/r/ibebbs/powerfull"&gt;Docker Hub&lt;/a&gt; pages.&lt;/p&gt;
+&lt;h2 id="sonoff-mini"&gt;Sonoff Mini&lt;/h2&gt;
+&lt;p&gt;My first application of PowerFull was to use excess solar energy to charge rechargeable batteries. I already had a decent 12-way battery charger (&lt;a href="https://www.ikea.com/gb/en/p/storhoegen-battery-charger-with-storage-white-40303651/"&gt;courtesy of IKEA&lt;/a&gt;) which I decided to control with one of these:&lt;/p&gt;
+&lt;img src="../Content/TechAdventuresInSustainability-PartII/Sonoff Mini.jpg" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="Sonoff Mini"&gt;
+&lt;p&gt;A Sonoff Mini.&lt;/p&gt;
+&lt;p&gt;Now using Sonoff to control devices is nothing new and people have been flashing custom firmware - most often &lt;a href="https://github.com/arendst/Tasmota"&gt;Tasmota&lt;/a&gt; - to these devices for years. The Sonoff Mini however makes flashing custom firmware easier than ever with a factory supplied &amp;quot;DIY Mode&amp;quot;. You see, historically, if you wanted to flash a Sonoff device with new firmware, you'd need an FTDI module to transfer the new firmware to the Sonoff device. With &amp;quot;DIY Mode&amp;quot; it's as simple as connecting a jumper using a specific tool to flash a firmware over Wifi. A guide to flashing the Sonoff Mini can be found &lt;a href="https://www.youtube.com/watch?v=9fkYBWvwn4A"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Furthermore, while PowerFull can be configured to work with a variety of devices via configurable MQTT messages, it is provided with a &amp;quot;Theme&amp;quot; that pre-sets all configuration values such that they are compatible with Tasmota.&lt;/p&gt;
+&lt;h2 id="operation"&gt;Operation&lt;/h2&gt;
+&lt;p&gt;The diagram and associated notes below show how PowerFull interacts with SolarEdge.Monitor and the Sonoff Mini to control power states:&lt;/p&gt;
+&lt;img src="../Content/TechAdventuresInSustainability-PartII/PowerFullOperation.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="PowerFull Operation Flow"&gt;
+&lt;br/&gt;
+&lt;ol&gt;
+&lt;li&gt;PowerFull begins in the &lt;strong&gt;Starting&lt;/strong&gt; state in which it connects to the MQTT broker and subscribes to required topics (&lt;code&gt;Device.PowerOffRequestTopic&lt;/code&gt;, &lt;code&gt;Device.PowerOnRequestTopic&lt;/code&gt;, &lt;code&gt;Device.PowerStateRequestTopic&lt;/code&gt;, &lt;code&gt;Device.PowerStateResponseTopic&lt;/code&gt;, &lt;code&gt;Messaging.PowerReadingTopic&lt;/code&gt;)&lt;/li&gt;
+&lt;li&gt;PowerFull transitions to the &lt;strong&gt;Initializing&lt;/strong&gt; state&lt;/li&gt;
+&lt;li&gt;PowerFull request power state (by sending &lt;code&gt;Device.PowerStateRequestPayload&lt;/code&gt; on &lt;code&gt;Device.PowerStateRequestTopic&lt;/code&gt;) from all devices (concurrently), waiting to receive a response from the device (on the &lt;code&gt;Device.PowerStateResponseTopic&lt;/code&gt;) for up to 10 seconds.&lt;/li&gt;
+&lt;li&gt;Broker forwards '&lt;null&gt;' on topic &lt;code&gt;cmnd/%deviceId%/POWER&lt;/code&gt; to Sonoff device.&lt;/li&gt;
+&lt;li&gt;Sonoff responds by publishing current power state (&amp;quot;ON&amp;quot; or &amp;quot;OFF&amp;quot;) on topic &amp;quot;stat/%deviceId%/POWER&amp;quot;&lt;/li&gt;
+&lt;li&gt;PowerFull uses &lt;code&gt;Device.PowerStateResponseOnPayloadRegex&lt;/code&gt; and &lt;code&gt;Device.PowerStateResponseOffPayloadReger&lt;/code&gt; to determine state of device. Any device that doesn't respond within 10 seconds or for which the response is not matched by the power state regex values is left in an 'Unknown' state and no further interaction is performed.&lt;/li&gt;
+&lt;li&gt;PowerFull transitions to the &lt;strong&gt;Running&lt;/strong&gt; state.&lt;/li&gt;
+&lt;li&gt;SolarEdge.Monitor publishes regular power reading message to the &amp;quot;home/solar/meter1readings&amp;quot; topic.&lt;/li&gt;
+&lt;li&gt;Power reading messages are received by PowerFull's subscription to the &lt;code&gt;Messaging.PowerReadingTopic&lt;/code&gt; and  the current power reading is extracted from the payload of the message via the &lt;code&gt;Messaging.PowerReadingPayloadValueRegex&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Power reading is averaged across &lt;code&gt;Service.AveragePowerReadingAcrossMinutes&lt;/code&gt; minutes and if it is:&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ol type="a"&gt;
+&lt;li&gt;above the &lt;code&gt;Service.ThresholdToTurnOnDeviceWatts&lt;/code&gt; value then the &lt;code&gt;Device.PowerOnRequestPayload&lt;/code&gt; is sent to the &lt;code&gt;Device.PowerOnRequestTopic&lt;/code&gt; for the next device to be turned on; or&lt;/li&gt;
+&lt;li&gt;below the &lt;code&gt;Service.ThresholdToTurnOffDeviceWatts&lt;/code&gt; value then the &lt;code&gt;Device.PowerOffRequestPayload&lt;/code&gt; is sent to the &lt;code&gt;Device.PowerOfRequestTopic&lt;/code&gt; for the next device to be turned off&lt;/li&gt;
+&lt;/ol&gt;
+&lt;ol start="11"&gt;
+&lt;li&gt;Broker forwards the payload &amp;quot;ON&amp;quot; or &amp;quot;OFF&amp;quot; on topic &amp;quot;cmnd/%deviceId%/POWER&amp;quot; to Sonoff device which turns it's output on or off respectively.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Steps 8-11 repeat until service is encounters a fault or halt at which point:&lt;/p&gt;
+&lt;ol start="12"&gt;
+&lt;li&gt;PowerFull transitions to a &lt;strong&gt;Faulted&lt;/strong&gt; state where all subscriptions and resources are disposed&lt;/li&gt;
+&lt;li&gt;PowerFull transitions to the &lt;strong&gt;Stopped&lt;/strong&gt; state where no further processing occurs&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;* All terms in &lt;code&gt;Code Format&lt;/code&gt; represent PowerFull configuration values. Configuration values can be specified on the command-line or via environment variables. You can see an example of the latter in the following section.&lt;/p&gt;
+&lt;h2 id="docker"&gt;Docker&lt;/h2&gt;
+&lt;p&gt;As shown in &lt;a href="https://ian.bebbs.co.uk/tags/uno-platform"&gt;Part 1&lt;/a&gt;, I use &lt;a href="https://docs.docker.com/compose/"&gt;Docker Compose&lt;/a&gt; to run my Smart Home infrastructure. Adding PowerFull was simply a case of adding a new service to my &lt;code&gt;docker-compose.yml&lt;/code&gt; file as shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-yml"&gt;version: &amp;quot;3.2&amp;quot;
+
+services:
+  # https://hub.docker.com/_/eclipse-mosquitto
+  mqtt:
+    image: eclipse-mosquitto
+    ports:
+      - &amp;quot;1883:1883&amp;quot;
+      - &amp;quot;9001:9001&amp;quot;
+
+  solaredgemonitor:
+    image: ibebbs/solaredge.monitor
+    environment:
+      - Solaredge:Monitor:Inverter:Address=192.168.2.23
+      - Solaredge:Monitor:Inverter:Port=502
+      - Solaredge:Monitor:MQTT:Address=mqtt
+      - Solaredge:Monitor:MQTT:Port=1883
+      - Solaredge:Monitor:MQTT:ClientId=InverterMonitor
+      - Solaredge:Monitor:MQTT:Topic=home/solar/inverter
+      - Solaredge:Monitor:Service:PollingIntervalSeconds=10
+      - Solaredge:Monitor:Service:ModelsToRead=inverter,meter1readings
+    depends_on:
+      - mqtt
+
+  powerfull:
+    image: ibebbs/powerfull
+    environment:
+      - PowerFull:Service:Devices=sonoff-battery
+      - PowerFull:Messaging:Broker=mqtt
+      - PowerFull:Messaging:PowerReadingTopic=home/solar/meter1readings
+      - PowerFull:Messaging:PowerReadingPayloadValueRegex=^{.+&amp;quot;RealPower&amp;quot;:{&amp;quot;Total&amp;quot;:(?&amp;lt;RealPower&amp;gt;-?\d+(\.\d+)).+}
+      - PowerFull:Device:Theme=Tasmota
+    depends_on:
+      - mqtt      
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;By adding rules to interpret power on and power off messages to &lt;a href="https://nodered.org/"&gt;NodeRed&lt;/a&gt; (see &lt;a href="https://ian.bebbs.co.uk/tags/uno-platform"&gt;Part 1&lt;/a&gt; for an explanation of how NodeRed is used), we're able to monitor the effectiveness of this solution:&lt;/p&gt;
+&lt;img src="../Content/TechAdventuresInSustainability-PartII/DevicePowerState.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Device Power State"&gt;
+&lt;p&gt;As you can see, over the last 30 days PowerFull has allowed me to harness 9 days (~216 hours) worth of electricity that would otherwise have been exported to the grid. Pretty cool!&lt;/p&gt;
+&lt;p&gt;If you have any questions or comments about PowerFull please feel free to drop me a line using the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;I'm taking a quick break from my &lt;a href="https://ian.bebbs.co.uk/tags/uno-platform"&gt;"Many Platforms, one world" blog series&lt;/a&gt; to reprise an old - but related - series on using technology to promote sustainability. In &lt;a href="http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI"&gt;Part 1 of this series&lt;/a&gt; I showed how my family uses &lt;a href="https://github.com/ibebbs/SolarEdge.Monitor"&gt;SolarEdge.Monitor&lt;/a&gt; to extract, persist and visualize the energy being produced by our solar panels. In this post I aim to show how I use the data produced by SolarEdge.Monitor to automatically optimize our electricity usage.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/COduo-Part3</id>
 		<title>Many platforms, one world - Part 3</title>
@@ -3259,20 +3362,5 @@ stream.statuses.filter(track='#INWED17')
 &lt;p&gt;Really quite looking forward to it now...&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;So, my partner and I - being &lt;a href="https://www.stem.org.uk/stem-ambassadors/ambassadors"&gt;STEM Ambassadors&lt;/a&gt; - were asked to prepare and present a talk about Raspberry Pis for a local university on &lt;a href="http://www.inwed.org.uk/"&gt;International Women In Engineering Day&lt;/a&gt;. Unfortunately, this invitation came rather late as a previous presenter had dropped out and this left very little time to prepare.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/ASentimentalAnalysisOfRedDwarfPartII</id>
-		<title>A sentiment(al) analysis of why Red Dwarf is no longer funny</title>
-		<link href="http://ian.bebbs.co.uk/posts/ASentimentalAnalysisOfRedDwarfPartII" />
-		<updated>2017-04-12T00:00:00Z</updated>
-		<content>&lt;p&gt;I've recently been working on a project that required some natural language processing. After a surprisingly brief search I came upon the &lt;a href="https://stanfordnlp.github.io/CoreNLP/"&gt;Stanford CoreNLP&lt;/a&gt; suite of tools and after playing with their &lt;a href="http://corenlp.run/"&gt;online demo&lt;/a&gt; was astounded at the capabilities it provided. Furthermore, it was free, could be run such that it provided a basic HTTP API and came packaged with everything it needed save a copy of the JRE.&lt;/p&gt;
-&lt;p&gt;Having recently &lt;a href="http://ian.bebbs.co.uk/posts/DockerAndKafka"&gt;enjoyed a lot of success&lt;/a&gt; running &lt;a href="https://zookeeper.apache.org/"&gt;various&lt;/a&gt; &lt;a href="https://kafka.apache.org/"&gt;JAVA&lt;/a&gt; &lt;a href="https://neo4j.com/product/"&gt;services&lt;/a&gt; inside a &lt;a href="https://www.docker.com/"&gt;Docker container&lt;/a&gt; running &lt;a href="https://technet.microsoft.com/en-us/windows-server-docs/get-started/getting-started-with-nano-server"&gt;Windows Nano Server&lt;/a&gt;, I decided to see if CoreNLP could be run like this too. Copying my previous &lt;a href="https://github.com/ibebbs/Docker/blob/master/Nanoserver-Zookeeper/Build.ps1"&gt;build script&lt;/a&gt; and &lt;a href="https://github.com/ibebbs/Docker/blob/master/Nanoserver-CoreNLP/Build.ps1"&gt;amending it&lt;/a&gt; to build a &lt;a href="https://hub.docker.com/r/ibebbs/nanonlp/"&gt;container running CoreNLP&lt;/a&gt; was ludicrously easy and in no time I had a local API I could hit to perform all the natural language processing I needed.&lt;/p&gt;
-&lt;p&gt;Now, while the project I was working on mainly required the &lt;a href="https://stanfordnlp.github.io/CoreNLP/ner.html"&gt;&amp;quot;Named Entity Recognition&amp;quot;&lt;/a&gt; and &lt;a href="https://stanfordnlp.github.io/CoreNLP/openie.html"&gt;&amp;quot;Open IE&amp;quot;&lt;/a&gt; annotators, I was intrigued to see that CoreNLP also included a basic &lt;a href="https://stanfordnlp.github.io/CoreNLP/sentiment.html"&gt;Sentiment&lt;/a&gt; annotator. Given that I had written part one of this post back in January, had noted at the time how much I'd like to do sentiment analysis on the transcripts of Red Dwarf, and that I hadn't written a blog post since, I decided to take some time out and perform the sentiment analysis so that I could write this post.&lt;/p&gt;
-&lt;p&gt;Again employing &lt;a href="https://jupyter.org/"&gt;Project Jupyter&lt;/a&gt; hosted on &lt;a href="https://notebooks.azure.com/"&gt;Azure Notebooks&lt;/a&gt; and using &lt;a href="http://fsharp.org/"&gt;F#&lt;/a&gt; coupled with &lt;a href="https://fslab.org/"&gt;FsLab&lt;/a&gt; as my primary language and toolkit, I had a lot of fun performing the analysis. Like last time, you can find the &lt;a href="https://github.com/ibebbs/RedDwarfAnalysis/blob/master/SentimentAnalysisWithCoreNLP.ipynb"&gt;full notebook&lt;/a&gt; and source material in my &lt;a href="https://github.com/ibebbs/RedDwarfAnalysis"&gt;Github repository&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Note: As before, Github provides a &amp;quot;limited rendering only&amp;quot; so, to see all the charts running correctly you need to use the 'nbviewer' link shown below to see a full rendering of the notepad.&lt;/p&gt;
-&lt;img src="https://mvpfyw-dm2306.files.1drv.com/y3mppldGfaYEhvWkV7mdUw26-lP3SOzlMTGFbf8slchIfjBL57IH-GrJev6ai_rISiHBKrom7Abg9YFjfhZ1ArOFT7a7mh4gJuGq-CErv1dun48GQC_BdhMV08fh6hbw400d9nHSEXJ0jA2nPBIrpOPNrOz0I3lVY1tu_L656ylQKg?width=660&amp;height=283&amp;cropmode=none" class="img-responsive" style="margin: auto; width:660; margin-top: 6px; margin-bottom: 6px;" alt="Open external view with nbviewer"/&gt;
-&lt;p&gt;The best bit of all (note: spoilers ahead!) is that it seems my original conclusion may indeed have been wrong... or at least mis-attributed.&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;I've recently been working on a project that required some natural language processing. After a surprisingly brief search I came upon the &lt;a href="https://stanfordnlp.github.io/CoreNLP/"&gt;Stanford CoreNLP&lt;/a&gt; suite of tools and after playing with their &lt;a href="http://corenlp.run/"&gt;online demo&lt;/a&gt; was astounded at the capabilities it provided. Furthermore, it was free, could be run such that it provided a basic HTTP API and came packaged with everything it needed save a copy of the JRE.&lt;/p&gt;</summary>
 	</entry>
 </feed>

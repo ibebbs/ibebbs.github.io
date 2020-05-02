@@ -1,0 +1,320 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Tech Adventures in Sustainability</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Tech Adventures in Sustainability" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartII" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Tech Adventures in Sustainability</h1>
+        <h2 class="subheading">Part II - Maximising Solar Consumption</h2>
+    <div class="meta">        
+Published on 02 May 2020<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/NET-Core" class="btn btn-default btn-xs">.NET Core</a>
+                    <a role="button" href="/tags/Docker" class="btn btn-default btn-xs">Docker</a>
+                    <a role="button" href="/tags/MQTT" class="btn btn-default btn-xs">MQTT</a>
+                    <a role="button" href="/tags/Solar" class="btn btn-default btn-xs">Solar</a>
+                    <a role="button" href="/tags/Sonoff" class="btn btn-default btn-xs">Sonoff</a>
+                    <a role="button" href="/tags/Sustainability" class="btn btn-default btn-xs">Sustainability</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="background">Background</h2>
+<p>I'm taking a quick break from my <a href="https://ian.bebbs.co.uk/tags/uno-platform">&quot;Many Platforms, one world&quot; blog series</a> to reprise an old - but related - series on using technology to promote sustainability. In <a href="http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI">Part 1 of this series</a> I showed how my family uses <a href="https://github.com/ibebbs/SolarEdge.Monitor">SolarEdge.Monitor</a> to extract, persist and visualize the energy being produced by our solar panels. In this post I aim to show how I use the data produced by SolarEdge.Monitor to automatically optimize our electricity usage.</p>
+<h2 id="maximizing-self-consumption-minimizing-imported-energy">Maximizing Self-Consumption / Minimizing Imported Energy</h2>
+<p>The data collected by SolarEdge.Monitor shows the best times to turn on electrical appliances around the house like the washing machine and dish washer. Unfortunately, over the summer we still end up with generation/consumption patterns that look like this:</p>
+<img src="../Content/TechAdventuresInSustainability-PartII/SolarGenerationAndImportExport.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Generation And Consumption">
+<p>As you can see, on sunny days, we generate way more electricity than we consume and over night we consume more electricity than we would like.</p>
+<p>The obvious answer here would be to supplement our solar power system with a battery which would be charged with the excess energy we generate during the day and discharged during the evening. We have discussed this at length and, unfortunately, we still don't feel the cost / RoI balance is there to justify buying a solar battery at this time.</p>
+<h2 id="working-smarter">Working Smarter</h2>
+<p>So if the obvious answer isn't the right answer (yet), what can we do? Well, when we thought about this problem, we realised that there are a lot of electrical appliances/devices that are used during the day but that sit in standby overnight sipping energy. If we turned these off rather than being on standby we could potentially cut our overnight consumption.</p>
+<p>Furthermore, from a sustainability point of view, we have a number of devices around the house that use normal domestic batteries ('AA' or 'AAA'). If we moved to using rechargeable batteries and charged them with excess solar energy then we could further maximise our self-consumption and reduce the number of batteries we buy.</p>
+<p>Again these are fairly obvious actions to take but extremely onerous to perform on a daily basis. If only there were something that could detect when we're exporting energy and turn these devices on or, conversely, when we're importing energy and turn these devices off.</p>
+<h2 id="powerfull">PowerFull</h2>
+<p>And so I wrote <a href="https://github.com/ibebbs/PowerFull">PowerFull</a>.</p>
+<blockquote class="blockquote">
+<p>An open-source .NET Core utility for automatically controlling device power via MQTT.</p>
+</blockquote>
+<p>Once supplied with MQTT and device information, PowerFull is able to monitor the levels of electricity being imported or exported and turn devices on or off appropriately.</p>
+<p>As with SolarEdge.Monitor, PowerFull is a .NET Core application which can natively be <a href="https://hub.docker.com/r/ibebbs/powerfull">containerized</a> and composed with other applications. A full description of how to configure and run PowerFull is available is both the <a href="https://github.com/ibebbs/PowerFull">source code repository</a> and the <a href="https://hub.docker.com/r/ibebbs/powerfull">Docker Hub</a> pages.</p>
+<h2 id="sonoff-mini">Sonoff Mini</h2>
+<p>My first application of PowerFull was to use excess solar energy to charge rechargeable batteries. I already had a decent 12-way battery charger (<a href="https://www.ikea.com/gb/en/p/storhoegen-battery-charger-with-storage-white-40303651/">courtesy of IKEA</a>) which I decided to control with one of these:</p>
+<img src="../Content/TechAdventuresInSustainability-PartII/Sonoff Mini.jpg" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="Sonoff Mini">
+<p>A Sonoff Mini.</p>
+<p>Now using Sonoff to control devices is nothing new and people have been flashing custom firmware - most often <a href="https://github.com/arendst/Tasmota">Tasmota</a> - to these devices for years. The Sonoff Mini however makes flashing custom firmware easier than ever with a factory supplied &quot;DIY Mode&quot;. You see, historically, if you wanted to flash a Sonoff device with new firmware, you'd need an FTDI module to transfer the new firmware to the Sonoff device. With &quot;DIY Mode&quot; it's as simple as connecting a jumper using a specific tool to flash a firmware over Wifi. A guide to flashing the Sonoff Mini can be found <a href="https://www.youtube.com/watch?v=9fkYBWvwn4A">here</a>.</p>
+<p>Furthermore, while PowerFull can be configured to work with a variety of devices via configurable MQTT messages, it is provided with a &quot;Theme&quot; that pre-sets all configuration values such that they are compatible with Tasmota.</p>
+<h2 id="operation">Operation</h2>
+<p>The diagram and associated notes below show how PowerFull interacts with SolarEdge.Monitor and the Sonoff Mini to control power states:</p>
+<img src="../Content/TechAdventuresInSustainability-PartII/PowerFullOperation.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="PowerFull Operation Flow">
+<br/>
+<ol>
+<li>PowerFull begins in the <strong>Starting</strong> state in which it connects to the MQTT broker and subscribes to required topics (<code>Device.PowerOffRequestTopic</code>, <code>Device.PowerOnRequestTopic</code>, <code>Device.PowerStateRequestTopic</code>, <code>Device.PowerStateResponseTopic</code>, <code>Messaging.PowerReadingTopic</code>)</li>
+<li>PowerFull transitions to the <strong>Initializing</strong> state</li>
+<li>PowerFull request power state (by sending <code>Device.PowerStateRequestPayload</code> on <code>Device.PowerStateRequestTopic</code>) from all devices (concurrently), waiting to receive a response from the device (on the <code>Device.PowerStateResponseTopic</code>) for up to 10 seconds.</li>
+<li>Broker forwards '<null>' on topic <code>cmnd/%deviceId%/POWER</code> to Sonoff device.</li>
+<li>Sonoff responds by publishing current power state (&quot;ON&quot; or &quot;OFF&quot;) on topic &quot;stat/%deviceId%/POWER&quot;</li>
+<li>PowerFull uses <code>Device.PowerStateResponseOnPayloadRegex</code> and <code>Device.PowerStateResponseOffPayloadReger</code> to determine state of device. Any device that doesn't respond within 10 seconds or for which the response is not matched by the power state regex values is left in an 'Unknown' state and no further interaction is performed.</li>
+<li>PowerFull transitions to the <strong>Running</strong> state.</li>
+<li>SolarEdge.Monitor publishes regular power reading message to the &quot;home/solar/meter1readings&quot; topic.</li>
+<li>Power reading messages are received by PowerFull's subscription to the <code>Messaging.PowerReadingTopic</code> and  the current power reading is extracted from the payload of the message via the <code>Messaging.PowerReadingPayloadValueRegex</code>.</li>
+<li>Power reading is averaged across <code>Service.AveragePowerReadingAcrossMinutes</code> minutes and if it is:</li>
+</ol>
+<ol type="a">
+<li>above the <code>Service.ThresholdToTurnOnDeviceWatts</code> value then the <code>Device.PowerOnRequestPayload</code> is sent to the <code>Device.PowerOnRequestTopic</code> for the next device to be turned on; or</li>
+<li>below the <code>Service.ThresholdToTurnOffDeviceWatts</code> value then the <code>Device.PowerOffRequestPayload</code> is sent to the <code>Device.PowerOfRequestTopic</code> for the next device to be turned off</li>
+</ol>
+<ol start="11">
+<li>Broker forwards the payload &quot;ON&quot; or &quot;OFF&quot; on topic &quot;cmnd/%deviceId%/POWER&quot; to Sonoff device which turns it's output on or off respectively.</li>
+</ol>
+<p>Steps 8-11 repeat until service is encounters a fault or halt at which point:</p>
+<ol start="12">
+<li>PowerFull transitions to a <strong>Faulted</strong> state where all subscriptions and resources are disposed</li>
+<li>PowerFull transitions to the <strong>Stopped</strong> state where no further processing occurs</li>
+</ol>
+<p>* All terms in <code>Code Format</code> represent PowerFull configuration values. Configuration values can be specified on the command-line or via environment variables. You can see an example of the latter in the following section.</p>
+<h2 id="docker">Docker</h2>
+<p>As shown in <a href="https://ian.bebbs.co.uk/tags/uno-platform">Part 1</a>, I use <a href="https://docs.docker.com/compose/">Docker Compose</a> to run my Smart Home infrastructure. Adding PowerFull was simply a case of adding a new service to my <code>docker-compose.yml</code> file as shown below:</p>
+<pre><code class="language-yml">version: &quot;3.2&quot;
+
+services:
+  # https://hub.docker.com/_/eclipse-mosquitto
+  mqtt:
+    image: eclipse-mosquitto
+    ports:
+      - &quot;1883:1883&quot;
+      - &quot;9001:9001&quot;
+
+  solaredgemonitor:
+    image: ibebbs/solaredge.monitor
+    environment:
+      - Solaredge:Monitor:Inverter:Address=192.168.2.23
+      - Solaredge:Monitor:Inverter:Port=502
+      - Solaredge:Monitor:MQTT:Address=mqtt
+      - Solaredge:Monitor:MQTT:Port=1883
+      - Solaredge:Monitor:MQTT:ClientId=InverterMonitor
+      - Solaredge:Monitor:MQTT:Topic=home/solar/inverter
+      - Solaredge:Monitor:Service:PollingIntervalSeconds=10
+      - Solaredge:Monitor:Service:ModelsToRead=inverter,meter1readings
+    depends_on:
+      - mqtt
+
+  powerfull:
+    image: ibebbs/powerfull
+    environment:
+      - PowerFull:Service:Devices=sonoff-battery
+      - PowerFull:Messaging:Broker=mqtt
+      - PowerFull:Messaging:PowerReadingTopic=home/solar/meter1readings
+      - PowerFull:Messaging:PowerReadingPayloadValueRegex=^{.+&quot;RealPower&quot;:{&quot;Total&quot;:(?&lt;RealPower&gt;-?\d+(\.\d+)).+}
+      - PowerFull:Device:Theme=Tasmota
+    depends_on:
+      - mqtt      
+</code></pre>
+<h2 id="conclusion">Conclusion</h2>
+<p>By adding rules to interpret power on and power off messages to <a href="https://nodered.org/">NodeRed</a> (see <a href="https://ian.bebbs.co.uk/tags/uno-platform">Part 1</a> for an explanation of how NodeRed is used), we're able to monitor the effectiveness of this solution:</p>
+<img src="../Content/TechAdventuresInSustainability-PartII/DevicePowerState.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Device Power State">
+<p>As you can see, over the last 30 days PowerFull has allowed me to harness 9 days (~216 hours) worth of electricity that would otherwise have been exported to the grid. Pretty cool!</p>
+<p>If you have any questions or comments about PowerFull please feel free to drop me a line using the links below or from my <a href="https://ian.bebbs.co.uk/about">about page</a>.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2020. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
