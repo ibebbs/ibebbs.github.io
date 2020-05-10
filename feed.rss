@@ -5,8 +5,171 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2020</copyright>
-		<pubDate>Sat, 02 May 2020 15:20:54 GMT</pubDate>
-		<lastBuildDate>Sat, 02 May 2020 15:20:54 GMT</lastBuildDate>
+		<pubDate>Sun, 10 May 2020 21:07:58 GMT</pubDate>
+		<lastBuildDate>Sun, 10 May 2020 21:07:58 GMT</lastBuildDate>
+		<item>
+			<title>Many platforms, one world - Part 4</title>
+			<link>http://ian.bebbs.co.uk/posts/COduo-Part4</link>
+			<description>&lt;p&gt;This is part 4 of my series on using the Uno Platform to write CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt;, a highly graphical cross-platform app, able to target both single and dual-screen devices. In this post I show how CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; uses the TwoPaneView to provide a single, adaptive UI which functions across multiple form-factors, screens and orientations. I then detail how to set up an Uno Platform solution such that you're able to use (one of the myriad implementations of) the TwoPaneView in your apps.&lt;/p&gt;</description>
+			<enclosure url="http://ian.bebbs.co.uk/Content/CODuo/Header.png" length="0" type="image" />
+			<guid>http://ian.bebbs.co.uk/posts/COduo-Part4</guid>
+			<pubDate>Sun, 10 May 2020 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;This is part 4 of my series on using the Uno Platform to write CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt;, a highly graphical cross-platform app, able to target both single and dual-screen devices. In this post I show how CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; uses the TwoPaneView to provide a single, adaptive UI which functions across multiple form-factors, screens and orientations. I then detail how to set up an Uno Platform solution such that you're able to use (one of the myriad implementations of) the TwoPaneView in your apps.&lt;/p&gt;
+&lt;p&gt;For an introduction to CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; or to find further posts in this series, please use the links below:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;a href="./COduo-Part1"&gt;Part 1 - Background&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part2"&gt;Part 2 - Infrastructure&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part3"&gt;Part 3 - Client Architecture&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part4"&gt;Part 4 - Using the TwoPaneView&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Part 5 - Implementing the interactive UK Map&lt;/li&gt;
+&lt;li&gt;Part 6 - Charts on the Uno Platform&lt;/li&gt;
+&lt;li&gt;Part 7 - Windows, Win10X and releasing to the Microsoft Store&lt;/li&gt;
+&lt;li&gt;Part 8 - Android and releasing to the Google Play Store&lt;/li&gt;
+&lt;li&gt;Part 9 - iOS and releasing to the Apple App Store&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id="the-twopaneview"&gt;The TwoPaneView&lt;/h2&gt;
+&lt;p&gt;Windows Dev Center describes the &lt;a href="https://docs.microsoft.com/en-us/uwp/api/microsoft.ui.xaml.controls.twopaneview?view=winui-2.3"&gt;TwoPaneView&lt;/a&gt; as:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;a layout control that helps you manage the display of apps that have 2 distinct areas of content, like a master/detail view.&lt;br /&gt;
+While it works on all Windows devices, the TwoPaneView control is designed to help you take full advantage of dual-screen devices automatically, with no special coding needed. On a dual-screen device, the two-pane view ensures that the user interface (UI) is split cleanly when it spans the gap between screens, so that your content is presented on either side of the gap.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;As outlined above, the central tenet of the TwoPaneView is that, by separating the UI of your app into two parts, your app can automatically capitalize on the additional screen real-estate offered by dual-screen devices. While splitting a UI into 2 distinct areas may seem odd, Microsoft offer several examples of how this can be achieved in their &lt;a href="https://docs.microsoft.com/en-us/dual-screen/introduction"&gt;&amp;quot;Introduction to dual-screen devices&amp;quot;&lt;/a&gt; article, a summary of which can be seen in the image below:&lt;/p&gt;
+&lt;img src="https://docs.microsoft.com/en-us/dual-screen/images/dual-screen-app-patterns.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Dual-screen app patterns"/&gt;
+&lt;p&gt;What Microsoft do not make clear though, is how good this approach is for providing a reactive UI on &lt;em&gt;single screen devices&lt;/em&gt;. By splitting your UI in this way, it can be composed into a variety of layouts to automatically fit the myriad different screen resolutions and aspect ratios provided by devices ranging from PC's and tablets to mobile phones and IoT devices (and the various orientations thereof). For example, below I show common screen sizes, layouts and orientations which are natively catered for by the TwoPaneView:&lt;/p&gt;
+&lt;img src="/Content/CODuo/TwoPaneViewLayouts.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="TwoPaneView on Single Screen"/&gt;
+&lt;p&gt;Note that the two panes do not need to be the same size and scroll-bars are introduced if either of the panes causes the layout to exceed the screen bounds.&lt;/p&gt;
+&lt;p&gt;Now this kind of reactive UI is nothing new but historically it would have had to be handled manually; usually (in the XAML world) through the use of &lt;a href="https://blog.mzikmund.com/2017/02/visualstatemanager-pitfalls/"&gt;Visual States and Adaptive Triggers&lt;/a&gt;. But with the TwoPaneView this is all taken care of for you while providing the added benefit of also allowing these panes to intelligently span across &lt;em&gt;screens&lt;/em&gt;. Pretty neat huh.&lt;/p&gt;
+&lt;p&gt;Microsoft provide a fairly comprehensive guide to using the TwoPaneView &lt;a href="https://docs.microsoft.com/en-us/windows/uwp/design/controls-and-patterns/two-pane-view"&gt;here&lt;/a&gt; but there are numerous additional tips for using the control - particularly on multiple screens - that could easily warrant an entire blog post. Here though I would like to refocus on how you can start using the control in an Uno Project which, unfortunately, isn't as straight forward as it ought to be.&lt;/p&gt;
+&lt;h2 id="three-implementations-of-two-panes"&gt;Three Implementations of Two Panes&lt;/h2&gt;
+&lt;p&gt;At the time of writing, there are &lt;em&gt;three&lt;/em&gt; implementations of the TwoPaneView control:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;The &lt;a href="https://docs.microsoft.com/en-us/uwp/api/windows.ui.xaml.controls.twopaneview"&gt;Windows 10 SDK version&lt;/a&gt;, released as part of the &lt;a href="https://developer.microsoft.com/en-US/windows/downloads/windows-10-sdk/"&gt;v10.0.18362.0 SDK&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;The &lt;a href="https://docs.microsoft.com/en-us/uwp/api/microsoft.ui.xaml.controls.twopaneview?view=winui-2.3"&gt;WinUI version&lt;/a&gt; released as part of the &lt;a href="https://www.nuget.org/packages/Microsoft.UI.Xaml/2.1.190405004"&gt;WinUI 2.1&lt;/a&gt; nuget package&lt;/li&gt;
+&lt;li&gt;The &lt;a href="https://platform.uno/blog/surface-duo-winui-twopaneview-implementation-via-uno-platform/"&gt;Uno version&lt;/a&gt; released as part of the &lt;a href="https://www.nuget.org/packages/Uno.UI/2.1.37"&gt;Uno.UI 2.1&lt;/a&gt; nuget package&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Getting an Uno Platform solution to correctly use the desired implementations has been the cause of more than a little confusion (&lt;a href="https://stackoverflow.com/questions/60931965/twopaneview-with-uno-platform"&gt;not least of which from me&lt;/a&gt;), so here I will cover the various combinations that allow you to use the TwoPaneView in a cross-platform code-base.&lt;/p&gt;
+&lt;h3 id="uno-windows-10-sdk"&gt;Uno + Windows 10 SDK&lt;/h3&gt;
+&lt;p&gt;If your UWP head project is targeting platform 1903 or later, then the easiest way to use the TwoPaneView is to mix the Uno.UI and Windows 10 SDK implementations of the control. To do this, first ensure:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;That all head projects except UWP have Uno.UI version 2.1 or later installed&lt;/li&gt;
+&lt;li&gt;The UWP head project is targeting platform 1903&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;With these pre-requisites, the following XAML will compile and run successfully across all heads:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-xaml"&gt;&amp;lt;Page
+    x:Class=&amp;quot;UnoWithWinUI.MainPage&amp;quot;
+    xmlns=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&amp;quot;
+    xmlns:x=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml&amp;quot;
+    xmlns:local=&amp;quot;using:UnoWithWinUI&amp;quot;
+    xmlns:d=&amp;quot;http://schemas.microsoft.com/expression/blend/2008&amp;quot;
+    xmlns:mc=&amp;quot;http://schemas.openxmlformats.org/markup-compatibility/2006&amp;quot;
+    mc:Ignorable=&amp;quot;d&amp;quot;&amp;gt;
+
+    &amp;lt;Grid Background=&amp;quot;{ThemeResource ApplicationPageBackgroundThemeBrush}&amp;quot;&amp;gt;
+        &amp;lt;TwoPaneView Pane1Length=&amp;quot;0.3*&amp;quot; Pane2Length=&amp;quot;0.7*&amp;quot; Background=&amp;quot;Yellow&amp;quot; HorizontalAlignment=&amp;quot;Stretch&amp;quot; VerticalAlignment=&amp;quot;Stretch&amp;quot; MinWideModeWidth=&amp;quot;100&amp;quot;&amp;gt;
+            &amp;lt;TwoPaneView.Pane1&amp;gt;
+                &amp;lt;Border&amp;gt;
+                    &amp;lt;Rectangle Fill=&amp;quot;LightBlue&amp;quot; /&amp;gt;
+                &amp;lt;/Border&amp;gt;
+            &amp;lt;/TwoPaneView.Pane1&amp;gt;
+            &amp;lt;TwoPaneView.Pane2&amp;gt;
+                &amp;lt;Border&amp;gt;
+                    &amp;lt;Rectangle Fill=&amp;quot;LightGreen&amp;quot;/&amp;gt;
+                &amp;lt;/Border&amp;gt;
+            &amp;lt;/TwoPaneView.Pane2&amp;gt;
+        &amp;lt;/TwoPaneView&amp;gt;
+    &amp;lt;/Grid&amp;gt;
+&amp;lt;/Page&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="uno-winui"&gt;Uno + WinUI&lt;/h3&gt;
+&lt;p&gt;WinUI is &lt;a href="https://microsoft.github.io/microsoft-ui-xaml/"&gt;&amp;quot;The Future of Windows Development&amp;quot;&lt;/a&gt; and, accordingly, the Uno platform has committed to &lt;a href="https://www.idiwork.com/unoplatform-winui-what-to-expect/"&gt;&amp;quot;put WinUI on every platform possible&amp;quot;&lt;/a&gt;. As such, if you're looking to start a new cross-platform project, you should probably be looking to use controls from the WinUI package (not the Windows 10 SDK) where possible.&lt;/p&gt;
+&lt;p&gt;Unfortunately, this isn't as simple as one might hope. Uno currently only implements a small subset of the controls available in WinUI and, as the namespaces between these controls are different, you will need to limit yourself to only using controls from WinUI that have also been implemented in Uno if you want to maintain a single code-base for your cross-platform project (at the time of writing Uno.UI has implemented just the &lt;a href="https://github.com/unoplatform/uno/tree/e61a1da0df49d2d93e32d71e2801fd84689bb007/src/Uno.UI/Microsoft/UI/Xaml/Controls/NumberBox"&gt;NumberBox&lt;/a&gt; and the &lt;a href="https://github.com/unoplatform/uno/tree/e61a1da0df49d2d93e32d71e2801fd84689bb007/src/Uno.UI/Microsoft/UI/Xaml/Controls/TwoPaneView"&gt;TwoPaneView&lt;/a&gt; controls).&lt;/p&gt;
+&lt;p&gt;The following steps describe how to get an Uno solution setup such that you can correctly use a WinUI control - in this instance the TwoPaneView - without resorting to head project specific views:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Ensure that all head projects except UWP have Uno.UI version 2.1 or later installed&lt;/li&gt;
+&lt;li&gt;Install the WinUI nuget package (version 2.1 or later) into the UWP head project&lt;/li&gt;
+&lt;li&gt;Add the required WinUI XAML resources to &lt;code&gt;App.xaml&lt;/code&gt; in the Shared project as shown here:
+&lt;pre&gt;&lt;code class="language-xaml"&gt;&amp;lt;Application.Resources&amp;gt;
+    &amp;lt;ResourceDictionary&amp;gt;
+        &amp;lt;ResourceDictionary.MergedDictionaries&amp;gt;
+            &amp;lt;XamlControlsResources xmlns=&amp;quot;using:Microsoft.UI.Xaml.Controls&amp;quot; /&amp;gt;
+        &amp;lt;/ResourceDictionary.MergedDictionaries&amp;gt;
+    &amp;lt;/ResourceDictionary&amp;gt;
+&amp;lt;/Application.Resources&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;/li&gt;
+&lt;li&gt;Add the &lt;code&gt;xmlns:winui=&amp;quot;using:Microsoft.UI.Xaml.Controls&amp;quot;&lt;/code&gt; namespace to the XAML page in which you wish to use the TwoPaneView control.&lt;/li&gt;
+&lt;li&gt;Add the TwoPaneView to the XAML page.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;pre&gt;&lt;code class="language-xaml"&gt;&amp;lt;Page
+    x:Class=&amp;quot;UnoWithWinUI.MainPage&amp;quot;
+    xmlns=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&amp;quot;
+    xmlns:x=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml&amp;quot;
+    xmlns:local=&amp;quot;using:UnoWithWinUI&amp;quot;
+    xmlns:winui=&amp;quot;using:Microsoft.UI.Xaml.Controls&amp;quot;
+    xmlns:d=&amp;quot;http://schemas.microsoft.com/expression/blend/2008&amp;quot;
+    xmlns:mc=&amp;quot;http://schemas.openxmlformats.org/markup-compatibility/2006&amp;quot;
+    mc:Ignorable=&amp;quot;d&amp;quot;&amp;gt;
+
+    &amp;lt;Grid Background=&amp;quot;{ThemeResource ApplicationPageBackgroundThemeBrush}&amp;quot;&amp;gt;
+        &amp;lt;winui:TwoPaneView Pane1Length=&amp;quot;0.3*&amp;quot; Pane2Length=&amp;quot;0.7*&amp;quot; Background=&amp;quot;Yellow&amp;quot; HorizontalAlignment=&amp;quot;Stretch&amp;quot; VerticalAlignment=&amp;quot;Stretch&amp;quot; MinWideModeWidth=&amp;quot;100&amp;quot;&amp;gt;
+            &amp;lt;winui:TwoPaneView.Pane1&amp;gt;
+                &amp;lt;Border&amp;gt;
+                    &amp;lt;Rectangle Fill=&amp;quot;LightBlue&amp;quot; /&amp;gt;
+                &amp;lt;/Border&amp;gt;
+            &amp;lt;/winui:TwoPaneView.Pane1&amp;gt;
+            &amp;lt;winui:TwoPaneView.Pane2&amp;gt;
+                &amp;lt;Border&amp;gt;
+                    &amp;lt;Rectangle Fill=&amp;quot;LightGreen&amp;quot;/&amp;gt;
+                &amp;lt;/Border&amp;gt;
+            &amp;lt;/winui:TwoPaneView.Pane2&amp;gt;
+        &amp;lt;/winui:TwoPaneView&amp;gt;
+    &amp;lt;/Grid&amp;gt;
+&amp;lt;/Page&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;At this point you should all project heads should compile and run successfully. If all goes well, you should see something akin to the following on each platform:&lt;/p&gt;
+&lt;img src="/Content/CODuo/UnoTwoPaneViewOnAndroid.png" class="img-responsive" style="margin: auto; height:320px; margin-top: 6px; margin-bottom: 6px;" alt="Uno TwoPaneView on Android"/&gt;
+&lt;h2 id="two-pains-with-the-twopaneview"&gt;Two pains with the TwoPaneView&lt;/h2&gt;
+&lt;p&gt;While developing CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; I found that the TwoPaneView exhibited two curious behaviours that I had not expected. Firstly, the control would continue to use proportional sizing of the panes even when the control was being used across multiple screens and, secondly, it wrapped each pane's content in a scroll viewer which made it difficult to correctly design an &amp;quot;adaptive&amp;quot; UI.&lt;/p&gt;
+&lt;p&gt;I spent an age trying to work out why the control was behaving this way and potential methods to get it to work the way I expected. Finally I ended up writing a custom control which &amp;quot;just worked&amp;quot; and moved on with trying to deliver some more functional aspects of the app.&lt;/p&gt;
+&lt;p&gt;Sometime later, while discussing this issue with the Uno Platform team, I decided to recreate the issues I had experienced in a new solution. Yet, when I came to demonstrate the issues - this time on the Windows 10X Emulator - the TwoPaneView worked perfectly. Looking at the associated code I confirmed that it had not changed yet I was no longer seeing either of the behaviours I had previously experienced... until I tried running the project back on the Surface Duo emulator.&lt;/p&gt;
+&lt;p&gt;Bingo.&lt;/p&gt;
+&lt;p&gt;It turned out that, while the WinUI implementation of the TwoPaneView worked exactly as I had originally expected, the Uno recreation of the control didn't exhibit the same behaviour. I &lt;a href="https://github.com/unoplatform/uno/issues/2816"&gt;created an issue&lt;/a&gt; in the Uno Platform github repository and will revert to using the TwoPaneView when they - or I - have time to resolve the issue.&lt;/p&gt;
+&lt;h2 id="using-the-twopaneview-in-coduo"&gt;Using the TwoPaneView in CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt;&lt;/h2&gt;
+&lt;p&gt;CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; uses the TwoPaneView in the &amp;quot;root&amp;quot; view. This root view is displayed in the UWP Window's &lt;code&gt;Frame&lt;/code&gt; and never changes. To support navigation and layout changes CO&lt;sub&gt;&lt;em&gt;duo&lt;/em&gt;&lt;/sub&gt; employs a &lt;a href="https://ian.bebbs.co.uk/posts/ReactiveStateMachines"&gt;Reactive State Machine&lt;/a&gt; which dictates the content that should be displayed within each pane of the TwoPaneView. This is done by reacting to mode changes in the TwoPaneView (i.e. SinglePane, Tall, Wide) and emitting &lt;code&gt;Layout.Changed&lt;/code&gt; events, all communicated between the view and state machine via the &lt;code&gt;Event.Bus&lt;/code&gt;. These events are received by the &lt;code&gt;Root.ViewModel&lt;/code&gt; which coordinates updating the TwoPaneView control in the &lt;code&gt;Root.View&lt;/code&gt; by directly setting the content of each panel.&lt;/p&gt;
+&lt;p&gt;To illustrate this here is the code from the &lt;a href="https://github.com/ibebbs/CODuo/blob/master/src/CODuo/CODuo.Shared/Home/State.cs"&gt;&lt;code&gt;Home.State&lt;/code&gt;&lt;/a&gt; which reacts to layout changes:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;var viewModel = _viewModelFactory.Create&amp;lt;IViewModel&amp;gt;();
+
+var layouts = Observable
+    .Merge(
+        _eventBus.GetEvent&amp;lt;Event.LayoutModeResponse&amp;gt;().Select(&amp;#64;event =&amp;gt; &amp;#64;event.Mode),
+        _eventBus.GetEvent&amp;lt;Event.LayoutModeChanged&amp;gt;().Select(&amp;#64;event =&amp;gt; &amp;#64;event.Mode))
+    .ObserveOn(_schedulers.Dispatcher)
+    .Select(mode =&amp;gt; AsLayout(viewModel, mode))
+    .Select(AsEvent)
+    .Subscribe(_eventBus.Publish);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And the code from the &lt;a href="https://github.com/ibebbs/CODuo/blob/master/src/CODuo/CODuo.Shared/Root/ViewModel.cs"&gt;&lt;code&gt;Root.ViewModel&lt;/code&gt;&lt;/a&gt; which applies the layout:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;return _eventBus.GetEvent&amp;lt;Event.LayoutChanged&amp;gt;()
+    .WithLatestFrom(_view, (&amp;#64;event, view) =&amp;gt; (&amp;#64;event.Layout, View: view))
+    .Where(tuple =&amp;gt; tuple.View != null)
+    .ObserveOn(_schedulers.Dispatcher)
+    .Subscribe(tuple =&amp;gt; tuple.View.PerformLayout(tuple.Layout));
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And the code from the &lt;a href="https://github.com/ibebbs/CODuo/blob/master/src/CODuo/CODuo.Shared/Root/View.xaml.cs"&gt;&lt;code&gt;Root.View&lt;/code&gt;&lt;/a&gt; which updates the TwoPaneView (currently my custom &lt;code&gt;DualPaneView&lt;/code&gt; control due to the issues described above):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public void PerformLayout(Layout layout)
+{
+    dualPaneView.Pane1 = layout.Pane1Content as UIElement;
+    dualPaneView.Pane2 = layout.Pane2Content as UIElement;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="part-5"&gt;Part 5&lt;/h2&gt;
+&lt;p&gt;In &lt;a href="./COduo-Part5"&gt;Part 5&lt;/a&gt; I will outline how I implemented the interactive map of the UK. I believe the approaches used for this control leverage some of the incredible power of UWP - and the Uno Platform - to &amp;quot;build modern, seamless UIs that feel natural to use on every &lt;del&gt;Windows&lt;/del&gt; device.&amp;quot;&lt;/p&gt;
+&lt;h2 id="finally"&gt;Finally&lt;/h2&gt;
+&lt;p&gt;I hope you enjoy this series and that it goes some way to demonstrating the massive potential presented by the Uno Platform for delivering cross-platform experiences without having to invest in additional staff training nor bifurcating your development efforts.&lt;/p&gt;
+&lt;p&gt;If you or your company are interested in building apps that can leverage the dual screen capabilities of new devices such as the Surface Duo and Surface Neo, or are keen to understand how a single code-base can deliver apps to &lt;em&gt;every platform from mobile phones to web sites&lt;/em&gt;, then please feel free to drop me a line using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;. I am actively seeking new clients in this space and would be happy to discuss any ideas you have or projects you're planning.&lt;/p&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>Tech Adventures in Sustainability</title>
 			<link>http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartII</link>
@@ -124,7 +287,7 @@ services:
 &lt;li&gt;&lt;a href="./COduo-Part1"&gt;Part 1 - Background&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="./COduo-Part2"&gt;Part 2 - Infrastructure&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="./COduo-Part3"&gt;Part 3 - Client Architecture&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Part 4 - Using the TwoPaneView&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part4"&gt;Part 4 - Using the TwoPaneView&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Part 5 - Implementing the interactive UK Map&lt;/li&gt;
 &lt;li&gt;Part 6 - Charts on the Uno Platform&lt;/li&gt;
 &lt;li&gt;Part 7 - Windows, Win10X and releasing to the Microsoft Store&lt;/li&gt;
@@ -273,7 +436,7 @@ services:
 &lt;li&gt;&lt;a href="./COduo-Part1"&gt;Part 1 - Background&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="./COduo-Part2"&gt;Part 2 - Infrastructure&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="./COduo-Part3"&gt;Part 3 - Client Architecture&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Part 4 - Using the TwoPaneView&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part4"&gt;Part 4 - Using the TwoPaneView&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Part 5 - Implementing the interactive UK Map&lt;/li&gt;
 &lt;li&gt;Part 6 - Charts on the Uno Platform&lt;/li&gt;
 &lt;li&gt;Part 7 - Windows, Win10X and releasing to the Microsoft Store&lt;/li&gt;
@@ -339,7 +502,7 @@ public static async Task Energy(
 &lt;li&gt;&lt;a href="./COduo-Part1"&gt;Part 1 - Background&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="./COduo-Part2"&gt;Part 2 - Infrastructure&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;&lt;a href="./COduo-Part3"&gt;Part 3 - Client Architecture&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;Part 4 - Using the TwoPaneView&lt;/li&gt;
+&lt;li&gt;&lt;a href="./COduo-Part4"&gt;Part 4 - Using the TwoPaneView&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Part 5 - Implementing the interactive UK Map&lt;/li&gt;
 &lt;li&gt;Part 6 - Charts on the Uno Platform&lt;/li&gt;
 &lt;li&gt;Part 7 - Windows, Win10X and releasing to the Microsoft Store&lt;/li&gt;
@@ -3305,63 +3468,6 @@ Again, the number of manager and worked nodes as well as the name prefix for eac
 &lt;p&gt;I've successfully used this script to provision multiple docker hosts and docker swarms but it's worthwhile noting that it can be a bit finickity with directories. If you can an error saying it couldn't find a directory then simply create it first. I really ought to fix up the script (improvements via PR gratefully accepted) but I'm now a bit busy deploying services to my swarm :0)&lt;/p&gt;
 &lt;p&gt;Furthermore I've successfully used nodes created by this script to provision a hybrid swarm (see the 'Mixed OS clusters section &lt;a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode"&gt;here&lt;/a&gt;) of boot2docker and nano2docker images. With the appropriate labels on the nodes, it is possible to use &lt;code&gt;docker-compose&lt;/code&gt; to automatically deploy images to the correct hosts while retaining all the benefits of overlay networking.&lt;/p&gt;
 &lt;p&gt;It's a lot of docking fun!&lt;/p&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>Unicorn Pi Tweet Bot</title>
-			<link>http://ian.bebbs.co.uk/posts/RaspberryPiUnicornTwitterBot</link>
-			<description>&lt;p&gt;So, my partner and I - being &lt;a href="https://www.stem.org.uk/stem-ambassadors/ambassadors"&gt;STEM Ambassadors&lt;/a&gt; - were asked to prepare and present a talk about Raspberry Pis for a local university on &lt;a href="http://www.inwed.org.uk/"&gt;International Women In Engineering Day&lt;/a&gt;. Unfortunately, this invitation came rather late as a previous presenter had dropped out and this left very little time to prepare.&lt;/p&gt;</description>
-			<enclosure url="https://i.ytimg.com/vi/g3sxXgLr1uQ/maxresdefault.jpg" length="0" type="image" />
-			<guid>http://ian.bebbs.co.uk/posts/RaspberryPiUnicornTwitterBot</guid>
-			<pubDate>Wed, 21 Jun 2017 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;p&gt;So, my partner and I - being &lt;a href="https://www.stem.org.uk/stem-ambassadors/ambassadors"&gt;STEM Ambassadors&lt;/a&gt; - were asked to prepare and present a talk about Raspberry Pis for a local university on &lt;a href="http://www.inwed.org.uk/"&gt;International Women In Engineering Day&lt;/a&gt;. Unfortunately, this invitation came rather late as a previous presenter had dropped out and this left very little time to prepare.&lt;/p&gt;
-&lt;p&gt;While I had a couple of Pis around the house doing IoT related chores, I really wanted something a little more flashy to present so I quickly rushed out to the local Maplins and picked up a new Raspberry Pi 3 and a &lt;a href="https://shop.pimoroni.com/products/unicorn-hat"&gt;Pimoroni Unicorn HAT&lt;/a&gt; - the very definition of flashy.&lt;/p&gt;
-&lt;img src="https://cdn.shopify.com/s/files/1/0174/1800/products/Unicorn_Still_4_1024x1024.jpg?v=1418813740" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Pimoroni Unicorn HAT"&gt;
-&lt;p&gt;I then needed to think of something to &lt;strong&gt;do&lt;/strong&gt; with it.&lt;/p&gt;
-&lt;p&gt;Wanting something interactive and, ideally, internet related (seeing a physical manifestation of an event in cyberspace really has 'wow' factor) I decided to write a Twitter bot that listens for a specific hashtag (#INWED17 in this instance) and scrolls the text of the tweet across the Unicorn HAT leds. As with most things of this nature, a short google session resulted in several articles / blog posts I could mash up to produce the desired effect. These were:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;a href="https://www.raspberrypi.org/learning/getting-started-with-the-twitter-api/requirements/"&gt;Getting started with Twitter&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://learn.pimoroni.com/tutorial/unicorn-hat/getting-started-with-unicorn-hat"&gt;Settings up Unicorn HAT&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://github.com/topshed/UnicornHatScroll"&gt;Unicorn HAT scroll&lt;/a&gt;&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;All in it took about an hour to get the various dependencies installed (including dealling with a rather annoying &lt;a href="https://stackoverflow.com/questions/27341064/how-do-i-fix-importerror-cannot-import-name-incompleteread"&gt;'pip' error&lt;/a&gt;), accounts set up and code mashed together in order to get a functional app up and running. Not bad considering this was my first stab at writing Python on a Pi.&lt;/p&gt;
-&lt;p&gt;I pushed the code to a &lt;a href="https://github.com/ibebbs/UnicornPiBot"&gt;Github repository&lt;/a&gt; but have included it below simply because I am impressed with how concise the it is:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;import sys
-import random
-
-from UHScroll import *
-from twython import TwythonStreamer
-from auth import (
-    consumer_key,
-    consumer_secret,
-    access_token,
-    access_token_secret
-)
-
-colours = ['red','white','pink','blue','green','cyan']
-
-non_bmp_map = dict.fromkeys(range(0x10000, sys.maxunicode + 1), 0xfffd)
-
-class UnicornPiBotStreamer(TwythonStreamer):
-    def on_success(self, data):
-        if 'text' in data:
-            text = data['text'].translate(non_bmp_map)
-            colour = random.choice(colours)
-            print(text)
-            unicorn_scroll(text, colour, 200, 0.05)
-
-stream = UnicornPiBotStreamer(
-    consumer_key,
-    consumer_secret,
-    access_token,
-    access_token_secret
-)
-
-stream.statuses.filter(track='#INWED17')
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;I'm now beginning to see why Python has gained such traction in non-enterprise markets and will definitely consider using it for future projects. Skipping the edit-compile-run loop and simply interpretting the code via a command line call certainly makes for fast iterations but I don't think I'd appreciate it so much if I was trying to develop anything of any size/complexity.&lt;/p&gt;
-&lt;p&gt;Anyway, having an exhibit visitors can interact with (albeit indirectly) will make a good addition to the &lt;a href="http://ian.bebbs.co.uk/posts/MonsterPi"&gt;other&lt;/a&gt; &lt;a href="https://www.raspberrypi.org/magpi/issues/40/"&gt;Pi&lt;/a&gt; &lt;a href="https://aiyprojects.withgoogle.com/voice"&gt;devices&lt;/a&gt; we'll be taking along and discussing.&lt;/p&gt;
-&lt;p&gt;Really quite looking forward to it now...&lt;/p&gt;
 </content:encoded>
 		</item>
 	</channel>
