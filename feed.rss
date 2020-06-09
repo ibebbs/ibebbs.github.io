@@ -5,8 +5,330 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2020</copyright>
-		<pubDate>Sat, 30 May 2020 16:29:08 GMT</pubDate>
-		<lastBuildDate>Sat, 30 May 2020 16:29:08 GMT</lastBuildDate>
+		<pubDate>Tue, 09 Jun 2020 13:02:29 GMT</pubDate>
+		<lastBuildDate>Tue, 09 Jun 2020 13:02:29 GMT</lastBuildDate>
+		<item>
+			<title>A Kata for Katas</title>
+			<link>http://ian.bebbs.co.uk/posts/Codewars</link>
+			<description>&lt;p&gt;Azure Functions and Azure Blob Storage provide an incredibly quick, easy and cheap way of adding dynamic content to a static website. In this post I show how I used this combo to add a list of completed "code kata" to my blog's sidebar.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/Codewars</guid>
+			<pubDate>Tue, 09 Jun 2020 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;Azure Functions and Azure Blob Storage provide an incredibly quick, easy and cheap way of adding dynamic content to a static website. In this post I show how I used this combo to add a list of completed &amp;quot;code kata&amp;quot; to my blog's sidebar.&lt;/p&gt;
+&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;A code kata is an exercise in programming which helps programmers hone their skills through practice and repetition.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;There are many ways of practising code katas and many sites that provide code katas for you to practise with. I use &lt;a href="https://www.codewars.com"&gt;Codewars&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;While completing a kata yesterday, I thought it would be good to show the katas I'm completing on my blog. A quick search revealed that Codewars has an &lt;a href="https://dev.codewars.com/"&gt;API&lt;/a&gt; for retrieving profile and kata information and &lt;a href="https://dev.codewars.com/#webhooks"&gt;webhooks&lt;/a&gt; for notifying external services when this information changes. A workable solution for getting kata information on my blog quickly came to mind and I simply couldn't resist taking time out to implement it.&lt;/p&gt;
+&lt;p&gt;Just a few - very enjoyable - hours later, I had this:&lt;/p&gt;
+&lt;img src="/Content/Codewars/Homepage.png" class="img-responsive" style="margin: auto; margin-top: 6px; margin-bottom: 6px;" alt="Homepage with Codewars"/&gt;
+&lt;p&gt;Here's how I did it.&lt;/p&gt;
+&lt;h2 id="static-serverless"&gt;Static &amp;amp; Serverless&lt;/h2&gt;
+&lt;p&gt;My blog is written in &lt;a href="https://en.wikipedia.org/wiki/Markdown"&gt;Markdown&lt;/a&gt; and uses &lt;a href="https://wyam.io/"&gt;Wyam.io&lt;/a&gt; to translate the markdown (plus other content) into a static site which is hosted on &lt;a href="https://pages.github.com/"&gt;Github Pages&lt;/a&gt;. All content is source controlled and the process of adding a new blog post is very smooth.&lt;/p&gt;
+&lt;p&gt;As such I didn't really want to add any complexity to the process by trying to regenerate the site when I complete a kata. This meant I needed to a) embed an external page within my blog, and b) write a service which would generate this page whenever I complete a kata. Furthermore, given the relative infrequency with which I undertake code katas, I didn't want a service running 24/7. This meant going &lt;a href="https://en.wikipedia.org/wiki/Serverless_computing"&gt;serverless&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;These requirements led to this architecture:&lt;/p&gt;
+&lt;img src="/Content/Codewars/Architecture.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px; margin-top: -20px;" alt="Architecture"/&gt;
+&lt;p&gt;Which can be read as follows:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;When a Kata is submitted to Codewars ...&lt;/li&gt;
+&lt;li&gt;... a webhook is used to call the Http Trigger of our Azure Function.&lt;/li&gt;
+&lt;li&gt;The Azure Function queries the Codewars API for the data it needs to generate an HTML page.&lt;/li&gt;
+&lt;li&gt;The generated page is saved to Azure Blob Storage in a container which is configured to allow &amp;quot;Public read access for blobs only&amp;quot;&lt;/li&gt;
+&lt;li&gt;The homepage for my blog is modified to include an &lt;code&gt;&amp;lt;embed/&amp;gt;&lt;/code&gt; element pointing to the generated page meaning ...&lt;/li&gt;
+&lt;li&gt;... visitors to my blog now receive both the content from GitHub Pages and the new page from Azure Blob Storage.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="implementation"&gt;Implementation&lt;/h2&gt;
+&lt;h3 id="azure-function"&gt;Azure Function&lt;/h3&gt;
+&lt;p&gt;If you're using Visual Studio 2019, writing this kind of Azure Function is an absolute doddle:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Create a new project and select the &amp;quot;Azure Functions&amp;quot; template.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;img src="/Content/Codewars/CreateAzureFunctionsProject.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Create an Azure Functions project"/&gt;
+&lt;ol start="2"&gt;
+&lt;li&gt;Name the project - in this example I've used the name &amp;quot;Blog.FunctionsExample&amp;quot;&lt;/li&gt;
+&lt;li&gt;In the &amp;quot;Create a new Azure Functions application&amp;quot; dialog, ensure you've selected:
+&lt;ol type="a"&gt;
+&lt;li&gt;&amp;quot;Azure Functions v3 (.NET Core)&amp;quot; (the latest Azure Blob Storage packages don't play so nice with older versions)&lt;/li&gt;
+&lt;li&gt;&amp;quot;Http trigger&amp;quot;&lt;/li&gt;
+&lt;li&gt;&amp;quot;Storage Emulator&amp;quot; for the &amp;quot;Storage account (AzureWebJobsStorage)&amp;quot;&lt;/li&gt;
+&lt;li&gt;&amp;quot;Function&amp;quot; for Authorization level&lt;/li&gt;
+&lt;/ol&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;img src="/Content/Codewars/HttpTrigger.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Create a new Azure Functions application"/&gt;
+&lt;ol start="4"&gt;
+&lt;li&gt;Clicking the &amp;quot;Create&amp;quot; button should result in a new project which looks something like this:&lt;/li&gt;
+&lt;/ol&gt;
+&lt;img src="/Content/Codewars/CreatedFunctionsSourceCode.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Create Function source code"/&gt;
+&lt;p&gt;Now, here comes the magic part: Hit F5.&lt;/p&gt;
+&lt;img src="/Content/Codewars/FunctionDebugging.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Integrated Function Debugging"/&gt;
+&lt;p&gt;If everything is set up correctly (you may get prompted to install a few packages), running the Functions app should have started the &lt;a href="https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator"&gt;&amp;quot;Azure Storage Emulator&amp;quot;&lt;/a&gt; and then spun up your function within the &lt;a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=windows%2Ccsharp%2Cbash"&gt;&amp;quot;Azure Functions Core Tools&amp;quot;&lt;/a&gt; debugging host. Yup, this is a fully local debug environment for Azure Functions &lt;em&gt;including Azure Storage emulation&lt;/em&gt;. Wow.&lt;/p&gt;
+&lt;p&gt;Once started, the debugging host should provide you an HTTP endpoint from which you can trigger your function; in the screenshot above it's &lt;code&gt;Function1: [GET,POST] http://localhost:7071/api/Function1&lt;/code&gt;. Simply GET this URL from a browser (or &lt;a href="https://www.postman.com/"&gt;Postman&lt;/a&gt;, or &lt;a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10"&gt;curl&lt;/a&gt;) and your function will run, returning the &lt;code&gt;responseMessage&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;You are completely free to use breakpoints or any other means of interactive debugging which effectively makes writing a cloud hosted and serverless Azure Functions app no more difficult than a basic console app.&lt;/p&gt;
+&lt;p&gt;Now all we need to do is flesh out the function.&lt;/p&gt;
+&lt;h3 id="writing-to-azure-blob-storage"&gt;Writing to Azure Blob Storage&lt;/h3&gt;
+&lt;p&gt;First we want to make our function output an HTML page to Azure Blob Storage. While there are many ways to interact with Azure Blob Storage from within an Azure Function, by far the easiest is to lean on Azure Functions' built in &lt;a href="https://jhaleyfiles2016.blob.core.windows.net/public/Azure%20WebJobs%20SDK%20Cheat%20Sheet%202014.pdf"&gt;bindings&lt;/a&gt;. To do this we first need to add a the &lt;a href="https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Storage/"&gt;&lt;code&gt;Microsoft.Azure.WebJobs.Extensions.Storage&lt;/code&gt;&lt;/a&gt; nuget package to our project. Then we add a new parameter to our function - (&lt;code&gt;CloudBlockBlob output&lt;/code&gt; below) - with attributes - (&lt;code&gt;[Blob()]&lt;/code&gt; below) - that detail how to bind this parameter. Finally we can save our generated content to the blob as shown here:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;[FunctionName(&amp;quot;Function1&amp;quot;)]
+public static async Task&amp;lt;IActionResult&amp;gt; Run(
+    [HttpTrigger(AuthorizationLevel.Function, &amp;quot;get&amp;quot;, &amp;quot;post&amp;quot;, Route = null)] HttpRequest req,
+    [Blob(&amp;quot;output/content.html&amp;quot;, FileAccess.Write, Connection = &amp;quot;AzureWebJobsStorage&amp;quot;)] CloudBlockBlob output,
+    ILogger log)
+{
+    log.LogInformation(&amp;quot;C# HTTP trigger function processed a request.&amp;quot;);
+
+    string name = req.Query[&amp;quot;name&amp;quot;];
+
+    string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+    dynamic data = JsonConvert.DeserializeObject(requestBody);
+    name = name ?? data?.name;
+
+    string responseMessage = string.IsNullOrEmpty(name)
+        ? &amp;quot;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&amp;quot;
+        : $&amp;quot;&amp;lt;html&amp;gt;&amp;lt;body&amp;gt;Hello, {name}. This HTTP triggered function executed successfully.&amp;lt;/body&amp;gt;&amp;lt;/html&amp;gt;&amp;quot;;
+
+    output.Properties.ContentType = &amp;quot;text/html&amp;quot;;
+    await output.UploadTextAsync(responseMessage);
+
+    return new NoContentResult();
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If we trigger this function now we should see a new container - &lt;code&gt;output&lt;/code&gt; - added to the Storage Emulator containing a single file: &lt;code&gt;content.html&lt;/code&gt;.&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;Quick tip: If you're doing anything with any form of Azure Storage, do yourself a favour and download the &lt;a href="https://azure.microsoft.com/en-us/features/storage-explorer/"&gt;&amp;quot;Azure Storage Explorer&amp;quot;&lt;/a&gt;. This app provides a very easy to use GUI over many forms of Azure Storage hosted in the cloud or locally. While it won't match a CLI for repetitive tasks, during development this app can really help you see what files are ending up where and with which characteristics.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Note that in most cases it would be sufficient to bind the &lt;code&gt;Blob&lt;/code&gt; attributed parameter to a simple &lt;code&gt;Stream&lt;/code&gt; type. However, this would result in files written to Azure Blob Store having a &lt;code&gt;Content-Type&lt;/code&gt; of &lt;code&gt;application/octet-stream&lt;/code&gt; which would not be displayed correctly (or at all!) by most browsers when encountering this type of file within an &lt;code&gt;&amp;lt;embed/&amp;gt;&lt;/code&gt; tag. As such we elect to bind to a &lt;code&gt;CloudBlockBlob&lt;/code&gt; type which allows us to set the &lt;code&gt;Content-Type&lt;/code&gt; directly.&lt;/p&gt;
+&lt;h2 id="collecting-and-aggregating-kata-information"&gt;Collecting and aggregating Kata information&lt;/h2&gt;
+&lt;p&gt;Great, so now we have a function which, when triggered, will write an HTML document to Azure Blob Storage. Now, we need to start working on filling out the HTML document with the information we're interested in. The first step here is to collect this information from Codewars which involves HTTP calls to three endpoints - none of which require authentication:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;The &lt;a href="https://dev.codewars.com/#get-user"&gt;Profile&lt;/a&gt; endpoint - to get my current honor and rank information&lt;/li&gt;
+&lt;li&gt;The &lt;a href="https://dev.codewars.com/#get-user:-completed-challenges"&gt;Completed Challenges&lt;/a&gt; endpoint - to get the katas I have completed&lt;/li&gt;
+&lt;li&gt;Repeated calls to the &lt;a href="https://dev.codewars.com/#get-code-challenge"&gt;Code Challenge&lt;/a&gt; endpoint - to get information for the last X katas I have completed ('X' will be specified in config)&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;For each endpoint, I first craft an example request in Postman, copy the JSON returned from the endpoint invocation and employ Visual Studio's insanely useful &lt;a href="https://dailydotnettips.com/did-you-know-you-can-automatically-create-classes-from-json-or-xml-in-visual-studio/"&gt;&amp;quot;Paste JSON as classes&amp;quot;&lt;/a&gt; to create DTOs which I can deserialize into. This makes calls to each endpoint as simple as doing this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;private static async Task&amp;lt;Profile.Rootobject&amp;gt; Profile(HttpClient client)
+{
+    var completedResponse = await client.GetAsync(&amp;quot;https://www.codewars.com/api/v1/users/ibebbs/&amp;quot;);
+
+    using (var stream = await completedResponse.Content.ReadAsStreamAsync())
+    {
+        return await JsonSerializer.DeserializeAsync&amp;lt;Profile.Rootobject&amp;gt;(stream);
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that all IO &lt;em&gt;has&lt;/em&gt; to be async. Calling the synchronous versions of any of the methods above will result in an exception being thrown stating &lt;a href="https://stackoverflow.com/a/60755952/628821"&gt;&amp;quot;Synchronous operations are disallowed&amp;quot;&lt;/a&gt;. This slightly complicates the retrieval of completed code challenges as each challenge needs to be fetched asynchronously then projected into a DTO asynchronously and these asynchronous operations need to be performed a specific number of times.&lt;/p&gt;
+&lt;p&gt;My go to approach for dealing with collections in a functional manner - LINQ - can't handle asynchronous operations but fortunately a recent addition to C# 8 - &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=dotnet-plat-ext-3.1"&gt;IAsyncEnumerable&lt;/a&gt; - can. Coupled with &lt;a href="https://www.nuget.org/packages/System.Linq.Async"&gt;&lt;code&gt;System.Linq.Async&lt;/code&gt;&lt;/a&gt; I can write &amp;quot;LINQ style&amp;quot; projections over asynchronous operations, as shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;private static async Task&amp;lt;IEnumerable&amp;lt;Completion&amp;gt;&amp;gt; Completions(HttpClient client, int numberOfCompletionstoInclude)
+{
+    var completed = await Completed(client);
+
+    var result = await completed.data
+        .ToAsyncEnumerable()
+        .SelectAwait(d =&amp;gt; AsCompletion(d, client))
+        .Take(numberOfCompletionstoInclude)
+        .ToArrayAsync();
+
+    return result;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally all the collected information is projected into a &lt;code&gt;Model&lt;/code&gt; class for use in the next step.&lt;/p&gt;
+&lt;h2 id="generating-an-html-page"&gt;Generating an HTML page&lt;/h2&gt;
+&lt;p&gt;To create the HTML page containing all the kata information in an appropriate layout I use (a prelease version of) &lt;a href="https://www.nuget.org/packages/RazorLight/2.0.0-beta7"&gt;RazorLight&lt;/a&gt;. This allows me to template the desired output using &amp;quot;cshtml&amp;quot; (a.k.a. &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor?view=aspnetcore-3.1"&gt;Razor pages&lt;/a&gt;) and bind values from the &lt;code&gt;Model&lt;/code&gt; into appropriate places within the template. Here's the &lt;code&gt;cshtml&lt;/code&gt; file:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-html"&gt;&amp;#64;model Blog.Codewars.Generator.Model
+&amp;lt;!DOCTYPE html&amp;gt;
+
+&amp;lt;html lang=&amp;quot;en&amp;quot; xmlns=&amp;quot;http://www.w3.org/1999/xhtml&amp;quot;&amp;gt;
+&amp;lt;head&amp;gt;
+    &amp;lt;meta charset=&amp;quot;utf-8&amp;quot; /&amp;gt;
+    &amp;lt;title&amp;gt;Codewars!&amp;lt;/title&amp;gt;
+    &amp;lt;link rel=&amp;quot;stylesheet&amp;quot; href=&amp;quot;https://www.codewars.com/assets/application-776f7eebc122613f70443dfee33518104673ba7dced96422ca993601702f6456.css&amp;quot;&amp;gt;
+    &amp;lt;style&amp;gt;
+        table td {
+            border-bottom: none;
+            padding-top: 2px;
+            padding-bottom: 2px;
+            line-height: normal;
+            padding: 0px;
+            padding-right: 10px;
+        }
+        td.fitwidth {
+            width: 1px;
+            white-space: nowrap;
+        }
+        div.minitag {
+            line-height: normal;
+            font-size: 9px;
+            margin: 0px
+        }
+        .tight {
+            line-height: normal;
+            margin-top: 4px;
+            margin-bottom: 0px;
+        }
+        .tight-last {
+            line-height: normal;
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+        .tagrow {
+            margin-bottom: 8px;
+            margin-top: -2px
+        }
+    &amp;lt;/style&amp;gt;
+&amp;lt;/head&amp;gt;
+&amp;lt;body style=&amp;quot;background-color: white;padding-top: 0px&amp;quot;&amp;gt;
+    &amp;lt;h2 class=&amp;quot;tight&amp;quot;&amp;gt;Honor: &amp;#64;Model.Honor&amp;lt;/h2&amp;gt;
+    &amp;lt;h3 class=&amp;quot;tight-last&amp;quot;&amp;gt;Showing &amp;#64;Model.Completions.Count() of &amp;#64;Model.TotalCompleted completed kata&amp;lt;/h3&amp;gt;
+    &amp;lt;table style=&amp;quot;width: 100%;background-color: white;&amp;quot;&amp;gt;
+        &amp;lt;tbody&amp;gt;
+            &amp;#64;foreach (var item in &amp;#64;Model.Completions)
+            {
+                &amp;lt;tr&amp;gt;
+                    &amp;lt;td class=&amp;quot;fitwidth&amp;quot; style=&amp;quot;border-bottom: none;&amp;quot;&amp;gt;
+                        &amp;lt;p class=&amp;quot;tight&amp;quot;&amp;gt;&amp;#64;item.Date.ToString(&amp;quot;yyyy-MM-dd&amp;quot;)&amp;lt;/p&amp;gt;
+                    &amp;lt;/td&amp;gt;
+                    &amp;lt;td&amp;gt;
+                        &amp;lt;a href=&amp;quot;&amp;#64;item.Uri&amp;quot; target=&amp;quot;_blank&amp;quot;&amp;gt;&amp;lt;h5 class=&amp;quot;tight&amp;quot;&amp;gt;&amp;#64;item.Name&amp;lt;/h5&amp;gt;&amp;lt;/a&amp;gt;
+                    &amp;lt;/td&amp;gt;
+                    &amp;lt;td class=&amp;quot;fitwidth&amp;quot; rowspan=&amp;quot;2&amp;quot; &amp;gt;
+                        &amp;#64;if (&amp;#64;item.Language == &amp;quot;csharp&amp;quot;)
+                        {
+                            &amp;lt;img src=&amp;quot;https://ian.bebbs.co.uk/Content/csharp.png&amp;quot; style=&amp;quot;max-width: 32px; margin-top: -6px&amp;quot; /&amp;gt;
+                        }
+                        else
+                        {
+                            &amp;lt;img src=&amp;quot;https://ian.bebbs.co.uk/Content/fsharp.png&amp;quot; style=&amp;quot;max-width: 32px; margin-top: -6px&amp;quot; /&amp;gt;
+                        }
+                    &amp;lt;/td&amp;gt;
+                    &amp;lt;td class=&amp;quot;fitwidth&amp;quot; rowspan=&amp;quot;2&amp;quot;&amp;gt;
+                        &amp;#64;{
+                            switch (item.Colour)
+                            {
+                                case &amp;quot;white&amp;quot;:
+                            &amp;lt;div class=&amp;quot;small-hex is-extra-wide is-inline mr-15px is-white-rank&amp;quot;&amp;gt;&amp;lt;div class=&amp;quot;inner-small-hex is-extra-wide &amp;quot;&amp;gt;&amp;lt;span&amp;gt;&amp;#64;item.Ktu&amp;lt;/span&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;
+                                    break;
+                                case &amp;quot;yellow&amp;quot;:
+                            &amp;lt;div class=&amp;quot;small-hex is-extra-wide is-inline mr-15px is-yellow-rank&amp;quot;&amp;gt;&amp;lt;div class=&amp;quot;inner-small-hex is-extra-wide &amp;quot;&amp;gt;&amp;lt;span&amp;gt;&amp;#64;item.Ktu&amp;lt;/span&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;
+                                    break;
+                                case &amp;quot;blue&amp;quot;:
+                            &amp;lt;div class=&amp;quot;small-hex is-extra-wide is-inline mr-15px is-blue-rank&amp;quot;&amp;gt;&amp;lt;div class=&amp;quot;inner-small-hex is-extra-wide &amp;quot;&amp;gt;&amp;lt;span&amp;gt;&amp;#64;item.Ktu&amp;lt;/span&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;
+                                    break;
+                                case &amp;quot;purple&amp;quot;:
+                            &amp;lt;div class=&amp;quot;small-hex is-extra-wide is-inline mr-15px is-purple-rank&amp;quot;&amp;gt;&amp;lt;div class=&amp;quot;inner-small-hex is-extra-wide &amp;quot;&amp;gt;&amp;lt;span&amp;gt;&amp;#64;item.Ktu&amp;lt;/span&amp;gt;&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;
+                                    break;
+                            }
+                        }
+                    &amp;lt;/td&amp;gt;
+                &amp;lt;/tr&amp;gt;
+                &amp;lt;tr class=&amp;quot;bottom-margin&amp;quot;&amp;gt;
+                    &amp;lt;td colspan=&amp;quot;2&amp;quot;&amp;gt;
+                        &amp;lt;div class=&amp;quot;mt-15px tagrow&amp;quot;&amp;gt;
+                            &amp;#64;foreach (var tag in &amp;#64;item.Tags)
+                            {
+                            &amp;lt;div class=&amp;quot;keyword-tag minitag tight&amp;quot;&amp;gt;&amp;#64;tag&amp;lt;/div&amp;gt;
+                            }
+                        &amp;lt;/div&amp;gt;
+                    &amp;lt;/td&amp;gt;
+                &amp;lt;/tr&amp;gt;
+            }
+        &amp;lt;/tbody&amp;gt;
+    &amp;lt;/table&amp;gt;
+&amp;lt;/body&amp;gt;
+&amp;lt;/html&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Please excuse the crappy CSS. I &lt;em&gt;still&lt;/em&gt; maintain CSS is a terrible way to style UI elements - particularly when compared to the elegance of &lt;a href="https://platform.uno/"&gt;XAML&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Anyway, this &lt;code&gt;codewars.cshtml&lt;/code&gt; file is added to the project as an &amp;quot;Embedded Resource&amp;quot; and used as follows:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public static class Implementation
+{
+    public static async Task&amp;lt;string&amp;gt; GenerateBlogPage(int numberOfCompletionstoInclude)
+    {
+        var engine = new RazorLightEngineBuilder()
+            .SetOperatingAssembly(Assembly.GetExecutingAssembly())
+            .UseEmbeddedResourcesProject(typeof(Implementation))
+            .UseMemoryCachingProvider()
+            .Build();
+
+        var model = await Source.Create(numberOfCompletionstoInclude);
+
+        string result = await engine.CompileRenderAsync(&amp;quot;codewars&amp;quot;, model);
+
+        return result;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="securing-the-function"&gt;Securing the Function&lt;/h2&gt;
+&lt;p&gt;While this function will be exposed publicly, we don't want just anyone to be able to invoke it as this would directly cost us money. By using the &amp;quot;'Function' Authorization Level&amp;quot; when we created the function, we ensured that the function can be invoked only if an appropriate &amp;quot;code&amp;quot; value is passed in the URL, but this is still just &lt;a href="https://en.wikipedia.org/wiki/Security_through_obscurity"&gt;&amp;quot;security through obscurity&amp;quot;&lt;/a&gt; which we should look to bolster further. As we'd like to ensure only Codewars can invoke this function (or at least cause the page to be regenerated) we can provide a &amp;quot;secret&amp;quot; to Codewars which they pass back to us - and we can check for - when the function is invoked.&lt;/p&gt;
+&lt;p&gt;Furthermore, Codewars will call this function for a variety of reasons, not just when I complete a kata. As generating the page is a relatively costly process (in terms of resources at least), we want to ensure this happens only when required. We therefore flesh out the function as follows:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;private static bool IsCodeWars(HttpRequest request)
+{
+    return request.Headers.TryGetValue(&amp;quot;X-Webhook-Secret&amp;quot;, out var values) &amp;amp;&amp;amp; values.Contains(Settings.CodewarsSecret);
+}
+
+private static async Task&amp;lt;bool&amp;gt; IsMyHonorChange(HttpRequest request, ILogger log)
+{
+    using (StreamReader reader = new StreamReader(request.Body))
+    {
+        var body = await reader.ReadToEndAsync();
+
+        log.LogInformation($&amp;quot;Body: '{body}'&amp;quot;);
+
+        return body.Contains(&amp;quot;honor_changed&amp;quot;) &amp;amp;&amp;amp; body.Contains(Settings.MyCodewarsId);
+    }
+}
+
+[FunctionName(&amp;quot;WebHook&amp;quot;)]
+public static async Task&amp;lt;IActionResult&amp;gt; Run(
+    [HttpTrigger(AuthorizationLevel.Function, &amp;quot;post&amp;quot;, Route = null)] HttpRequest request,
+    [Blob(&amp;quot;blog/codewars.html&amp;quot;, FileAccess.Write, Connection = &amp;quot;AzureWebJobsStorage&amp;quot;)] CloudBlockBlob output,
+    ILogger log)
+{
+    log.LogInformation(&amp;quot;C# HTTP trigger function processed a request.&amp;quot;);
+
+    if (IsCodeWars(request))
+    {
+        if (await IsMyHonorChange(request, log))
+        {
+            var content = await Generator.Implementation.GenerateBlogPage(Settings.NumberOfCompletionstoInclude);
+            output.Properties.ContentType = &amp;quot;text/html&amp;quot;;
+            await output.UploadTextAsync(content);
+
+            return new NoContentResult();
+        }
+        else
+        {
+            return new StatusCodeResult(304);
+        }
+    }
+    else
+    {
+        return new UnauthorizedResult();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note that &lt;code&gt;Settings&lt;/code&gt; is a façade for retrieving configuration values as shown here:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public static class Settings
+{
+    public static string CodewarsSecret =&amp;gt; Environment.GetEnvironmentVariable(&amp;quot;CodewarsSecret&amp;quot;);
+
+    public static string MyCodewarsId =&amp;gt; Environment.GetEnvironmentVariable(&amp;quot;MyCodewarsId&amp;quot;);
+
+    public static int NumberOfCompletionstoInclude =&amp;gt; Int32.Parse(Environment.GetEnvironmentVariable(&amp;quot;NumberOfCompletionstoInclude&amp;quot;));
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2 id="deployment"&gt;Deployment&lt;/h2&gt;
+&lt;p&gt;Finally we need to get the function deployed and connected to Codewars. As this isn't something that is going to change regularly, deployment of the function to Azure is performed with a &amp;quot;right click -&amp;gt; publish&amp;quot; from within Visual Studio. Once deployed, the function URL and &lt;code&gt;CodewarsSecret&lt;/code&gt; value are copied from the Azure portal and added to my Codewars Account Settings page as shown below:&lt;/p&gt;
+&lt;img src="/Content/Codewars/FunctionURL.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Function URL from Azure Portal"/&gt;
+&lt;br/&gt;
+&lt;img src="/Content/Codewars/CodewarsWebhook.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Codewars Webhook settings"/&gt;
+&lt;p&gt;Once saved, completing a kata automatically generates a new page in Azure Blob Storage which then appears on my blog. Nice!&lt;/p&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Sometimes I'm amazed at how fast and inexpensive it has become to assemble solutions to problems that, just a few years ago, would have been a major undertaking and cost a significant amount to run. Indeed, this solution took just a few hours from concept to deployment and costs...&lt;/p&gt;
+&lt;img src="/Content/Codewars/AzureCost.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Azure Cost Analysis"/&gt;
+&lt;p&gt;... yup, less than a penny a month to run!&lt;/p&gt;
+&lt;p&gt;As developers we truly are spoiled by the tooling provided to us by Visual Studio and the hosting options available in Azure. While I'm fairly proficient in variety of other languages and frameworks, I always find myself back in VS because it makes everything just so damn easy!&lt;/p&gt;
+&lt;p&gt;Anyway, the source code for this project can be found in my &lt;a href="https://github.com/ibebbs/Blog.Codewars"&gt;&amp;quot;Blog.Codewars&amp;quot;&lt;/a&gt; repository on Github. Please star it if you find it - or this blog post - useful.&lt;/p&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>Many platforms, one world - Part 4</title>
 			<link>http://ian.bebbs.co.uk/posts/COduo-Part4</link>
@@ -3344,130 +3666,6 @@ For example, say we have introduce a &lt;code&gt;Role&lt;/code&gt; entity and th
 &lt;p&gt;I used the above information to create a small application for listening to and interacting with the gateway and devices. Mostly out of interest, I used &lt;a href="https://dotnet.github.io/orleans/"&gt;Microsoft's Orleans framework&lt;/a&gt; to create a console application which wraps up the interaction with various devices into strongly typed agents (also an agent approach seemed to nicely mirror the segregated nature of the devices themselves).&lt;/p&gt;
 &lt;p&gt;I didn't take this too far as I subsequently decided to use an &amp;quot;off-the-shelf&amp;quot; system for interacting with the Xiaomi devices (the subject of my next &amp;quot;smart home&amp;quot; post) but it's a decent proof-of-concept. I've published the source in a &lt;a href="https://github.com/ibebbs/MiOrleans"&gt;repository on Github&lt;/a&gt;; feel free to have a play and drop me a line with any questions you might have.&lt;/p&gt;
 &lt;p&gt;In the next post I'll disucss the off-the-shelf system I'm now using to privately interact with the Xiaomi devices.&lt;/p&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>Nano2Docker</title>
-			<link>http://ian.bebbs.co.uk/posts/Nano2Docker</link>
-			<description>&lt;p&gt;While my current contract doesn't leave much time for personal projects, I have made some progress on my current project (details on exactly what this is to follow). In fact, some of the smaller, peripheral services have their primary use-cases functionally complete and are ready for deployment and I am now faced with the question: Deployment to where?&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/Nano2Docker</guid>
-			<pubDate>Mon, 10 Jul 2017 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;h1 id="deployment-at-last"&gt;Deployment at last&lt;/h1&gt;
-&lt;p&gt;While my current contract doesn't leave much time for personal projects, I have made some progress on my current project (details on exactly what this is to follow). In fact, some of the smaller, peripheral services have their primary use-cases functionally complete and are ready for deployment and I am now faced with the question: Deployment to where?&lt;/p&gt;
-&lt;h1 id="fabric-or-container"&gt;Fabric or Container&lt;/h1&gt;
-&lt;p&gt;Given this project constitutes multiple micro-services using message based, asynchronous communication with the potential to scale services horizontally, I required some form of elastic service fabric. Furthermore, I wanted a local development environment which would simulate a cluster of machines but with which I could monkey about as much as I liked without fear of accidentally incurring massive hosting fees in the cloud.&lt;/p&gt;
-&lt;p&gt;As I had just upgraded my home server with plenty of memory, I decided to use one of more virtual machines running on this server to host the environment during development, but which technology to use?&lt;/p&gt;
-&lt;p&gt;Initially I had intended to use a &lt;a href="https://docs.microsoft.com/en-us/azure/service-fabric/service-fabric-get-started-with-a-local-cluster"&gt;local Service Fabric cluster&lt;/a&gt;. However, upon further investigation I found that the SDK and API introduced significant friction to the development process (needing additional projects for supplying manifest / configuration data for services, overly complex deployment scripts, etc). Even the 'guest executable' approach seemed overly complex and I quickly went off this approach.&lt;/p&gt;
-&lt;p&gt;My second thought was &lt;a href="https://www.docker.com/"&gt;Docker&lt;/a&gt;; specifically the creation of a local &lt;a href="https://docs.docker.com/engine/swarm/"&gt;Docker Swarm&lt;/a&gt; which I could deploy servies to with &lt;a href="https://docs.docker.com/compose/"&gt;Docker Compose&lt;/a&gt;. &lt;a href="https://docs.docker.com/machine/"&gt;Docker Machine&lt;/a&gt; made short work of provisioning Docker hosts in Hyper-V but with one caveat: it's &lt;a href="http://boot2docker.io/"&gt;boot2docker&lt;/a&gt; image would only run Linux based containers and, while many of the services I have written / will write run quite happily on .NET Core, some require packages that do not yet provide support for .NET Core / Standard.&lt;/p&gt;
-&lt;p&gt;Given that a recent update made &lt;a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode"&gt;Swarm mode available to Windows Server 2016&lt;/a&gt; host operating systems, I decided I would look into provisioning a series of Windows Server VM's with container support and configure Docker on these VM's to operate in swarm mode.&lt;/p&gt;
-&lt;h1 id="using-nano-server-as-a-docker-host"&gt;Using Nano Server as a Docker host&lt;/h1&gt;
-&lt;p&gt;While I had previously used Microsoft Nano Server as a &lt;a href="http://ian.bebbs.co.uk/posts/ASentimentalAnalysisOfRedDwarfPartII"&gt;guest OS&lt;/a&gt; for &lt;a href="http://ian.bebbs.co.uk/posts/DockerAndKafka"&gt;containerized apps&lt;/a&gt;, I hadn't realised that it was possible to use it as a host OS for Docker until I came across &lt;a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/deploy-containers/deploy-containers-on-nano"&gt;this article&lt;/a&gt;. For those not familiar with Nano Server it is an extremely slimmed down (the OS image is less than 170Mb) and fast booting (5-10 seconds), headless version of Windows Server 2016 which, given it is capable of acting as a Docker host, effectively makes it 'boot2docker' but for Windows containers.&lt;/p&gt;
-&lt;p&gt;Nano Server is shipped with Windows Server 2016 and is accompanied by a Powershell module which provides some terrific facilities for working with Nano Server images. &lt;a href="https://docs.microsoft.com/en-us/windows-server/get-started/deploy-nano-server"&gt;This document&lt;/a&gt; shows how to use this Powershell module to create customised Nano Server images as either &lt;a href="https://en.wikipedia.org/wiki/Windows_Imaging_Format"&gt;'.wim'&lt;/a&gt;, &lt;a href="https://en.wikipedia.org/wiki/ISO_image"&gt;'.iso'&lt;/a&gt; or - most interestingly for me -  &lt;a href="https://technet.microsoft.com/en-us/library/hh831446(v=ws.11).aspx"&gt;'.vhdx'&lt;/a&gt;. In short, the following powershell command will create a virtual HD that can be attached to a virtual machine and which will boot directly into Nano Server with support for - but no utilites to provide - containerization services:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &amp;lt;path to root of media&amp;gt; -BasePath &amp;lt;path in which to build the image&amp;gt; -TargetPath &amp;lt;destination path&amp;gt;\NanoServer.vhdx -ComputerName &amp;lt;computer name&amp;gt; -Containers -EnableRemoteManagementPort
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This command will also open &lt;a href="https://msdn.microsoft.com/en-us/library/aa384426(v=vs.85).aspx"&gt;WinRM&lt;/a&gt; ports on the Nano Server which allows you to use &lt;a href="https://technet.microsoft.com/en-us/library/ff700227.aspx"&gt;PS Remoting&lt;/a&gt; to remote into the virtual machine and examine it's state; indispensable for debugging purposes.&lt;/p&gt;
-&lt;h1 id="updating-nano-server"&gt;Updating Nano Server&lt;/h1&gt;
-&lt;p&gt;Referring back to the &lt;a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode"&gt;'Getting Started with Swarm Mode'&lt;/a&gt; article, it states that a &lt;a href="https://support.microsoft.com/en-us/help/4015217/windows-10-update-kb4015217"&gt;relatively recent update&lt;/a&gt; is required to run Docker Swarms on Windows Server 2016 based OS's. It is therefore necessary to ensure this update is applied to any NanoServer image we create for the purpose of running Docker, ideally during the creation of the image not a subsequent setup script.&lt;/p&gt;
-&lt;p&gt;Well, those clever people at Microsoft thought of this too and provided a &lt;code&gt;-ServicingPackagePath&lt;/code&gt; argument for the &lt;code&gt;New-NanoServerImage&lt;/code&gt; command which takes a path to a cab update file and applies the update to the NanoServer OS during image creation. A mechanism for getting an update from Microsoft (as an *.msu) and extracting it into a (series of) cab-files for use in the &lt;code&gt;New-NanoServerImage&lt;/code&gt; is provided by Thomas Maurer in &lt;a href="http://www.thomasmaurer.ch/2016/10/how-to-install-updates-on-nano-server/"&gt;an excellent blog post here&lt;/a&gt;.&lt;/p&gt;
-&lt;h1 id="installing-docker-as-part-of-a-nano-server-image"&gt;Installing Docker as part of a Nano Server image&lt;/h1&gt;
-&lt;p&gt;Now, just like 'boot2docker' we want our Nano Server to be ready to host Windows Containers as soon as it's booted and without further manual configuration. To this end, I needed to find a way to install Docker as part of the deployment process. Fortunately the 'New-NanoServer' command provides a &lt;code&gt;-SetupCompleteCommand&lt;/code&gt; argument which allows you to 'run custom commands as part of setupcomplete.cmd' (i.e. on first boot). Great, so now to prepare a script to deploy Docker which we can call via the &lt;code&gt;-SetupCompleteCommand&lt;/code&gt; argument.&lt;/p&gt;
-&lt;p&gt;Conveniently, Docker's &lt;a href="https://docs.docker.com/docker-ee-for-windows/install/#using-a-script-to-install-docker-ee"&gt;documentation for installing Docker EE&lt;/a&gt; (the version supported by Windows) provides exactly the script required, copied below with some additional configuration copied from the 'Prepare Container Host' section of &lt;a href=""&gt;'Deploy Containers on Nano'&lt;/a&gt; article:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# On an online machine, download the zip file
-Invoke-Webrequest -UseBasicparsing -Outfile docker.zip https://download.docker.com/components/engine/windows-server/17.03/docker-17.03.0-ee.zip
-
-# Extract the archive.
-Expand-Archive docker.zip -DestinationPath $Env:ProgramFiles
-
-# Clean up the zip file.
-Remove-Item -Force docker.zip
-
-# Install Docker. This will require rebooting.
-# This is not required as we have already prepared out image with container support
-# $null = Install-WindowsFeature containers
-
-# Add Docker to the path for the current session.
-$env:path += &amp;quot;;$env:ProgramFiles\docker&amp;quot;
-
-# Modify PATH to persist across sessions.
-# Note: Nano Server's SetEnvironmentVariable method does not take a scope parameter 
-[Environment]::SetEnvironmentVariable(&amp;quot;PATH&amp;quot;, $env:path)
-
-# Open an inbound port for the docker daemon  
-netsh advfirewall firewall add rule name=&amp;quot;Docker daemon &amp;quot; dir=in action=allow protocol=TCP localport=2375
-
-# Create and populate docker daemon's configuration file
-New-Item -Type File 'C:\ProgramData\docker\config\daemon.json' -Force
-Add-Content 'C:\programdata\docker\config\daemon.json' '{ &amp;quot;hosts&amp;quot;: [&amp;quot;tcp://0.0.0.0:2375&amp;quot;, &amp;quot;npipe://&amp;quot;] }'
-
-# Register the Docker daemon as a service.
-dockerd --register-service
-
-# Start the daemon.
-Start-Service docker
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now this script requires that the Nano Server be online when the script is run so that it can download the Docker binaries. Unfortunately, given that this script will run as part of the deployment process, this is unlikely to be the case. Instead, we'll need to lean on another feature of the &lt;code&gt;New-NanoServerImage&lt;/code&gt;, &lt;code&gt;-CopyPath&lt;/code&gt;. This argument allows you to specify one or more files to copy to the Nano Server image as part of it's creation and we'll use it to copy a pre-downloaded copy of the docker binaries (along with a copy of the deployment script) to the root of the images C:\ drive, as shown here:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &amp;lt;path to root of media&amp;gt; -BasePath &amp;lt;path in which to build the image&amp;gt; -TargetPath &amp;lt;destination path&amp;gt;\NanoServer.vhdx -ComputerName &amp;lt;computer name&amp;gt; -Containers -EnableRemoteManagementPort -CopyPath &amp;#64;('&amp;lt;path to deployment script&amp;gt;\DeployDocker.ps1', '&amp;lt;path in which docker is downloaded&amp;gt;\docker.zip') -SetupCompleteCommand &amp;#64;('Powershell.exe -Command .\DeployDocker.ps1') 
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Great, now we can comment out the first line of the script above and it'll run fine, right? Unfortunately not. It seems that, at the stage of the boot process at which this script runs, powershell isn't quite ready to run powershell. Fortunately, others have encountered this issue before and Sergey Babkin provides &lt;a href="https://blogs.msdn.microsoft.com/sergey_babkins_blog/2017/01/05/how-to-run-powershell-from-setupcomplete-cmd/"&gt;this solution&lt;/a&gt;; copied below with customisation for our requirements:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;set LOCALAPPDATA=%USERPROFILE%\AppData\Local
-set PSExecutionPolicyPreference=Unrestricted
-Powershell -Command C:\DeployDocker.ps1
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Ok, so we'll add and deploy this batch file as 'DeployDocker.bat' and then execute this instead of the powershell script as the &lt;code&gt;-SetupCompleteCommand&lt;/code&gt;, as shown here:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;New-NanoServerImage -Edition Standard -DeploymentType Guest -MediaPath &amp;lt;path to root of media&amp;gt; -BasePath &amp;lt;path in which to build the image&amp;gt; -TargetPath &amp;lt;destination path&amp;gt;\NanoServer.vhdx -ComputerName &amp;lt;computer name&amp;gt; -Containers -EnableRemoteManagementPort -CopyPath &amp;#64;('&amp;lt;path to deployment batch file'\DeployDocker.bat', '&amp;lt;path to deployment script&amp;gt;\DeployDocker.ps1', '&amp;lt;path in which docker is downloaded&amp;gt;\docker.zip') -SetupCompleteCommand 'C:\DeployDocker.bat' 
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;And thats it. If you now create a virtual machine with the new 'NanoServer.vhdx' image as it's boot drive, you should find that, once it's booted you're able to communicate with the Docker daemon on the VM. For example:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;docker -H &amp;lt;IP Address of VM&amp;gt; ps
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Should return a (empty) list of containers present on the Nano Server host.&lt;/p&gt;
-&lt;h1 id="scripting-the-creation-of-a-vm"&gt;Scripting the creation of a VM&lt;/h1&gt;
-&lt;p&gt;Now, jumping through all the hoops above each time we want to make a new VM to host docker would be arduous to say the least. As such, I put together a powershell module which is able to directly create VM's ready to host Docker containers in just a few steps. From a powershell command prompr, this can be done as follows:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Get the Nano2Docker powershell module&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;This module is available in my Docker repository on Github and can be downloaded directly using the following command:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;Invoke-WebRequest -OutFile Nano2Docker.psm1 https://raw.githubusercontent.com/ibebbs/Docker/master/Nano2Docker/Nano2Docker.psm1
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Then installed using:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;Import-Module Nano2Docker.psm1
-&lt;/code&gt;&lt;/pre&gt;
-&lt;ol start="2"&gt;
-&lt;li&gt;Prepare a base NanoServer image&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;The process of downloading docker and applying updates can be extremely slow. Therefore we first create a reusable base NanoServer image that has docker installed and updates applied. This is done using the command:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;Initialize-Nano2DockerImage -MediaPath &amp;lt;Drive letter for Windows Server 2016&amp;gt; -BuildPath &amp;lt;Path to a build location&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;For example, if your Windows Server 2016 media is mounted in the 'G' drive and you want to build the new Nano2Docker image in the 'C:\Nano2Docker' folder, you'd use the command:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;Initialize-Nano2DockerImage -MediaPath G: -BuildPath &amp;quot;C:\Nano2Docker&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The command provides defaults download locations for docker and required updates but these can be overriden using the &lt;code&gt;-DockerUrl&lt;/code&gt; and &lt;code&gt;-UpdateUrl&lt;/code&gt; parameters repsectively. Furthermore, if you already have an '.msu' file downloaded you can save a lot of time by providing this to the command using the &lt;code&gt;-UpdateFile&lt;/code&gt; parameter.&lt;/p&gt;
-&lt;p&gt;When you run this command, you will be prompted for Administrator credentials for the new Nano2Docker image. Either enter them when prompted or supply a &lt;code&gt;SecureString&lt;/code&gt; value to the &lt;code&gt;-Password&lt;/code&gt; argument (which is usually done using the &lt;code&gt;Get-Credentials&lt;/code&gt; commandlet).&lt;/p&gt;
-&lt;p&gt;When this command completes - which can take a while - you will find a 'Nano2Docker.vhdx' file in the BuildPath directory.&lt;/p&gt;
-&lt;ol start="3"&gt;
-&lt;li&gt;Create a VM using the new NanoServer image&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;You can now use the &lt;code&gt;New-Nano2Docker&lt;/code&gt; commandlet to quickly create new VM docker hosts. The command is used as follows:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;New-Nano2Docker -MediaPath &amp;lt;Drive letter for Windows Server 2016&amp;gt; -ImagePath &amp;lt;Path to a previously created Nano2Docker.vhdx&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Using our previous example, the command would be:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;New-Nano2Docker -MediaPath G: -ImagePath &amp;quot;C:\Nano2Docker\Nano2Docker.vhdx&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This command will copy the base image to the VM path (defaults to 'C:\Users\Public\Documents\Hyper-V\Virtual Hard Disks'), provision a new, local, Hyper-V VM named 'Nano2Docker' with reasonable resources (4 cores / 2Gb of dynamic ram) and attached to the first available virtual switch.
-Obviously, each of these characteristics can be changed using the appropriate arguments - use &lt;code&gt;Get-Help New-Nano2Docker&lt;/code&gt; to list the available arguments. You will again be asked to an Administrator password for the new VM which can be entered during creation or specified as a parameter to the commandlet.&lt;/p&gt;
-&lt;p&gt;Once the new VM has been created, it will be started and the script will wait for NanoServer to start correctly. Once started, the IP address of the new VM is displayed and it should be immediately possible to use docker to communicate with the docker daemon on the VM.&lt;/p&gt;
-&lt;h1 id="scripting-the-deployment-of-a-docker-swarm"&gt;Scripting the deployment of a Docker Swarm&lt;/h1&gt;
-&lt;p&gt;Given it was now trivial to create docker hosts, I wrote a final commandlet which leverages previous commandlets to provision an entire docker swarm. This is done using the &lt;code&gt;New-Nano2DockerSwarm&lt;/code&gt; commandlet as follows:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;New-Nano2DockerSwarm -MediaPath &amp;lt;Drive letter for Windows Server 2016&amp;gt; -ImagePath &amp;lt;Path to a previously created Nano2Docker.vhdx&amp;gt; -VMPath &amp;lt;Path to a location to store swarm host VMs&amp;gt;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Again, using our previous example and wanting to store new VM images in the 'C:\Nano2Docker\VMs' directory, the command would be:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;New-Nano2DockerSwarm -MediaPath G: -ImagePath &amp;quot;C:\Nano2Docker\Nano2Docker.vhdx&amp;quot; -VMPath &amp;quot;C:\Nano2Docker\VMs&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;This command defaults to creating a single manager node and three worker nodes named 'n2d-mngr-0' and 'n2d-wrkr-0/1/2' respectively. All nodes will have already been joined to the swarm in the appropriate capacity and ready for services to be deployed using docker or docker-compose.
-Again, the number of manager and worked nodes as well as the name prefix for each node can be changed via the appropriate arguments (use &lt;code&gt;Get-Help New-Nano2DockerSwarm&lt;/code&gt; to list the arguments).&lt;/p&gt;
-&lt;h1 id="roundup"&gt;Roundup&lt;/h1&gt;
-&lt;p&gt;I've successfully used this script to provision multiple docker hosts and docker swarms but it's worthwhile noting that it can be a bit finickity with directories. If you can an error saying it couldn't find a directory then simply create it first. I really ought to fix up the script (improvements via PR gratefully accepted) but I'm now a bit busy deploying services to my swarm :0)&lt;/p&gt;
-&lt;p&gt;Furthermore I've successfully used nodes created by this script to provision a hybrid swarm (see the 'Mixed OS clusters section &lt;a href="https://docs.microsoft.com/en-us/virtualization/windowscontainers/manage-containers/swarm-mode"&gt;here&lt;/a&gt;) of boot2docker and nano2docker images. With the appropriate labels on the nodes, it is possible to use &lt;code&gt;docker-compose&lt;/code&gt; to automatically deploy images to the correct hosts while retaining all the benefits of overlay networking.&lt;/p&gt;
-&lt;p&gt;It's a lot of docking fun!&lt;/p&gt;
 </content:encoded>
 		</item>
 	</channel>

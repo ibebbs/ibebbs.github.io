@@ -1,0 +1,537 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - A Kata for Katas</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - A Kata for Katas" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/Codewars" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>A Kata for Katas</h1>
+        <h2 class="subheading">Visual Studio and Azure Kung fu!</h2>
+    <div class="meta">        
+Published on 09 June 2020<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/azure-blob-storage" class="btn btn-default btn-xs">azure blob storage</a>
+                    <a role="button" href="/tags/azure-functions" class="btn btn-default btn-xs">azure functions</a>
+                    <a role="button" href="/tags/blog" class="btn btn-default btn-xs">blog</a>
+                    <a role="button" href="/tags/serverless" class="btn btn-default btn-xs">serverless</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="tldr">TL;DR</h2>
+<p>Azure Functions and Azure Blob Storage provide an incredibly quick, easy and cheap way of adding dynamic content to a static website. In this post I show how I used this combo to add a list of completed &quot;code kata&quot; to my blog's sidebar.</p>
+<h2 id="intro">Intro</h2>
+<blockquote class="blockquote">
+<p>A code kata is an exercise in programming which helps programmers hone their skills through practice and repetition.</p>
+</blockquote>
+<p>There are many ways of practising code katas and many sites that provide code katas for you to practise with. I use <a href="https://www.codewars.com">Codewars</a>.</p>
+<p>While completing a kata yesterday, I thought it would be good to show the katas I'm completing on my blog. A quick search revealed that Codewars has an <a href="https://dev.codewars.com/">API</a> for retrieving profile and kata information and <a href="https://dev.codewars.com/#webhooks">webhooks</a> for notifying external services when this information changes. A workable solution for getting kata information on my blog quickly came to mind and I simply couldn't resist taking time out to implement it.</p>
+<p>Just a few - very enjoyable - hours later, I had this:</p>
+<img src="/Content/Codewars/Homepage.png" class="img-responsive" style="margin: auto; margin-top: 6px; margin-bottom: 6px;" alt="Homepage with Codewars"/>
+<p>Here's how I did it.</p>
+<h2 id="static-serverless">Static &amp; Serverless</h2>
+<p>My blog is written in <a href="https://en.wikipedia.org/wiki/Markdown">Markdown</a> and uses <a href="https://wyam.io/">Wyam.io</a> to translate the markdown (plus other content) into a static site which is hosted on <a href="https://pages.github.com/">Github Pages</a>. All content is source controlled and the process of adding a new blog post is very smooth.</p>
+<p>As such I didn't really want to add any complexity to the process by trying to regenerate the site when I complete a kata. This meant I needed to a) embed an external page within my blog, and b) write a service which would generate this page whenever I complete a kata. Furthermore, given the relative infrequency with which I undertake code katas, I didn't want a service running 24/7. This meant going <a href="https://en.wikipedia.org/wiki/Serverless_computing">serverless</a>.</p>
+<p>These requirements led to this architecture:</p>
+<img src="/Content/Codewars/Architecture.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px; margin-top: -20px;" alt="Architecture"/>
+<p>Which can be read as follows:</p>
+<ol>
+<li>When a Kata is submitted to Codewars ...</li>
+<li>... a webhook is used to call the Http Trigger of our Azure Function.</li>
+<li>The Azure Function queries the Codewars API for the data it needs to generate an HTML page.</li>
+<li>The generated page is saved to Azure Blob Storage in a container which is configured to allow &quot;Public read access for blobs only&quot;</li>
+<li>The homepage for my blog is modified to include an <code>&lt;embed/&gt;</code> element pointing to the generated page meaning ...</li>
+<li>... visitors to my blog now receive both the content from GitHub Pages and the new page from Azure Blob Storage.</li>
+</ol>
+<h2 id="implementation">Implementation</h2>
+<h3 id="azure-function">Azure Function</h3>
+<p>If you're using Visual Studio 2019, writing this kind of Azure Function is an absolute doddle:</p>
+<ol>
+<li>Create a new project and select the &quot;Azure Functions&quot; template.</li>
+</ol>
+<img src="/Content/Codewars/CreateAzureFunctionsProject.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Create an Azure Functions project"/>
+<ol start="2">
+<li>Name the project - in this example I've used the name &quot;Blog.FunctionsExample&quot;</li>
+<li>In the &quot;Create a new Azure Functions application&quot; dialog, ensure you've selected:
+<ol type="a">
+<li>&quot;Azure Functions v3 (.NET Core)&quot; (the latest Azure Blob Storage packages don't play so nice with older versions)</li>
+<li>&quot;Http trigger&quot;</li>
+<li>&quot;Storage Emulator&quot; for the &quot;Storage account (AzureWebJobsStorage)&quot;</li>
+<li>&quot;Function&quot; for Authorization level</li>
+</ol>
+</li>
+</ol>
+<img src="/Content/Codewars/HttpTrigger.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Create a new Azure Functions application"/>
+<ol start="4">
+<li>Clicking the &quot;Create&quot; button should result in a new project which looks something like this:</li>
+</ol>
+<img src="/Content/Codewars/CreatedFunctionsSourceCode.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Create Function source code"/>
+<p>Now, here comes the magic part: Hit F5.</p>
+<img src="/Content/Codewars/FunctionDebugging.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Integrated Function Debugging"/>
+<p>If everything is set up correctly (you may get prompted to install a few packages), running the Functions app should have started the <a href="https://docs.microsoft.com/en-us/azure/storage/common/storage-use-emulator">&quot;Azure Storage Emulator&quot;</a> and then spun up your function within the <a href="https://docs.microsoft.com/en-us/azure/azure-functions/functions-run-local?tabs=windows%2Ccsharp%2Cbash">&quot;Azure Functions Core Tools&quot;</a> debugging host. Yup, this is a fully local debug environment for Azure Functions <em>including Azure Storage emulation</em>. Wow.</p>
+<p>Once started, the debugging host should provide you an HTTP endpoint from which you can trigger your function; in the screenshot above it's <code>Function1: [GET,POST] http://localhost:7071/api/Function1</code>. Simply GET this URL from a browser (or <a href="https://www.postman.com/">Postman</a>, or <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">curl</a>) and your function will run, returning the <code>responseMessage</code>.</p>
+<p>You are completely free to use breakpoints or any other means of interactive debugging which effectively makes writing a cloud hosted and serverless Azure Functions app no more difficult than a basic console app.</p>
+<p>Now all we need to do is flesh out the function.</p>
+<h3 id="writing-to-azure-blob-storage">Writing to Azure Blob Storage</h3>
+<p>First we want to make our function output an HTML page to Azure Blob Storage. While there are many ways to interact with Azure Blob Storage from within an Azure Function, by far the easiest is to lean on Azure Functions' built in <a href="https://jhaleyfiles2016.blob.core.windows.net/public/Azure%20WebJobs%20SDK%20Cheat%20Sheet%202014.pdf">bindings</a>. To do this we first need to add a the <a href="https://www.nuget.org/packages/Microsoft.Azure.WebJobs.Extensions.Storage/"><code>Microsoft.Azure.WebJobs.Extensions.Storage</code></a> nuget package to our project. Then we add a new parameter to our function - (<code>CloudBlockBlob output</code> below) - with attributes - (<code>[Blob()]</code> below) - that detail how to bind this parameter. Finally we can save our generated content to the blob as shown here:</p>
+<pre><code class="language-c#">[FunctionName(&quot;Function1&quot;)]
+public static async Task&lt;IActionResult&gt; Run(
+    [HttpTrigger(AuthorizationLevel.Function, &quot;get&quot;, &quot;post&quot;, Route = null)] HttpRequest req,
+    [Blob(&quot;output/content.html&quot;, FileAccess.Write, Connection = &quot;AzureWebJobsStorage&quot;)] CloudBlockBlob output,
+    ILogger log)
+{
+    log.LogInformation(&quot;C# HTTP trigger function processed a request.&quot;);
+
+    string name = req.Query[&quot;name&quot;];
+
+    string requestBody = await new StreamReader(req.Body).ReadToEndAsync();
+    dynamic data = JsonConvert.DeserializeObject(requestBody);
+    name = name ?? data?.name;
+
+    string responseMessage = string.IsNullOrEmpty(name)
+        ? &quot;&lt;html&gt;&lt;body&gt;This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.&lt;/body&gt;&lt;/html&gt;&quot;
+        : $&quot;&lt;html&gt;&lt;body&gt;Hello, {name}. This HTTP triggered function executed successfully.&lt;/body&gt;&lt;/html&gt;&quot;;
+
+    output.Properties.ContentType = &quot;text/html&quot;;
+    await output.UploadTextAsync(responseMessage);
+
+    return new NoContentResult();
+}
+</code></pre>
+<p>If we trigger this function now we should see a new container - <code>output</code> - added to the Storage Emulator containing a single file: <code>content.html</code>.</p>
+<blockquote class="blockquote">
+<p>Quick tip: If you're doing anything with any form of Azure Storage, do yourself a favour and download the <a href="https://azure.microsoft.com/en-us/features/storage-explorer/">&quot;Azure Storage Explorer&quot;</a>. This app provides a very easy to use GUI over many forms of Azure Storage hosted in the cloud or locally. While it won't match a CLI for repetitive tasks, during development this app can really help you see what files are ending up where and with which characteristics.</p>
+</blockquote>
+<p>Note that in most cases it would be sufficient to bind the <code>Blob</code> attributed parameter to a simple <code>Stream</code> type. However, this would result in files written to Azure Blob Store having a <code>Content-Type</code> of <code>application/octet-stream</code> which would not be displayed correctly (or at all!) by most browsers when encountering this type of file within an <code>&lt;embed/&gt;</code> tag. As such we elect to bind to a <code>CloudBlockBlob</code> type which allows us to set the <code>Content-Type</code> directly.</p>
+<h2 id="collecting-and-aggregating-kata-information">Collecting and aggregating Kata information</h2>
+<p>Great, so now we have a function which, when triggered, will write an HTML document to Azure Blob Storage. Now, we need to start working on filling out the HTML document with the information we're interested in. The first step here is to collect this information from Codewars which involves HTTP calls to three endpoints - none of which require authentication:</p>
+<ol>
+<li>The <a href="https://dev.codewars.com/#get-user">Profile</a> endpoint - to get my current honor and rank information</li>
+<li>The <a href="https://dev.codewars.com/#get-user:-completed-challenges">Completed Challenges</a> endpoint - to get the katas I have completed</li>
+<li>Repeated calls to the <a href="https://dev.codewars.com/#get-code-challenge">Code Challenge</a> endpoint - to get information for the last X katas I have completed ('X' will be specified in config)</li>
+</ol>
+<p>For each endpoint, I first craft an example request in Postman, copy the JSON returned from the endpoint invocation and employ Visual Studio's insanely useful <a href="https://dailydotnettips.com/did-you-know-you-can-automatically-create-classes-from-json-or-xml-in-visual-studio/">&quot;Paste JSON as classes&quot;</a> to create DTOs which I can deserialize into. This makes calls to each endpoint as simple as doing this:</p>
+<pre><code class="language-c#">private static async Task&lt;Profile.Rootobject&gt; Profile(HttpClient client)
+{
+    var completedResponse = await client.GetAsync(&quot;https://www.codewars.com/api/v1/users/ibebbs/&quot;);
+
+    using (var stream = await completedResponse.Content.ReadAsStreamAsync())
+    {
+        return await JsonSerializer.DeserializeAsync&lt;Profile.Rootobject&gt;(stream);
+    }
+}
+</code></pre>
+<p>Note that all IO <em>has</em> to be async. Calling the synchronous versions of any of the methods above will result in an exception being thrown stating <a href="https://stackoverflow.com/a/60755952/628821">&quot;Synchronous operations are disallowed&quot;</a>. This slightly complicates the retrieval of completed code challenges as each challenge needs to be fetched asynchronously then projected into a DTO asynchronously and these asynchronous operations need to be performed a specific number of times.</p>
+<p>My go to approach for dealing with collections in a functional manner - LINQ - can't handle asynchronous operations but fortunately a recent addition to C# 8 - <a href="https://docs.microsoft.com/en-us/dotnet/api/system.collections.generic.iasyncenumerable-1?view=dotnet-plat-ext-3.1">IAsyncEnumerable</a> - can. Coupled with <a href="https://www.nuget.org/packages/System.Linq.Async"><code>System.Linq.Async</code></a> I can write &quot;LINQ style&quot; projections over asynchronous operations, as shown below:</p>
+<pre><code class="language-c#">private static async Task&lt;IEnumerable&lt;Completion&gt;&gt; Completions(HttpClient client, int numberOfCompletionstoInclude)
+{
+    var completed = await Completed(client);
+
+    var result = await completed.data
+        .ToAsyncEnumerable()
+        .SelectAwait(d =&gt; AsCompletion(d, client))
+        .Take(numberOfCompletionstoInclude)
+        .ToArrayAsync();
+
+    return result;
+}
+</code></pre>
+<p>Finally all the collected information is projected into a <code>Model</code> class for use in the next step.</p>
+<h2 id="generating-an-html-page">Generating an HTML page</h2>
+<p>To create the HTML page containing all the kata information in an appropriate layout I use (a prelease version of) <a href="https://www.nuget.org/packages/RazorLight/2.0.0-beta7">RazorLight</a>. This allows me to template the desired output using &quot;cshtml&quot; (a.k.a. <a href="https://docs.microsoft.com/en-us/aspnet/core/mvc/views/razor?view=aspnetcore-3.1">Razor pages</a>) and bind values from the <code>Model</code> into appropriate places within the template. Here's the <code>cshtml</code> file:</p>
+<pre><code class="language-html">&#64;model Blog.Codewars.Generator.Model
+&lt;!DOCTYPE html&gt;
+
+&lt;html lang=&quot;en&quot; xmlns=&quot;http://www.w3.org/1999/xhtml&quot;&gt;
+&lt;head&gt;
+    &lt;meta charset=&quot;utf-8&quot; /&gt;
+    &lt;title&gt;Codewars!&lt;/title&gt;
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;https://www.codewars.com/assets/application-776f7eebc122613f70443dfee33518104673ba7dced96422ca993601702f6456.css&quot;&gt;
+    &lt;style&gt;
+        table td {
+            border-bottom: none;
+            padding-top: 2px;
+            padding-bottom: 2px;
+            line-height: normal;
+            padding: 0px;
+            padding-right: 10px;
+        }
+        td.fitwidth {
+            width: 1px;
+            white-space: nowrap;
+        }
+        div.minitag {
+            line-height: normal;
+            font-size: 9px;
+            margin: 0px
+        }
+        .tight {
+            line-height: normal;
+            margin-top: 4px;
+            margin-bottom: 0px;
+        }
+        .tight-last {
+            line-height: normal;
+            margin-top: 4px;
+            margin-bottom: 8px;
+        }
+        .tagrow {
+            margin-bottom: 8px;
+            margin-top: -2px
+        }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body style=&quot;background-color: white;padding-top: 0px&quot;&gt;
+    &lt;h2 class=&quot;tight&quot;&gt;Honor: &#64;Model.Honor&lt;/h2&gt;
+    &lt;h3 class=&quot;tight-last&quot;&gt;Showing &#64;Model.Completions.Count() of &#64;Model.TotalCompleted completed kata&lt;/h3&gt;
+    &lt;table style=&quot;width: 100%;background-color: white;&quot;&gt;
+        &lt;tbody&gt;
+            &#64;foreach (var item in &#64;Model.Completions)
+            {
+                &lt;tr&gt;
+                    &lt;td class=&quot;fitwidth&quot; style=&quot;border-bottom: none;&quot;&gt;
+                        &lt;p class=&quot;tight&quot;&gt;&#64;item.Date.ToString(&quot;yyyy-MM-dd&quot;)&lt;/p&gt;
+                    &lt;/td&gt;
+                    &lt;td&gt;
+                        &lt;a href=&quot;&#64;item.Uri&quot; target=&quot;_blank&quot;&gt;&lt;h5 class=&quot;tight&quot;&gt;&#64;item.Name&lt;/h5&gt;&lt;/a&gt;
+                    &lt;/td&gt;
+                    &lt;td class=&quot;fitwidth&quot; rowspan=&quot;2&quot; &gt;
+                        &#64;if (&#64;item.Language == &quot;csharp&quot;)
+                        {
+                            &lt;img src=&quot;https://ian.bebbs.co.uk/Content/csharp.png&quot; style=&quot;max-width: 32px; margin-top: -6px&quot; /&gt;
+                        }
+                        else
+                        {
+                            &lt;img src=&quot;https://ian.bebbs.co.uk/Content/fsharp.png&quot; style=&quot;max-width: 32px; margin-top: -6px&quot; /&gt;
+                        }
+                    &lt;/td&gt;
+                    &lt;td class=&quot;fitwidth&quot; rowspan=&quot;2&quot;&gt;
+                        &#64;{
+                            switch (item.Colour)
+                            {
+                                case &quot;white&quot;:
+                            &lt;div class=&quot;small-hex is-extra-wide is-inline mr-15px is-white-rank&quot;&gt;&lt;div class=&quot;inner-small-hex is-extra-wide &quot;&gt;&lt;span&gt;&#64;item.Ktu&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+                                    break;
+                                case &quot;yellow&quot;:
+                            &lt;div class=&quot;small-hex is-extra-wide is-inline mr-15px is-yellow-rank&quot;&gt;&lt;div class=&quot;inner-small-hex is-extra-wide &quot;&gt;&lt;span&gt;&#64;item.Ktu&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+                                    break;
+                                case &quot;blue&quot;:
+                            &lt;div class=&quot;small-hex is-extra-wide is-inline mr-15px is-blue-rank&quot;&gt;&lt;div class=&quot;inner-small-hex is-extra-wide &quot;&gt;&lt;span&gt;&#64;item.Ktu&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+                                    break;
+                                case &quot;purple&quot;:
+                            &lt;div class=&quot;small-hex is-extra-wide is-inline mr-15px is-purple-rank&quot;&gt;&lt;div class=&quot;inner-small-hex is-extra-wide &quot;&gt;&lt;span&gt;&#64;item.Ktu&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;
+                                    break;
+                            }
+                        }
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+                &lt;tr class=&quot;bottom-margin&quot;&gt;
+                    &lt;td colspan=&quot;2&quot;&gt;
+                        &lt;div class=&quot;mt-15px tagrow&quot;&gt;
+                            &#64;foreach (var tag in &#64;item.Tags)
+                            {
+                            &lt;div class=&quot;keyword-tag minitag tight&quot;&gt;&#64;tag&lt;/div&gt;
+                            }
+                        &lt;/div&gt;
+                    &lt;/td&gt;
+                &lt;/tr&gt;
+            }
+        &lt;/tbody&gt;
+    &lt;/table&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+<p>Please excuse the crappy CSS. I <em>still</em> maintain CSS is a terrible way to style UI elements - particularly when compared to the elegance of <a href="https://platform.uno/">XAML</a>.</p>
+<p>Anyway, this <code>codewars.cshtml</code> file is added to the project as an &quot;Embedded Resource&quot; and used as follows:</p>
+<pre><code class="language-c#">public static class Implementation
+{
+    public static async Task&lt;string&gt; GenerateBlogPage(int numberOfCompletionstoInclude)
+    {
+        var engine = new RazorLightEngineBuilder()
+            .SetOperatingAssembly(Assembly.GetExecutingAssembly())
+            .UseEmbeddedResourcesProject(typeof(Implementation))
+            .UseMemoryCachingProvider()
+            .Build();
+
+        var model = await Source.Create(numberOfCompletionstoInclude);
+
+        string result = await engine.CompileRenderAsync(&quot;codewars&quot;, model);
+
+        return result;
+    }
+}
+</code></pre>
+<h2 id="securing-the-function">Securing the Function</h2>
+<p>While this function will be exposed publicly, we don't want just anyone to be able to invoke it as this would directly cost us money. By using the &quot;'Function' Authorization Level&quot; when we created the function, we ensured that the function can be invoked only if an appropriate &quot;code&quot; value is passed in the URL, but this is still just <a href="https://en.wikipedia.org/wiki/Security_through_obscurity">&quot;security through obscurity&quot;</a> which we should look to bolster further. As we'd like to ensure only Codewars can invoke this function (or at least cause the page to be regenerated) we can provide a &quot;secret&quot; to Codewars which they pass back to us - and we can check for - when the function is invoked.</p>
+<p>Furthermore, Codewars will call this function for a variety of reasons, not just when I complete a kata. As generating the page is a relatively costly process (in terms of resources at least), we want to ensure this happens only when required. We therefore flesh out the function as follows:</p>
+<pre><code class="language-c#">private static bool IsCodeWars(HttpRequest request)
+{
+    return request.Headers.TryGetValue(&quot;X-Webhook-Secret&quot;, out var values) &amp;&amp; values.Contains(Settings.CodewarsSecret);
+}
+
+private static async Task&lt;bool&gt; IsMyHonorChange(HttpRequest request, ILogger log)
+{
+    using (StreamReader reader = new StreamReader(request.Body))
+    {
+        var body = await reader.ReadToEndAsync();
+
+        log.LogInformation($&quot;Body: '{body}'&quot;);
+
+        return body.Contains(&quot;honor_changed&quot;) &amp;&amp; body.Contains(Settings.MyCodewarsId);
+    }
+}
+
+[FunctionName(&quot;WebHook&quot;)]
+public static async Task&lt;IActionResult&gt; Run(
+    [HttpTrigger(AuthorizationLevel.Function, &quot;post&quot;, Route = null)] HttpRequest request,
+    [Blob(&quot;blog/codewars.html&quot;, FileAccess.Write, Connection = &quot;AzureWebJobsStorage&quot;)] CloudBlockBlob output,
+    ILogger log)
+{
+    log.LogInformation(&quot;C# HTTP trigger function processed a request.&quot;);
+
+    if (IsCodeWars(request))
+    {
+        if (await IsMyHonorChange(request, log))
+        {
+            var content = await Generator.Implementation.GenerateBlogPage(Settings.NumberOfCompletionstoInclude);
+            output.Properties.ContentType = &quot;text/html&quot;;
+            await output.UploadTextAsync(content);
+
+            return new NoContentResult();
+        }
+        else
+        {
+            return new StatusCodeResult(304);
+        }
+    }
+    else
+    {
+        return new UnauthorizedResult();
+    }
+}
+</code></pre>
+<p>Note that <code>Settings</code> is a façade for retrieving configuration values as shown here:</p>
+<pre><code class="language-c#">public static class Settings
+{
+    public static string CodewarsSecret =&gt; Environment.GetEnvironmentVariable(&quot;CodewarsSecret&quot;);
+
+    public static string MyCodewarsId =&gt; Environment.GetEnvironmentVariable(&quot;MyCodewarsId&quot;);
+
+    public static int NumberOfCompletionstoInclude =&gt; Int32.Parse(Environment.GetEnvironmentVariable(&quot;NumberOfCompletionstoInclude&quot;));
+}
+</code></pre>
+<h2 id="deployment">Deployment</h2>
+<p>Finally we need to get the function deployed and connected to Codewars. As this isn't something that is going to change regularly, deployment of the function to Azure is performed with a &quot;right click -&gt; publish&quot; from within Visual Studio. Once deployed, the function URL and <code>CodewarsSecret</code> value are copied from the Azure portal and added to my Codewars Account Settings page as shown below:</p>
+<img src="/Content/Codewars/FunctionURL.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Function URL from Azure Portal"/>
+<br/>
+<img src="/Content/Codewars/CodewarsWebhook.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Codewars Webhook settings"/>
+<p>Once saved, completing a kata automatically generates a new page in Azure Blob Storage which then appears on my blog. Nice!</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Sometimes I'm amazed at how fast and inexpensive it has become to assemble solutions to problems that, just a few years ago, would have been a major undertaking and cost a significant amount to run. Indeed, this solution took just a few hours from concept to deployment and costs...</p>
+<img src="/Content/Codewars/AzureCost.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Azure Cost Analysis"/>
+<p>... yup, less than a penny a month to run!</p>
+<p>As developers we truly are spoiled by the tooling provided to us by Visual Studio and the hosting options available in Azure. While I'm fairly proficient in variety of other languages and frameworks, I always find myself back in VS because it makes everything just so damn easy!</p>
+<p>Anyway, the source code for this project can be found in my <a href="https://github.com/ibebbs/Blog.Codewars">&quot;Blog.Codewars&quot;</a> repository on Github. Please star it if you find it - or this blog post - useful.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2020. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
