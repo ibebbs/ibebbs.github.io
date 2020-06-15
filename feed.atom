@@ -4,8 +4,314 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-06-09T13:02:29Z</updated>
+	<updated>2020-06-15T14:48:18Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/UnoWithSwagger</id>
+		<title>Giving Uno Some Swagger</title>
+		<link href="http://ian.bebbs.co.uk/posts/UnoWithSwagger" />
+		<updated>2020-06-15T00:00:00Z</updated>
+		<content>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;A few days ago, &lt;a href="https://twitter.com/thenickrandolph"&gt;Nick Randolph&lt;/a&gt; published an excellent blog post about &lt;a href="https://nicksnettravels.builttoroam.com/consuming-swagger/"&gt;&amp;quot;Consuming REST API with Swagger / OpenAPI in Xamarin and Uno Applications&amp;quot;&lt;/a&gt;. I read this article with great interest (and perhaps a touch of chagrin) as I was mid-way through writing a very similar article myself. While I found this post to be as detailed and pragmatic as &lt;a href="https://nicksnettravels.builttoroam.com/uno-crossplatform-template/"&gt;Nick's always are&lt;/a&gt;, I feel he missed a few key elements about consuming strongly-typed ReST clients in Uno, particularly when it comes to consuming them from within a browser via the WebAssembly (WASM) project. In this post I will cover these additional points such that the reader is able to consume ReST endpoints, in the same manner, from all Uno head projects.&lt;/p&gt;
+&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;This article will now very much be a continuation of Nick's. If you haven't read Nick's post, I would encourage you to &lt;a href="https://nicksnettravels.builttoroam.com/consuming-swagger/"&gt;do so now&lt;/a&gt; so that you understand many of the approaches used here. Much like Nick, I will be using a ReST endpoint created for an earlier blog post, namely the &amp;quot;Cheeze.Store&amp;quot; API written for my &lt;a href="https://ian.bebbs.co.uk/posts/LessReSTMoreHotChocolate"&gt;&amp;quot;Less ReST, More HotChocolate&amp;quot;&lt;/a&gt; post.&lt;/p&gt;
+&lt;p&gt;All source code for this post can be found in my &lt;a href="https://github.com/ibebbs/UnoWithSwagger"&gt;UnoWithSwagger&lt;/a&gt; repo on Github.&lt;/p&gt;
+&lt;h2 id="typed-clients"&gt;Typed Clients&lt;/h2&gt;
+&lt;p&gt;In contrast to Nick's post, I will not be using &lt;code&gt;dotnet openapi&lt;/code&gt; to generate Typed Clients for my API but will instead continue to use the &lt;a href="https://www.nuget.org/packages/NSwag.MSBuild/"&gt;&lt;code&gt;NSwag.MSBuild&lt;/code&gt;&lt;/a&gt; package. This is for two reasons:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Typed Client generation using &lt;code&gt;NSwag.MSBuild&lt;/code&gt; uses an NSwag configuration file. This configuration file provides much greater control over the generated code than is currently possible with &lt;code&gt;dotnet openapi&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Once configured, &lt;code&gt;NSwag.MSBuild&lt;/code&gt; is able to generate Typed Clients directly from the ReST service's source code instead of needing a &lt;code&gt;swagger.json&lt;/code&gt; file. This saves a significant amount of time when you're writing a .NET ReST service as you don't need to start the service to update the client side code, thereby removing friction and allowing you to rapidly iterate the API.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;If you're interested in using &lt;code&gt;NSwag.MSBuild&lt;/code&gt; to generate your Typed Clients then I cover the process quite thoroughly &lt;a href="https://ian.bebbs.co.uk/posts/LessReSTMoreHotChocolate#generating-typed-clients"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Furthermore, rather than &amp;quot;newing up&amp;quot; a &lt;code&gt;swaggerClient&lt;/code&gt; manually, I will be using the &lt;a href="https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/3.1.5"&gt;&lt;code&gt;Microsoft.Extensions.DependencyInjection&lt;/code&gt;&lt;/a&gt; and &lt;a href="https://www.nuget.org/packages/Microsoft.Extensions.Http/3.1.5"&gt;&lt;code&gt;Microsoft.Extensions.Http&lt;/code&gt;&lt;/a&gt; packages to inject a correctly configured Typed Client into my view-model. This, I believe, is where Typed Clients really shine as this approach completely abstracts the source of the data such that the Typed Clients appear to just be another client side dependency.&lt;/p&gt;
+&lt;p&gt;Here is the &lt;code&gt;Services&lt;/code&gt; class I use for service registration:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public partial class Services
+{
+    public static readonly Services Instance = new Services();
+
+    private readonly ServiceCollection _serviceCollection;
+    private readonly Lazy&amp;lt;IServiceProvider&amp;gt; _serviceProvider;
+
+    private Services()
+    {
+        _serviceCollection = new ServiceCollection();
+        _serviceProvider = new Lazy&amp;lt;IServiceProvider&amp;gt;(() =&amp;gt; _serviceCollection.BuildServiceProvider());
+    }
+
+    private void RegisterGlobalServices(IServiceCollection services, ILogger logger)
+    {
+        services.AddHttpClient&amp;lt;Store.Client.IStoreClient, Store.Client.StoreClient&amp;gt;(
+            httpClient =&amp;gt; httpClient.BaseAddress = new Uri(&amp;quot;http://localhost:5000&amp;quot;)
+        );
+
+        services.AddSingleton&amp;lt;ISchedulers, Schedulers&amp;gt;();
+
+        services.AddTransient&amp;lt;ViewModel&amp;gt;();
+    }
+
+    public void PerformRegistration(ILogger logger)
+    {
+        if (_serviceProvider.IsValueCreated) throw new InvalidOperationException(&amp;quot;You cannot register services after the service provider has been created&amp;quot;);
+
+        RegisterGlobalServices(_serviceCollection, logger);
+    }
+
+    public IServiceProvider Provider =&amp;gt; _serviceProvider.Value;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Which is initialized from &lt;code&gt;App.xaml.cs&lt;/code&gt; as shown here:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;sealed partial class App : Application
+{
+    private readonly ILogger&amp;lt;App&amp;gt; _logger;
+
+    public App()
+    {
+        ConfigureFilters(global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory);
+
+        _logger = global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory.CreateLogger&amp;lt;App&amp;gt;();
+
+        Platform.Services.Instance.PerformRegistration(_logger);
+
+        this.InitializeComponent();
+        this.Suspending += OnSuspending;
+    }
+
+    ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And used (naively) from within the view to instantiate the ViewModel, which then acts as the view's data context:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public sealed partial class MainPage : Page
+{
+    private readonly ViewModel _viewModel;
+    private IDisposable _behaviours;
+
+    public MainPage()
+    {
+        this.InitializeComponent();
+
+        _viewModel = Platform.Services.Instance.Provider.GetRequiredService&amp;lt;ViewModel&amp;gt;();
+        DataContext = _viewModel;
+    }
+    
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+
+        _behaviours = _viewModel.Activate();
+    }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+
+        if (_behaviours != null)
+        {
+            _behaviours.Dispose();
+            _behaviours = null;
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally, here is the &lt;code&gt;ViewModel&lt;/code&gt; implementation showing the use of the &lt;code&gt;IStoreClient&lt;/code&gt; Typed Client:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public class ViewModel : INotifyPropertyChanged
+{
+    private readonly IStoreClient _storeClient;
+    private readonly Platform.ISchedulers _schedulers;
+    private readonly ILogger&amp;lt;ViewModel&amp;gt; _logger;
+    private readonly MVx.Observable.Command _loadCheese;
+    private readonly MVx.Observable.Property&amp;lt;IEnumerable&amp;lt;Store.Client.Cheese&amp;gt;&amp;gt; _cheeses;
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public ViewModel(IStoreClient storeClient, Platform.ISchedulers schedulers)
+    {
+        _storeClient = storeClient;
+        _schedulers = schedulers;
+
+        _logger = global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory.CreateLogger&amp;lt;ViewModel&amp;gt;();
+
+        _loadCheese = new MVx.Observable.Command(true);
+        _cheeses = new MVx.Observable.Property&amp;lt;IEnumerable&amp;lt;Store.Client.Cheese&amp;gt;&amp;gt;(Enumerable.Empty&amp;lt;Store.Client.Cheese&amp;gt;(), nameof(Cheeses), args =&amp;gt; PropertyChanged?.Invoke(this, args));
+    }
+
+    private IDisposable ShouldLoadCheeseWhenLoadCheeseInvoked()
+    {
+        return _loadCheese
+            .Do(_ =&amp;gt; _logger.LogInformation(&amp;quot;Loading Cheeses!&amp;quot;))
+            .SelectMany(_ =&amp;gt; _storeClient.GetAsync())
+            .ObserveOn(_schedulers.Dispatcher)
+            .Subscribe(_cheeses);
+    }
+
+    public IDisposable Activate()
+    {
+        return new CompositeDisposable(
+            ShouldLoadCheeseWhenLoadCheeseInvoked()
+        );
+    }
+
+    public ICommand LoadCheese =&amp;gt; _loadCheese;
+
+    public IEnumerable&amp;lt;Store.Client.Cheese&amp;gt; Cheeses =&amp;gt; _cheeses.Get();
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note: This ViewModel uses my &lt;a href="https://www.nuget.org/packages/MVx.Observable/"&gt;&lt;code&gt;MVx.Observable&lt;/code&gt;&lt;/a&gt; package:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;Functional, Declarative and Reactive Extensions for MVVM &amp;amp; MVC patterns&lt;/p&gt;
+&lt;p&gt;A (mostly) unopinionated, light-weight alternative to ReactiveUI provided as a library &lt;em&gt;not a framework&lt;/em&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="this-missing-links"&gt;This Missing Links&lt;/h2&gt;
+&lt;p&gt;Now, regardless of how you've generated your Typed Clients, you will have added a reference to the client library to each of the head projects in your Uno solution. With the above code in place, you should be able to start the UWP head, click the &amp;quot;Load Cheeze!&amp;quot; button and see this:&lt;/p&gt;
+&lt;img src="/Content/UnoWithSwagger/UWPHead.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="UWP Head Running"&gt;
+&lt;p&gt;However, starting the WASM head will result in the browser only showing the app's splash screen. If you bring up your browser's &amp;quot;developer tools&amp;quot; window (I use Chrome and Edge interchangeably) and view the console output you should see something like the following:&lt;/p&gt;
+&lt;img src="/Content/UnoWithSwagger/WASMLinkerIssue.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="WASM DefaultHttpClientFactory could not be located"&gt;
+&lt;p&gt;This error is due to way the Mono linker determines the assemblies and types that should - or shouldn't - be included in the WASM output. By default, only statically referenced types (i.e. those we're directly using in our code) will be included and downloaded into the browser when starting the app. As we don't directly reference &amp;quot;Microsoft.Extensions.Http.DefaultHttpClientFactory&amp;quot; this type isn't available to the app and therefore the DI container isn't able to instantiate it.&lt;/p&gt;
+&lt;p&gt;To resolve this, we need to explicitly instruct the Mono linker to include the types we need. This can be done by modifying the &lt;code&gt;LinkerConfig.xml&lt;/code&gt; file (within the WASM head project) to the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-xml"&gt;&amp;lt;linker&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;Cheeze.App.Wasm&amp;quot; /&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;Uno.UI&amp;quot; /&amp;gt;
+  
+  &amp;lt;assembly fullname=&amp;quot;Newtonsoft.Json&amp;quot; /&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;System.ComponentModel.Annotations&amp;quot;/&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;Microsoft.Extensions.Http&amp;quot;/&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;Microsoft.Extensions.Options&amp;quot;/&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;Cheeze.Store.Client&amp;quot; /&amp;gt;
+
+  &amp;lt;assembly fullname=&amp;quot;System.Core&amp;quot;&amp;gt;
+	&amp;lt;!-- This is required by JSon.NET and any expression.Compile caller --&amp;gt;
+	&amp;lt;type fullname=&amp;quot;System.Linq.Expressions*&amp;quot; /&amp;gt;
+  &amp;lt;/assembly&amp;gt;
+&amp;lt;/linker&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;With this done, we should now be able to start the Cheeze App within the browser:&lt;/p&gt;
+&lt;img src="/Content/UnoWithSwagger/WASMRunningNoData.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Cheeze.App running in browser"&gt;
+&lt;br/&gt;
+&lt;h2 id="close-but-no-handler"&gt;Close, but no handler!&lt;/h2&gt;
+&lt;p&gt;With Cheeze.App running in the browser, if we click the &amp;quot;Load Cheeze!&amp;quot; button now we should get... wait for it....&lt;/p&gt;
+&lt;p&gt;Nope, nothing.&lt;/p&gt;
+&lt;p&gt;Back to the browser's debugging tool's Console output and we're likely to see something along the lines of &amp;quot;Operation is not supported on this platform&amp;quot;. This is due to the fact that, while running in the browser, the WASM head uses the browser to make HTTP calls. In order to do this, the &lt;code&gt;HttpClient&lt;/code&gt; used by the Typed Client implementation needs to be configured to use the &lt;code&gt;WasmHttpHandler&lt;/code&gt; as described &lt;a href="https://platform.uno/docs/articles/faq.html#is-it-possible-to-make-http-web-requests-using-the-wasm-target"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;Note: Somewhat confusingly, I hit this error consistently while originally writing the Cheese.App but, after implemented the changes below then backing them out so I could write this post, I could not for the life of me get the error to occur again. I imagine it's something cached or not rebuilt but this does mean that I'm unable to share screenshots showing this error. Apologies.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Fortunately, getting &lt;code&gt;HttpClient&lt;/code&gt; to use the &lt;code&gt;WasmHttpHandler&lt;/code&gt; can be done completely transparently to the Typed Client by adding some additional configuration to our dependency injection setup. Shown below is the refactored &lt;code&gt;Services.cs&lt;/code&gt; class.&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public partial class Services
+{
+    public static readonly Services Service = new Services();
+
+    private readonly ServiceCollection _serviceCollection;
+    private readonly Lazy&amp;lt;IServiceProvider&amp;gt; _serviceProvider;
+
+    private Services()
+    {
+        _serviceCollection = new ServiceCollection();
+        _serviceProvider = new Lazy&amp;lt;IServiceProvider&amp;gt;(() =&amp;gt; _serviceCollection.BuildServiceProvider());
+    }
+
+    partial void GetHttpMessageHandler(ref HttpMessageHandler handler);
+
+    private HttpMessageHandler PrimaryHttpMessageHandler()
+    {
+        HttpMessageHandler handler = null;
+
+        GetHttpMessageHandler(ref handler);
+
+        handler ??= new HttpClientHandler();
+
+        return handler;
+    }
+
+    private void RegisterGlobalServices(IServiceCollection services, ILogger logger)
+    {
+        services
+            .AddHttpClient&amp;lt;Store.Client.IStoreClient, Store.Client.StoreClient&amp;gt;(
+                httpClient =&amp;gt; httpClient.BaseAddress = new Uri(&amp;quot;http://localhost:5000&amp;quot;))
+            .ConfigurePrimaryHttpMessageHandler(PrimaryHttpMessageHandler);
+
+        services.AddSingleton&amp;lt;ISchedulers, Schedulers&amp;gt;();
+
+        services.AddTransient&amp;lt;ViewModel&amp;gt;();
+    }
+
+    public void PerformRegistration(ILogger logger)
+    {
+        if (_serviceProvider.IsValueCreated) throw new InvalidOperationException(&amp;quot;You cannot register services after the service provider has been created&amp;quot;);
+
+        RegisterGlobalServices(_serviceCollection, logger);
+    }
+
+    public IServiceProvider Provider =&amp;gt; _serviceProvider.Value;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note the addition of the &lt;code&gt;.ConfigurePrimaryHttpMessageHandler(PrimaryHttpMessageHandler)&lt;/code&gt; call and the &lt;code&gt;GetHttpMessageHandler&lt;/code&gt; partial method. The code here ensures that &lt;code&gt;HttpClientHandler&lt;/code&gt; is used as the default but allows this to be overriden by providing an implementation for the &lt;code&gt;GetHttpMessageHandler&lt;/code&gt; within platform specific code. Accordingly, a partial implementation of the &lt;code&gt;Services.cs&lt;/code&gt; class is added to the &lt;code&gt;WASM&lt;/code&gt; head project as follows:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public partial class Services
+{
+    partial void GetHttpMessageHandler(ref HttpMessageHandler handler)
+    {
+        handler = new Uno.UI.Wasm.WasmHttpHandler();
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now when the implementation of the IStoreClient is injected into the &lt;code&gt;ViewModel&lt;/code&gt; it will be using an &lt;code&gt;HttpClient&lt;/code&gt; instance which is configured to use &lt;code&gt;WasmHttpHandler&lt;/code&gt;. Nice.&lt;/p&gt;
+&lt;h2 id="cors-blimey"&gt;COR[s] BLIMEY!&lt;/h2&gt;
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;Now&lt;/strong&gt;&lt;/em&gt; when we start the WASM head and click the &amp;quot;Load Cheeze!&amp;quot; button we get...  #$&amp;#64;&amp;amp;%*! ... &lt;em&gt;&lt;strong&gt;still&lt;/strong&gt;&lt;/em&gt; nothing.&lt;/p&gt;
+&lt;p&gt;Again, back to the browser's Console output and we'll see the culprit:&lt;/p&gt;
+&lt;img src="/Content/UnoWithSwagger/WASMCorsIssue.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Still No Data"&gt;
+&lt;p&gt;Remember how I said earlier that &amp;quot;the WASM head uses the browser to make HTTP calls&amp;quot;? Yup? Well, this therefore makes the requests beholden to &lt;a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing"&gt;CORS&lt;/a&gt;. As the &lt;code&gt;GET&lt;/code&gt; request emanating from our Cheeze.App is deemed to be from another origin (by virtue of running from a different port) our service refuses to answer the request and everything disappears in a puff of console output.&lt;/p&gt;
+&lt;p&gt;To resolve this issue, we need to change the service (Cheeze.Store) through the addition of a CORS policy, as shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public class Startup
+{
+    ...
+
+    // This method gets called by the runtime. Use this method to add services to the container.
+    public void ConfigureServices(IServiceCollection services)
+    {
+        ...
+
+        services.AddCors(o =&amp;gt; o.AddPolicy(
+            &amp;quot;CorsPolicy&amp;quot;,
+            builder =&amp;gt;
+            {
+                builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+            })
+        );
+        
+        ...
+    }
+
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        ...
+
+        app.UseCors(&amp;quot;CorsPolicy&amp;quot;);
+        
+        ...
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note: The policy shown here is for debug only and shouldn't be used verbatim in production!!&lt;/p&gt;
+&lt;h1 id="finally"&gt;Finally!&lt;/h1&gt;
+&lt;p&gt;With all this in place and rebuilt, clicking the &amp;quot;Load Cheeze!&amp;quot; button in the browser finally gives us:&lt;/p&gt;
+&lt;img src="/Content/UnoWithSwagger/WASMWithData.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="WASM with data"&gt;
+&lt;p&gt;YAY!&lt;/p&gt;
+&lt;p&gt;Now, personally, I feel it's worth taking a moment here to reflect on this. With just a minor change in client side code (~12 loc) we're able to run &lt;em&gt;exactly&lt;/em&gt; the same app both on the desktop &lt;strong&gt;and&lt;/strong&gt; in the browser. I mean, look at it:&lt;/p&gt;
+&lt;img src="/Content/UnoWithSwagger/SideBySide.png" class="img-responsive" style="margin: auto; width:95%; margin-top: 6px; margin-bottom: 6px;" alt="Side By Side"&gt;
+&lt;p&gt;With no effort and just a couple of minor exceptions (font weight in UWP - left, and a scroll bar in the browser - right) the UI is pixel-perfect across two platforms that really couldn't be more dissimilar! I've said it before and I'll say it again, the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; team deserve massive kudos for providing a framework that allows developers to leverage existing skills (not to mention one of the best UI frameworks) to deliver apps across four (no, wait, &lt;a href="https://platform.uno/blog/announcing-uno-platform-2-4-macos-support-and-windows-calculator-on-macos/"&gt;FIVE!&lt;/a&gt;) disparate platforms.&lt;/p&gt;
+&lt;h2 id="wrapping-up"&gt;Wrapping Up&lt;/h2&gt;
+&lt;p&gt;While implementing WASM heads for Uno solutions, I've found the following helps smooth the process:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Enable WASM debugging by add &lt;code&gt;inspectUri&lt;/code&gt; to &lt;code&gt;properties/launchSettings.json&lt;/code&gt; as shown &lt;a href="https://platform.uno/blog/debugging-uno-platform-webassembly-apps-in-visual-studio-2019/"&gt;here&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Use Microsoft Edge to find errors (it's Console output seems have more info) but Chrome to hit breakpoints&lt;/li&gt;
+&lt;li&gt;Create loggers via &lt;code&gt;global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory.CreateLogger&amp;lt;T&amp;gt;()&lt;/code&gt;. Uno uses an old version of &lt;code&gt;Microsoft.Extensions.Logging&lt;/code&gt; so injecting an &lt;code&gt;ILogger&amp;lt;T&amp;gt;&lt;/code&gt; instance into a class doesn't (seem to) work for browser console output and certainly can't used used while registering services.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;And that's it. I hope you've found this helpful. Should you like or use any of the code in this article please star the &lt;a href="https://github.com/ibebbs/UnoWithSwagger"&gt;repository&lt;/a&gt; and, if you have any questions or comments, please feel free to drop me a line using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="oh-and.fine-cheese"&gt;Oh, and... Fine Cheese&lt;/h2&gt;
+&lt;p&gt;Some content in the &amp;quot;Cheeze&amp;quot; app/repository has been borrowed - thus far without permission - from &lt;a href="https://www.finecheese.co.uk/"&gt;The Fine Cheese Co&lt;/a&gt; website. While I'm not affiliated with this company in any way - I just happen to like both cheese and their website - if you should end up ordering from them as a result of reading article, please let them know so they don't force me to change all the screen shots above. Thanks.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;A few days ago, &lt;a href="https://twitter.com/thenickrandolph"&gt;Nick Randolph&lt;/a&gt; published an excellent blog post about &lt;a href="https://nicksnettravels.builttoroam.com/consuming-swagger/"&gt;"Consuming REST API with Swagger / OpenAPI in Xamarin and Uno Applications"&lt;/a&gt;. I read this article with great interest (and perhaps a touch of chagrin) as I was mid-way through writing a very similar article myself. While I found this post to be as detailed and pragmatic as &lt;a href="https://nicksnettravels.builttoroam.com/uno-crossplatform-template/"&gt;Nick's always are&lt;/a&gt;, I feel he missed a few key elements about consuming strongly-typed ReST clients in Uno, particularly when it comes to consuming them from within a browser via the WebAssembly (WASM) project. In this post I will cover these additional points such that the reader is able to consume ReST endpoints, in the same manner, from all Uno head projects.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/Codewars</id>
 		<title>A Kata for Katas</title>
@@ -3492,179 +3798,5 @@ For example, say we have introduce a &lt;code&gt;Role&lt;/code&gt; entity and th
 &lt;p&gt;In the next post, I'll discuss how I've developed this platform even further into a full, voice activated, digital assistant while &lt;em&gt;still&lt;/em&gt; maintaining privacy and security.&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;In &lt;a href="http://ian.bebbs.co.uk/posts/ASmartHome-Part1"&gt;part I&lt;/a&gt; of this series I described how to use Xiaomi Mi Smart Home devices without compromising your home privacy or security.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/ASmartHome-Part1</id>
-		<title>A SmartHome... NoT - Part I</title>
-		<link href="http://ian.bebbs.co.uk/posts/ASmartHome-Part1" />
-		<updated>2018-01-29T00:00:00Z</updated>
-		<content>&lt;p&gt;I moved house a couple of months back to, what my partner likes to describe as, our &amp;quot;forever home&amp;quot;. As such, I was keen to start looking into home monitoring / automation again as I knew things had progressed significantly since I last considered such things and I was keen to see what could be done. After lots of investigation I believe I have found the basis of a home automation solution which meets my current needs, should be extensible moving forward and which does not compromise the securty or privacy of my home.&lt;/p&gt;
-&lt;p&gt;This post is, I hope, the first in a series that discuss the various devices and software I use to monitor and automate my home.&lt;/p&gt;
-&lt;h1 id="private-by-design"&gt;Private by design&lt;/h1&gt;
-&lt;p&gt;Firstly a word on privacy. While &amp;quot;smart devices&amp;quot; are everywhere nowadays, they almost all require connection to the internet and, often, a subscription to a &amp;quot;cloud&amp;quot; service. I wrote about &lt;a href="http://ian.bebbs.co.uk/posts/MonsterPi"&gt;this before&lt;/a&gt; and expressed my desire for smart devices to &amp;quot;drop the 'Inter' from IoT and expand the 'net' to become a 'Network of Things', or NoT&amp;quot; which could optionally be bridged to the internet if desired. To quote myself:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;I've long loved the idea of home automation. From X10 and LightwaveRF through to modern Bluetooth and Wifi connected devices, I have played with dozens of technologies in search of home automation nirvana. But recently I have watched with growing bewilderment at the incredible number of &amp;quot;cloud-connected&amp;quot; home automation devices being released and the eagerness with which they're snapped up by naive consumers hungry to control everything from the carefree comfort of their iPhone.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;You see, while you can buy a myriad of IoT devices off the shelf nowadays, they nearly all come with some form of &amp;quot;cloud-service&amp;quot; that is necessary in order for the device to work as sold. As the more wily of reader will no doubt be aware, this exposes your home network to innumerable &lt;a href="https://it.slashdot.org/story/16/10/03/1359200/source-code-for-iot-botnet-mirai-which-took-down-krebs-on-security-website-with-ddos-attack-released"&gt;security concerns&lt;/a&gt;, &lt;a href="https://it.slashdot.org/story/16/08/08/1449221/hackers-make-the-first-ever-ransomware-for-smart-thermostats"&gt;potential abuses&lt;/a&gt; and an &lt;a href="https://tech.slashdot.org/story/16/01/14/1347243/nest-thermostat-bug-leaves-owners-without-heating"&gt;external point of failure&lt;/a&gt; that cannot be closed/fixed without sacrificing some or all of the functionality of the new fangled device.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Since I wrote post, the market for internet connected home automation devices has exploded... as have the concerns around the &lt;a href="(https://gizmodo.com/amazon-agrees-to-hand-over-data-in-echo-murder-case-1793039360)"&gt;privacy&lt;/a&gt;, &lt;a href="https://www.bleepingcomputer.com/news/government/germany-preparing-law-for-backdoors-in-any-type-of-modern-device/"&gt;security&lt;/a&gt; and &lt;a href="https://torrentfreak.com/piracy-notices-can-mess-with-your-thermostat-isp-warns-171224/"&gt;functionality&lt;/a&gt; (or &lt;a href="https://gizmodo.com/yes-your-amazon-echo-is-an-ad-machine-1821712916"&gt;unwanted functionality&lt;/a&gt;) of the devices. I am &lt;a href="http://uk.businessinsider.com/consumers-holding-off-on-smart-home-gadgets-thanks-to-privacy-fears-2017-11?r=US&amp;amp;IR=T"&gt;not alone&lt;/a&gt; in being sufficiently concerned by these issues that I choose the devices I allow on my home network very carefully and &lt;a href="http://ian.bebbs.co.uk/tags/monitoring"&gt;monitor them closely&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;In short, the list of &amp;quot;off-the-shelf&amp;quot; devices I would feel comfortable having on my home network is very short and, until recently, I was resigned to having to build these devices myself using &lt;a href="https://en.wikipedia.org/wiki/Single-board_computer"&gt;single board computers&lt;/a&gt; or &lt;a href="https://en.wikipedia.org/wiki/ESP8266"&gt;Wifi connected microcontrollers&lt;/a&gt;. That is until a family of devices came to my attention that originated from the most unlikely of places...&lt;/p&gt;
-&lt;h2 id="mi-smart-home"&gt;Mi Smart Home&lt;/h2&gt;
-&lt;p&gt;China isn't the first country that comes to mind when you think about privacy yet, with the release of the &lt;a href="https://xiaomi-mi.com/mi-smart-home/"&gt;&amp;quot;Mi Smart Home&amp;quot;&lt;/a&gt; family of devices, the Chinese electronics manufacturer &lt;a href="https://en.wikipedia.org/wiki/Xiaomi"&gt;Xiaomi Inc&lt;/a&gt; seems to have delivered a smart-device eco-system that is privacy-friendly... albeit somewhat tacitly as we will see below.&lt;/p&gt;
-&lt;p&gt;The Mi Smart family consists of a number of small, battery powered Zigbee devices such as &lt;a href="https://xiaomi-mi.com/sockets-and-sensors/xiaomi-mi-temperature-humidity-sensor/"&gt;temperature and humidity sensors&lt;/a&gt;, &lt;a href="https://xiaomi-mi.com/sockets-and-sensors/xiaomi-mi-door-window-sensors/"&gt;door / window sensors&lt;/a&gt;, &lt;a href="https://xiaomi-mi.com/sockets-and-sensors/xiaomi-mi-occupancy-sensor/"&gt;movement sensors&lt;/a&gt; and &lt;a href="https://www.gearbest.com/alarm-systems/pp_610096.html"&gt;various switches&lt;/a&gt;. Oh... and a curious &lt;a href="https://xiaomi-mi.com/sockets-and-sensors/xiaomi-mi-smart-home-cube-white/"&gt;'cube' controller&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;These devices connect to your internal Wifi network via a &lt;a href="https://xiaomi-mi.com/mi-smart-home/xiaomi-mi-gateway-2/"&gt;Gateway device&lt;/a&gt;. In addition to providing the Zigbee to Wifi bridge, this gateway also provides an ambient light sensor, a very useful RGB light and a umm... not so useful speaker. This is all packaged in a small, round, 30 gram device about 8 centimeters in diameter and 3 cenitmeters deep. Frustratingly the gateway only comes with the Chinese/Australian type I plug so you need an adapter to use it in the UK which adds significantly to the depth (although I've taken to using a &lt;a href="https://www.gearbest.com/plugs-sockets/pp_1168562.html"&gt;convenient extension lead&lt;/a&gt; instead).&lt;/p&gt;
-&lt;p&gt;To set up the Wifi Gateway device and add sensors, you have to install the &lt;a href="https://play.google.com/store/apps/details?id=com.xiaomi.smarthome&amp;amp;hl=en_GB"&gt;Xiaomi Mi Home app&lt;/a&gt; which, to be frank, is a privacy nightmare. The list of permissions it needs is quite incredible:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Version 5.1.1 can access:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Device &amp;amp; app history
-&lt;ul&gt;
-&lt;li&gt;retrieve running apps&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Identity
-&lt;ul&gt;
-&lt;li&gt;find accounts on the device&lt;/li&gt;
-&lt;li&gt;add or remove accounts&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Calendar
-&lt;ul&gt;
-&lt;li&gt;read calendar events plus confidential information&lt;/li&gt;
-&lt;li&gt;add or modify calendar events and send emails to guests without owners' knowledge&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Contacts
-&lt;ul&gt;
-&lt;li&gt;find accounts on the device&lt;/li&gt;
-&lt;li&gt;read your contacts&lt;/li&gt;
-&lt;li&gt;modify your contacts&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Location
-&lt;ul&gt;
-&lt;li&gt;approximate location (network-based)&lt;/li&gt;
-&lt;li&gt;precise location (GPS and network-based)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;SMS
-&lt;ul&gt;
-&lt;li&gt;read your text messages (SMS or MMS)&lt;/li&gt;
-&lt;li&gt;receive text messages (SMS)&lt;/li&gt;
-&lt;li&gt;send SMS messages&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Phone
-&lt;ul&gt;
-&lt;li&gt;directly call phone numbers&lt;/li&gt;
-&lt;li&gt;reroute outgoing calls&lt;/li&gt;
-&lt;li&gt;read call log&lt;/li&gt;
-&lt;li&gt;read phone status and identity&lt;/li&gt;
-&lt;li&gt;write call log&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Photos / Media / Files
-&lt;ul&gt;
-&lt;li&gt;read the contents of your USB storage&lt;/li&gt;
-&lt;li&gt;modify or delete the contents of your USB storage&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Storage
-&lt;ul&gt;
-&lt;li&gt;read the contents of your USB storage&lt;/li&gt;
-&lt;li&gt;modify or delete the contents of your USB storage&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Camera
-&lt;ul&gt;
-&lt;li&gt;take pictures and videos&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Microphone
-&lt;ul&gt;
-&lt;li&gt;record audio&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Wi-Fi connection information
-&lt;ul&gt;
-&lt;li&gt;view Wi-Fi connections&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Device ID &amp;amp; call information
-&lt;ul&gt;
-&lt;li&gt;read phone status and identity&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;Other
-&lt;ul&gt;
-&lt;li&gt;download files without notification&lt;/li&gt;
-&lt;li&gt;interact across users&lt;/li&gt;
-&lt;li&gt;full licence to interact across users&lt;/li&gt;
-&lt;li&gt;transmit infrared&lt;/li&gt;
-&lt;li&gt;modify secure system settings&lt;/li&gt;
-&lt;li&gt;read Home settings and shortcuts&lt;/li&gt;
-&lt;li&gt;write Home settings and shortcuts&lt;/li&gt;
-&lt;li&gt;view network connections&lt;/li&gt;
-&lt;li&gt;create accounts and set passwords&lt;/li&gt;
-&lt;li&gt;read battery statistics&lt;/li&gt;
-&lt;li&gt;pair with Bluetooth devices&lt;/li&gt;
-&lt;li&gt;access Bluetooth settings&lt;/li&gt;
-&lt;li&gt;send sticky broadcast&lt;/li&gt;
-&lt;li&gt;change network connectivity&lt;/li&gt;
-&lt;li&gt;allow Wi-Fi Multicast reception&lt;/li&gt;
-&lt;li&gt;connect and disconnect from Wi-Fi&lt;/li&gt;
-&lt;li&gt;disable your screen lock&lt;/li&gt;
-&lt;li&gt;control flashlight&lt;/li&gt;
-&lt;li&gt;full network access&lt;/li&gt;
-&lt;li&gt;change your audio settings&lt;/li&gt;
-&lt;li&gt;control Near-Field Communication&lt;/li&gt;
-&lt;li&gt;read sync settings&lt;/li&gt;
-&lt;li&gt;run at startup&lt;/li&gt;
-&lt;li&gt;draw over other apps&lt;/li&gt;
-&lt;li&gt;use accounts on the device&lt;/li&gt;
-&lt;li&gt;control vibration&lt;/li&gt;
-&lt;li&gt;prevent device from sleeping&lt;/li&gt;
-&lt;li&gt;modify system settings&lt;/li&gt;
-&lt;li&gt;toggle sync on and off&lt;/li&gt;
-&lt;li&gt;install shortcuts&lt;/li&gt;
-&lt;li&gt;uninstall shortcuts&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Scary huh! How can I possibly claim these devices are privacy friendly when you've basically just given a Chinese company permission to do pretty much anything it likes with your phone's hardware and data? Well, notice how I said you need the app to &amp;quot;set up the Wifi Gateway device and add sensors&amp;quot;. Once they're setup you no longer need the app and, furthermore, once &amp;quot;local network functions&amp;quot; are enabled (more on this in a second) neither the gateway nor sensors need internet access to function.&lt;/p&gt;
-&lt;p&gt;So, how to go about using these sensors in a privacy friendly way?&lt;/p&gt;
-&lt;h1 id="preparation"&gt;Preparation&lt;/h1&gt;
-&lt;p&gt;To get set up with these devices without compromising your privacy, you will need:&lt;/p&gt;
-&lt;h2 id="a-dedicated-vlan-and-wifi-network-for-smart-home-devices"&gt;A dedicated VLAN and Wifi network for &amp;quot;smart home&amp;quot; devices&lt;/h2&gt;
-&lt;p&gt;I recommend putting any 3rd party &amp;quot;smart&amp;quot; devices in an isolated environment within which you can easily enable or disable internet access. To do this I am using the VLAN feature of my Draytek 2860 router which involves  creating a second VLAN on my network, enabling &amp;quot;Inter-LAN' routing so I could access the VLAN from my existing subnet and, finally, adding firewall rules to prevent devices on this VLAN from accessing the internet / other vlans.&lt;/p&gt;
-&lt;h2 id="a-clean-android-device"&gt;A clean Android device&lt;/h2&gt;
-&lt;p&gt;I had an old Android phone laying around on which I performed a hard-reset and wiped all user-data. With a clean device I could then install the app without worrying about sharing anything private with Xiaomi&lt;/p&gt;
-&lt;h1 id="installation"&gt;Installation&lt;/h1&gt;
-&lt;p&gt;First, install the Xiaomi Mi Home app on your clean Android device. On first run after installation you will be prompted for a region and asked to sign in. In order to use all the Mi Smart devices, you &lt;strong&gt;must&lt;/strong&gt; select &amp;quot;Mainland China&amp;quot; for your region (this doesn't affect the language in the app) following which you can just create a new account to sign in.&lt;/p&gt;
-&lt;p&gt;Once the app is installed you can plug in a gateway. This results in a nice flashing yellow ring of light around the device... and a harsh female voice babbling Chinese at an almost intolerable volume;  basically an audio and visual indication that the gateway is in &amp;quot;pairing&amp;quot; mode.&lt;/p&gt;
-&lt;p&gt;Go ahead and pair the gateway to the app following the walk-through &lt;a href="https://www.youtube.com/watch?v=nkFF284OFRE"&gt;here&lt;/a&gt;. At this point it's a good idea to also install any additional &amp;quot;sub devices&amp;quot; you have (i.e. the various Zigbee sensors) which can be done by following &lt;a href="https://www.youtube.com/watch?v=TiAgeg5P1T4"&gt;this&lt;/a&gt; walkthrough.&lt;/p&gt;
-&lt;p&gt;Finally, in order to use the gateway and sensors without the app and/or internet access, it is necessary to enable &amp;quot;local network functions&amp;quot;. This can be done from the app by following the instructions &lt;a href="https://www.domoticz.com/wiki/Xiaomi_Gateway_(Aqara)"&gt;here&lt;/a&gt;. Quite why Xiaomi decided to hide what its possible the killer feature of these devices behind a &amp;quot;secret&amp;quot; button I've no idea... fortunately it's an open secret and Xiaomi don't seem to be making any effort to conceal it further.&lt;/p&gt;
-&lt;p&gt;With all the above done, feel free to junk the app and disable internet access from the &amp;quot;smart device&amp;quot; subnet / ip range.&lt;/p&gt;
-&lt;h1 id="usage"&gt;Usage&lt;/h1&gt;
-&lt;p&gt;Once 'local network functions' have been enabled, each Gateway uses the multicast address &lt;code&gt;224.0.0.50&lt;/code&gt; to broadcast UDP messages on port &lt;code&gt;9898&lt;/code&gt; from the gateway and sub-devices. The gateway publishes a &amp;quot;heartbeat&amp;quot; messages every 10-15 seconds or so meaning you can easily determine everything is working by spinning up Wireshark (on a device connected to the &amp;quot;smart device&amp;quot; subnet) filtering out anything that isn't a UDP message (&lt;code&gt;ip.proto == &amp;quot;udp&amp;quot;&lt;/code&gt;) and looking for messages from the gateway IP address. You should eventually see something like this:&lt;/p&gt;
-&lt;img src="/Content/posts/Heartbeat.png" alt="Wireshark Heartbeat capture" class="img-responsive" style="margin-left: auto; margin-right: auto; margin-top: 4px; margin-bottom: 4px"&gt;
-&lt;p&gt;Once you can see these messages you can start interacting with the gateway and devices using various commands. For example, to get a list of the sub-devices from a gateway you can send a 'get_id_list' command using a UDP packet container this string (as ASCII encoded binary) to the gateway's IP address, again on port &lt;code&gt;9898&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;{&amp;quot;cmd&amp;quot;:&amp;quot;get_id_list&amp;quot;}&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;This will result in a &lt;code&gt;get_id_list_ack&lt;/code&gt; response containing a list of &lt;code&gt;sid&lt;/code&gt; (aka 'simple' id) values for devices registered with the gateway (including the gateway sensor/status itself)  as follows:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;{&amp;quot;cmd&amp;quot;:&amp;quot;get_id_list_ack&amp;quot;,&amp;quot;sid&amp;quot;:&amp;quot;7811dcb06972&amp;quot;,&amp;quot;token&amp;quot;:&amp;quot;L0DI4IiFAvAgInyL&amp;quot;,&amp;quot;data&amp;quot;:&amp;quot;[\&amp;quot;158d0001a200f5\&amp;quot;,\&amp;quot;158d0001c1cdfb\&amp;quot;]&amp;quot;}&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;You're then able to retrieve the device status using the &lt;code&gt;read&lt;/code&gt; command for each &lt;code&gt;sid&lt;/code&gt;:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;{&amp;quot;cmd&amp;quot;:&amp;quot;read&amp;quot;,&amp;quot;sid&amp;quot;:&amp;quot;7811dcb06972&amp;quot;}&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;Which will return a &lt;code&gt;read_ack&lt;/code&gt; response containing device specific information in the 'data' property. For example, if you send a &lt;code&gt;read&lt;/code&gt; command specifying the &lt;code&gt;sid&lt;/code&gt; of the gateway you will receive something like the following:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;{&amp;quot;cmd&amp;quot;:&amp;quot;read_ack&amp;quot;,&amp;quot;model&amp;quot;:&amp;quot;gateway&amp;quot;,&amp;quot;sid&amp;quot;:&amp;quot;7811dcb06972&amp;quot;,&amp;quot;short_id&amp;quot;:0,&amp;quot;data&amp;quot;:&amp;quot;{\&amp;quot;rgb\&amp;quot;:0,\&amp;quot;illumination\&amp;quot;:1292,\&amp;quot;proto_version\&amp;quot;:\&amp;quot;1.0.9\&amp;quot;}&amp;quot;}&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;Furthermore, when the status of a sensor changes (for example a door sensor opens or closes) a &lt;code&gt;report&lt;/code&gt; message is broadcast as follows:&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;{&amp;quot;cmd&amp;quot;:&amp;quot;report&amp;quot;,&amp;quot;model&amp;quot;:&amp;quot;magnet&amp;quot;,&amp;quot;sid&amp;quot;:&amp;quot;158d0001c1cdfb&amp;quot;,&amp;quot;short_id&amp;quot;:56258,&amp;quot;data&amp;quot;:&amp;quot;{\&amp;quot;status\&amp;quot;:\&amp;quot;open\&amp;quot;}&amp;quot;}&lt;/code&gt;&lt;/p&gt;
-&lt;h1 id="heres-one-i-made-earlier"&gt;Here's one I made earlier...&lt;/h1&gt;
-&lt;p&gt;I used the above information to create a small application for listening to and interacting with the gateway and devices. Mostly out of interest, I used &lt;a href="https://dotnet.github.io/orleans/"&gt;Microsoft's Orleans framework&lt;/a&gt; to create a console application which wraps up the interaction with various devices into strongly typed agents (also an agent approach seemed to nicely mirror the segregated nature of the devices themselves).&lt;/p&gt;
-&lt;p&gt;I didn't take this too far as I subsequently decided to use an &amp;quot;off-the-shelf&amp;quot; system for interacting with the Xiaomi devices (the subject of my next &amp;quot;smart home&amp;quot; post) but it's a decent proof-of-concept. I've published the source in a &lt;a href="https://github.com/ibebbs/MiOrleans"&gt;repository on Github&lt;/a&gt;; feel free to have a play and drop me a line with any questions you might have.&lt;/p&gt;
-&lt;p&gt;In the next post I'll disucss the off-the-shelf system I'm now using to privately interact with the Xiaomi devices.&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;I moved house a couple of months back to, what my partner likes to describe as, our "forever home". As such, I was keen to start looking into home monitoring / automation again as I knew things had progressed significantly since I last considered such things and I was keen to see what could be done. After lots of investigation I believe I have found the basis of a home automation solution which meets my current needs, should be extensible moving forward and which does not compromise the securty or privacy of my home.&lt;/p&gt;</summary>
 	</entry>
 </feed>

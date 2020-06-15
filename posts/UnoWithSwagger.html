@@ -1,0 +1,521 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Giving Uno Some Swagger</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Giving Uno Some Swagger" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/UnoWithSwagger" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Giving Uno Some Swagger</h1>
+        <h2 class="subheading">Using NSwag Typed Clients with Uno &amp; WebAssembly</h2>
+    <div class="meta">        
+Published on 15 June 2020<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/NSwag" class="btn btn-default btn-xs">NSwag</a>
+                    <a role="button" href="/tags/Rest" class="btn btn-default btn-xs">Rest</a>
+                    <a role="button" href="/tags/Uno" class="btn btn-default btn-xs">Uno</a>
+                    <a role="button" href="/tags/WebAssembly" class="btn btn-default btn-xs">WebAssembly</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="tldr">TL;DR</h2>
+<p>A few days ago, <a href="https://twitter.com/thenickrandolph">Nick Randolph</a> published an excellent blog post about <a href="https://nicksnettravels.builttoroam.com/consuming-swagger/">&quot;Consuming REST API with Swagger / OpenAPI in Xamarin and Uno Applications&quot;</a>. I read this article with great interest (and perhaps a touch of chagrin) as I was mid-way through writing a very similar article myself. While I found this post to be as detailed and pragmatic as <a href="https://nicksnettravels.builttoroam.com/uno-crossplatform-template/">Nick's always are</a>, I feel he missed a few key elements about consuming strongly-typed ReST clients in Uno, particularly when it comes to consuming them from within a browser via the WebAssembly (WASM) project. In this post I will cover these additional points such that the reader is able to consume ReST endpoints, in the same manner, from all Uno head projects.</p>
+<h2 id="intro">Intro</h2>
+<p>This article will now very much be a continuation of Nick's. If you haven't read Nick's post, I would encourage you to <a href="https://nicksnettravels.builttoroam.com/consuming-swagger/">do so now</a> so that you understand many of the approaches used here. Much like Nick, I will be using a ReST endpoint created for an earlier blog post, namely the &quot;Cheeze.Store&quot; API written for my <a href="https://ian.bebbs.co.uk/posts/LessReSTMoreHotChocolate">&quot;Less ReST, More HotChocolate&quot;</a> post.</p>
+<p>All source code for this post can be found in my <a href="https://github.com/ibebbs/UnoWithSwagger">UnoWithSwagger</a> repo on Github.</p>
+<h2 id="typed-clients">Typed Clients</h2>
+<p>In contrast to Nick's post, I will not be using <code>dotnet openapi</code> to generate Typed Clients for my API but will instead continue to use the <a href="https://www.nuget.org/packages/NSwag.MSBuild/"><code>NSwag.MSBuild</code></a> package. This is for two reasons:</p>
+<ol>
+<li>Typed Client generation using <code>NSwag.MSBuild</code> uses an NSwag configuration file. This configuration file provides much greater control over the generated code than is currently possible with <code>dotnet openapi</code></li>
+<li>Once configured, <code>NSwag.MSBuild</code> is able to generate Typed Clients directly from the ReST service's source code instead of needing a <code>swagger.json</code> file. This saves a significant amount of time when you're writing a .NET ReST service as you don't need to start the service to update the client side code, thereby removing friction and allowing you to rapidly iterate the API.</li>
+</ol>
+<p>If you're interested in using <code>NSwag.MSBuild</code> to generate your Typed Clients then I cover the process quite thoroughly <a href="https://ian.bebbs.co.uk/posts/LessReSTMoreHotChocolate#generating-typed-clients">here</a>.</p>
+<p>Furthermore, rather than &quot;newing up&quot; a <code>swaggerClient</code> manually, I will be using the <a href="https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/3.1.5"><code>Microsoft.Extensions.DependencyInjection</code></a> and <a href="https://www.nuget.org/packages/Microsoft.Extensions.Http/3.1.5"><code>Microsoft.Extensions.Http</code></a> packages to inject a correctly configured Typed Client into my view-model. This, I believe, is where Typed Clients really shine as this approach completely abstracts the source of the data such that the Typed Clients appear to just be another client side dependency.</p>
+<p>Here is the <code>Services</code> class I use for service registration:</p>
+<pre><code class="language-c#">public partial class Services
+{
+    public static readonly Services Instance = new Services();
+
+    private readonly ServiceCollection _serviceCollection;
+    private readonly Lazy&lt;IServiceProvider&gt; _serviceProvider;
+
+    private Services()
+    {
+        _serviceCollection = new ServiceCollection();
+        _serviceProvider = new Lazy&lt;IServiceProvider&gt;(() =&gt; _serviceCollection.BuildServiceProvider());
+    }
+
+    private void RegisterGlobalServices(IServiceCollection services, ILogger logger)
+    {
+        services.AddHttpClient&lt;Store.Client.IStoreClient, Store.Client.StoreClient&gt;(
+            httpClient =&gt; httpClient.BaseAddress = new Uri(&quot;http://localhost:5000&quot;)
+        );
+
+        services.AddSingleton&lt;ISchedulers, Schedulers&gt;();
+
+        services.AddTransient&lt;ViewModel&gt;();
+    }
+
+    public void PerformRegistration(ILogger logger)
+    {
+        if (_serviceProvider.IsValueCreated) throw new InvalidOperationException(&quot;You cannot register services after the service provider has been created&quot;);
+
+        RegisterGlobalServices(_serviceCollection, logger);
+    }
+
+    public IServiceProvider Provider =&gt; _serviceProvider.Value;
+}
+</code></pre>
+<p>Which is initialized from <code>App.xaml.cs</code> as shown here:</p>
+<pre><code class="language-c#">sealed partial class App : Application
+{
+    private readonly ILogger&lt;App&gt; _logger;
+
+    public App()
+    {
+        ConfigureFilters(global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory);
+
+        _logger = global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory.CreateLogger&lt;App&gt;();
+
+        Platform.Services.Instance.PerformRegistration(_logger);
+
+        this.InitializeComponent();
+        this.Suspending += OnSuspending;
+    }
+
+    ...
+}
+</code></pre>
+<p>And used (naively) from within the view to instantiate the ViewModel, which then acts as the view's data context:</p>
+<pre><code class="language-c#">public sealed partial class MainPage : Page
+{
+    private readonly ViewModel _viewModel;
+    private IDisposable _behaviours;
+
+    public MainPage()
+    {
+        this.InitializeComponent();
+
+        _viewModel = Platform.Services.Instance.Provider.GetRequiredService&lt;ViewModel&gt;();
+        DataContext = _viewModel;
+    }
+    
+    protected override void OnNavigatedTo(NavigationEventArgs e)
+    {
+        base.OnNavigatedTo(e);
+
+        _behaviours = _viewModel.Activate();
+    }
+
+    protected override void OnNavigatedFrom(NavigationEventArgs e)
+    {
+        base.OnNavigatedFrom(e);
+
+        if (_behaviours != null)
+        {
+            _behaviours.Dispose();
+            _behaviours = null;
+        }
+    }
+}
+</code></pre>
+<p>Finally, here is the <code>ViewModel</code> implementation showing the use of the <code>IStoreClient</code> Typed Client:</p>
+<pre><code class="language-c#">public class ViewModel : INotifyPropertyChanged
+{
+    private readonly IStoreClient _storeClient;
+    private readonly Platform.ISchedulers _schedulers;
+    private readonly ILogger&lt;ViewModel&gt; _logger;
+    private readonly MVx.Observable.Command _loadCheese;
+    private readonly MVx.Observable.Property&lt;IEnumerable&lt;Store.Client.Cheese&gt;&gt; _cheeses;
+
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public ViewModel(IStoreClient storeClient, Platform.ISchedulers schedulers)
+    {
+        _storeClient = storeClient;
+        _schedulers = schedulers;
+
+        _logger = global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory.CreateLogger&lt;ViewModel&gt;();
+
+        _loadCheese = new MVx.Observable.Command(true);
+        _cheeses = new MVx.Observable.Property&lt;IEnumerable&lt;Store.Client.Cheese&gt;&gt;(Enumerable.Empty&lt;Store.Client.Cheese&gt;(), nameof(Cheeses), args =&gt; PropertyChanged?.Invoke(this, args));
+    }
+
+    private IDisposable ShouldLoadCheeseWhenLoadCheeseInvoked()
+    {
+        return _loadCheese
+            .Do(_ =&gt; _logger.LogInformation(&quot;Loading Cheeses!&quot;))
+            .SelectMany(_ =&gt; _storeClient.GetAsync())
+            .ObserveOn(_schedulers.Dispatcher)
+            .Subscribe(_cheeses);
+    }
+
+    public IDisposable Activate()
+    {
+        return new CompositeDisposable(
+            ShouldLoadCheeseWhenLoadCheeseInvoked()
+        );
+    }
+
+    public ICommand LoadCheese =&gt; _loadCheese;
+
+    public IEnumerable&lt;Store.Client.Cheese&gt; Cheeses =&gt; _cheeses.Get();
+}
+</code></pre>
+<p>Note: This ViewModel uses my <a href="https://www.nuget.org/packages/MVx.Observable/"><code>MVx.Observable</code></a> package:</p>
+<blockquote class="blockquote">
+<p>Functional, Declarative and Reactive Extensions for MVVM &amp; MVC patterns</p>
+<p>A (mostly) unopinionated, light-weight alternative to ReactiveUI provided as a library <em>not a framework</em>.</p>
+</blockquote>
+<h2 id="this-missing-links">This Missing Links</h2>
+<p>Now, regardless of how you've generated your Typed Clients, you will have added a reference to the client library to each of the head projects in your Uno solution. With the above code in place, you should be able to start the UWP head, click the &quot;Load Cheeze!&quot; button and see this:</p>
+<img src="/Content/UnoWithSwagger/UWPHead.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="UWP Head Running">
+<p>However, starting the WASM head will result in the browser only showing the app's splash screen. If you bring up your browser's &quot;developer tools&quot; window (I use Chrome and Edge interchangeably) and view the console output you should see something like the following:</p>
+<img src="/Content/UnoWithSwagger/WASMLinkerIssue.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="WASM DefaultHttpClientFactory could not be located">
+<p>This error is due to way the Mono linker determines the assemblies and types that should - or shouldn't - be included in the WASM output. By default, only statically referenced types (i.e. those we're directly using in our code) will be included and downloaded into the browser when starting the app. As we don't directly reference &quot;Microsoft.Extensions.Http.DefaultHttpClientFactory&quot; this type isn't available to the app and therefore the DI container isn't able to instantiate it.</p>
+<p>To resolve this, we need to explicitly instruct the Mono linker to include the types we need. This can be done by modifying the <code>LinkerConfig.xml</code> file (within the WASM head project) to the following:</p>
+<pre><code class="language-xml">&lt;linker&gt;
+  &lt;assembly fullname=&quot;Cheeze.App.Wasm&quot; /&gt;
+  &lt;assembly fullname=&quot;Uno.UI&quot; /&gt;
+  
+  &lt;assembly fullname=&quot;Newtonsoft.Json&quot; /&gt;
+  &lt;assembly fullname=&quot;System.ComponentModel.Annotations&quot;/&gt;
+  &lt;assembly fullname=&quot;Microsoft.Extensions.Http&quot;/&gt;
+  &lt;assembly fullname=&quot;Microsoft.Extensions.Options&quot;/&gt;
+  &lt;assembly fullname=&quot;Cheeze.Store.Client&quot; /&gt;
+
+  &lt;assembly fullname=&quot;System.Core&quot;&gt;
+	&lt;!-- This is required by JSon.NET and any expression.Compile caller --&gt;
+	&lt;type fullname=&quot;System.Linq.Expressions*&quot; /&gt;
+  &lt;/assembly&gt;
+&lt;/linker&gt;
+</code></pre>
+<p>With this done, we should now be able to start the Cheeze App within the browser:</p>
+<img src="/Content/UnoWithSwagger/WASMRunningNoData.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Cheeze.App running in browser">
+<br/>
+<h2 id="close-but-no-handler">Close, but no handler!</h2>
+<p>With Cheeze.App running in the browser, if we click the &quot;Load Cheeze!&quot; button now we should get... wait for it....</p>
+<p>Nope, nothing.</p>
+<p>Back to the browser's debugging tool's Console output and we're likely to see something along the lines of &quot;Operation is not supported on this platform&quot;. This is due to the fact that, while running in the browser, the WASM head uses the browser to make HTTP calls. In order to do this, the <code>HttpClient</code> used by the Typed Client implementation needs to be configured to use the <code>WasmHttpHandler</code> as described <a href="https://platform.uno/docs/articles/faq.html#is-it-possible-to-make-http-web-requests-using-the-wasm-target">here</a>.</p>
+<blockquote class="blockquote">
+<p>Note: Somewhat confusingly, I hit this error consistently while originally writing the Cheese.App but, after implemented the changes below then backing them out so I could write this post, I could not for the life of me get the error to occur again. I imagine it's something cached or not rebuilt but this does mean that I'm unable to share screenshots showing this error. Apologies.</p>
+</blockquote>
+<p>Fortunately, getting <code>HttpClient</code> to use the <code>WasmHttpHandler</code> can be done completely transparently to the Typed Client by adding some additional configuration to our dependency injection setup. Shown below is the refactored <code>Services.cs</code> class.</p>
+<pre><code class="language-c#">public partial class Services
+{
+    public static readonly Services Service = new Services();
+
+    private readonly ServiceCollection _serviceCollection;
+    private readonly Lazy&lt;IServiceProvider&gt; _serviceProvider;
+
+    private Services()
+    {
+        _serviceCollection = new ServiceCollection();
+        _serviceProvider = new Lazy&lt;IServiceProvider&gt;(() =&gt; _serviceCollection.BuildServiceProvider());
+    }
+
+    partial void GetHttpMessageHandler(ref HttpMessageHandler handler);
+
+    private HttpMessageHandler PrimaryHttpMessageHandler()
+    {
+        HttpMessageHandler handler = null;
+
+        GetHttpMessageHandler(ref handler);
+
+        handler ??= new HttpClientHandler();
+
+        return handler;
+    }
+
+    private void RegisterGlobalServices(IServiceCollection services, ILogger logger)
+    {
+        services
+            .AddHttpClient&lt;Store.Client.IStoreClient, Store.Client.StoreClient&gt;(
+                httpClient =&gt; httpClient.BaseAddress = new Uri(&quot;http://localhost:5000&quot;))
+            .ConfigurePrimaryHttpMessageHandler(PrimaryHttpMessageHandler);
+
+        services.AddSingleton&lt;ISchedulers, Schedulers&gt;();
+
+        services.AddTransient&lt;ViewModel&gt;();
+    }
+
+    public void PerformRegistration(ILogger logger)
+    {
+        if (_serviceProvider.IsValueCreated) throw new InvalidOperationException(&quot;You cannot register services after the service provider has been created&quot;);
+
+        RegisterGlobalServices(_serviceCollection, logger);
+    }
+
+    public IServiceProvider Provider =&gt; _serviceProvider.Value;
+}
+</code></pre>
+<p>Note the addition of the <code>.ConfigurePrimaryHttpMessageHandler(PrimaryHttpMessageHandler)</code> call and the <code>GetHttpMessageHandler</code> partial method. The code here ensures that <code>HttpClientHandler</code> is used as the default but allows this to be overriden by providing an implementation for the <code>GetHttpMessageHandler</code> within platform specific code. Accordingly, a partial implementation of the <code>Services.cs</code> class is added to the <code>WASM</code> head project as follows:</p>
+<pre><code class="language-c#">public partial class Services
+{
+    partial void GetHttpMessageHandler(ref HttpMessageHandler handler)
+    {
+        handler = new Uno.UI.Wasm.WasmHttpHandler();
+    }
+}
+</code></pre>
+<p>Now when the implementation of the IStoreClient is injected into the <code>ViewModel</code> it will be using an <code>HttpClient</code> instance which is configured to use <code>WasmHttpHandler</code>. Nice.</p>
+<h2 id="cors-blimey">COR[s] BLIMEY!</h2>
+<p><em><strong>Now</strong></em> when we start the WASM head and click the &quot;Load Cheeze!&quot; button we get...  #$&#64;&amp;%*! ... <em><strong>still</strong></em> nothing.</p>
+<p>Again, back to the browser's Console output and we'll see the culprit:</p>
+<img src="/Content/UnoWithSwagger/WASMCorsIssue.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Still No Data">
+<p>Remember how I said earlier that &quot;the WASM head uses the browser to make HTTP calls&quot;? Yup? Well, this therefore makes the requests beholden to <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CORS</a>. As the <code>GET</code> request emanating from our Cheeze.App is deemed to be from another origin (by virtue of running from a different port) our service refuses to answer the request and everything disappears in a puff of console output.</p>
+<p>To resolve this issue, we need to change the service (Cheeze.Store) through the addition of a CORS policy, as shown below:</p>
+<pre><code class="language-c#">public class Startup
+{
+    ...
+
+    // This method gets called by the runtime. Use this method to add services to the container.
+    public void ConfigureServices(IServiceCollection services)
+    {
+        ...
+
+        services.AddCors(o =&gt; o.AddPolicy(
+            &quot;CorsPolicy&quot;,
+            builder =&gt;
+            {
+                builder.AllowAnyOrigin()
+                        .AllowAnyMethod()
+                        .AllowAnyHeader();
+            })
+        );
+        
+        ...
+    }
+
+    // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+    public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+    {
+        ...
+
+        app.UseCors(&quot;CorsPolicy&quot;);
+        
+        ...
+    }
+}
+</code></pre>
+<p>Note: The policy shown here is for debug only and shouldn't be used verbatim in production!!</p>
+<h1 id="finally">Finally!</h1>
+<p>With all this in place and rebuilt, clicking the &quot;Load Cheeze!&quot; button in the browser finally gives us:</p>
+<img src="/Content/UnoWithSwagger/WASMWithData.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="WASM with data">
+<p>YAY!</p>
+<p>Now, personally, I feel it's worth taking a moment here to reflect on this. With just a minor change in client side code (~12 loc) we're able to run <em>exactly</em> the same app both on the desktop <strong>and</strong> in the browser. I mean, look at it:</p>
+<img src="/Content/UnoWithSwagger/SideBySide.png" class="img-responsive" style="margin: auto; width:95%; margin-top: 6px; margin-bottom: 6px;" alt="Side By Side">
+<p>With no effort and just a couple of minor exceptions (font weight in UWP - left, and a scroll bar in the browser - right) the UI is pixel-perfect across two platforms that really couldn't be more dissimilar! I've said it before and I'll say it again, the <a href="https://platform.uno/">Uno Platform</a> team deserve massive kudos for providing a framework that allows developers to leverage existing skills (not to mention one of the best UI frameworks) to deliver apps across four (no, wait, <a href="https://platform.uno/blog/announcing-uno-platform-2-4-macos-support-and-windows-calculator-on-macos/">FIVE!</a>) disparate platforms.</p>
+<h2 id="wrapping-up">Wrapping Up</h2>
+<p>While implementing WASM heads for Uno solutions, I've found the following helps smooth the process:</p>
+<ul>
+<li>Enable WASM debugging by add <code>inspectUri</code> to <code>properties/launchSettings.json</code> as shown <a href="https://platform.uno/blog/debugging-uno-platform-webassembly-apps-in-visual-studio-2019/">here</a></li>
+<li>Use Microsoft Edge to find errors (it's Console output seems have more info) but Chrome to hit breakpoints</li>
+<li>Create loggers via <code>global::Uno.Extensions.LogExtensionPoint.AmbientLoggerFactory.CreateLogger&lt;T&gt;()</code>. Uno uses an old version of <code>Microsoft.Extensions.Logging</code> so injecting an <code>ILogger&lt;T&gt;</code> instance into a class doesn't (seem to) work for browser console output and certainly can't used used while registering services.</li>
+</ul>
+<p>And that's it. I hope you've found this helpful. Should you like or use any of the code in this article please star the <a href="https://github.com/ibebbs/UnoWithSwagger">repository</a> and, if you have any questions or comments, please feel free to drop me a line using any of the links below or from my <a href="https://ian.bebbs.co.uk/about">about page</a>.</p>
+<h2 id="oh-and.fine-cheese">Oh, and... Fine Cheese</h2>
+<p>Some content in the &quot;Cheeze&quot; app/repository has been borrowed - thus far without permission - from <a href="https://www.finecheese.co.uk/">The Fine Cheese Co</a> website. While I'm not affiliated with this company in any way - I just happen to like both cheese and their website - if you should end up ordering from them as a result of reading article, please let them know so they don't force me to change all the screen shots above. Thanks.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2020. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
