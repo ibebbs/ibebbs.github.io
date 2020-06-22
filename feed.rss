@@ -5,8 +5,360 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2020</copyright>
-		<pubDate>Mon, 15 Jun 2020 14:48:18 GMT</pubDate>
-		<lastBuildDate>Mon, 15 Jun 2020 14:48:18 GMT</lastBuildDate>
+		<pubDate>Mon, 22 Jun 2020 11:34:41 GMT</pubDate>
+		<lastBuildDate>Mon, 22 Jun 2020 11:34:41 GMT</lastBuildDate>
+		<item>
+			<title>Uno WebAssembly Containerization</title>
+			<link>http://ian.bebbs.co.uk/posts/UnoWasmDocker</link>
+			<description>&lt;p&gt;In this post I will show how to build and run Uno's WebAssembly projects within a Docker container. While I'm pretty familiar with containerization technologies, Uno's transformation of C#/XAML to WebAssembly via Mono was - and, to a certain extent, still is - a bit of a mystery. As such, this post will very much be an exploration of the technical underpinnings of these technologies.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/UnoWasmDocker</guid>
+			<pubDate>Mon, 22 Jun 2020 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;In this post I will show how to build and run Uno's WebAssembly projects within a Docker container. While I'm pretty familiar with containerization technologies, Uno's transformation of C#/XAML to WebAssembly via Mono was - and, to a certain extent, still is - a bit of a mystery. As such, this post will very much be an exploration of the technical underpinnings of these technologies.&lt;/p&gt;
+&lt;h2 id="deployment"&gt;Deployment&lt;/h2&gt;
+&lt;p&gt;While most project heads in an Uno solution are native applications that get deployed to and run on a device (usually from an App store), the WebAssembly (Wasm) head is different. Artifacts from the compilation of the Wasm project need to be deployed to a server which is capable of serving them to a browser when requested.&lt;/p&gt;
+&lt;p&gt;This deployment is typically achieved by publishing the Wasm artifacts to IIS hosted on a [virtual] server, &lt;a href="https://nicksnettravels.builttoroam.com/post-2019-03-20-publishing-uno-webassembly-wasm-to-azure-app-service-aspx/"&gt;deploying an Azure App-Service&lt;/a&gt; replete with all artifacts or simply copying the artifacts to a &lt;a href="https://nicksnettravels.builttoroam.com/post-2019-03-20-deploying-uno-wasm-using-blob-storage-aspx/"&gt;file store capable of responding to HTTP requests&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;However there is another modern deployment mechanism that has, in recent years, come to dominate the DevOps landscape: Containerization.&lt;/p&gt;
+&lt;h2 id="add-docker-support"&gt;Add -&amp;gt; Docker Support...&lt;/h2&gt;
+&lt;p&gt;Visual Studio has had first class support for creating and running Docker Containers for quite a while now and its integration into Visual Studio is very mature. In most instances, Containerizing a project has become as simple as right-clicking on the project, selecting &amp;quot;Add -&amp;gt; Docker Support...&amp;quot; and following the resulting dialogs. Unfortunately, despite being a web project which Visual Studio knows how to &amp;quot;Publish...&amp;quot;, right clicking on an Uno Wasm project does not present the option to add Docker Support.&lt;/p&gt;
+&lt;p&gt;Given I was working on a solution with a containerized ReST API (along with &lt;a href="https://ian.bebbs.co.uk/posts/UnoWithSwagger"&gt;NSwag-generated .NET Standard client project&lt;/a&gt;) I really wanted to be able to containerize the Wasm app too so it could form part of a &lt;a href="https://docs.docker.com/compose/"&gt;composed deployment&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;To simplify the process of working this out, I created a new Uno Platform project named &lt;code&gt;ContaineredUnoWasm&lt;/code&gt; using version 2.4.0.0 of the Uno Platform templates and worked to containerize that. This project (completed with working containerized builds) can be found &lt;a href="https://github.com/ibebbs/ContaineredUnoWasm"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="building-in-a-container"&gt;Building in a container&lt;/h2&gt;
+&lt;h3 id="imitation-is-the-sincerest-form-of-flattery"&gt;Imitation is the sincerest form of flattery&lt;/h3&gt;
+&lt;p&gt;If I was going to containerize the deployment of the Wasm project, I decided to go the whole hog and allow for &lt;a href="https://docs.docker.com/develop/develop-images/multistage-build/"&gt;multi-stage containerized builds&lt;/a&gt;, much like those created natively by Visual Studio. Without really thinking too much about it, my first - somewhat naïve - approach was simply to copy and customise a &lt;code&gt;Dockerfile&lt;/code&gt; created by Visual Studio; in effect, something like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-dockerfile"&gt;FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+WORKDIR /src
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;]
+RUN dotnet restore &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;]
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&amp;quot;]
+RUN dotnet build &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT [&amp;quot;dotnet&amp;quot;, &amp;quot;ContaineredUnoWasm.Wasm.dll&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can then try building a container image from this &lt;code&gt;Dockerfile&lt;/code&gt; by executing the following command (from the root of our repo):&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$&amp;gt; docker build -f .\ContaineredUnoWasm\ContaineredUnoWasm.Wasm\Dockerfile .
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Which fails with the somewhat confusing error:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Step 10/16 : RUN dotnet build &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/build
+...
+Build FAILED.
+...
+  Downloading mono-wasm-502dca36d36 to /tmp/mono-wasm-502dca36d36.zip
+/root/.nuget/packages/uno.wasm.bootstrap/1.2.0/build/Uno.Wasm.Bootstrap.targets(124,5): error : System.ComponentModel.Win32Exception (2): No such file or directory [/src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Oooh-kay. We know that file is exists as that's the file we started building!&lt;/p&gt;
+&lt;h3 id="jaylee-to-the-rescue"&gt;Jaylee to the rescue!&lt;/h3&gt;
+&lt;p&gt;Casting around for ideas as to what might be causing this issue, I came across &lt;a href="https://jaylee.org/archive/2019/03/21/azure-devops-wasm-build-container.html"&gt;this post&lt;/a&gt; from the one and only &lt;a href="https://twitter.com/jlaban"&gt;Jerome Laban&lt;/a&gt; which shows how to build the Wasm project in Azure Devops using a container... which all sounded rather promising.&lt;/p&gt;
+&lt;p&gt;Reading this post shows that Jerome is using a custom container image - &lt;code&gt;nventive/wasm-build:1.0-bionic&lt;/code&gt; - within which the Wasm project is built. Looking this image up on &lt;a href="https://hub.docker.com/r/nventive/wasm-build"&gt;Docker Hub&lt;/a&gt; and then navigating to the &lt;a href="https://github.com/nventive/docker"&gt;source repository&lt;/a&gt; allows us to see what bizarre wizardry Jerome is using to build the Wasm project in a container. And here it is:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-dockerfile"&gt;FROM mcr.microsoft.com/dotnet/core/sdk:2.2.105-bionic
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+RUN echo &amp;quot;deb https://download.mono-project.com/repo/ubuntu stable-bionic main&amp;quot; | tee /etc/apt/sources.list.d/mono-official-stable.list
+RUN apt-get update
+
+# Install mono, msbuild and dependencies
+RUN apt-get -y install sudo unzip python mono-devel msbuild libc6 ninja-build
+
+# Setup for GitVersion 4.x 
+RUN sudo apt-get install -y libgit2-dev libgit2-26 &amp;amp;&amp;amp; \
+ln -s /usr/lib/x86_64-linux-gnu/libgit2.so /lib/x86_64-linux-gnu/libgit2-15e1193.so
+
+# Install node and puppeteer dependencies
+RUN curl -sL https://deb.nodesource.com/setup_11.x | sudo -E bash - &amp;amp;&amp;amp; \
+	sudo apt install -y nodejs gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 \
+	libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 \
+	libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 \
+	libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 \
+	libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget
+
+# Install and activate emscripten
+RUN git clone https://github.com/juj/emsdk.git &amp;amp;&amp;amp; \
+	sudo chmod 777 /emsdk &amp;amp;&amp;amp; \
+    cd emsdk &amp;amp;&amp;amp; \
+    ./emsdk install sdk-1.38.28-64bit &amp;amp;&amp;amp; \
+    ./emsdk install sdk-1.38.30-64bit &amp;amp;&amp;amp; \
+    ./emsdk install sdk-1.38.31-64bit &amp;amp;&amp;amp; \
+    ./emsdk install sdk-1.38.34-64bit &amp;amp;&amp;amp; \
+    ./emsdk install latest &amp;amp;&amp;amp; \
+    ./emsdk activate sdk-1.38.31-64bit &amp;amp;&amp;amp; \
+    sudo chmod -R 777 /emsdk
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;No wonder our docker build was failing, look at all the additional dependencies we need to build the Wasm project.&lt;/p&gt;
+&lt;p&gt;You know, contrary to intuition, the more I learn about the how the C#-&amp;gt;WebAssembly transformation works, the &lt;em&gt;more&lt;/em&gt; it seems like magic.&lt;/p&gt;
+&lt;h3 id="meanwhile-back-in-the-dockerfile"&gt;Meanwhile, back in the Dockerfile&lt;/h3&gt;
+&lt;p&gt;Right, so armed with Jerome's magical mystical container image of power, we'll try rewriting our Dockerfile as follows:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-dockerfile"&gt;FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM nventive/wasm-build:latest AS build
+WORKDIR /src
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;]
+RUN dotnet restore &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;]
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&amp;quot;]
+RUN dotnet build &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT [&amp;quot;dotnet&amp;quot;, &amp;quot;ContaineredUnoWasm.Wasm.dll&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Looks promising, let's give it a shot. Running this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$&amp;gt; docker build -f .\ContaineredUnoWasm\ContaineredUnoWasm.Wasm\Dockerfile .
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Produces this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Step 8/14 : RUN dotnet build &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/build
+ ---&amp;gt; Running in 1f7ff2159acc
+Microsoft (R) Build Engine version 15.9.20+g88f5fadfbe for .NET Core
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+  Restoring packages for /src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj...
+  Installing Microsoft.Extensions.DependencyInjection.Abstractions 1.1.0.
+  Installing System.Runtime.CompilerServices.Unsafe 4.3.0.
+  Installing Microsoft.Extensions.Logging 1.1.1.
+  Installing System.ValueTuple 4.4.0.
+  Installing CommonServiceLocator 2.0.5.
+  Installing System.Buffers 4.4.0.
+  Installing System.Runtime.CompilerServices.Unsafe 4.5.2.
+  Installing Microsoft.Extensions.Primitives 1.1.0.
+  Installing Uno.SourceGenerationTasks 2.0.6.
+  Installing Uno.Core 2.0.0.
+  Installing System.Memory 4.5.2.
+  Installing Uno.Core.Build 2.0.0.
+  Installing System.Runtime.InteropServices.WindowsRuntime 4.3.0.
+  Installing Microsoft.Extensions.Configuration.Abstractions 1.1.1.
+  Installing Microsoft.Extensions.Logging.Abstractions 1.1.1.
+  Installing Uno.UI 2.4.0.
+  Installing Microsoft.Extensions.Logging.Console 1.1.1.
+  Installing Microsoft.Extensions.Logging.Filter 1.1.1.
+  Installing Uno.Wasm.Bootstrap 1.2.0.
+  Installing Uno.Wasm.Bootstrap.DevServer 1.2.0.
+  Generating MSBuild file /src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/obj/ContaineredUnoWasm.Wasm.csproj.nuget.g.props.
+  Generating MSBuild file /src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/obj/ContaineredUnoWasm.Wasm.csproj.nuget.g.targets.
+  Restore completed in 27.69 sec for /src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj.
+It was not possible to find any compatible framework version
+The specified framework 'Microsoft.NETCore.App', version '3.0.0' was not found.
+  - Check application dependencies and target a framework version installed at:
+      /usr/share/dotnet/
+  - Installing .NET Core prerequisites might help resolve this problem:
+      https://go.microsoft.com/fwlink/?LinkID=798306&amp;amp;clcid=0x409
+  - The .NET Core framework and SDK can be installed from:
+      https://aka.ms/dotnet-download
+  - The following versions are installed:
+      2.2.3 at [/usr/share/dotnet/shared/Microsoft.NETCore.App]
+/root/.nuget/packages/uno.sourcegenerationtasks/2.0.6/build/netstandard1.0/Uno.SourceGenerationTasks.targets(127,2): error : Generation failed, error code 150 [/src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj]
+
+Build FAILED.
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Oh, interesting stuff. An error we can work with and, if I'm not mistaken, I seem to remember the &lt;code&gt;nventive/wasm-build&lt;/code&gt; Dockerfile starting with &lt;code&gt;FROM mcr.microsoft.com/dotnet/core/sdk:2.2.105-bionic&lt;/code&gt;. Perhaps this Dockerfile is just a little out of date?&lt;/p&gt;
+&lt;h3 id="updating-wasm-build"&gt;Updating Wasm-Build&lt;/h3&gt;
+&lt;br/&gt;
+&lt;h4 id="edit"&gt;- - - - EDIT - - - -&lt;/h4&gt;
+&lt;p&gt;At this point I forked, cloned, updated and built a new version of the &lt;a href="https://github.com/nventive/docker"&gt;&lt;code&gt;nventive/docker&lt;/code&gt;&lt;/a&gt; image. However, towards the end of authoring this blog post, a hunch caused me to search for &amp;quot;docker&amp;quot; in the &amp;quot;unoplatform&amp;quot; organisation on Github. On the last page of &amp;quot;Code&amp;quot; hits, I found a link to this &lt;a href="https://github.com/unoplatform/Uno.Wasm.Bootstrap/blob/master/Readme.md"&gt;&lt;code&gt;Readme.md&lt;/code&gt;&lt;/a&gt; in which, about half way down, is a reference to another container image &lt;a href="https://hub.docker.com/r/unoplatform/wasm-build"&gt;&lt;code&gt;unoplatform/wasm-build&lt;/code&gt;&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;This image was completely up to date and meant I no longer had to build a custom version so the rest of this (somewhat painful) section has been removed. Conversely, I decided to leave the slight misdirection in the section above as I thought it provided quite an insight into the complexities involved in building the Wasm output.&lt;/p&gt;
+&lt;h4 id="end-edit"&gt;- - - - END EDIT - - - -&lt;/h4&gt;
+&lt;br/&gt;
+&lt;h3 id="one-step-back-two-steps-forward"&gt;One step back, two steps forward&lt;/h3&gt;
+&lt;p&gt;Ok, having found a new &lt;code&gt;wasm-build&lt;/code&gt; image, lets try integrating it into the &lt;code&gt;Dockerfile&lt;/code&gt; for building &lt;code&gt;ContaineredUnoWasm&lt;/code&gt; as follows:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-dockerfile"&gt;FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM unoplatform/wasm-build:latest AS build
+WORKDIR /src
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;]
+RUN dotnet restore &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;]
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&amp;quot;]
+RUN dotnet build &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT [&amp;quot;dotnet&amp;quot;, &amp;quot;ContaineredUnoWasm.Wasm.dll&amp;quot;]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Which is built using the command:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$&amp;gt; docker build -f .\ContaineredUnoWasm\ContaineredUnoWasm.Wasm\Dockerfile . -t ibebbs/containeredunowasm:latest
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And results in:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;Successfully built c2c4c48cf33a
+Successfully tagged ibebbs/containeredunowasm:latest
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Huzzah, it worked!&lt;/p&gt;
+&lt;img src="/Content/UnoWasmDocker/Brilliant.jpg" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="BRILLIANT!!!!"&gt;
+&lt;br/&gt;
+&lt;h2 id="running-from-a-container"&gt;Running from a container&lt;/h2&gt;
+&lt;p&gt;Now, unless I'm very much mistaken, running our containerized Wasm app should be as simple as starting the container and navigating to the exposed port in a browser. As such, let's run the command:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$&amp;gt; docker run -p 5000:80 ibebbs/containeredunowasm:latest
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Results in:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;It was not possible to find any installed .NET Core SDKs
+  Did you mean to run .NET Core SDK commands? Install a .NET Core SDK from:
+      https://aka.ms/dotnet-download
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Errr... no I didn't, I wanted to run my app service. Let's see what's going on here by opening an interactive shell within the container and listing the contents:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;docker run -it --entrypoint /bin/bash ibebbs/containeredunowasm:latest
+root&amp;#64;52acb17752f2:/app# dir
+AppManifest.js                                             Uno.UI.css
+Assets                                                     Uno.UI.dll
+CommonServiceLocator.dll                                   Uno.UI.js
+Fonts.css                                                  Uno.Xaml.dll
+Microsoft.Extensions.Configuration.Abstractions.dll        Uno.dll
+Microsoft.Extensions.DependencyInjection.Abstractions.dll  _compressed_br
+Microsoft.Extensions.Logging.Abstractions.dll              _compressed_gz
+Microsoft.Extensions.Logging.Console.dll                   corebindings.o
+Microsoft.Extensions.Logging.Filter.dll                    dotnet.js
+Microsoft.Extensions.Logging.dll                           dotnet.wasm
+Microsoft.Extensions.Primitives.dll                        driver.o
+Properties                                                 index.html
+System.Buffers.dll                                         jquery-pep.js
+System.Collections.Immutable.dll                           managed-4aa732b23652301ed854d2dd646ce71b0b0b5e3f
+System.ComponentModel.dll                                  mono-config.js
+System.Linq.dll                                            normalize.css
+System.Memory.dll                                          refs
+System.Numerics.Vectors.dll                                require.js
+System.Reflection.Emit.ILGeneration.dll                    runtime.js
+System.Reflection.Emit.Lightweight.dll                     server.py
+System.Runtime.CompilerServices.Unsafe.dll                 service-worker.js
+System.Runtime.InteropServices.WindowsRuntime.dll          setImmediate.js
+System.Threading.dll                                       uno-bootstrap.css
+Uno.Core.dll                                               uno-bootstrap.js
+Uno.Foundation.dll                                         uno-config.js
+Uno.UI.Toolkit.dll                                         web.config
+Uno.UI.Wasm.dll                                            zlib-helper.o
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;What? No &lt;code&gt;ContaineredUnoWasm.Wasm.dll&lt;/code&gt; but an &amp;quot;index.html&amp;quot;? This looks suspiciously like a...&lt;/p&gt;
+&lt;img src="/Content/UnoWasmDocker/MindBlown.gif" class="img-responsive" style="margin: auto; margin-top: 6px; margin-bottom: 6px;" alt="Mind Blown"&gt;
+&lt;p&gt;Yup, &lt;em&gt;&lt;strong&gt;very&lt;/strong&gt;&lt;/em&gt; much mistaken. The result of compiling the Wasm project isn't a hosted service but is ... of course ... just content which can be hosted by another service. As such, there's really nothing for the container to run and, as such, we're going to need a web server to serve this content.&lt;/p&gt;
+&lt;h3 id="kestrel-vs-nginx"&gt;Kestrel vs Nginx&lt;/h3&gt;
+&lt;p&gt;Now, this being a .net solution and me being a .net fanboi, I really wanted serve this content from a .net webserver. I was thinking it should be possible to find an off-the-[docker hub]-shelf image of a kestrel webserver which was/could be configured to serve static content. But no, despite a significant search, it appeared that, if I wanted to serve the content from Kestrel I'd have to add, build and containerize a bespoke web project.&lt;/p&gt;
+&lt;p&gt;So instead I decided to use &lt;a href="https://hub.docker.com/_/nginx/"&gt;nginx&lt;/a&gt; which is configured to &lt;a href="https://github.com/docker-library/docs/tree/master/nginx#hosting-some-simple-static-content"&gt;serve static content&lt;/a&gt; out-of-the-box.&lt;/p&gt;
+&lt;p&gt;To use nginx, I amended the &lt;code&gt;Dockerfile&lt;/code&gt; for &lt;code&gt;ContaineredUnoWasm&lt;/code&gt; to this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-dockerfile"&gt;FROM unoplatform/wasm-build:latest AS build
+WORKDIR /src
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;]
+RUN dotnet restore &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;]
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&amp;quot;]
+RUN dotnet build &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/publish
+
+FROM nginx:alpine
+EXPOSE 80
+COPY --from=publish /app/publish /usr/share/nginx/html
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then rebuilt and started the image:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;$&amp;gt; docker build -f .\ContaineredUnoWasm\ContaineredUnoWasm.Wasm\Dockerfile . -t ibebbs/containeredunowasm:latest
+...
+Successfully built 4c1fc5cb9efd
+Successfully tagged ibebbs/containeredunowasm:latest
+$&amp;gt; docker run -p 5000:80 ibebbs/containeredunowasm:latest
+/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
+/docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+10-listen-on-ipv6-by-default.sh: Getting the checksum of /etc/nginx/conf.d/default.conf
+10-listen-on-ipv6-by-default.sh: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh
+/docker-entrypoint.sh: Configuration complete; ready for start up
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Looks promising. Let's hit &lt;code&gt;http://localhost:5000&lt;/code&gt; with a browser:&lt;/p&gt;
+&lt;img src="/Content/UnoWasmDocker/UnoLogo.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Uno Logo"&gt;
+&lt;p&gt;Well, that's better. Lets see if we can resolve the &amp;quot;Incorrect response MIME type&amp;quot; issue by telling nginx about the mime types to serve. This is done by adding a &lt;code&gt;mime.types&lt;/code&gt; file to our project containing:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;types {
+  text/html                             html htm shtml;
+  text/css                              css;
+  text/javascript						            js;
+  application/wasm                      wasm;
+  application/octet-stream              dll clr;
+  application/json                      json;
+  application/font-woff                 woff woff2;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And adding it to our &lt;code&gt;nginx&lt;/code&gt; container by amending the &lt;code&gt;Dockerfile&lt;/code&gt; for &lt;code&gt;ContaineredUnoWasm&lt;/code&gt; as shown here:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-dockerfile"&gt;FROM unoplatform/wasm-build:latest AS build
+WORKDIR /src
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;]
+RUN dotnet restore &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;]
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&amp;quot;]
+RUN dotnet build &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/publish
+
+FROM nginx:alpine
+EXPOSE 80
+COPY --from=publish /app/publish /usr/share/nginx/html
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/mime.types&amp;quot;, &amp;quot;/etc/nginx/mime.types&amp;quot; ]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now, rebuilding the image, running the container and hitting the endpoint in a browser gives us:&lt;/p&gt;
+&lt;img src="/Content/UnoWasmDocker/HelloWorld.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Hello World!"&gt;
+&lt;p&gt;Wahoo!&lt;/p&gt;
+&lt;h3 id="a-little-house-keeping"&gt;A little house keeping&lt;/h3&gt;
+&lt;p&gt;Of course, needing to add a &amp;quot;mime.types&amp;quot; file with this exact content to any Wasm project we want to containerize is a pain so instead lets make a container image that already includes this file. In a fork of the &lt;a href="https://github.com/unoplatform/docker"&gt;&lt;code&gt;unoplatform/docker&lt;/code&gt;&lt;/a&gt; repository, I'll add a new folder called &lt;code&gt;wasm-serve&lt;/code&gt; within which I'll add the &lt;code&gt;mime.types&lt;/code&gt; file from above and the following &lt;code&gt;Dockerfile&lt;/code&gt;:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-dockerfile"&gt;FROM nginx:alpine
+COPY [&amp;quot;mime.types&amp;quot;, &amp;quot;/etc/nginx/mime.types&amp;quot; ]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Building this image with the command &lt;code&gt;docker build . -t wasm-server:latest&lt;/code&gt; allows me to modify the &lt;code&gt;Dockerfile&lt;/code&gt; for &lt;code&gt;ContaineredUnoWasm&lt;/code&gt; as follows:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-dockerfile"&gt;FROM unoplatform/wasm-build:latest AS build
+WORKDIR /src
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;]
+RUN dotnet restore &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot;
+
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&amp;quot;]
+COPY [&amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&amp;quot;, &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&amp;quot;]
+RUN dotnet build &amp;quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &amp;quot;ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&amp;quot; -c Release -o /app/publish
+
+FROM ibebbs/wasm-serve:latest
+EXPOSE 80
+COPY --from=publish /app/publish /usr/share/nginx/html
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Which, when rebuilt and run, still results in the running app.&lt;/p&gt;
+&lt;p&gt;Done and done.&lt;/p&gt;
+&lt;h3 id="future-improvements"&gt;Future improvements&lt;/h3&gt;
+&lt;p&gt;At the moment the docker build needs to download the &amp;quot;mono-wasm SDK&amp;quot; on each build. It would be much better download the mono-wasm SDK in an earlier step of the Dockerfile so that it is cached and doesn't need to be downloaded each time. I'm looking into doing this and will provide an update as an when I've worked out how to do it.&lt;/p&gt;
+&lt;p&gt;&lt;a href="https://balintpogatsa.github.io/2019/05/05/webassembly-mono-aot-example.html"&gt;This article&lt;/a&gt; suggests downloading the SDK from &lt;a href="https://jenkins.mono-project.com/job/test-mono-mainline-wasm/label=ubuntu-1804-amd64/lastSuccessfulBuild/Azure/"&gt;here&lt;/a&gt; but the build output from Visual Studio suggests the SDK is coming from a blob owned by Uno (&lt;a href="https://unowasmbootstrap.blob.core.windows.net/runtime/mono-wasm-###########.zip"&gt;https://unowasmbootstrap.blob.core.windows.net/runtime/mono-wasm-###########.zip&lt;/a&gt;). Either way, once it's downloaded, setting the &lt;code&gt;WASM_SDK&lt;/code&gt; to the path of the unzipped sdk should ensure the sdk doesn't need to be downloaded during build.&lt;/p&gt;
+&lt;p&gt;I'm also still having problems building/running more advanced projects within a container. Hitting a weird error (&lt;code&gt;Object doesn't support property or method '_coreDispatcherCallback'&lt;/code&gt;) when running the resulting WASM in a browser. Still banging my head against this one so any advice gratefully received.&lt;/p&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;It really was a bit of a roller-coaster of a journey to get a containerized build / image of an Uno Wasm project running.&lt;/p&gt;
+&lt;p&gt;One thing it really highlighted to me is the amazing impact of open-source code. Any time an issue was encountered, I was able to find the &lt;em&gt;exact code/file&lt;/em&gt; causing the problem and thereby find a solution. For someone who cut his teeth programming before the internet made resolving every programming issue as simple as a quick jaunt to StackOverflow, and when source-code was something you had to pay through the nose for, working in and with OSS for the past several years has been an real eye-opener (if you'll excuse the somewhat strained facial idioms).&lt;/p&gt;
+&lt;p&gt;However, we also discovered that this transparency can also be a double-edged sword. The .NET ecosystem - and especially Uno - is moving forward at an incredible cadence with new releases causing older versions to be deprecated and documentation to become dated. As we can see above, this can throw serious curve-balls to anyone endeavouring to stray from the beaten path or get a better understanding of how things work.&lt;/p&gt;
+&lt;p&gt;Anyway, should you have any suggestions for, or questions about, anything above please feel free to drop me a line using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;.&lt;/p&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>Giving Uno Some Swagger</title>
 			<link>http://ian.bebbs.co.uk/posts/UnoWithSwagger</link>
@@ -3704,100 +4056,6 @@ For example, say we have introduce a &lt;code&gt;Role&lt;/code&gt; entity and th
 &lt;p&gt;&lt;em&gt;Note: The fact that these downsides are all related to tooling shows just how ingrained this convention is to modern development.&lt;/em&gt;&lt;/p&gt;
 &lt;h3 id="conclusion"&gt;Conclusion&lt;/h3&gt;
 &lt;p&gt;As shown, moving away from the &amp;quot;grouping by functional pattern&amp;quot; convention and instead using &amp;quot;Fluent Namespacing&amp;quot; can make your code much more readable and maintainable while requiring very little overhead. The side benefits of simplified navigation leading to easier comprehension and the potential for highlighting possible code-smells can really pay dividends in a large code base. I'd very much encourage you to try Fluent Namespacing in your next project, I don't think you'll regret it.&lt;/p&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>A SmartHome... NoT - Part II</title>
-			<link>http://ian.bebbs.co.uk/posts/ASmartHome-Part2</link>
-			<description>&lt;p&gt;In &lt;a href="http://ian.bebbs.co.uk/posts/ASmartHome-Part1"&gt;part I&lt;/a&gt; of this series I described how to use Xiaomi Mi Smart Home devices without compromising your home privacy or security.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/ASmartHome-Part2</guid>
-			<pubDate>Tue, 06 Feb 2018 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;p&gt;In &lt;a href="http://ian.bebbs.co.uk/posts/ASmartHome-Part1"&gt;part I&lt;/a&gt; of this series I described how to use Xiaomi Mi Smart Home devices without compromising your home privacy or security.&lt;/p&gt;
-&lt;p&gt;And lo, with the &lt;em&gt;sweet, sweet nut&lt;/em&gt; of privacy-friendly sensors laid before me, I raised the metaphorical &lt;em&gt;hammer of code&lt;/em&gt; like an allegorical Thor about to deliver righteous justice to... and then I stopped. What was I trying to deliver righteous justice to. In fact, what the smeg did I actually want to &lt;em&gt;do&lt;/em&gt; with all these things?&lt;/p&gt;
-&lt;p&gt;So focused had I been on finding a 'how', I hadn't really considered the what or why? Monitoring, sure but there had to be useful things I could automate.&lt;/p&gt;
-&lt;p&gt;At this point I decided to take a look around at what other people were doing and, almost inevitably, came upon the &lt;a href="https://community.openhab.org/"&gt;OpenHAB forums&lt;/a&gt;.&lt;/p&gt;
-&lt;h1 id="openhabian"&gt;OpenHABian&lt;/h1&gt;
-&lt;p&gt;OpenHAB has been around for years and for much of this time has been the &lt;em&gt;go to&lt;/em&gt; software for home automation.  Nowadays there a numerous other offerings and OpenHAB has had to rapidly evolve to stay competitive. To this end OpenHAB recently released OpenHAB 2 which, as far as I can tell, is a full rewrite based on &lt;a href="https://www.eclipse.org/smarthome/"&gt;Eclipse SmartHome framework&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;While &lt;a href="http://www.myopenhab.org/"&gt;'cloud based' versions of OpenHAB are available&lt;/a&gt; the normal use-case is to deploy a version of OpenHAB on the local network thereby keeping all processing locally too. To facilitate this, they now offer pre-built images of OpenHabian - a distribution for single board computes (i.e. the Raspberry Pi et al) that comes with OpenHAB pre-installed.&lt;/p&gt;
-&lt;p&gt;Anyway, I was interested in how OpenHAB might have evolved and love trying out new images on the Raspberry Pi (seriously it's like Docker except on real hardware and... well... works) so downloaded &lt;a href="https://github.com/openhab/openhabian/releases"&gt;the latest version&lt;/a&gt; (somewhat confusing named 'version 1.4' even though it contains OpenHAB 2.2), &lt;a href="https://etcher.io/"&gt;etched it&lt;/a&gt; to an SD card, put the SD card in a spare RPi3 and booted.&lt;/p&gt;
-&lt;h2 id="installation"&gt;Installation&lt;/h2&gt;
-&lt;p&gt;Installation of OpenHABian is pretty straight forward, simply insert the newly prepared SD card and power on the Pi. One thing to note however is that the setup of OpenHABian requires internet access to download additional components / updates. As I had added the RPi3 running OpenHABian to my secured subnet, my first install of OpenHABian failed as there was no internet access available. A quick firewall exclusion and restart solved the problem.&lt;/p&gt;
-&lt;h2 id="paper-ui"&gt;Paper UI&lt;/h2&gt;
-&lt;p&gt;One of the key enhancements in OpenHAB 2 is the introduction of 'Paper UI'. Paper UI is an HTML5 web application which allows a fully graphical setup and administration of &lt;a href="https://docs.openhab.org/configuration/things.html"&gt;Things&lt;/a&gt; and &lt;a href="https://docs.openhab.org/configuration/items.html"&gt;Items&lt;/a&gt;. Where previously you'd have to drop into textual configuration of components, Paper UI offers a simplified means of getting your home automation devices known to, and used by, OpenHAB.&lt;/p&gt;
-&lt;p&gt;Indeed, getting Paper UI to recognise and use my Xiaomi Mi Smart Home devices was simple and can be done as follows:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;Install the &lt;a href="https://docs.openhab.org/addons/bindings/mihome/readme.html"&gt;'Xiaomi Mi Smart Home Binding'&lt;/a&gt;.&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;From the Paper UI, click the 'Add-ons' menu item on the left&lt;/li&gt;
-&lt;li&gt;Click the 'Bindings' tab at the top of the page&lt;/li&gt;
-&lt;li&gt;Search for 'Xiaomi'&lt;/li&gt;
-&lt;li&gt;Click the 'INSTALL' button to the right of the 'Xiaomi Mi Smart Home Binding'&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Add the Xiaomi Gateway(s)&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Once the 'Xiaomi Mi Smart Home Binding' has been installed, any gateways on the current subnet that have 'local network functions' enabled should magically appear in the 'Inbox' and have a notification shown.&lt;/li&gt;
-&lt;li&gt;For each gateway on the subnet, simply add it as a 'Thing' with a unique name and in an appropriate location. Also don't forget to add the 'developer key' (copied from the Xiami Mi Home app after enabling 'local network functions') so you can issue commands to the gateway.&lt;/li&gt;
-&lt;li&gt;Each time you add a gateway, the binding will query sub-devices registered with the gateway which will also then be shown in the inbox. These sub-devices can then be added as 'Things' for which you should  remember to set the location so 'Items' linked to the 'Thing' (see below) are displayed correctly.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Add 'Items' to be displayed&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;You should now see all your devices in 'Things'. Each one has several 'Channels' which can be 'linked' to an 'Item' by clicking the blue and white circular icon beside it. For most types of 'Channels', the default values displayed in the 'Link Channel' can be left as is.&lt;/li&gt;
-&lt;li&gt;Each 'Item' linked to a channel is shown on the Control page with Locations seperated on to discrete tabs.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;Once all your Xiaomi devices have been added as 'Things' and their respective 'Channels' linked to 'Items' you should end up with something like this in the 'Control' page:&lt;/p&gt;
-&lt;img src="/Content/posts/OpenHAB - Paper UI - Configured.png" alt="OpenHAB - Paper UI - Configured" class="img-responsive" style="margin-left: auto; margin-right: auto; margin-top: 4px; margin-bottom: 4px"&gt;
-&lt;p&gt;So far so good. Now what?&lt;/p&gt;
-&lt;p&gt;Well, turns out not a lot. After getting your devices added to OpenHABian, you have to move into textual configuration if you want to actually perform any automation via interaction between devices.&lt;/p&gt;
-&lt;p&gt;&amp;quot;Oh&amp;quot;, I thought, &amp;quot;That was a waste of time then&amp;quot;.&lt;/p&gt;
-&lt;h2 id="node-red"&gt;Node-RED&lt;/h2&gt;
-&lt;p&gt;On a whim, I decided to SSH into OpenHABian and play with the &lt;a href="https://docs.openhab.org/installation/openhabian.html#openhabian-config"&gt;OpenHABian Configuration Tool&lt;/a&gt;. Most of the options were fairly straight forward and unexciting until I got to the &lt;a href="https://docs.openhab.org/installation/openhabian.html#optional-components"&gt;Optional Components&lt;/a&gt; menu. Here a couple of items caught my eye, particularly the option to install Node-RED along side OpenHAB.&lt;/p&gt;
-&lt;p&gt;I'd heard of &lt;a href="https://nodered.org/"&gt;Node-RED&lt;/a&gt; previously but had never tried it. As I was about to junk the install of OpenHABian anyway, I decided I'd have a play... and this is where the magic happened.&lt;/p&gt;
-&lt;p&gt;For others who have not used Node-RED, it is a Node.js app designed for &amp;quot;wiring together hardware devices, APIs and online services in new and interesting ways&amp;quot;. It has an amazingly simple yet ludicrously brilliant UI which makes experimentation with it's various 'nodes' extremely quick and easy. Moreover, the installation on OpenHABian comes pre-installed with nodes to interact with 'Items' in OpenHAB.&lt;/p&gt;
-&lt;p&gt;Despite, never having used Node-RED before, in just a few minutes I had the following flow deployed and running:&lt;/p&gt;
-&lt;img src="/Content/posts/Node-RED - First Flow.png" alt="First Node-RED flow" class="img-responsive" style="margin-left: auto; margin-right: auto; margin-top: 4px; margin-bottom: 4px"&gt;
-&lt;p&gt;Which does the following:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Uses an &lt;code&gt;openhab2-in&lt;/code&gt; node to listen to changes to the &lt;code&gt;OfficeDoorSensor_OpenStatus&lt;/code&gt; value.&lt;/li&gt;
-&lt;li&gt;Uses a &lt;code&gt;switch&lt;/code&gt; node to compare the status value to 'OPEN' or 'CLOSED' and emit the message to the appropriate port.&lt;/li&gt;
-&lt;li&gt;If the door has been opened:
-&lt;ul&gt;
-&lt;li&gt;Use a &lt;code&gt;openhab2-out&lt;/code&gt; node to issue a 'ON' &lt;code&gt;ItemCommand&lt;/code&gt; to the &lt;code&gt;OfficeGateway_Brightness&lt;/code&gt; channel (i.e. turn the light in the Xiami Mi Smart Gateway on).&lt;/li&gt;
-&lt;li&gt;Wait five seconds then use a &lt;code&gt;openhab2-out&lt;/code&gt; node to issue a 'OFF' &lt;code&gt;ItemCommand&lt;/code&gt; to the &lt;code&gt;OfficeGateway_Brightness&lt;/code&gt; channel (i.e. turn the light in the Xiami Mi Smart Gateway off).&lt;/li&gt;
-&lt;/ul&gt;
-&lt;/li&gt;
-&lt;li&gt;If the door has been closed then use a &lt;code&gt;openhab2-out&lt;/code&gt; node to issue a 'OFF' &lt;code&gt;ItemCommand&lt;/code&gt; to the &lt;code&gt;OfficeGateway_Brightness&lt;/code&gt; channel (i.e. turn the light in the Xiami Mi Smart Gateway off).&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;Ok, the use case is fairly simple but wow, what an incredibly level of integration between disparate sensors / lights with just five nodes, a few connections and no bespoke code what-so-ever.&lt;/p&gt;
-&lt;p&gt;I was hooked.&lt;/p&gt;
-&lt;p&gt;Playing with Node-RED inspired me to start brain-storming potential use-cases and they soon started coming thick and fast. Broadly the use-cases fell into three main categories:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Utility - mitigate small frustrations around the house&lt;/li&gt;
-&lt;li&gt;Security - enhance home security&lt;/li&gt;
-&lt;li&gt;Efficiency - reduce home power consumption&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;However, one use case I came up with fell into all three of these categories &lt;strong&gt;and&lt;/strong&gt; a logical progression from the above flow.&lt;/p&gt;
-&lt;h1 id="a-use-case-at-last"&gt;A use case at last!&lt;/h1&gt;
-&lt;p&gt;Our new 'forever home' has a built in double garage. While the doors on the garage are in pretty good condition, the locks are nothing special and present an obvious security weak spot. Indeed, we use the garage doors every day as it's a very convenient way into the house which increases the likelihood we'll forget to close the doors properly.&lt;/p&gt;
-&lt;p&gt;Furthermore, the flurescent lights in the garage are old and take an age to turn on. As we need to go through the garage to get to the utility room and can't see the way to the utility room until the light is on, we tended to simply turn them on at the beginning of the day and turn them off before going to bed each night, thereby consuming way more energy than necessary.&lt;/p&gt;
-&lt;p&gt;Understanding this, I used an additional gateway in the garage, coupled with sensors on each of the doors (garage door, kitchen door, utility room door) and an easily controllable &lt;a href="https://www.amazon.co.uk/gp/product/B077HLQMBD"&gt;IP camera&lt;/a&gt; to put together the following flow:&lt;/p&gt;
-&lt;img src="/Content/posts/Node-RED - Garage.png" alt="Node-RED garage flow" class="img-responsive" style="margin-left: auto; margin-right: auto; margin-top: 4px; margin-bottom: 4px"&gt;
-&lt;p&gt;This does a couple of things:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;Turns on the light in the gateway whenever any of the doors open&lt;/p&gt;
-&lt;p&gt;The light in the gateway is more than enough to light the way to the utility room which addresses the utility aspect of the use-case as we no longer need to wait for the garage light to come on. Furthermore, three minutes after the door was opened (regardless of whether it's been closed again), the light in the gateway is turned off. This is normally long enough for us to do whatever we needed in the garage and addresses the efficiency aspect of the use-case as we no longer leave a light on all day.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Turns the IP Camera to look at the opened door and takes a snapshot&lt;/p&gt;
-&lt;p&gt;The IP camera I've used has a useful feature whereby it can record several Pan/Tilt positions which it can then return to using a single command. I use this feature to point the camera at the door which has just been opened and use a further command to take a snapshot image of what it sees. This addresses the security aspect of the use case by ensuring video surveilance coverage of activity within the garage.&lt;br /&gt;
-&lt;em&gt;Ultimately I intend to upload this image to a cloud storage provider and send a notification to my phone if this happens within certain time constraints but this has yet to be implemented.&lt;/em&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h1 id="moving-forward"&gt;Moving forward&lt;/h1&gt;
-&lt;p&gt;As you can see, the combination of Xiaomi Mi Smart devices, OpenHAB[ian] and Node-RED is extremely potent. Without writing any code (compiled, intepreted or DSL), I'm able to orchestrate some very advanced interactions between sensors, actuators and other services.&lt;/p&gt;
-&lt;p&gt;In the next post, I'll discuss how I've developed this platform even further into a full, voice activated, digital assistant while &lt;em&gt;still&lt;/em&gt; maintaining privacy and security.&lt;/p&gt;
 </content:encoded>
 		</item>
 	</channel>

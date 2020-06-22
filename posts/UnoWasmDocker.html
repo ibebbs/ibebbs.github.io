@@ -1,0 +1,566 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Uno WebAssembly Containerization</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Uno WebAssembly Containerization" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/UnoWasmDocker" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Uno WebAssembly Containerization</h1>
+        <h2 class="subheading">Adding Docker Support to Uno&#x27;s Wasm head</h2>
+    <div class="meta">        
+Published on 22 June 2020<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/Docker" class="btn btn-default btn-xs">Docker</a>
+                    <a role="button" href="/tags/Uno" class="btn btn-default btn-xs">Uno</a>
+                    <a role="button" href="/tags/WebAssembly" class="btn btn-default btn-xs">WebAssembly</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="intro">Intro</h2>
+<p>In this post I will show how to build and run Uno's WebAssembly projects within a Docker container. While I'm pretty familiar with containerization technologies, Uno's transformation of C#/XAML to WebAssembly via Mono was - and, to a certain extent, still is - a bit of a mystery. As such, this post will very much be an exploration of the technical underpinnings of these technologies.</p>
+<h2 id="deployment">Deployment</h2>
+<p>While most project heads in an Uno solution are native applications that get deployed to and run on a device (usually from an App store), the WebAssembly (Wasm) head is different. Artifacts from the compilation of the Wasm project need to be deployed to a server which is capable of serving them to a browser when requested.</p>
+<p>This deployment is typically achieved by publishing the Wasm artifacts to IIS hosted on a [virtual] server, <a href="https://nicksnettravels.builttoroam.com/post-2019-03-20-publishing-uno-webassembly-wasm-to-azure-app-service-aspx/">deploying an Azure App-Service</a> replete with all artifacts or simply copying the artifacts to a <a href="https://nicksnettravels.builttoroam.com/post-2019-03-20-deploying-uno-wasm-using-blob-storage-aspx/">file store capable of responding to HTTP requests</a>.</p>
+<p>However there is another modern deployment mechanism that has, in recent years, come to dominate the DevOps landscape: Containerization.</p>
+<h2 id="add-docker-support">Add -&gt; Docker Support...</h2>
+<p>Visual Studio has had first class support for creating and running Docker Containers for quite a while now and its integration into Visual Studio is very mature. In most instances, Containerizing a project has become as simple as right-clicking on the project, selecting &quot;Add -&gt; Docker Support...&quot; and following the resulting dialogs. Unfortunately, despite being a web project which Visual Studio knows how to &quot;Publish...&quot;, right clicking on an Uno Wasm project does not present the option to add Docker Support.</p>
+<p>Given I was working on a solution with a containerized ReST API (along with <a href="https://ian.bebbs.co.uk/posts/UnoWithSwagger">NSwag-generated .NET Standard client project</a>) I really wanted to be able to containerize the Wasm app too so it could form part of a <a href="https://docs.docker.com/compose/">composed deployment</a>.</p>
+<p>To simplify the process of working this out, I created a new Uno Platform project named <code>ContaineredUnoWasm</code> using version 2.4.0.0 of the Uno Platform templates and worked to containerize that. This project (completed with working containerized builds) can be found <a href="https://github.com/ibebbs/ContaineredUnoWasm">here</a>.</p>
+<h2 id="building-in-a-container">Building in a container</h2>
+<h3 id="imitation-is-the-sincerest-form-of-flattery">Imitation is the sincerest form of flattery</h3>
+<p>If I was going to containerize the deployment of the Wasm project, I decided to go the whole hog and allow for <a href="https://docs.docker.com/develop/develop-images/multistage-build/">multi-stage containerized builds</a>, much like those created natively by Visual Studio. Without really thinking too much about it, my first - somewhat naïve - approach was simply to copy and customise a <code>Dockerfile</code> created by Visual Studio; in effect, something like this:</p>
+<pre><code class="language-dockerfile">FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+WORKDIR /src
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;]
+RUN dotnet restore &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;]
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&quot;]
+RUN dotnet build &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT [&quot;dotnet&quot;, &quot;ContaineredUnoWasm.Wasm.dll&quot;]
+</code></pre>
+<p>We can then try building a container image from this <code>Dockerfile</code> by executing the following command (from the root of our repo):</p>
+<pre><code>$&gt; docker build -f .\ContaineredUnoWasm\ContaineredUnoWasm.Wasm\Dockerfile .
+</code></pre>
+<p>Which fails with the somewhat confusing error:</p>
+<pre><code>Step 10/16 : RUN dotnet build &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/build
+...
+Build FAILED.
+...
+  Downloading mono-wasm-502dca36d36 to /tmp/mono-wasm-502dca36d36.zip
+/root/.nuget/packages/uno.wasm.bootstrap/1.2.0/build/Uno.Wasm.Bootstrap.targets(124,5): error : System.ComponentModel.Win32Exception (2): No such file or directory [/src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj]
+</code></pre>
+<p>Oooh-kay. We know that file is exists as that's the file we started building!</p>
+<h3 id="jaylee-to-the-rescue">Jaylee to the rescue!</h3>
+<p>Casting around for ideas as to what might be causing this issue, I came across <a href="https://jaylee.org/archive/2019/03/21/azure-devops-wasm-build-container.html">this post</a> from the one and only <a href="https://twitter.com/jlaban">Jerome Laban</a> which shows how to build the Wasm project in Azure Devops using a container... which all sounded rather promising.</p>
+<p>Reading this post shows that Jerome is using a custom container image - <code>nventive/wasm-build:1.0-bionic</code> - within which the Wasm project is built. Looking this image up on <a href="https://hub.docker.com/r/nventive/wasm-build">Docker Hub</a> and then navigating to the <a href="https://github.com/nventive/docker">source repository</a> allows us to see what bizarre wizardry Jerome is using to build the Wasm project in a container. And here it is:</p>
+<pre><code class="language-dockerfile">FROM mcr.microsoft.com/dotnet/core/sdk:2.2.105-bionic
+RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
+RUN echo &quot;deb https://download.mono-project.com/repo/ubuntu stable-bionic main&quot; | tee /etc/apt/sources.list.d/mono-official-stable.list
+RUN apt-get update
+
+# Install mono, msbuild and dependencies
+RUN apt-get -y install sudo unzip python mono-devel msbuild libc6 ninja-build
+
+# Setup for GitVersion 4.x 
+RUN sudo apt-get install -y libgit2-dev libgit2-26 &amp;&amp; \
+ln -s /usr/lib/x86_64-linux-gnu/libgit2.so /lib/x86_64-linux-gnu/libgit2-15e1193.so
+
+# Install node and puppeteer dependencies
+RUN curl -sL https://deb.nodesource.com/setup_11.x | sudo -E bash - &amp;&amp; \
+	sudo apt install -y nodejs gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcups2 \
+	libdbus-1-3 libexpat1 libfontconfig1 libgcc1 libgconf-2-4 libgdk-pixbuf2.0-0 libglib2.0-0 \
+	libgtk-3-0 libnspr4 libpango-1.0-0 libpangocairo-1.0-0 libstdc++6 libx11-6 libx11-xcb1 libxcb1 \
+	libxcomposite1 libxcursor1 libxdamage1 libxext6 libxfixes3 libxi6 libxrandr2 libxrender1 libxss1 \
+	libxtst6 ca-certificates fonts-liberation libappindicator1 libnss3 lsb-release xdg-utils wget
+
+# Install and activate emscripten
+RUN git clone https://github.com/juj/emsdk.git &amp;&amp; \
+	sudo chmod 777 /emsdk &amp;&amp; \
+    cd emsdk &amp;&amp; \
+    ./emsdk install sdk-1.38.28-64bit &amp;&amp; \
+    ./emsdk install sdk-1.38.30-64bit &amp;&amp; \
+    ./emsdk install sdk-1.38.31-64bit &amp;&amp; \
+    ./emsdk install sdk-1.38.34-64bit &amp;&amp; \
+    ./emsdk install latest &amp;&amp; \
+    ./emsdk activate sdk-1.38.31-64bit &amp;&amp; \
+    sudo chmod -R 777 /emsdk
+</code></pre>
+<p>No wonder our docker build was failing, look at all the additional dependencies we need to build the Wasm project.</p>
+<p>You know, contrary to intuition, the more I learn about the how the C#-&gt;WebAssembly transformation works, the <em>more</em> it seems like magic.</p>
+<h3 id="meanwhile-back-in-the-dockerfile">Meanwhile, back in the Dockerfile</h3>
+<p>Right, so armed with Jerome's magical mystical container image of power, we'll try rewriting our Dockerfile as follows:</p>
+<pre><code class="language-dockerfile">FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM nventive/wasm-build:latest AS build
+WORKDIR /src
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;]
+RUN dotnet restore &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;]
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&quot;]
+RUN dotnet build &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT [&quot;dotnet&quot;, &quot;ContaineredUnoWasm.Wasm.dll&quot;]
+</code></pre>
+<p>Looks promising, let's give it a shot. Running this:</p>
+<pre><code>$&gt; docker build -f .\ContaineredUnoWasm\ContaineredUnoWasm.Wasm\Dockerfile .
+</code></pre>
+<p>Produces this:</p>
+<pre><code>Step 8/14 : RUN dotnet build &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/build
+ ---&gt; Running in 1f7ff2159acc
+Microsoft (R) Build Engine version 15.9.20+g88f5fadfbe for .NET Core
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+  Restoring packages for /src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj...
+  Installing Microsoft.Extensions.DependencyInjection.Abstractions 1.1.0.
+  Installing System.Runtime.CompilerServices.Unsafe 4.3.0.
+  Installing Microsoft.Extensions.Logging 1.1.1.
+  Installing System.ValueTuple 4.4.0.
+  Installing CommonServiceLocator 2.0.5.
+  Installing System.Buffers 4.4.0.
+  Installing System.Runtime.CompilerServices.Unsafe 4.5.2.
+  Installing Microsoft.Extensions.Primitives 1.1.0.
+  Installing Uno.SourceGenerationTasks 2.0.6.
+  Installing Uno.Core 2.0.0.
+  Installing System.Memory 4.5.2.
+  Installing Uno.Core.Build 2.0.0.
+  Installing System.Runtime.InteropServices.WindowsRuntime 4.3.0.
+  Installing Microsoft.Extensions.Configuration.Abstractions 1.1.1.
+  Installing Microsoft.Extensions.Logging.Abstractions 1.1.1.
+  Installing Uno.UI 2.4.0.
+  Installing Microsoft.Extensions.Logging.Console 1.1.1.
+  Installing Microsoft.Extensions.Logging.Filter 1.1.1.
+  Installing Uno.Wasm.Bootstrap 1.2.0.
+  Installing Uno.Wasm.Bootstrap.DevServer 1.2.0.
+  Generating MSBuild file /src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/obj/ContaineredUnoWasm.Wasm.csproj.nuget.g.props.
+  Generating MSBuild file /src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/obj/ContaineredUnoWasm.Wasm.csproj.nuget.g.targets.
+  Restore completed in 27.69 sec for /src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj.
+It was not possible to find any compatible framework version
+The specified framework 'Microsoft.NETCore.App', version '3.0.0' was not found.
+  - Check application dependencies and target a framework version installed at:
+      /usr/share/dotnet/
+  - Installing .NET Core prerequisites might help resolve this problem:
+      https://go.microsoft.com/fwlink/?LinkID=798306&amp;clcid=0x409
+  - The .NET Core framework and SDK can be installed from:
+      https://aka.ms/dotnet-download
+  - The following versions are installed:
+      2.2.3 at [/usr/share/dotnet/shared/Microsoft.NETCore.App]
+/root/.nuget/packages/uno.sourcegenerationtasks/2.0.6/build/netstandard1.0/Uno.SourceGenerationTasks.targets(127,2): error : Generation failed, error code 150 [/src/ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj]
+
+Build FAILED.
+</code></pre>
+<p>Oh, interesting stuff. An error we can work with and, if I'm not mistaken, I seem to remember the <code>nventive/wasm-build</code> Dockerfile starting with <code>FROM mcr.microsoft.com/dotnet/core/sdk:2.2.105-bionic</code>. Perhaps this Dockerfile is just a little out of date?</p>
+<h3 id="updating-wasm-build">Updating Wasm-Build</h3>
+<br/>
+<h4 id="edit">- - - - EDIT - - - -</h4>
+<p>At this point I forked, cloned, updated and built a new version of the <a href="https://github.com/nventive/docker"><code>nventive/docker</code></a> image. However, towards the end of authoring this blog post, a hunch caused me to search for &quot;docker&quot; in the &quot;unoplatform&quot; organisation on Github. On the last page of &quot;Code&quot; hits, I found a link to this <a href="https://github.com/unoplatform/Uno.Wasm.Bootstrap/blob/master/Readme.md"><code>Readme.md</code></a> in which, about half way down, is a reference to another container image <a href="https://hub.docker.com/r/unoplatform/wasm-build"><code>unoplatform/wasm-build</code></a>.</p>
+<p>This image was completely up to date and meant I no longer had to build a custom version so the rest of this (somewhat painful) section has been removed. Conversely, I decided to leave the slight misdirection in the section above as I thought it provided quite an insight into the complexities involved in building the Wasm output.</p>
+<h4 id="end-edit">- - - - END EDIT - - - -</h4>
+<br/>
+<h3 id="one-step-back-two-steps-forward">One step back, two steps forward</h3>
+<p>Ok, having found a new <code>wasm-build</code> image, lets try integrating it into the <code>Dockerfile</code> for building <code>ContaineredUnoWasm</code> as follows:</p>
+<pre><code class="language-dockerfile">FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
+WORKDIR /app
+EXPOSE 80
+
+FROM unoplatform/wasm-build:latest AS build
+WORKDIR /src
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;]
+RUN dotnet restore &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;]
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&quot;]
+RUN dotnet build &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT [&quot;dotnet&quot;, &quot;ContaineredUnoWasm.Wasm.dll&quot;]
+</code></pre>
+<p>Which is built using the command:</p>
+<pre><code>$&gt; docker build -f .\ContaineredUnoWasm\ContaineredUnoWasm.Wasm\Dockerfile . -t ibebbs/containeredunowasm:latest
+</code></pre>
+<p>And results in:</p>
+<pre><code>Successfully built c2c4c48cf33a
+Successfully tagged ibebbs/containeredunowasm:latest
+</code></pre>
+<p>Huzzah, it worked!</p>
+<img src="/Content/UnoWasmDocker/Brilliant.jpg" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="BRILLIANT!!!!">
+<br/>
+<h2 id="running-from-a-container">Running from a container</h2>
+<p>Now, unless I'm very much mistaken, running our containerized Wasm app should be as simple as starting the container and navigating to the exposed port in a browser. As such, let's run the command:</p>
+<pre><code>$&gt; docker run -p 5000:80 ibebbs/containeredunowasm:latest
+</code></pre>
+<p>Results in:</p>
+<pre><code>It was not possible to find any installed .NET Core SDKs
+  Did you mean to run .NET Core SDK commands? Install a .NET Core SDK from:
+      https://aka.ms/dotnet-download
+</code></pre>
+<p>Errr... no I didn't, I wanted to run my app service. Let's see what's going on here by opening an interactive shell within the container and listing the contents:</p>
+<pre><code>docker run -it --entrypoint /bin/bash ibebbs/containeredunowasm:latest
+root&#64;52acb17752f2:/app# dir
+AppManifest.js                                             Uno.UI.css
+Assets                                                     Uno.UI.dll
+CommonServiceLocator.dll                                   Uno.UI.js
+Fonts.css                                                  Uno.Xaml.dll
+Microsoft.Extensions.Configuration.Abstractions.dll        Uno.dll
+Microsoft.Extensions.DependencyInjection.Abstractions.dll  _compressed_br
+Microsoft.Extensions.Logging.Abstractions.dll              _compressed_gz
+Microsoft.Extensions.Logging.Console.dll                   corebindings.o
+Microsoft.Extensions.Logging.Filter.dll                    dotnet.js
+Microsoft.Extensions.Logging.dll                           dotnet.wasm
+Microsoft.Extensions.Primitives.dll                        driver.o
+Properties                                                 index.html
+System.Buffers.dll                                         jquery-pep.js
+System.Collections.Immutable.dll                           managed-4aa732b23652301ed854d2dd646ce71b0b0b5e3f
+System.ComponentModel.dll                                  mono-config.js
+System.Linq.dll                                            normalize.css
+System.Memory.dll                                          refs
+System.Numerics.Vectors.dll                                require.js
+System.Reflection.Emit.ILGeneration.dll                    runtime.js
+System.Reflection.Emit.Lightweight.dll                     server.py
+System.Runtime.CompilerServices.Unsafe.dll                 service-worker.js
+System.Runtime.InteropServices.WindowsRuntime.dll          setImmediate.js
+System.Threading.dll                                       uno-bootstrap.css
+Uno.Core.dll                                               uno-bootstrap.js
+Uno.Foundation.dll                                         uno-config.js
+Uno.UI.Toolkit.dll                                         web.config
+Uno.UI.Wasm.dll                                            zlib-helper.o
+</code></pre>
+<p>What? No <code>ContaineredUnoWasm.Wasm.dll</code> but an &quot;index.html&quot;? This looks suspiciously like a...</p>
+<img src="/Content/UnoWasmDocker/MindBlown.gif" class="img-responsive" style="margin: auto; margin-top: 6px; margin-bottom: 6px;" alt="Mind Blown">
+<p>Yup, <em><strong>very</strong></em> much mistaken. The result of compiling the Wasm project isn't a hosted service but is ... of course ... just content which can be hosted by another service. As such, there's really nothing for the container to run and, as such, we're going to need a web server to serve this content.</p>
+<h3 id="kestrel-vs-nginx">Kestrel vs Nginx</h3>
+<p>Now, this being a .net solution and me being a .net fanboi, I really wanted serve this content from a .net webserver. I was thinking it should be possible to find an off-the-[docker hub]-shelf image of a kestrel webserver which was/could be configured to serve static content. But no, despite a significant search, it appeared that, if I wanted to serve the content from Kestrel I'd have to add, build and containerize a bespoke web project.</p>
+<p>So instead I decided to use <a href="https://hub.docker.com/_/nginx/">nginx</a> which is configured to <a href="https://github.com/docker-library/docs/tree/master/nginx#hosting-some-simple-static-content">serve static content</a> out-of-the-box.</p>
+<p>To use nginx, I amended the <code>Dockerfile</code> for <code>ContaineredUnoWasm</code> to this:</p>
+<pre><code class="language-dockerfile">FROM unoplatform/wasm-build:latest AS build
+WORKDIR /src
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;]
+RUN dotnet restore &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;]
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&quot;]
+RUN dotnet build &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/publish
+
+FROM nginx:alpine
+EXPOSE 80
+COPY --from=publish /app/publish /usr/share/nginx/html
+</code></pre>
+<p>Then rebuilt and started the image:</p>
+<pre><code>$&gt; docker build -f .\ContaineredUnoWasm\ContaineredUnoWasm.Wasm\Dockerfile . -t ibebbs/containeredunowasm:latest
+...
+Successfully built 4c1fc5cb9efd
+Successfully tagged ibebbs/containeredunowasm:latest
+$&gt; docker run -p 5000:80 ibebbs/containeredunowasm:latest
+/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
+/docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+10-listen-on-ipv6-by-default.sh: Getting the checksum of /etc/nginx/conf.d/default.conf
+10-listen-on-ipv6-by-default.sh: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh
+/docker-entrypoint.sh: Configuration complete; ready for start up
+</code></pre>
+<p>Looks promising. Let's hit <code>http://localhost:5000</code> with a browser:</p>
+<img src="/Content/UnoWasmDocker/UnoLogo.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Uno Logo">
+<p>Well, that's better. Lets see if we can resolve the &quot;Incorrect response MIME type&quot; issue by telling nginx about the mime types to serve. This is done by adding a <code>mime.types</code> file to our project containing:</p>
+<pre><code>types {
+  text/html                             html htm shtml;
+  text/css                              css;
+  text/javascript						            js;
+  application/wasm                      wasm;
+  application/octet-stream              dll clr;
+  application/json                      json;
+  application/font-woff                 woff woff2;
+}
+</code></pre>
+<p>And adding it to our <code>nginx</code> container by amending the <code>Dockerfile</code> for <code>ContaineredUnoWasm</code> as shown here:</p>
+<pre><code class="language-dockerfile">FROM unoplatform/wasm-build:latest AS build
+WORKDIR /src
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;]
+RUN dotnet restore &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;]
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&quot;]
+RUN dotnet build &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/publish
+
+FROM nginx:alpine
+EXPOSE 80
+COPY --from=publish /app/publish /usr/share/nginx/html
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/mime.types&quot;, &quot;/etc/nginx/mime.types&quot; ]
+</code></pre>
+<p>Now, rebuilding the image, running the container and hitting the endpoint in a browser gives us:</p>
+<img src="/Content/UnoWasmDocker/HelloWorld.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Hello World!">
+<p>Wahoo!</p>
+<h3 id="a-little-house-keeping">A little house keeping</h3>
+<p>Of course, needing to add a &quot;mime.types&quot; file with this exact content to any Wasm project we want to containerize is a pain so instead lets make a container image that already includes this file. In a fork of the <a href="https://github.com/unoplatform/docker"><code>unoplatform/docker</code></a> repository, I'll add a new folder called <code>wasm-serve</code> within which I'll add the <code>mime.types</code> file from above and the following <code>Dockerfile</code>:</p>
+<pre><code class="language-dockerfile">FROM nginx:alpine
+COPY [&quot;mime.types&quot;, &quot;/etc/nginx/mime.types&quot; ]
+</code></pre>
+<p>Building this image with the command <code>docker build . -t wasm-server:latest</code> allows me to modify the <code>Dockerfile</code> for <code>ContaineredUnoWasm</code> as follows:</p>
+<pre><code class="language-dockerfile">FROM unoplatform/wasm-build:latest AS build
+WORKDIR /src
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;]
+RUN dotnet restore &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot;
+
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Shared/&quot;]
+COPY [&quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&quot;, &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/&quot;]
+RUN dotnet build &quot;ContaineredUnoWasm/ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/build 
+
+FROM build AS publish
+RUN dotnet publish &quot;ContaineredUnoWasm.Wasm/ContaineredUnoWasm.Wasm.csproj&quot; -c Release -o /app/publish
+
+FROM ibebbs/wasm-serve:latest
+EXPOSE 80
+COPY --from=publish /app/publish /usr/share/nginx/html
+</code></pre>
+<p>Which, when rebuilt and run, still results in the running app.</p>
+<p>Done and done.</p>
+<h3 id="future-improvements">Future improvements</h3>
+<p>At the moment the docker build needs to download the &quot;mono-wasm SDK&quot; on each build. It would be much better download the mono-wasm SDK in an earlier step of the Dockerfile so that it is cached and doesn't need to be downloaded each time. I'm looking into doing this and will provide an update as an when I've worked out how to do it.</p>
+<p><a href="https://balintpogatsa.github.io/2019/05/05/webassembly-mono-aot-example.html">This article</a> suggests downloading the SDK from <a href="https://jenkins.mono-project.com/job/test-mono-mainline-wasm/label=ubuntu-1804-amd64/lastSuccessfulBuild/Azure/">here</a> but the build output from Visual Studio suggests the SDK is coming from a blob owned by Uno (<a href="https://unowasmbootstrap.blob.core.windows.net/runtime/mono-wasm-###########.zip">https://unowasmbootstrap.blob.core.windows.net/runtime/mono-wasm-###########.zip</a>). Either way, once it's downloaded, setting the <code>WASM_SDK</code> to the path of the unzipped sdk should ensure the sdk doesn't need to be downloaded during build.</p>
+<p>I'm also still having problems building/running more advanced projects within a container. Hitting a weird error (<code>Object doesn't support property or method '_coreDispatcherCallback'</code>) when running the resulting WASM in a browser. Still banging my head against this one so any advice gratefully received.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>It really was a bit of a roller-coaster of a journey to get a containerized build / image of an Uno Wasm project running.</p>
+<p>One thing it really highlighted to me is the amazing impact of open-source code. Any time an issue was encountered, I was able to find the <em>exact code/file</em> causing the problem and thereby find a solution. For someone who cut his teeth programming before the internet made resolving every programming issue as simple as a quick jaunt to StackOverflow, and when source-code was something you had to pay through the nose for, working in and with OSS for the past several years has been an real eye-opener (if you'll excuse the somewhat strained facial idioms).</p>
+<p>However, we also discovered that this transparency can also be a double-edged sword. The .NET ecosystem - and especially Uno - is moving forward at an incredible cadence with new releases causing older versions to be deprecated and documentation to become dated. As we can see above, this can throw serious curve-balls to anyone endeavouring to stray from the beaten path or get a better understanding of how things work.</p>
+<p>Anyway, should you have any suggestions for, or questions about, anything above please feel free to drop me a line using any of the links below or from my <a href="https://ian.bebbs.co.uk/about">about page</a>.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2020. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
