@@ -124,7 +124,7 @@ Published on 22 June 2020<br>    </div>
                                         
 
 <h2 id="intro">Intro</h2>
-<p>In this post I will show how to build and run Uno's WebAssembly projects within a Docker container. While I'm pretty familiar with containerization technologies, Uno's transformation of C#/XAML to WebAssembly via Mono was - and, to a certain extent, still is - a bit of a mystery. As such, this post will very much be an exploration of the technical underpinnings of these technologies.</p>
+<p>In this post I will show how to build and run <a href="https://platform.uno/">Uno Platform</a> WebAssembly projects within a Docker container. While I'm pretty familiar with containerization technologies, Uno's transformation of C#/XAML to WebAssembly via Mono was - and, to a certain extent, still is - a bit of a mystery. As such, this post will very much be an exploration of the technical underpinnings of these technologies.</p>
 <h2 id="deployment">Deployment</h2>
 <p>While most project heads in an Uno solution are native applications that get deployed to and run on a device (usually from an App store), the WebAssembly (Wasm) head is different. Artifacts from the compilation of the Wasm project need to be deployed to a server which is capable of serving them to a browser when requested.</p>
 <p>This deployment is typically achieved by publishing the Wasm artifacts to IIS hosted on a [virtual] server, <a href="https://nicksnettravels.builttoroam.com/post-2019-03-20-publishing-uno-webassembly-wasm-to-azure-app-service-aspx/">deploying an Azure App-Service</a> replete with all artifacts or simply copying the artifacts to a <a href="https://nicksnettravels.builttoroam.com/post-2019-03-20-deploying-uno-wasm-using-blob-storage-aspx/">file store capable of responding to HTTP requests</a>.</p>
@@ -171,8 +171,8 @@ Build FAILED.
 </code></pre>
 <p>Oooh-kay. We know that file is exists as that's the file we started building!</p>
 <h3 id="jaylee-to-the-rescue">Jaylee to the rescue!</h3>
-<p>Casting around for ideas as to what might be causing this issue, I came across <a href="https://jaylee.org/archive/2019/03/21/azure-devops-wasm-build-container.html">this post</a> from the one and only <a href="https://twitter.com/jlaban">Jerome Laban</a> which shows how to build the Wasm project in Azure Devops using a container... which all sounded rather promising.</p>
-<p>Reading this post shows that Jerome is using a custom container image - <code>nventive/wasm-build:1.0-bionic</code> - within which the Wasm project is built. Looking this image up on <a href="https://hub.docker.com/r/nventive/wasm-build">Docker Hub</a> and then navigating to the <a href="https://github.com/nventive/docker">source repository</a> allows us to see what bizarre wizardry Jerome is using to build the Wasm project in a container. And here it is:</p>
+<p>Casting around for ideas as to what might be causing this issue, I came across <a href="https://jaylee.org/archive/2019/03/21/azure-devops-wasm-build-container.html">this post</a> from the one and only <a href="https://twitter.com/jlaban">Jérôme Laban</a> which shows how to build the Wasm project in Azure Devops using a container... which all sounded rather promising.</p>
+<p>Reading this post shows that Jérôme is using a custom container image - <code>nventive/wasm-build:1.0-bionic</code> - within which the Wasm project is built. Looking this image up on <a href="https://hub.docker.com/r/nventive/wasm-build">Docker Hub</a> and then navigating to the <a href="https://github.com/nventive/docker">source repository</a> allows us to see what bizarre wizardry Jérôme is using to build the Wasm project in a container. And here it is:</p>
 <pre><code class="language-dockerfile">FROM mcr.microsoft.com/dotnet/core/sdk:2.2.105-bionic
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 3FA7E0328081BFF6A14DA29AA6A19B38D3D831EF
 RUN echo &quot;deb https://download.mono-project.com/repo/ubuntu stable-bionic main&quot; | tee /etc/apt/sources.list.d/mono-official-stable.list
@@ -208,7 +208,7 @@ RUN git clone https://github.com/juj/emsdk.git &amp;&amp; \
 <p>No wonder our docker build was failing, look at all the additional dependencies we need to build the Wasm project.</p>
 <p>You know, contrary to intuition, the more I learn about the how the C#-&gt;WebAssembly transformation works, the <em>more</em> it seems like magic.</p>
 <h3 id="meanwhile-back-in-the-dockerfile">Meanwhile, back in the Dockerfile</h3>
-<p>Right, so armed with Jerome's magical mystical container image of power, we'll try rewriting our Dockerfile as follows:</p>
+<p>Right, so armed with Jérôme's magical mystical container image of power, we'll try rewriting our Dockerfile as follows:</p>
 <pre><code class="language-dockerfile">FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 WORKDIR /app
 EXPOSE 80
@@ -462,6 +462,11 @@ COPY --from=publish /app/publish /usr/share/nginx/html
 <p>At the moment the docker build needs to download the &quot;mono-wasm SDK&quot; on each build. It would be much better download the mono-wasm SDK in an earlier step of the Dockerfile so that it is cached and doesn't need to be downloaded each time. I'm looking into doing this and will provide an update as an when I've worked out how to do it.</p>
 <p><a href="https://balintpogatsa.github.io/2019/05/05/webassembly-mono-aot-example.html">This article</a> suggests downloading the SDK from <a href="https://jenkins.mono-project.com/job/test-mono-mainline-wasm/label=ubuntu-1804-amd64/lastSuccessfulBuild/Azure/">here</a> but the build output from Visual Studio suggests the SDK is coming from a blob owned by Uno (<a href="https://unowasmbootstrap.blob.core.windows.net/runtime/mono-wasm-###########.zip">https://unowasmbootstrap.blob.core.windows.net/runtime/mono-wasm-###########.zip</a>). Either way, once it's downloaded, setting the <code>WASM_SDK</code> to the path of the unzipped sdk should ensure the sdk doesn't need to be downloaded during build.</p>
 <p>I'm also still having problems building/running more advanced projects within a container. Hitting a weird error (<code>Object doesn't support property or method '_coreDispatcherCallback'</code>) when running the resulting WASM in a browser. Still banging my head against this one so any advice gratefully received.</p>
+<h4 id="edit-1">- - - - EDIT - - - -</h4>
+<p>And as if by magic, Jérôme nails the answer in one fell swoop:</p>
+<blockquote class="twitter-tweet tw-align-center"><p lang="en" dir="ltr">Nice article!! dotnet publish definitely needs a bit of work (the support is very recent), too many files are in the output folder. For the `_coreDispatcherCallback` error, it&#39;s generally a mismatch between Uno.UI and Uno.Wasm.Bootstrap. Recent builds don&#39;t have that issue.</p>&mdash; Jérôme Laban (&#64;jlaban) <a href="https://twitter.com/jlaban/status/1275046276233605122?ref_src=twsrc%5Etfw">June 22, 2020</a></blockquote> <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
+<br/>
+<h4 id="end-edit-1">- - - - END EDIT - - - -</h4>
 <h2 id="conclusion">Conclusion</h2>
 <p>It really was a bit of a roller-coaster of a journey to get a containerized build / image of an Uno Wasm project running.</p>
 <p>One thing it really highlighted to me is the amazing impact of open-source code. Any time an issue was encountered, I was able to find the <em>exact code/file</em> causing the problem and thereby find a solution. For someone who cut his teeth programming before the internet made resolving every programming issue as simple as a quick jaunt to StackOverflow, and when source-code was something you had to pay through the nose for, working in and with OSS for the past several years has been an real eye-opener (if you'll excuse the somewhat strained facial idioms).</p>
