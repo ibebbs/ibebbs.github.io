@@ -129,6 +129,7 @@ Published on 16 July 2020<br>    </div>
 
 <h2 id="tldr">TL;DR</h2>
 <p>In this article we will see how to use <a href="https://platform.uno/">Uno Platform</a> and <a href="https://docs.microsoft.com/en-us/aspnet/signalr/overview/getting-started/introduction-to-signalr">SignalR</a> to create applications that run on all major platforms - PC, Mac, Android, iOS <em><strong>and</strong></em> Web - and are capable of receiving real-time updates from a SignalR service. As you will see, these two technologies work incredibly well together, providing an elegant solution to a use-case which, just a few years ago, would have been fiendishly difficult.</p>
+<p>All the source code for this post can be found in my <a href="https://github.com/ibebbs/UnoChat">UnoChat</a> repository on GitHub.</p>
 <h2 id="intro">Intro</h2>
 <p>A project I'm working on features a web-dashboard. Being a XAML fan, using Uno to create a web-assembly app was a complete a no-brainer... until I realised that I wanted the dashboard to feature real-time updates. Thanks to SignalR (and a host of subsequent technologies) real-time updates is nothing new for traditional web apps but how would these technologies fare when used with Uno/WebAssembly.</p>
 <p>Hunting around, I had seen that a couple of people had tried this approach a while back but had hit various stumbling blocks along the way. As far as I could tell, no-one had yet managed to get a working solution which, as you might imagine, was a tad worrying.</p>

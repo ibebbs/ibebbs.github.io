@@ -4,7 +4,7 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-07-16T16:49:16Z</updated>
+	<updated>2020-07-16T17:00:09Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/UnoChat</id>
@@ -13,6 +13,7 @@
 		<updated>2020-07-16T00:00:00Z</updated>
 		<content>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
 &lt;p&gt;In this article we will see how to use &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; and &lt;a href="https://docs.microsoft.com/en-us/aspnet/signalr/overview/getting-started/introduction-to-signalr"&gt;SignalR&lt;/a&gt; to create applications that run on all major platforms - PC, Mac, Android, iOS &lt;em&gt;&lt;strong&gt;and&lt;/strong&gt;&lt;/em&gt; Web - and are capable of receiving real-time updates from a SignalR service. As you will see, these two technologies work incredibly well together, providing an elegant solution to a use-case which, just a few years ago, would have been fiendishly difficult.&lt;/p&gt;
+&lt;p&gt;All the source code for this post can be found in my &lt;a href="https://github.com/ibebbs/UnoChat"&gt;UnoChat&lt;/a&gt; repository on GitHub.&lt;/p&gt;
 &lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
 &lt;p&gt;A project I'm working on features a web-dashboard. Being a XAML fan, using Uno to create a web-assembly app was a complete a no-brainer... until I realised that I wanted the dashboard to feature real-time updates. Thanks to SignalR (and a host of subsequent technologies) real-time updates is nothing new for traditional web apps but how would these technologies fare when used with Uno/WebAssembly.&lt;/p&gt;
 &lt;p&gt;Hunting around, I had seen that a couple of people had tried this approach a while back but had hit various stumbling blocks along the way. As far as I could tell, no-one had yet managed to get a working solution which, as you might imagine, was a tad worrying.&lt;/p&gt;
