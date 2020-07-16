@@ -5,8 +5,602 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2020</copyright>
-		<pubDate>Mon, 22 Jun 2020 14:27:20 GMT</pubDate>
-		<lastBuildDate>Mon, 22 Jun 2020 14:27:20 GMT</lastBuildDate>
+		<pubDate>Thu, 16 Jul 2020 16:49:16 GMT</pubDate>
+		<lastBuildDate>Thu, 16 Jul 2020 16:49:16 GMT</lastBuildDate>
+		<item>
+			<title>Cross-Platform Real-Time Communication with Uno &amp; SignalR</title>
+			<link>http://ian.bebbs.co.uk/posts/UnoChat</link>
+			<description>&lt;p&gt;In this article we will see how to use &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; and &lt;a href="https://docs.microsoft.com/en-us/aspnet/signalr/overview/getting-started/introduction-to-signalr"&gt;SignalR&lt;/a&gt; to create applications that run on all major platforms - PC, Mac, Android, iOS &lt;em&gt;&lt;strong&gt;and&lt;/strong&gt;&lt;/em&gt; Web - and are capable of receiving real-time updates from a SignalR service. As you will see, these two technologies work incredibly well together, providing an elegant solution to a use-case which, just a few years ago, would have been fiendishly difficult.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/UnoChat</guid>
+			<pubDate>Thu, 16 Jul 2020 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;In this article we will see how to use &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; and &lt;a href="https://docs.microsoft.com/en-us/aspnet/signalr/overview/getting-started/introduction-to-signalr"&gt;SignalR&lt;/a&gt; to create applications that run on all major platforms - PC, Mac, Android, iOS &lt;em&gt;&lt;strong&gt;and&lt;/strong&gt;&lt;/em&gt; Web - and are capable of receiving real-time updates from a SignalR service. As you will see, these two technologies work incredibly well together, providing an elegant solution to a use-case which, just a few years ago, would have been fiendishly difficult.&lt;/p&gt;
+&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;A project I'm working on features a web-dashboard. Being a XAML fan, using Uno to create a web-assembly app was a complete a no-brainer... until I realised that I wanted the dashboard to feature real-time updates. Thanks to SignalR (and a host of subsequent technologies) real-time updates is nothing new for traditional web apps but how would these technologies fare when used with Uno/WebAssembly.&lt;/p&gt;
+&lt;p&gt;Hunting around, I had seen that a couple of people had tried this approach a while back but had hit various stumbling blocks along the way. As far as I could tell, no-one had yet managed to get a working solution which, as you might imagine, was a tad worrying.&lt;/p&gt;
+&lt;p&gt;Regardless, I knew that Uno and its compilation to WebAssembly (driven by the amazing work undertaken by the &lt;a href="https://github.com/mono/mono"&gt;Mono team&lt;/a&gt;) had progressed massively in the last year so I figured I'd give it a go to see if I could get any further. I was very much prepared for a bit of a slog here, expecting to have to dig into the internals of both Uno and SignalR in order to get it working. But I was &lt;em&gt;not&lt;/em&gt; prepared for what actually happened:&lt;/p&gt;
+&lt;p&gt;It... just... worked.&lt;/p&gt;
+&lt;p&gt;First time.&lt;/p&gt;
+&lt;p&gt;With no kludges, no work-arounds, no untoward platform-specific code and no conditional compilation.&lt;/p&gt;
+&lt;p&gt;It really did &lt;strong&gt;Just Work™&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;The following post shows how you can use these amazing technologies together to deliver real-time updates to a cross-platform app.&lt;/p&gt;
+&lt;h2 id="ingredients"&gt;Ingredients&lt;/h2&gt;
+&lt;p&gt;To cook up this little sumptuous little dish, you will need a copy of Visual Studio 2019 with the following installed:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&amp;quot;ASP.NET and Web development&amp;quot; workload&lt;/li&gt;
+&lt;li&gt;&amp;quot;Azure development&amp;quot; workload&lt;/li&gt;
+&lt;li&gt;&amp;quot;Universal Windows Platform development&amp;quot; workload&lt;/li&gt;
+&lt;li&gt;&amp;quot;Mobile development with .NET&amp;quot; workload&lt;/li&gt;
+&lt;li&gt;&amp;quot;.NET Core cross-platform development&amp;quot; toolset&lt;/li&gt;
+&lt;li&gt;The &lt;a href="https://marketplace.visualstudio.com/items?itemName=nventivecorp.uno-platform-addin"&gt;Uno Platform Solution Templates&lt;/a&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;You will also need a (&lt;a href="https://azure.microsoft.com/en-us/free/"&gt;free&lt;/a&gt;) Azure account to which we'll publish our SignalR service so it's easily available to our client platforms.&lt;/p&gt;
+&lt;h2 id="objective"&gt;Objective&lt;/h2&gt;
+&lt;p&gt;We're going to be building a version of the &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-3.1&amp;amp;tabs=visual-studio"&gt;&amp;quot;Get started with ASP.NET Core SignalR&amp;quot;&lt;/a&gt; sample app but, instead of an &amp;quot;HTML+js&amp;quot; client, we're going to be using  Uno to write an app which can be compiled and run natively across multiple platforms &lt;em&gt;including&lt;/em&gt; the web.&lt;/p&gt;
+&lt;p&gt;When we're finished, we'll have a solution which looks like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;UnoChat
+|- UnoChat.Service
+|- UnoChat.Client.Console
+|- UnoChat.Client.App
+   |- UnoChat.Client.App.Droid
+   |- UnoChat.Client.App.iOS
+   |- UnoChat.Client.App.macOS
+   |- UnoChat.Client.App.UWP
+   |- UnoChat.Client.App.Wasm
+   |- UnoChat.Client.App.Shared
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We'll dive into each of these projects individually below with the occasional &amp;quot;F5&amp;quot; to test our progress.&lt;/p&gt;
+&lt;p&gt;Right, lets go!&lt;/p&gt;
+&lt;h2 id="service-console-client-testing-deployment"&gt;Service, Console Client, Testing &amp;amp; Deployment&lt;/h2&gt;
+&lt;h3 id="unochat.service"&gt;UnoChat.Service&lt;/h3&gt;
+&lt;p&gt;We'll first create the SignalR service. As this is covered quite extensively in the &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-3.1&amp;amp;tabs=visual-studio"&gt;sample app&lt;/a&gt; we're basing this article on I'm going to shoot through this pretty quickly, only covering notable differences and the code we should end up with.&lt;/p&gt;
+&lt;p&gt;Ok, start up Visual Studio 2019 and create a new project as shown here:&lt;/p&gt;
+&lt;table style="margin: auto; width:100%;"&gt;
+  &lt;tr&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/CreateNewASPNetCoreWebApplicationI.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Create New ASP Net Core Web Application - Step 1"/&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/CreateNewASPNetCoreWebApplicationII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Create New ASP Net Core Web Application - Step 2"/&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;Now, follow the steps in the &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-3.1&amp;amp;tabs=visual-studio#create-a-signalr-hub"&gt;&amp;quot;Create a SignalR hub&amp;quot;&lt;/a&gt; section of the sample app to create a &lt;code&gt;ChatHub : Hub&lt;/code&gt; class in a &lt;code&gt;Hubs&lt;/code&gt; folder within the &lt;code&gt;UnoChat.Service&lt;/code&gt; project.&lt;/p&gt;
+&lt;p&gt;We'll continue with the configuration described in the &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-3.1&amp;amp;tabs=visual-studio#configure-signalr"&gt;&amp;quot;Configure SignalR&amp;quot;&lt;/a&gt; but we'll also be adding a &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-3.1"&gt;CORS policy&lt;/a&gt; such that we're able to connect to it from a locally hosted Wasm app. The final configuration of the &lt;code&gt;Startup&lt;/code&gt; class in the &lt;code&gt;UnoChat.Service&lt;/code&gt; project should look like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+namespace UnoChat.Service
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddRazorPages();
+            services.AddSignalR();
+
+            services.AddCors(o =&amp;gt; o.AddPolicy(
+                 &amp;quot;CorsPolicy&amp;quot;,
+                 builder =&amp;gt; builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                 )
+            );
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler(&amp;quot;/Error&amp;quot;);
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+            app.UseCors(&amp;quot;CorsPolicy&amp;quot;);
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =&amp;gt;
+            {
+                endpoints.MapRazorPages();
+                endpoints.MapHub&amp;lt;Hubs.ChatHub&amp;gt;(&amp;quot;/chathub&amp;quot;);
+            });
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And that's it. Seriously that's all we need to create a service which is able to provide real-time communication services to a whole host of client applications.... I know, right!&lt;/p&gt;
+&lt;h3 id="unochat.client.console"&gt;UnoChat.Client.Console&lt;/h3&gt;
+&lt;p&gt;Next we'll create a quick console application to test our SignalR service prior to diving into a cross platform solution with Uno.&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;BTW, the console app - by virtue of being .NET Core - is also cross-platform and will run on... well... &lt;a href="https://docs.microsoft.com/en-us/dotnet/core/"&gt;pretty much anything&lt;/a&gt;.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;So, right click on the &amp;quot;UnoChat&amp;quot; solution and add a new &amp;quot;Console App (.NET Core)&amp;quot; project as shown here:&lt;/p&gt;
+&lt;img src="/Content/UnoChat/CreateNewNetCoreConsoleApp.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Create New Net Core Console App"/&gt;
+&lt;p&gt;Then, add the &lt;a href="https://www.nuget.org/packages/Microsoft.AspNetCore.SignalR.Client/"&gt;&lt;code&gt;Microsoft.AspNetCore.SignalR.Client&lt;/code&gt; nuget package&lt;/a&gt; to the &lt;code&gt;UnoChat.Client.Console&lt;/code&gt; project as shown here:&lt;/p&gt;
+&lt;img src="/Content/UnoChat/InstallMicrosoftAspNetCoreSignalRClientInUnoChatClientConsole.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Install Microsoft Asp Net Core SignalR Client In UnoChat Client Console"/&gt;
+&lt;p&gt;Finally, replace the code in &lt;code&gt;Main.cs&lt;/code&gt; with the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;using Microsoft.AspNetCore.SignalR.Client;
+using System.Threading.Tasks;
+
+namespace UnoChat.Client.Console
+{
+    using Console = System.Console;
+
+    class Program
+    {
+        static async Task Main(string[] args)
+        {
+            Console.WriteLine(&amp;quot;Hi! Err... who are you?&amp;quot;);
+
+            var name = Console.ReadLine();
+
+            Console.WriteLine($&amp;quot;Ok {name} one second, we're going to connect to the SignalR server...&amp;quot;);
+
+            var connection = new HubConnectionBuilder()
+                .WithUrl(&amp;quot;http://localhost:61877/ChatHub&amp;quot;)
+                .WithAutomaticReconnect()
+                .Build();
+
+            connection.On&amp;lt;string, string&amp;gt;(&amp;quot;ReceiveMessage&amp;quot;, (user, message) =&amp;gt; Console.WriteLine($&amp;quot;{user}: {message}&amp;quot;));
+
+            await connection.StartAsync();
+
+            Console.WriteLine($&amp;quot;Aaaaaand we're connected. Enter a message and hit return to send it to other connected clients...&amp;quot;);
+
+            while (true)
+            {
+                var message = Console.ReadLine();
+
+                await connection.InvokeAsync(&amp;quot;SendMessage&amp;quot;, name, message);
+            }
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;Note: You'll need to ensure the port number in the &lt;code&gt;.WithUrl(&amp;quot;http://localhost:61877/ChatHub&amp;quot;)&lt;/code&gt; line is correct. You can find the port number your &lt;code&gt;UnoChat.Service&lt;/code&gt; is set to use by right clicking on the &lt;code&gt;UnoChat.Service&lt;/code&gt; project, selecting &lt;code&gt;Properties&lt;/code&gt;, navigating to the &lt;code&gt;Debug&lt;/code&gt; tab and examining the &lt;code&gt;App URL&lt;/code&gt; setting in the &lt;code&gt;Web Server Settings&lt;/code&gt; section as shown here:
+&lt;img src="/Content/UnoChat/UnoChatServiceDebugSettings.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Service Debug Settings"/&gt;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h3 id="local-testing"&gt;Local Testing&lt;/h3&gt;
+&lt;p&gt;Now we can test our service with our client console. Right click on the &lt;code&gt;UnoChat.Service&lt;/code&gt; project and select &lt;code&gt;Debug-&amp;gt;Start New Instance&lt;/code&gt;. After a few seconds compilation a browser window should open and show something similar to this:&lt;/p&gt;
+&lt;img src="/Content/UnoChat/UnoChatServiceDebugBrowser.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Service Debug Browser"/&gt;
+&lt;p&gt;With that running, go back to Visual Studio and right click on the &lt;code&gt;UnoChat.Client.Console&lt;/code&gt; project and again select &lt;code&gt;Debug-&amp;gt;Start New Instance&lt;/code&gt;. A console window should appear asking who you are. Enter a name, hit return and wait for the app to tell you that it has connected. At this point you can send messages to the &lt;code&gt;UnoChat.Service&lt;/code&gt; which should be echoed back to the console window prefixed with your name as shown here:&lt;/p&gt;
+&lt;video class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" controls autoplay loop&gt;
+  &lt;source src="/Content/UnoChat/UnoChatClientConsoleDebug.mp4" type="video/mp4"/&gt;
+Your browser does not support the video tag
+&lt;/video&gt;
+&lt;p&gt;Just to show we're not just echoing these things locally, right click on the &lt;code&gt;UnoChat.Client.Console&lt;/code&gt; project again and start a second instance using &lt;code&gt;Debug-&amp;gt;Start New Instance&lt;/code&gt;. In this window enter a different name and wait for connection. Now when you send a message, you'll see it in both console windows as shown here:&lt;/p&gt;
+&lt;img src="/Content/UnoChat/UnoChatClientConsoleTwoInstances.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Client Console Two Instances"/&gt;
+&lt;p&gt;Pretty neat huh!&lt;/p&gt;
+&lt;h3 id="deployment"&gt;Deployment&lt;/h3&gt;
+&lt;p&gt;With our SignalR service running nicely, lets deploy it to Azure by right clicking on the &lt;code&gt;UnoChat.Service&lt;/code&gt; project and selecting &lt;code&gt;Publish...&lt;/code&gt;. I'm not going to cover this process in too much detail as it's &lt;a href="https://docs.microsoft.com/en-US/visualstudio/deployment/quickstart-deploy-to-azure?view=vs-2019"&gt;thoroughly documented elsewhere&lt;/a&gt; but, if you've not done this before, the following screen shots should help you through:&lt;/p&gt;
+&lt;table style="margin: auto; width:100%;"&gt;
+  &lt;tr&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/PublishUnoChatServiceToAzureI.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 1"/&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/PublishUnoChatServiceToAzureII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 2"/&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/PublishUnoChatServiceToAzureIII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 3"/&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/PublishUnoChatServiceToAzureIV.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 4"/&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/PublishUnoChatServiceToAzureV.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 5"/&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/PublishUnoChatServiceToAzureVI.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 6"/&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/PublishUnoChatServiceToAzureVII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 7"/&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/PublishUnoChatServiceToAzureVIII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 8"/&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/PublishUnoChatServiceToAzureIX.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 9"/&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;Still with me? Great.&lt;/p&gt;
+&lt;p&gt;Lets test our deployed SignalR service by updating the &lt;code&gt;.WithUrl(&amp;quot;http://localhost:61877/ChatHub&amp;quot;)&lt;/code&gt; line in our &lt;code&gt;UnoChat.Client.Console&lt;/code&gt; app to match the deployed service as shown in the last screenshot above; for me it's &lt;code&gt;.WithUrl(&amp;quot;https://unochatservice20200716114254.azurewebsites.net/ChatHub&amp;quot;)&lt;/code&gt;. Once done you should be able to start the &lt;code&gt;UnoChat.Client.Console&lt;/code&gt; app and send/receive messages to/from your deployed SignalR service.&lt;/p&gt;
+&lt;p&gt;Now for the magic...&lt;/p&gt;
+&lt;h2 id="uno-client"&gt;Uno Client&lt;/h2&gt;
+&lt;h3 id="creating-preparing-an-uno-project"&gt;Creating &amp;amp; Preparing An Uno Project&lt;/h3&gt;
+&lt;p&gt;Back in Visual Studio, right click the &lt;code&gt;UnoChat&lt;/code&gt; solution and &lt;code&gt;Add-&amp;gt;New Project...&lt;/code&gt;.  Select &lt;code&gt;Cross-Platform App (Uno Platform)&lt;/code&gt; from the &lt;code&gt;Add a new project&lt;/code&gt; dialog and click Next. Name it &lt;code&gt;UnoChat.Client&lt;/code&gt; on the &lt;code&gt;Configure your new project&lt;/code&gt; dialog and finally click &lt;code&gt;Create&lt;/code&gt;:&lt;/p&gt;
+&lt;table style="margin: auto; width:100%;"&gt;
+  &lt;tr&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/CreateNewCrossPlatformAppI.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Create New Cross Platform App - Step 1"/&gt;&lt;/td&gt;
+    &lt;td&gt;&lt;img src="/Content/UnoChat/CreateNewCrossPlatformAppII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Create New Cross Platform App - Step 2"/&gt;&lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;To help keep my solution organised, I like to group all the Uno &amp;quot;head&amp;quot; projects in a solution folder. This is shown below but don't feel obliged to follow suit:&lt;/p&gt;
+&lt;img src="/Content/UnoChat/UnoChatClientSolutionFolder.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Client Solution Folder"/&gt;
+&lt;p&gt;Now, the first thing to do here is to get our dependencies in order using the following steps:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Upgrade all &lt;code&gt;Uno.*&lt;/code&gt; packages to the latest non-prelease versions (at the time of writing this is &lt;code&gt;Uno.UI&lt;/code&gt; &amp;amp; &lt;code&gt;Uno.UI.RemoteControl&lt;/code&gt; to v2.4.4, &lt;code&gt;Uno.Wasm.Bootstrap&lt;/code&gt; &amp;amp; &lt;code&gt;Uno.Wasm.Bootstrap.DevServer&lt;/code&gt; to v1.3.0)&lt;/li&gt;
+&lt;li&gt;Install the &lt;a href="https://www.nuget.org/packages/Microsoft.AspNetCore.SignalR.Client/"&gt;&lt;code&gt;Microsoft.AspNetCore.SignalR.Client&lt;/code&gt; nuget package&lt;/a&gt; to all the head projects (UnoChat.Client.Droid, UnoChat.Client.iOS, etc, etc).&lt;/li&gt;
+&lt;li&gt;Install the &lt;a href="https://www.nuget.org/packages/MVx.Observable/"&gt;&lt;code&gt;MVx.Observable&lt;/code&gt; nuget package&lt;/a&gt; to all the head projects (UnoChat.Client.Droid, UnoChat.Client.iOS, etc, etc).&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;Quick tip: Use the &lt;code&gt;Manage NuGet Packages for Solution...&lt;/code&gt; option from the solution's right-click menu to get this done much faster than modifying individual projects.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Lastly use the &lt;code&gt;Properties&lt;/code&gt; window to change the &lt;code&gt;Root namespace&lt;/code&gt; value for the &lt;code&gt;UnoChat.Client.Shared&lt;/code&gt; project from &lt;code&gt;UnoChat.Client.Shared&lt;/code&gt; to just &lt;code&gt;UnoChat.Client&lt;/code&gt; (I'm kind hoping this change makes it into the Uno templates at some point).&lt;/p&gt;
+&lt;h3 id="mvx.observable"&gt;MVx.Observable&lt;/h3&gt;
+&lt;p&gt;I like to implement UI/UX flows using behavioural, declarative and functional paradigms. I wrote &lt;code&gt;MVx.Observable&lt;/code&gt; to be a &amp;quot;(mostly) unopinionated, light-weight alternative to ReactiveUI provided as a library &lt;em&gt;not a framework&lt;/em&gt;&amp;quot; and have written about it extensively &lt;a href="https://ian.bebbs.co.uk/posts/ReactiveBehaviors"&gt;here&lt;/a&gt; and &lt;a href="https://ian.bebbs.co.uk/posts/Uno#four-important-words"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;You don't &lt;em&gt;need&lt;/em&gt; to use &lt;code&gt;MVx.Observable&lt;/code&gt; to implement the functionality present in this project but I'd encourage you to at least give it a try as, like ReactiveUI, these patterns really can help manage UI state, ensure UX flows are testable and keep discrete behaviours... well, discrete.&lt;/p&gt;
+&lt;p&gt;&lt;code&gt;MVx.Observable&lt;/code&gt; uses &lt;a href="https://www.nuget.org/packages/System.Reactive/"&gt;&lt;code&gt;System.Reactive&lt;/code&gt;&lt;/a&gt; to embody it's behaviours in a reactive manner and, as these behaviours interact with the UI, we need to use &lt;code&gt;IScheduler&lt;/code&gt; instances to ensure we update the UI from the correct thread. This is somewhat complicated by the fact that we're writing a cross-platform app which uses different &lt;code&gt;IScheduler&lt;/code&gt; implementations to marshal updates to the appropriate platform threads. Fortunately, this complexity is easily tamed through the use of &lt;a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/partial-classes-and-methods"&gt;Partial Classes and Methods&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;In the &lt;code&gt;UnoChat.Client.Shared&lt;/code&gt; project, add a &lt;code&gt;Schedulers.cs&lt;/code&gt; file with the following content:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;using System;
+using System.Reactive.Concurrency;
+using System.Threading;
+
+namespace UnoChat.Client
+{
+    public static partial class Schedulers
+    {
+        static partial void OverrideDispatchScheduler(ref IScheduler scheduler);
+
+        private static readonly Lazy&amp;lt;IScheduler&amp;gt; DispatcherScheduler = new Lazy&amp;lt;IScheduler&amp;gt;(
+            () =&amp;gt;
+            {
+                IScheduler scheduler = null;
+
+                OverrideDispatchScheduler(ref scheduler);
+
+                return scheduler == null
+                    ? new SynchronizationContextScheduler(SynchronizationContext.Current)
+                    : scheduler;
+            }
+        );
+
+        public static IScheduler Dispatcher =&amp;gt; DispatcherScheduler.Value;
+
+        public static IScheduler Default =&amp;gt; Scheduler.Default;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Then, in the UWP head, override the &lt;code&gt;OverrideDispatchScheduler&lt;/code&gt; method to provide the correct scheduler for the platform by adding a &lt;code&gt;Schedulers.cs&lt;/code&gt; file to the head project with the following content:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;using System.Reactive.Concurrency;
+using Windows.UI.Xaml;
+
+namespace UnoChat.Client
+{
+    public static partial class Schedulers
+    {
+        static partial void OverrideDispatchScheduler(ref IScheduler scheduler)
+        {
+            scheduler = new CoreDispatcherScheduler(Window.Current.Dispatcher);
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now we can safely use the scheduler in our solution knowing that we're able to easily marshal operations to and from the UI thread.&lt;/p&gt;
+&lt;h3 id="viewmodel"&gt;ViewModel&lt;/h3&gt;
+&lt;p&gt;Leveraging &lt;code&gt;MVx.Observable&lt;/code&gt; we're now going to create a &lt;a href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel"&gt;ViewModel&lt;/a&gt; to manage all the interaction with SignalR ensuring we don't need have any logic in the view's code-behind.&lt;/p&gt;
+&lt;p&gt;Create a new &lt;code&gt;ViewModel&lt;/code&gt; class in the &lt;code&gt;UnoChat.Client.Shared&lt;/code&gt; project containing the following code:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;using Microsoft.AspNetCore.SignalR.Client;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Windows.Input;
+using Uno.Extensions;
+
+namespace UnoChat.Client
+{
+    public class ViewModel : INotifyPropertyChanged
+    {
+        private readonly MVx.Observable.Property&amp;lt;string&amp;gt; _name;
+        private readonly MVx.Observable.Property&amp;lt;HubConnectionState&amp;gt; _state;
+        private readonly MVx.Observable.Command _connect;
+
+        private readonly MVx.Observable.Property&amp;lt;string&amp;gt; _lastMessageReceived;
+        private readonly MVx.Observable.Property&amp;lt;IEnumerable&amp;lt;string&amp;gt;&amp;gt; _allMessages;
+        private readonly MVx.Observable.Property&amp;lt;string&amp;gt; _messageToSend;
+        private readonly MVx.Observable.Property&amp;lt;bool&amp;gt; _messageToSendIsEnabled;
+        private readonly MVx.Observable.Command _sendMessage;
+
+        private readonly HubConnection _connection;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private static string DefaultName =&amp;gt; typeof(ViewModel)
+            .Assembly
+            .GetName()
+            .Name
+            .Split('.')
+            .Last();
+
+        public ViewModel()
+        {
+            _name = new MVx.Observable.Property&amp;lt;string&amp;gt;(DefaultName, nameof(Name), args =&amp;gt; PropertyChanged?.Invoke(this, args));
+            _state = new MVx.Observable.Property&amp;lt;HubConnectionState&amp;gt;(HubConnectionState.Disconnected, nameof(State), args =&amp;gt; PropertyChanged?.Invoke(this, args));
+            _connect = new MVx.Observable.Command();
+            _lastMessageReceived = new MVx.Observable.Property&amp;lt;string&amp;gt;(nameof(LastMessageReceived), args =&amp;gt; PropertyChanged?.Invoke(this, args));
+            _allMessages = new MVx.Observable.Property&amp;lt;IEnumerable&amp;lt;string&amp;gt;&amp;gt;(Enumerable.Empty&amp;lt;string&amp;gt;(), nameof(AllMessages), args =&amp;gt; PropertyChanged?.Invoke(this, args));
+            _messageToSend = new MVx.Observable.Property&amp;lt;string&amp;gt;(nameof(MessageToSend), args =&amp;gt; PropertyChanged?.Invoke(this, args));
+            _messageToSendIsEnabled = new MVx.Observable.Property&amp;lt;bool&amp;gt;(false, nameof(MessageToSendIsEnabled), args =&amp;gt; PropertyChanged?.Invoke(this, args));
+            _sendMessage = new MVx.Observable.Command();
+
+            _connection = new HubConnectionBuilder()
+                .WithUrl(&amp;quot;https://unochatservice20200716114254.azurewebsites.net/ChatHub&amp;quot;)
+                .WithAutomaticReconnect()
+                .Build();
+        }
+
+        private IDisposable ShouldEnableConnectWhenNotConnected()
+        {
+            return _state
+                .Select(state =&amp;gt; state == HubConnectionState.Disconnected)
+                .ObserveOn(Schedulers.Dispatcher)
+                .Subscribe(_connect);
+        }
+
+        private IDisposable ShouldEnableMessageToSendWhenConnected()
+        {
+            return _state
+                .Select(state =&amp;gt; state == HubConnectionState.Connected)
+                .Subscribe(_messageToSendIsEnabled);
+        }
+
+        private IDisposable ShouldConnectToServiceWhenConnectInvoked()
+        {
+            return _connect
+                .SelectMany(_ =&amp;gt; Observable
+                    .StartAsync(async () =&amp;gt;
+                    {
+                        await _connection.StartAsync();
+                        return _connection.State;
+                    }))
+                .ObserveOn(Schedulers.Dispatcher)
+                .Subscribe(_state);
+        }
+
+        private IDisposable ShouldDisconnectFromServiceWhenDisposed()
+        {
+            return Disposable.Create(() =&amp;gt; _ = _connection.StopAsync());
+        }
+
+        private IDisposable ShouldListenForNewMessagesFromTheService()
+        {
+            return Observable
+                .Create&amp;lt;string&amp;gt;(
+                    observer =&amp;gt;
+                    {
+                        Action&amp;lt;string, string&amp;gt; onReceiveMessage =
+                            (user, message) =&amp;gt; observer.OnNext($&amp;quot;{user}: {message}&amp;quot;);
+
+                        return _connection.On(&amp;quot;ReceiveMessage&amp;quot;, onReceiveMessage);
+                    })
+                .ObserveOn(Schedulers.Dispatcher)
+                .Subscribe(_lastMessageReceived);
+        }
+
+        private IDisposable ShouldAddNewMessagesToAllMessages()
+        {
+            return _lastMessageReceived
+                .Where(message =&amp;gt; !string.IsNullOrWhiteSpace(message))
+                .WithLatestFrom(_allMessages, (message, messages) =&amp;gt; messages.Concat(message).ToArray())
+                .Subscribe(_allMessages);
+        }
+
+        private IDisposable ShouldEnableSendMessageWhenConnectedAndBothNameAndMessageToSendAreNotEmpty()
+        {
+            return Observable
+                .CombineLatest(_state, _name, _messageToSend, (state, name, message) =&amp;gt; state == HubConnectionState.Connected &amp;amp;&amp;amp; !(string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(message)))
+                .Subscribe(_sendMessage);
+        }
+
+        private IDisposable ShouldSendMessageToServiceThenClearSentMessage(IObservable&amp;lt;object&amp;gt; messageToSendBoxReturn)
+        {
+            var namedMessage = Observable
+                .CombineLatest(_name, _messageToSend, (name, message) =&amp;gt; (Name: name, Message: message));
+
+            return Observable.Merge(_sendMessage, messageToSendBoxReturn)
+                .WithLatestFrom(namedMessage, (_, tuple) =&amp;gt; tuple)
+                .Where(tuple =&amp;gt; !string.IsNullOrEmpty(tuple.Message))
+                .SelectMany(tuple =&amp;gt; Observable
+                    .StartAsync(() =&amp;gt; _connection.InvokeAsync(&amp;quot;SendMessage&amp;quot;, tuple.Name, tuple.Message)))
+                .Select(_ =&amp;gt; string.Empty)
+                .ObserveOn(Schedulers.Dispatcher)
+                .Subscribe(_messageToSend);
+        }
+
+        public IDisposable Activate(IObservable&amp;lt;object&amp;gt; messageToSendBoxReturn)
+        {
+            return new CompositeDisposable(
+                ShouldEnableConnectWhenNotConnected(),
+                ShouldEnableMessageToSendWhenConnected(),
+                ShouldConnectToServiceWhenConnectInvoked(),
+                ShouldDisconnectFromServiceWhenDisposed(),
+                ShouldListenForNewMessagesFromTheService(),
+                ShouldAddNewMessagesToAllMessages(),
+                ShouldEnableSendMessageWhenConnectedAndBothNameAndMessageToSendAreNotEmpty(),
+                ShouldSendMessageToServiceThenClearSentMessage(messageToSendBoxReturn)
+            );
+        }
+
+        public string Name
+        {
+            get =&amp;gt; _name.Get();
+            set =&amp;gt; _name.Set(value);
+        }
+
+        public HubConnectionState State =&amp;gt; _state.Get();
+
+        public string LastMessageReceived =&amp;gt; _lastMessageReceived.Get();
+
+        public IEnumerable&amp;lt;string&amp;gt; AllMessages =&amp;gt; _allMessages.Get();
+
+        public string MessageToSend
+        {
+            get =&amp;gt; _messageToSend.Get();
+            set =&amp;gt; _messageToSend.Set(value);
+        }
+
+        public bool MessageToSendIsEnabled =&amp;gt; _messageToSendIsEnabled.Get();
+
+        public ICommand Connect =&amp;gt; _connect;
+
+        public ICommand SendMessage =&amp;gt; _sendMessage;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;While this code is fairly lengthy it includes a large number of behaviours such as asynchronous connection management and message handling for SignalR along with enabling and disabling controls based on the current state of the UI and/or connection. All these behaviours are separated into discrete methods allowing them to be easily modified, supplemented or removed by simply changing, adding or removing an appropriated named &amp;quot;ShouldXXXX&amp;quot; method.&lt;/p&gt;
+&lt;h3 id="view"&gt;View&lt;/h3&gt;
+&lt;p&gt;With the ViewModel in place and taking care of all the fundamental logic for the application, we now need to use it from the view. In the code behind for &lt;code&gt;MainView.cs&lt;/code&gt; add the following code:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;using System;
+using System.Reactive.Linq;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Navigation;
+
+// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&amp;amp;clcid=0x409
+
+namespace UnoChat.Client
+{
+    /// &amp;lt;summary&amp;gt;
+    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// &amp;lt;/summary&amp;gt;
+    public sealed partial class MainPage : Page
+    {
+        private readonly ViewModel _viewModel;
+        private IDisposable _behaviours;
+
+        public MainPage()
+        {
+            this.InitializeComponent();
+
+            _viewModel = new ViewModel();
+            DataContext = _viewModel;
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            var messageToSendReturn = Observable
+                .FromEvent&amp;lt;KeyEventHandler, KeyRoutedEventArgs&amp;gt;(
+                    handler =&amp;gt; (s, k) =&amp;gt; handler(k),
+                    handler =&amp;gt; MessageToSendTextBox.KeyUp += handler,
+                    handler =&amp;gt; MessageToSendTextBox.KeyUp -= handler)
+                .Where(k =&amp;gt; k.Key == Windows.System.VirtualKey.Enter);
+
+            _behaviours = _viewModel.Activate(messageToSendReturn);
+        }
+
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            base.OnNavigatingFrom(e);
+
+            if (_behaviours != null)
+            {
+                _behaviours.Dispose();
+                _behaviours = null;
+            }
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In this code we instantiate the ViewModel, set it as the View's &lt;code&gt;DataContext&lt;/code&gt; and call it's &lt;code&gt;Activate&lt;/code&gt; method when the user navigates to this view. Note how we pass an observable to the &lt;code&gt;Activate&lt;/code&gt; method which will emit a value when the user hits return on the &lt;code&gt;MessageToSendTextBox&lt;/code&gt;. This allows us to receive feedback from the UI without compromising View/ViewModel segregation.&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;Activate&lt;/code&gt; method returns an &lt;code&gt;IDisposable&lt;/code&gt; which, when disposed, will tear down all the associated behaviours, unsubscribe from events and release resources. Accordingly, we dispose of this &lt;code&gt;IDisposable&lt;/code&gt; when the user navigates away from this view, thereby correctly managing the lifetime of the ViewModel's resources.&lt;/p&gt;
+&lt;p&gt;Finally, lets implement our UI by editing the &lt;code&gt;MainView.xaml&lt;/code&gt; to the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-xml"&gt;&amp;lt;Page
+    x:Class=&amp;quot;UnoChat.Client.MainPage&amp;quot;
+    xmlns=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&amp;quot;
+    xmlns:x=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml&amp;quot;
+    xmlns:local=&amp;quot;using:UnoChat.Client&amp;quot;
+    xmlns:d=&amp;quot;http://schemas.microsoft.com/expression/blend/2008&amp;quot;
+    xmlns:mc=&amp;quot;http://schemas.openxmlformats.org/markup-compatibility/2006&amp;quot;
+    mc:Ignorable=&amp;quot;d&amp;quot;&amp;gt;
+
+    &amp;lt;Grid Background=&amp;quot;{ThemeResource ApplicationPageBackgroundThemeBrush}&amp;quot;&amp;gt;
+        &amp;lt;Grid.RowDefinitions&amp;gt;
+            &amp;lt;RowDefinition Height=&amp;quot;Auto&amp;quot;/&amp;gt;
+            &amp;lt;RowDefinition Height=&amp;quot;*&amp;quot;/&amp;gt;
+            &amp;lt;RowDefinition Height=&amp;quot;Auto&amp;quot;/&amp;gt;
+        &amp;lt;/Grid.RowDefinitions&amp;gt;
+        &amp;lt;Grid.ColumnDefinitions&amp;gt;
+            &amp;lt;ColumnDefinition Width=&amp;quot;Auto&amp;quot;/&amp;gt;
+            &amp;lt;ColumnDefinition Width=&amp;quot;*&amp;quot;/&amp;gt;
+            &amp;lt;ColumnDefinition Width=&amp;quot;Auto&amp;quot;/&amp;gt;
+        &amp;lt;/Grid.ColumnDefinitions&amp;gt;
+        &amp;lt;TextBlock Text=&amp;quot;Name:&amp;quot; Style=&amp;quot;{StaticResource BaseTextBlockStyle}&amp;quot; Grid.Row=&amp;quot;0&amp;quot; Grid.Column=&amp;quot;0&amp;quot; Margin=&amp;quot;4&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+        &amp;lt;TextBox Text=&amp;quot;{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}&amp;quot; Grid.Row=&amp;quot;0&amp;quot; Grid.Column=&amp;quot;1&amp;quot; Margin=&amp;quot;4&amp;quot;/&amp;gt;
+        &amp;lt;Button Command=&amp;quot;{Binding Path=Connect}&amp;quot; Content=&amp;quot;Connect&amp;quot; Grid.Row=&amp;quot;0&amp;quot; Grid.Column=&amp;quot;2&amp;quot; Margin=&amp;quot;4&amp;quot; Padding=&amp;quot;16,4&amp;quot; HorizontalAlignment=&amp;quot;Stretch&amp;quot;/&amp;gt;
+        &amp;lt;ItemsControl ItemsSource=&amp;quot;{Binding Path=AllMessages}&amp;quot; Grid.Row=&amp;quot;1&amp;quot; Grid.ColumnSpan=&amp;quot;3&amp;quot; Margin=&amp;quot;4&amp;quot; /&amp;gt;
+        &amp;lt;TextBlock Text=&amp;quot;Message:&amp;quot; Style=&amp;quot;{StaticResource BaseTextBlockStyle}&amp;quot; Grid.Row=&amp;quot;2&amp;quot; Grid.Column=&amp;quot;0&amp;quot; Margin=&amp;quot;4&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot;/&amp;gt;
+        &amp;lt;TextBox x:Name=&amp;quot;MessageToSendTextBox&amp;quot; Text=&amp;quot;{Binding Path=MessageToSend, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}&amp;quot; IsEnabled=&amp;quot;{Binding Path=MessageToSendIsEnabled}&amp;quot; Grid.Row=&amp;quot;2&amp;quot; Grid.Column=&amp;quot;1&amp;quot; Margin=&amp;quot;4&amp;quot;/&amp;gt;
+        &amp;lt;Button Command=&amp;quot;{Binding Path=SendMessage}&amp;quot; Content=&amp;quot;Send&amp;quot; Grid.Row=&amp;quot;2&amp;quot; Grid.Column=&amp;quot;2&amp;quot; Margin=&amp;quot;4&amp;quot; Padding=&amp;quot;16,4&amp;quot; HorizontalAlignment=&amp;quot;Stretch&amp;quot;/&amp;gt;
+    &amp;lt;/Grid&amp;gt;
+&amp;lt;/Page&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And that's that. Let's give it a go!&lt;/p&gt;
+&lt;h3 id="testing"&gt;Testing&lt;/h3&gt;
+&lt;p&gt;Set the &lt;code&gt;UnoChat.Client.UWP&lt;/code&gt; project as the &amp;quot;Startup Project&amp;quot; and hit F5. After a short compilation cycle you should see the following:&lt;/p&gt;
+&lt;img src="/Content/UnoChat/UnoChatClientUWPRunningI.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Client UWP Running - 1"/&gt;
+&lt;p&gt;Click &amp;quot;Connect&amp;quot; and, after a short pause you should see the &amp;quot;Message&amp;quot; textbox become enabled. Enter some text in the &amp;quot;Message&amp;quot; textbox and click the &amp;quot;Send&amp;quot; button (or hit enter) and the message should be sent to SignalR. SignalR will then publish this message to all connected clients which, given we are one of the connected clients, will result in the message being sent back to us and being displayed in ItemsControl in the middle of the window as shown below:&lt;/p&gt;
+&lt;img src="/Content/UnoChat/UnoChatClientUWPRunningII.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Client UWP Running - 2"/&gt;
+&lt;p&gt;But having one client on one platform is no fun!&lt;/p&gt;
+&lt;p&gt;Lets kick off the Android head project by right clicking on it and selection &lt;code&gt;Debug-&amp;gt;Start New Instance&lt;/code&gt;. After another short compilation an Android Emulator should started and our app should be deployed to it then run. Clicking &amp;quot;Connect&amp;quot; then (after connection is complete) entering a message in the &amp;quot;Message&amp;quot; text box and hitting &amp;quot;Send&amp;quot; should result in the following:&lt;/p&gt;
+&lt;img src="/Content/UnoChat/UnoChatRunningOnUwpAndAndroid.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Running On Uwp And Android"/&gt;
+&lt;p&gt;Nice, two platforms for the price on one!&lt;/p&gt;
+&lt;p&gt;Now (and you'll need to be &lt;a href="https://docs.microsoft.com/en-us/xamarin/ios/get-started/installation/windows/connecting-to-mac/"&gt;paired to a Mac for this&lt;/a&gt;), right click the iOS head project and select &lt;code&gt;Debug-&amp;gt;Start New Instance&lt;/code&gt;. Once the iOS device emulator has started, follow the same steps as with with other head projects and you'll see the following:&lt;/p&gt;
+&lt;img src="/Content/UnoChat/UnoChatRunningOnUwpAndroidAndiOS.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Running On Uwp, Android and iOS"/&gt;
+&lt;p&gt;That's three for three.&lt;/p&gt;
+&lt;p&gt;Now, right click on the WASM head and select &lt;code&gt;Debug-&amp;gt;Start New Instance&lt;/code&gt;. After a short compilation you'll see a browser window appear and.... get stuck at the splash screen.&lt;/p&gt;
+&lt;p&gt;Booo! So close...&lt;/p&gt;
+&lt;h3 id="getting-wasm-linked"&gt;Getting WASM Linked&lt;/h3&gt;
+&lt;p&gt;Opening the browser's &amp;quot;Developer Tools&amp;quot; with F12 we see this on the Console:&lt;/p&gt;
+&lt;img src="/Content/UnoChat/UnoChatWasmLinkerIssues.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Wasm Link Issues"/&gt;
+&lt;p&gt;Well, we've seen these &amp;quot;A suitable constructor ... could not be found&amp;quot; exceptions &lt;a href="https://ian.bebbs.co.uk/posts/UnoWithSwagger#this-missing-links"&gt;before&lt;/a&gt;. They're due to the assemblies containing the associated types being omitted by the Mono linker. By looking up which assemblies the various types belong to we're able to explicitly instruct the linker to include the assemblies by modifying the &lt;code&gt;LinkerConfig.xml&lt;/code&gt; file in the WASM head project.&lt;/p&gt;
+&lt;p&gt;After a few &amp;quot;start -&amp;gt; fail -&amp;gt; find type -&amp;gt; amend config&amp;quot; iterations I ended up with the following in my &lt;code&gt;LinkerConfig.xaml&lt;/code&gt; file:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-xml"&gt;&amp;lt;linker&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;UnoChat.Client.Wasm&amp;quot; /&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;Uno.UI&amp;quot; /&amp;gt;
+
+  &amp;lt;assembly fullname=&amp;quot;Microsoft.AspnetCore.Http.Connections.Client&amp;quot;/&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;Microsoft.Extensions.Options&amp;quot;/&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;Microsoft.AspNetCore.SignalR.Client&amp;quot;/&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;Microsoft.AspNetCore.SignalR.Client.Core&amp;quot;/&amp;gt;
+  &amp;lt;assembly fullname=&amp;quot;Microsoft.AspNetCore.SignalR.Protocols.Json&amp;quot;/&amp;gt;
+
+  &amp;lt;assembly fullname=&amp;quot;System.Core&amp;quot;&amp;gt;
+	&amp;lt;!-- This is required by JSon.NET and any expression.Compile caller --&amp;gt;
+	  &amp;lt;type fullname=&amp;quot;System.Linq.Expressions*&amp;quot; /&amp;gt;
+  &amp;lt;/assembly&amp;gt;
+&amp;lt;/linker&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And, with this in place starting the WASM head resulted in:&lt;/p&gt;
+&lt;img src="/Content/UnoChat/UnoChatWasmRunning.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Wasm Running"/&gt;
+&lt;p&gt;ooOOoo... exciting!! Could it be??&lt;/p&gt;
+&lt;video class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" controls autoplay loop&gt;
+  &lt;source src="/Content/UnoChat/UnoChatAllWingsCheckin.mp4" type="video/mp4"/&gt;
+Your browser does not support the video tag
+&lt;/video&gt;
+&lt;p&gt;Yes, yes it could.&lt;/p&gt;
+&lt;p&gt;Here we have &lt;code&gt;UnoChat.Client.Console&lt;/code&gt; (Red Leader), &lt;code&gt;UnoChat.Client.UWP&lt;/code&gt; (Red 3), &lt;code&gt;UnoChat.Client.Wasm&lt;/code&gt; (Red 6), &lt;code&gt;UnoChat.Client.Droid&lt;/code&gt; (Red 5) and &lt;code&gt;UnoChat.Client.iOS&lt;/code&gt; (Red Buttons) all connected to the SignalR service and all receiving real-time updates.&lt;/p&gt;
+&lt;p&gt;Nice.&lt;/p&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;And there we go. In about an hour (hey I stopped for lunch) we have an app which is capable of receiving real-time updates and which runs on pretty much every OS - either natively or through the browser. Moreover, the code to deliver this somewhat epic feat is short, concise, maintainable and - most importantly - 99% shared amongst the various project heads.&lt;/p&gt;
+&lt;p&gt;The Uno platform really has matured amazingly well since I first blogged about it as part of last December's &lt;a href="https://ian.bebbs.co.uk/posts/Uno"&gt;Third Annual C# Advent&lt;/a&gt;. Back then I found that it worked... mostly... but not all the head projects functioned correctly and it required a whole host of kludges to get them all running from a shared codebase. Just over seven months later and the change is incredible: You now have an expectation of things working &amp;quot;out-of-the-box&amp;quot; and any minor difference/issue on a given platform to be an easy work around.&lt;/p&gt;
+&lt;p&gt;I can't wait to see what the Uno Platform has in store for us at &lt;a href="https://platform.uno/blog/unoconf-2020-virtual-free-aug-12-2020-save-the-date/"&gt;UnoConf 2020&lt;/a&gt; (personally I'm hoping for Uno on Linux and - most importantly - Raspberry Pis). Hope to see you all there on August 12th!&lt;/p&gt;
+&lt;h2 id="lastly"&gt;Lastly...&lt;/h2&gt;
+&lt;p&gt;If you're interested in using the Uno Platform to deliver cross-platform apps or have an upcoming project for which you'd like evaluate Uno Platform's fit, then please feel free to drop me a line to discuss your project/ideas using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;. As a freelance software developer and remote contractor I'm always interested in hearing from potential new clients or about potential new collaborations.&lt;/p&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>Uno WebAssembly Containerization</title>
 			<link>http://ian.bebbs.co.uk/posts/UnoWasmDocker</link>
@@ -3955,112 +4549,6 @@ Console.WriteLine(response);
 &lt;li&gt;Returning &lt;em&gt;something&lt;/em&gt; rather than &lt;em&gt;nothing&lt;/em&gt; facilitates the adoption of a more declarative programming style.&lt;/li&gt;
 &lt;/ol&gt;
 &lt;p&gt;So there we go. A safe, obvious, easy and, most-importantly, low-cost means of dealing with the &amp;quot;Billion-Dollar Mistake&amp;quot;. Give it a stab and see what you think. As shown above, there's a very low barrier to entry so there's very little to lose.&lt;/p&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>Fluent Namespacing</title>
-			<link>http://ian.bebbs.co.uk/posts/FluentNamespacing</link>
-			<description>&lt;p&gt;&lt;em&gt;So, it's been a while since I've blogged. Mostly this has been due to other commitments (family, friends, side projects, etc), working more hours contracting than I would ideally like and generally not having any dead-time (such as when I used to commute). Since my last blog post (over a year ago!!) I've been maintaining an ever increasing list of things I'd like to blog about but haven't found the time. Given it's a new year, I've decided to pick a couple of the more challenging/contentious blog ideas and endeavour to get them written. This is the first and, while not necessarily the most contentious, might take some getting your head around. You have been warned...&lt;/em&gt;&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/FluentNamespacing</guid>
-			<pubDate>Thu, 09 May 2019 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;p&gt;&lt;em&gt;So, it's been a while since I've blogged. Mostly this has been due to other commitments (family, friends, side projects, etc), working more hours contracting than I would ideally like and generally not having any dead-time (such as when I used to commute). Since my last blog post (over a year ago!!) I've been maintaining an ever increasing list of things I'd like to blog about but haven't found the time. Given it's a new year, I've decided to pick a couple of the more challenging/contentious blog ideas and endeavour to get them written. This is the first and, while not necessarily the most contentious, might take some getting your head around. You have been warned...&lt;/em&gt;&lt;/p&gt;
-&lt;p&gt;There is a convention at the heart of enterprise development and many modern development frameworks which seems to have been blindly adopted by the development community at large. I hope to challenge this convention as I believe changing it can provide many useful benefits in day to day development.&lt;/p&gt;
-&lt;p&gt;The convention I'm referring to is the tendency to group classes by &lt;em&gt;functional pattern&lt;/em&gt; rather than &lt;em&gt;functional domain&lt;/em&gt;. What does this mean? Well, to illustrate, lets start a new webapi project:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;dotnet new webapi
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;You will end up with a folder structure similar to this:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;$:.
-│   appsettings.Development.json
-│   appsettings.json
-│   FluentNamespacing.csproj
-│   Program.cs
-│   Startup.cs
-│   
-├───Controllers
-│       ValuesController.cs
-│       
-└───Properties
-        launchSettings.json
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;There, you see it don't you? No? Well, that just shows how ingrained this convention is.&lt;/p&gt;
-&lt;p&gt;I'm referring to the &lt;code&gt;ValuesController&lt;/code&gt; class residing a &lt;code&gt;Controllers&lt;/code&gt; folder. What's the problem with that, you ask? Well, lets develop this project a little further and revisit.&lt;/p&gt;
-&lt;p&gt;Lets say, after a little &lt;em&gt;conventional&lt;/em&gt; development, we're now here:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;$:.
-│   appsettings.Development.json
-│   appsettings.json
-│   FluentNamespacing.csproj
-│   Program.cs
-│   Startup.cs
-│               
-├───Controllers
-│       PersonController.cs
-│       
-├───Factories
-│       PersonFactory.cs
-│       
-├───Models
-│       PersonModel.cs
-│               
-├───Properties
-│       launchSettings.json
-│       
-└───Repositories
-        PersonRepository.cs
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Our abstract &lt;code&gt;ValuesController&lt;/code&gt; has become a &lt;code&gt;PersonController&lt;/code&gt; as we want to serve instances of the &lt;code&gt;PersonModel&lt;/code&gt;. But wait, where is the &lt;code&gt;PersonModel&lt;/code&gt; class? Ah, of course, in the &lt;code&gt;Models&lt;/code&gt; folder. Ok, we'll add &lt;code&gt;using FluentNamespacing.Models&lt;/code&gt; to the top of the &lt;code&gt;PersonController.cs&lt;/code&gt; and continue.&lt;/p&gt;
-&lt;p&gt;Now as is common practice, we might want to abstract our datastore via the &lt;a href="https://martinfowler.com/eaaCatalog/repository.html"&gt;repository pattern&lt;/a&gt; so we dutifully create a &lt;code&gt;Repositories&lt;/code&gt; folder within which we add a &lt;code&gt;PersonRepository&lt;/code&gt; class. We need to use this in the &lt;code&gt;PersonController&lt;/code&gt; so we add another using statement to the file (&lt;code&gt;using FluentNamespacing.Repositories&lt;/code&gt;) bringing the &lt;code&gt;PersonRepository&lt;/code&gt; into scope.&lt;/p&gt;
-&lt;p&gt;Finally, when a user uses a POST call to create a new user, the &lt;code&gt;PersonController&lt;/code&gt; should again follow common practise and use the &lt;a href="https://en.wikipedia.org/wiki/Factory_method_pattern"&gt;factory pattern&lt;/a&gt; to create a new &lt;code&gt;PersonModel&lt;/code&gt; which can then be saved via the repository. Again we go round the loop of creating a directory (&lt;code&gt;Factories&lt;/code&gt;), adding a class to it (&lt;code&gt;PersonFactory&lt;/code&gt;) and adding a using to the &lt;code&gt;PersonController.cs&lt;/code&gt; file (&lt;code&gt;using FluentNamespacing.Factories&lt;/code&gt;). Phew.&lt;/p&gt;
-&lt;p&gt;Now look at our project. We have almost as many folders as we do classes and the classes related to the &amp;quot;Person&amp;quot; entity are spread across the project. Furthermore, we've had to prefix each of our classes with the  entity (i.e. &lt;code&gt;Person&lt;/code&gt;) it relates to in order to differentiate it from similar classes for other entities (i.e. &lt;code&gt;Job&lt;/code&gt;, &lt;code&gt;Role&lt;/code&gt;, &lt;code&gt;Group&lt;/code&gt;). That's a lot of typing and/or mouse navigation to get basic functionality in place.&lt;/p&gt;
-&lt;p&gt;Now consider this:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;D:.
-│   appsettings.Development.json
-│   appsettings.json
-│   FluentlyNamespaced.csproj
-│   Program.cs
-│   Startup.cs
-│               
-├───Person
-│       Controller.cs
-│       Factory.cs
-│       Model.cs
-│       Repository.cs
-│       
-└───Properties
-        launchSettings.json
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Here we have exactly the same functionality but grouped by functional domain not functional pattern; i.e. all classes related to a Person are in the same folder. This has resulted in far less structural noise, simplified class names and no need for additional using statements to be added to any of the classes.&lt;/p&gt;
-&lt;h3 id="fluent-namespacing"&gt;Fluent Namespacing&lt;/h3&gt;
-&lt;p&gt;I have been applying this approach in medium to large enterprise code-bases for some time now and find it provides simplified code, less structural overhead, easier navigation, faster comprehension and improved code architecture. I refer to it as &amp;quot;Fluent Namespacing&amp;quot; because, when you start referring to your classes via the [partial] namespace rather than long class names (requiring additional &lt;code&gt;using&lt;/code&gt; statements), the code tends to read like a &lt;a href="https://martinfowler.com/bliki/FluentInterface.html"&gt;fluent interface&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;I believe this approach provides numerous additional benefits such as:&lt;/p&gt;
-&lt;h4 id="propinquity"&gt;1. Propinquity&lt;/h4&gt;
-&lt;p&gt;Want the repository for your entity? It's right along side it. As are all the other classes related to that entity. This means you can very quickly skip between these classes without needing to navigate the breadth of your project looking for a folder for the appropriate functional pattern.&lt;/p&gt;
-&lt;h4 id="scope"&gt;2. Scope&lt;/h4&gt;
-&lt;p&gt;When you write code which involves multiple entities, these entities need to be brought into scope. Rather than adding using statements, I have found that utilising the entity's namespace in a fluent fashion gives very elegant results.
-For example, say we have introduce a &lt;code&gt;Role&lt;/code&gt; entity and the controller for this entity needs to be able to add &lt;code&gt;Person&lt;/code&gt; instances to a role. A (naïve) implementation of this class might look something akin to:&lt;/p&gt;
-&lt;script src="https://gist.github.com/ibebbs/117531fb4a3a3556fd3788d45ffaaa57.js"&gt;&lt;/script&gt;
-&lt;p&gt;Note the lack of additional using statements and how bringing classes related to other entities into scope requires only a partial namespace which then reads like natural language (i.e. Person.Repository / Person.Model).&lt;/p&gt;
-&lt;h4 id="coupling"&gt;3. Coupling&lt;/h4&gt;
-&lt;p&gt;In general, it is desirable for classes in your project to be loosely coupled. Fluent namespacing can visually illustrate when a class might be tightly-coupled by requiring long namespace traversals. For example:&lt;/p&gt;
-&lt;script src="https://gist.github.com/ibebbs/52ecb2051da6812d2a023cfc76cb0331.js"&gt;&lt;/script&gt;
-&lt;p&gt;Should the Group controller really be using the Person entity's data source (&lt;code&gt;Person.Data.Source&lt;/code&gt;) and mapping provider (&lt;code&gt;Person.Mapping.Provider&lt;/code&gt;) to fetch a &lt;code&gt;Person.Model&lt;/code&gt; instances or would they be better using the Person entity's repository (&lt;code&gt;Person.Repository&lt;/code&gt;)?&lt;/p&gt;
-&lt;h3 id="other-considerations"&gt;Other considerations&lt;/h3&gt;
-&lt;p&gt;There are a couple of downsides to this approach such as:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;Refactoring&lt;/p&gt;
-&lt;p&gt;When you use Visual Studio's built in refactoring methods, it will always endeavour add a &lt;code&gt;using&lt;/code&gt; to your class for classes outside the current namespace, even if you've already referred to them via the namespace:
-&lt;img src="/Content/FluentNamespacing/FluentlyNamespaced-AddReadOnlyField.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Field - yes please, using - no thanks!"&gt;&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Field? Yes please. Using? No thanks!&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;Searching&lt;/p&gt;
-&lt;p&gt;In Visual Studio, when you need to search for a specific class, you may find you get many more hits than expected; afterall, if the &lt;code&gt;Model&lt;/code&gt; class for all entities is called &lt;code&gt;Model&lt;/code&gt; searching for 'Model' will return all the entity classes. Fortunately, Visual Studio's 'Go to All' functionality supports search by multiple key word matches so this works:
-&lt;img src="/Content/FluentNamespacing/Go to All.png" class="img-responsive" style="margin: auto; width:600px; margin-top: 6px; margin-bottom: 6px;" alt="Ah, there it is"&gt;&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;&lt;em&gt;Note: The fact that these downsides are all related to tooling shows just how ingrained this convention is to modern development.&lt;/em&gt;&lt;/p&gt;
-&lt;h3 id="conclusion"&gt;Conclusion&lt;/h3&gt;
-&lt;p&gt;As shown, moving away from the &amp;quot;grouping by functional pattern&amp;quot; convention and instead using &amp;quot;Fluent Namespacing&amp;quot; can make your code much more readable and maintainable while requiring very little overhead. The side benefits of simplified navigation leading to easier comprehension and the potential for highlighting possible code-smells can really pay dividends in a large code base. I'd very much encourage you to try Fluent Namespacing in your next project, I don't think you'll regret it.&lt;/p&gt;
 </content:encoded>
 		</item>
 	</channel>

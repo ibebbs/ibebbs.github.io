@@ -1,0 +1,812 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Cross-Platform Real-Time Communication with Uno &amp; SignalR</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Cross-Platform Real-Time Communication with Uno &amp; SignalR" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/UnoChat" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="/assets/js/jquery.min.js"></script>
+        <script src="/assets/js/bootstrap.min.js"></script>     
+        <script src="/assets/js/highlight.pack.js"></script>   
+        <script src="/assets/js/clean-blog.js"></script>
+        <script src="/assets/js/d3.v3.min.js"></script>
+        <script src="/assets/js/trianglify.min.js"></script>
+        <script src="/assets/js/Please-compressed.js"></script>
+        <script src="/assets/js/background-check.min.js"></script>
+                
+        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+        <!--[if lt IE 9]>
+                <script src="/assets/js/html5shiv.js"></script>
+                <script src="/assets/js/respond.min.js"></script>
+        <![endif]-->
+        
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Cross-Platform Real-Time Communication with Uno &amp; SignalR</h1>
+        <h2 class="subheading">It just works&#x2122;</h2>
+    <div class="meta">        
+Published on 16 July 2020<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/Android" class="btn btn-default btn-xs">Android</a>
+                    <a role="button" href="/tags/iOS" class="btn btn-default btn-xs">iOS</a>
+                    <a role="button" href="/tags/SignalR" class="btn btn-default btn-xs">SignalR</a>
+                    <a role="button" href="/tags/Uno-Platform" class="btn btn-default btn-xs">Uno Platform</a>
+                    <a role="button" href="/tags/UWP" class="btn btn-default btn-xs">UWP</a>
+                    <a role="button" href="/tags/Wasm" class="btn btn-default btn-xs">Wasm</a>
+                    <a role="button" href="/tags/Xaml" class="btn btn-default btn-xs">Xaml</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="tldr">TL;DR</h2>
+<p>In this article we will see how to use <a href="https://platform.uno/">Uno Platform</a> and <a href="https://docs.microsoft.com/en-us/aspnet/signalr/overview/getting-started/introduction-to-signalr">SignalR</a> to create applications that run on all major platforms - PC, Mac, Android, iOS <em><strong>and</strong></em> Web - and are capable of receiving real-time updates from a SignalR service. As you will see, these two technologies work incredibly well together, providing an elegant solution to a use-case which, just a few years ago, would have been fiendishly difficult.</p>
+<h2 id="intro">Intro</h2>
+<p>A project I'm working on features a web-dashboard. Being a XAML fan, using Uno to create a web-assembly app was a complete a no-brainer... until I realised that I wanted the dashboard to feature real-time updates. Thanks to SignalR (and a host of subsequent technologies) real-time updates is nothing new for traditional web apps but how would these technologies fare when used with Uno/WebAssembly.</p>
+<p>Hunting around, I had seen that a couple of people had tried this approach a while back but had hit various stumbling blocks along the way. As far as I could tell, no-one had yet managed to get a working solution which, as you might imagine, was a tad worrying.</p>
+<p>Regardless, I knew that Uno and its compilation to WebAssembly (driven by the amazing work undertaken by the <a href="https://github.com/mono/mono">Mono team</a>) had progressed massively in the last year so I figured I'd give it a go to see if I could get any further. I was very much prepared for a bit of a slog here, expecting to have to dig into the internals of both Uno and SignalR in order to get it working. But I was <em>not</em> prepared for what actually happened:</p>
+<p>It... just... worked.</p>
+<p>First time.</p>
+<p>With no kludges, no work-arounds, no untoward platform-specific code and no conditional compilation.</p>
+<p>It really did <strong>Just Work™</strong>.</p>
+<p>The following post shows how you can use these amazing technologies together to deliver real-time updates to a cross-platform app.</p>
+<h2 id="ingredients">Ingredients</h2>
+<p>To cook up this little sumptuous little dish, you will need a copy of Visual Studio 2019 with the following installed:</p>
+<ol>
+<li>&quot;ASP.NET and Web development&quot; workload</li>
+<li>&quot;Azure development&quot; workload</li>
+<li>&quot;Universal Windows Platform development&quot; workload</li>
+<li>&quot;Mobile development with .NET&quot; workload</li>
+<li>&quot;.NET Core cross-platform development&quot; toolset</li>
+<li>The <a href="https://marketplace.visualstudio.com/items?itemName=nventivecorp.uno-platform-addin">Uno Platform Solution Templates</a>.</li>
+</ol>
+<p>You will also need a (<a href="https://azure.microsoft.com/en-us/free/">free</a>) Azure account to which we'll publish our SignalR service so it's easily available to our client platforms.</p>
+<h2 id="objective">Objective</h2>
+<p>We're going to be building a version of the <a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-3.1&amp;tabs=visual-studio">&quot;Get started with ASP.NET Core SignalR&quot;</a> sample app but, instead of an &quot;HTML+js&quot; client, we're going to be using  Uno to write an app which can be compiled and run natively across multiple platforms <em>including</em> the web.</p>
+<p>When we're finished, we'll have a solution which looks like this:</p>
+<pre><code>UnoChat
+|- UnoChat.Service
+|- UnoChat.Client.Console
+|- UnoChat.Client.App
+   |- UnoChat.Client.App.Droid
+   |- UnoChat.Client.App.iOS
+   |- UnoChat.Client.App.macOS
+   |- UnoChat.Client.App.UWP
+   |- UnoChat.Client.App.Wasm
+   |- UnoChat.Client.App.Shared
+</code></pre>
+<p>We'll dive into each of these projects individually below with the occasional &quot;F5&quot; to test our progress.</p>
+<p>Right, lets go!</p>
+<h2 id="service-console-client-testing-deployment">Service, Console Client, Testing &amp; Deployment</h2>
+<h3 id="unochat.service">UnoChat.Service</h3>
+<p>We'll first create the SignalR service. As this is covered quite extensively in the <a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-3.1&amp;tabs=visual-studio">sample app</a> we're basing this article on I'm going to shoot through this pretty quickly, only covering notable differences and the code we should end up with.</p>
+<p>Ok, start up Visual Studio 2019 and create a new project as shown here:</p>
+<table style="margin: auto; width:100%;">
+  <tr>
+    <td><img src="/Content/UnoChat/CreateNewASPNetCoreWebApplicationI.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Create New ASP Net Core Web Application - Step 1"/></td>
+    <td><img src="/Content/UnoChat/CreateNewASPNetCoreWebApplicationII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Create New ASP Net Core Web Application - Step 2"/></td>
+  </tr>
+</table>
+<p>Now, follow the steps in the <a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-3.1&amp;tabs=visual-studio#create-a-signalr-hub">&quot;Create a SignalR hub&quot;</a> section of the sample app to create a <code>ChatHub : Hub</code> class in a <code>Hubs</code> folder within the <code>UnoChat.Service</code> project.</p>
+<p>We'll continue with the configuration described in the <a href="https://docs.microsoft.com/en-us/aspnet/core/tutorials/signalr?view=aspnetcore-3.1&amp;tabs=visual-studio#configure-signalr">&quot;Configure SignalR&quot;</a> but we'll also be adding a <a href="https://docs.microsoft.com/en-us/aspnet/core/security/cors?view=aspnetcore-3.1">CORS policy</a> such that we're able to connect to it from a locally hosted Wasm app. The final configuration of the <code>Startup</code> class in the <code>UnoChat.Service</code> project should look like this:</p>
+<pre><code class="language-c#">using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+
+namespace UnoChat.Service
+{
+    public class Startup
+    {
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+
+        public IConfiguration Configuration { get; }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        public void ConfigureServices(IServiceCollection services)
+        {
+            services.AddRazorPages();
+            services.AddSignalR();
+
+            services.AddCors(o =&gt; o.AddPolicy(
+                 &quot;CorsPolicy&quot;,
+                 builder =&gt; builder
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                 )
+            );
+        }
+
+        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        {
+            if (env.IsDevelopment())
+            {
+                app.UseDeveloperExceptionPage();
+            }
+            else
+            {
+                app.UseExceptionHandler(&quot;/Error&quot;);
+                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+                app.UseHsts();
+            }
+
+            app.UseHttpsRedirection();
+            app.UseStaticFiles();
+
+            app.UseRouting();
+            app.UseCors(&quot;CorsPolicy&quot;);
+
+            app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =&gt;
+            {
+                endpoints.MapRazorPages();
+                endpoints.MapHub&lt;Hubs.ChatHub&gt;(&quot;/chathub&quot;);
+            });
+        }
+    }
+}
+</code></pre>
+<p>And that's it. Seriously that's all we need to create a service which is able to provide real-time communication services to a whole host of client applications.... I know, right!</p>
+<h3 id="unochat.client.console">UnoChat.Client.Console</h3>
+<p>Next we'll create a quick console application to test our SignalR service prior to diving into a cross platform solution with Uno.</p>
+<blockquote class="blockquote">
+<p>BTW, the console app - by virtue of being .NET Core - is also cross-platform and will run on... well... <a href="https://docs.microsoft.com/en-us/dotnet/core/">pretty much anything</a>.</p>
+</blockquote>
+<p>So, right click on the &quot;UnoChat&quot; solution and add a new &quot;Console App (.NET Core)&quot; project as shown here:</p>
+<img src="/Content/UnoChat/CreateNewNetCoreConsoleApp.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Create New Net Core Console App"/>
+<p>Then, add the <a href="https://www.nuget.org/packages/Microsoft.AspNetCore.SignalR.Client/"><code>Microsoft.AspNetCore.SignalR.Client</code> nuget package</a> to the <code>UnoChat.Client.Console</code> project as shown here:</p>
+<img src="/Content/UnoChat/InstallMicrosoftAspNetCoreSignalRClientInUnoChatClientConsole.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Install Microsoft Asp Net Core SignalR Client In UnoChat Client Console"/>
+<p>Finally, replace the code in <code>Main.cs</code> with the following:</p>
+<pre><code class="language-c#">using Microsoft.AspNetCore.SignalR.Client;
+using System.Threading.Tasks;
+
+namespace UnoChat.Client.Console
+{
+    using Console = System.Console;
+
+    class Program
+    {
+        static async Task Main(string[] args)
+        {
+            Console.WriteLine(&quot;Hi! Err... who are you?&quot;);
+
+            var name = Console.ReadLine();
+
+            Console.WriteLine($&quot;Ok {name} one second, we're going to connect to the SignalR server...&quot;);
+
+            var connection = new HubConnectionBuilder()
+                .WithUrl(&quot;http://localhost:61877/ChatHub&quot;)
+                .WithAutomaticReconnect()
+                .Build();
+
+            connection.On&lt;string, string&gt;(&quot;ReceiveMessage&quot;, (user, message) =&gt; Console.WriteLine($&quot;{user}: {message}&quot;));
+
+            await connection.StartAsync();
+
+            Console.WriteLine($&quot;Aaaaaand we're connected. Enter a message and hit return to send it to other connected clients...&quot;);
+
+            while (true)
+            {
+                var message = Console.ReadLine();
+
+                await connection.InvokeAsync(&quot;SendMessage&quot;, name, message);
+            }
+        }
+    }
+}
+</code></pre>
+<blockquote class="blockquote">
+<p>Note: You'll need to ensure the port number in the <code>.WithUrl(&quot;http://localhost:61877/ChatHub&quot;)</code> line is correct. You can find the port number your <code>UnoChat.Service</code> is set to use by right clicking on the <code>UnoChat.Service</code> project, selecting <code>Properties</code>, navigating to the <code>Debug</code> tab and examining the <code>App URL</code> setting in the <code>Web Server Settings</code> section as shown here:
+<img src="/Content/UnoChat/UnoChatServiceDebugSettings.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Service Debug Settings"/></p>
+</blockquote>
+<h3 id="local-testing">Local Testing</h3>
+<p>Now we can test our service with our client console. Right click on the <code>UnoChat.Service</code> project and select <code>Debug-&gt;Start New Instance</code>. After a few seconds compilation a browser window should open and show something similar to this:</p>
+<img src="/Content/UnoChat/UnoChatServiceDebugBrowser.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Service Debug Browser"/>
+<p>With that running, go back to Visual Studio and right click on the <code>UnoChat.Client.Console</code> project and again select <code>Debug-&gt;Start New Instance</code>. A console window should appear asking who you are. Enter a name, hit return and wait for the app to tell you that it has connected. At this point you can send messages to the <code>UnoChat.Service</code> which should be echoed back to the console window prefixed with your name as shown here:</p>
+<video class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" controls autoplay loop>
+  <source src="/Content/UnoChat/UnoChatClientConsoleDebug.mp4" type="video/mp4"/>
+Your browser does not support the video tag
+</video>
+<p>Just to show we're not just echoing these things locally, right click on the <code>UnoChat.Client.Console</code> project again and start a second instance using <code>Debug-&gt;Start New Instance</code>. In this window enter a different name and wait for connection. Now when you send a message, you'll see it in both console windows as shown here:</p>
+<img src="/Content/UnoChat/UnoChatClientConsoleTwoInstances.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Client Console Two Instances"/>
+<p>Pretty neat huh!</p>
+<h3 id="deployment">Deployment</h3>
+<p>With our SignalR service running nicely, lets deploy it to Azure by right clicking on the <code>UnoChat.Service</code> project and selecting <code>Publish...</code>. I'm not going to cover this process in too much detail as it's <a href="https://docs.microsoft.com/en-US/visualstudio/deployment/quickstart-deploy-to-azure?view=vs-2019">thoroughly documented elsewhere</a> but, if you've not done this before, the following screen shots should help you through:</p>
+<table style="margin: auto; width:100%;">
+  <tr>
+    <td><img src="/Content/UnoChat/PublishUnoChatServiceToAzureI.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 1"/></td>
+    <td><img src="/Content/UnoChat/PublishUnoChatServiceToAzureII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 2"/></td>
+    <td><img src="/Content/UnoChat/PublishUnoChatServiceToAzureIII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 3"/></td>
+  </tr>
+  <tr>
+    <td><img src="/Content/UnoChat/PublishUnoChatServiceToAzureIV.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 4"/></td>
+    <td><img src="/Content/UnoChat/PublishUnoChatServiceToAzureV.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 5"/></td>
+    <td><img src="/Content/UnoChat/PublishUnoChatServiceToAzureVI.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 6"/></td>
+  </tr>
+  <tr>
+    <td><img src="/Content/UnoChat/PublishUnoChatServiceToAzureVII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 7"/></td>
+    <td><img src="/Content/UnoChat/PublishUnoChatServiceToAzureVIII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 8"/></td>
+    <td><img src="/Content/UnoChat/PublishUnoChatServiceToAzureIX.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Publish UnoChat Service To Azure - Step 9"/></td>
+    <td></td>
+  </tr>
+</table>
+<p>Still with me? Great.</p>
+<p>Lets test our deployed SignalR service by updating the <code>.WithUrl(&quot;http://localhost:61877/ChatHub&quot;)</code> line in our <code>UnoChat.Client.Console</code> app to match the deployed service as shown in the last screenshot above; for me it's <code>.WithUrl(&quot;https://unochatservice20200716114254.azurewebsites.net/ChatHub&quot;)</code>. Once done you should be able to start the <code>UnoChat.Client.Console</code> app and send/receive messages to/from your deployed SignalR service.</p>
+<p>Now for the magic...</p>
+<h2 id="uno-client">Uno Client</h2>
+<h3 id="creating-preparing-an-uno-project">Creating &amp; Preparing An Uno Project</h3>
+<p>Back in Visual Studio, right click the <code>UnoChat</code> solution and <code>Add-&gt;New Project...</code>.  Select <code>Cross-Platform App (Uno Platform)</code> from the <code>Add a new project</code> dialog and click Next. Name it <code>UnoChat.Client</code> on the <code>Configure your new project</code> dialog and finally click <code>Create</code>:</p>
+<table style="margin: auto; width:100%;">
+  <tr>
+    <td><img src="/Content/UnoChat/CreateNewCrossPlatformAppI.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Create New Cross Platform App - Step 1"/></td>
+    <td><img src="/Content/UnoChat/CreateNewCrossPlatformAppII.png" class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Create New Cross Platform App - Step 2"/></td>
+  </tr>
+</table>
+<p>To help keep my solution organised, I like to group all the Uno &quot;head&quot; projects in a solution folder. This is shown below but don't feel obliged to follow suit:</p>
+<img src="/Content/UnoChat/UnoChatClientSolutionFolder.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Client Solution Folder"/>
+<p>Now, the first thing to do here is to get our dependencies in order using the following steps:</p>
+<ol>
+<li>Upgrade all <code>Uno.*</code> packages to the latest non-prelease versions (at the time of writing this is <code>Uno.UI</code> &amp; <code>Uno.UI.RemoteControl</code> to v2.4.4, <code>Uno.Wasm.Bootstrap</code> &amp; <code>Uno.Wasm.Bootstrap.DevServer</code> to v1.3.0)</li>
+<li>Install the <a href="https://www.nuget.org/packages/Microsoft.AspNetCore.SignalR.Client/"><code>Microsoft.AspNetCore.SignalR.Client</code> nuget package</a> to all the head projects (UnoChat.Client.Droid, UnoChat.Client.iOS, etc, etc).</li>
+<li>Install the <a href="https://www.nuget.org/packages/MVx.Observable/"><code>MVx.Observable</code> nuget package</a> to all the head projects (UnoChat.Client.Droid, UnoChat.Client.iOS, etc, etc).</li>
+</ol>
+<blockquote class="blockquote">
+<p>Quick tip: Use the <code>Manage NuGet Packages for Solution...</code> option from the solution's right-click menu to get this done much faster than modifying individual projects.</p>
+</blockquote>
+<p>Lastly use the <code>Properties</code> window to change the <code>Root namespace</code> value for the <code>UnoChat.Client.Shared</code> project from <code>UnoChat.Client.Shared</code> to just <code>UnoChat.Client</code> (I'm kind hoping this change makes it into the Uno templates at some point).</p>
+<h3 id="mvx.observable">MVx.Observable</h3>
+<p>I like to implement UI/UX flows using behavioural, declarative and functional paradigms. I wrote <code>MVx.Observable</code> to be a &quot;(mostly) unopinionated, light-weight alternative to ReactiveUI provided as a library <em>not a framework</em>&quot; and have written about it extensively <a href="https://ian.bebbs.co.uk/posts/ReactiveBehaviors">here</a> and <a href="https://ian.bebbs.co.uk/posts/Uno#four-important-words">here</a>.</p>
+<p>You don't <em>need</em> to use <code>MVx.Observable</code> to implement the functionality present in this project but I'd encourage you to at least give it a try as, like ReactiveUI, these patterns really can help manage UI state, ensure UX flows are testable and keep discrete behaviours... well, discrete.</p>
+<p><code>MVx.Observable</code> uses <a href="https://www.nuget.org/packages/System.Reactive/"><code>System.Reactive</code></a> to embody it's behaviours in a reactive manner and, as these behaviours interact with the UI, we need to use <code>IScheduler</code> instances to ensure we update the UI from the correct thread. This is somewhat complicated by the fact that we're writing a cross-platform app which uses different <code>IScheduler</code> implementations to marshal updates to the appropriate platform threads. Fortunately, this complexity is easily tamed through the use of <a href="https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/partial-classes-and-methods">Partial Classes and Methods</a>.</p>
+<p>In the <code>UnoChat.Client.Shared</code> project, add a <code>Schedulers.cs</code> file with the following content:</p>
+<pre><code class="language-c#">using System;
+using System.Reactive.Concurrency;
+using System.Threading;
+
+namespace UnoChat.Client
+{
+    public static partial class Schedulers
+    {
+        static partial void OverrideDispatchScheduler(ref IScheduler scheduler);
+
+        private static readonly Lazy&lt;IScheduler&gt; DispatcherScheduler = new Lazy&lt;IScheduler&gt;(
+            () =&gt;
+            {
+                IScheduler scheduler = null;
+
+                OverrideDispatchScheduler(ref scheduler);
+
+                return scheduler == null
+                    ? new SynchronizationContextScheduler(SynchronizationContext.Current)
+                    : scheduler;
+            }
+        );
+
+        public static IScheduler Dispatcher =&gt; DispatcherScheduler.Value;
+
+        public static IScheduler Default =&gt; Scheduler.Default;
+    }
+}
+</code></pre>
+<p>Then, in the UWP head, override the <code>OverrideDispatchScheduler</code> method to provide the correct scheduler for the platform by adding a <code>Schedulers.cs</code> file to the head project with the following content:</p>
+<pre><code class="language-c#">using System.Reactive.Concurrency;
+using Windows.UI.Xaml;
+
+namespace UnoChat.Client
+{
+    public static partial class Schedulers
+    {
+        static partial void OverrideDispatchScheduler(ref IScheduler scheduler)
+        {
+            scheduler = new CoreDispatcherScheduler(Window.Current.Dispatcher);
+        }
+    }
+}
+</code></pre>
+<p>Now we can safely use the scheduler in our solution knowing that we're able to easily marshal operations to and from the UI thread.</p>
+<h3 id="viewmodel">ViewModel</h3>
+<p>Leveraging <code>MVx.Observable</code> we're now going to create a <a href="https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel">ViewModel</a> to manage all the interaction with SignalR ensuring we don't need have any logic in the view's code-behind.</p>
+<p>Create a new <code>ViewModel</code> class in the <code>UnoChat.Client.Shared</code> project containing the following code:</p>
+<pre><code class="language-c#">using Microsoft.AspNetCore.SignalR.Client;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Reactive.Disposables;
+using System.Reactive.Linq;
+using System.Windows.Input;
+using Uno.Extensions;
+
+namespace UnoChat.Client
+{
+    public class ViewModel : INotifyPropertyChanged
+    {
+        private readonly MVx.Observable.Property&lt;string&gt; _name;
+        private readonly MVx.Observable.Property&lt;HubConnectionState&gt; _state;
+        private readonly MVx.Observable.Command _connect;
+
+        private readonly MVx.Observable.Property&lt;string&gt; _lastMessageReceived;
+        private readonly MVx.Observable.Property&lt;IEnumerable&lt;string&gt;&gt; _allMessages;
+        private readonly MVx.Observable.Property&lt;string&gt; _messageToSend;
+        private readonly MVx.Observable.Property&lt;bool&gt; _messageToSendIsEnabled;
+        private readonly MVx.Observable.Command _sendMessage;
+
+        private readonly HubConnection _connection;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private static string DefaultName =&gt; typeof(ViewModel)
+            .Assembly
+            .GetName()
+            .Name
+            .Split('.')
+            .Last();
+
+        public ViewModel()
+        {
+            _name = new MVx.Observable.Property&lt;string&gt;(DefaultName, nameof(Name), args =&gt; PropertyChanged?.Invoke(this, args));
+            _state = new MVx.Observable.Property&lt;HubConnectionState&gt;(HubConnectionState.Disconnected, nameof(State), args =&gt; PropertyChanged?.Invoke(this, args));
+            _connect = new MVx.Observable.Command();
+            _lastMessageReceived = new MVx.Observable.Property&lt;string&gt;(nameof(LastMessageReceived), args =&gt; PropertyChanged?.Invoke(this, args));
+            _allMessages = new MVx.Observable.Property&lt;IEnumerable&lt;string&gt;&gt;(Enumerable.Empty&lt;string&gt;(), nameof(AllMessages), args =&gt; PropertyChanged?.Invoke(this, args));
+            _messageToSend = new MVx.Observable.Property&lt;string&gt;(nameof(MessageToSend), args =&gt; PropertyChanged?.Invoke(this, args));
+            _messageToSendIsEnabled = new MVx.Observable.Property&lt;bool&gt;(false, nameof(MessageToSendIsEnabled), args =&gt; PropertyChanged?.Invoke(this, args));
+            _sendMessage = new MVx.Observable.Command();
+
+            _connection = new HubConnectionBuilder()
+                .WithUrl(&quot;https://unochatservice20200716114254.azurewebsites.net/ChatHub&quot;)
+                .WithAutomaticReconnect()
+                .Build();
+        }
+
+        private IDisposable ShouldEnableConnectWhenNotConnected()
+        {
+            return _state
+                .Select(state =&gt; state == HubConnectionState.Disconnected)
+                .ObserveOn(Schedulers.Dispatcher)
+                .Subscribe(_connect);
+        }
+
+        private IDisposable ShouldEnableMessageToSendWhenConnected()
+        {
+            return _state
+                .Select(state =&gt; state == HubConnectionState.Connected)
+                .Subscribe(_messageToSendIsEnabled);
+        }
+
+        private IDisposable ShouldConnectToServiceWhenConnectInvoked()
+        {
+            return _connect
+                .SelectMany(_ =&gt; Observable
+                    .StartAsync(async () =&gt;
+                    {
+                        await _connection.StartAsync();
+                        return _connection.State;
+                    }))
+                .ObserveOn(Schedulers.Dispatcher)
+                .Subscribe(_state);
+        }
+
+        private IDisposable ShouldDisconnectFromServiceWhenDisposed()
+        {
+            return Disposable.Create(() =&gt; _ = _connection.StopAsync());
+        }
+
+        private IDisposable ShouldListenForNewMessagesFromTheService()
+        {
+            return Observable
+                .Create&lt;string&gt;(
+                    observer =&gt;
+                    {
+                        Action&lt;string, string&gt; onReceiveMessage =
+                            (user, message) =&gt; observer.OnNext($&quot;{user}: {message}&quot;);
+
+                        return _connection.On(&quot;ReceiveMessage&quot;, onReceiveMessage);
+                    })
+                .ObserveOn(Schedulers.Dispatcher)
+                .Subscribe(_lastMessageReceived);
+        }
+
+        private IDisposable ShouldAddNewMessagesToAllMessages()
+        {
+            return _lastMessageReceived
+                .Where(message =&gt; !string.IsNullOrWhiteSpace(message))
+                .WithLatestFrom(_allMessages, (message, messages) =&gt; messages.Concat(message).ToArray())
+                .Subscribe(_allMessages);
+        }
+
+        private IDisposable ShouldEnableSendMessageWhenConnectedAndBothNameAndMessageToSendAreNotEmpty()
+        {
+            return Observable
+                .CombineLatest(_state, _name, _messageToSend, (state, name, message) =&gt; state == HubConnectionState.Connected &amp;&amp; !(string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(message)))
+                .Subscribe(_sendMessage);
+        }
+
+        private IDisposable ShouldSendMessageToServiceThenClearSentMessage(IObservable&lt;object&gt; messageToSendBoxReturn)
+        {
+            var namedMessage = Observable
+                .CombineLatest(_name, _messageToSend, (name, message) =&gt; (Name: name, Message: message));
+
+            return Observable.Merge(_sendMessage, messageToSendBoxReturn)
+                .WithLatestFrom(namedMessage, (_, tuple) =&gt; tuple)
+                .Where(tuple =&gt; !string.IsNullOrEmpty(tuple.Message))
+                .SelectMany(tuple =&gt; Observable
+                    .StartAsync(() =&gt; _connection.InvokeAsync(&quot;SendMessage&quot;, tuple.Name, tuple.Message)))
+                .Select(_ =&gt; string.Empty)
+                .ObserveOn(Schedulers.Dispatcher)
+                .Subscribe(_messageToSend);
+        }
+
+        public IDisposable Activate(IObservable&lt;object&gt; messageToSendBoxReturn)
+        {
+            return new CompositeDisposable(
+                ShouldEnableConnectWhenNotConnected(),
+                ShouldEnableMessageToSendWhenConnected(),
+                ShouldConnectToServiceWhenConnectInvoked(),
+                ShouldDisconnectFromServiceWhenDisposed(),
+                ShouldListenForNewMessagesFromTheService(),
+                ShouldAddNewMessagesToAllMessages(),
+                ShouldEnableSendMessageWhenConnectedAndBothNameAndMessageToSendAreNotEmpty(),
+                ShouldSendMessageToServiceThenClearSentMessage(messageToSendBoxReturn)
+            );
+        }
+
+        public string Name
+        {
+            get =&gt; _name.Get();
+            set =&gt; _name.Set(value);
+        }
+
+        public HubConnectionState State =&gt; _state.Get();
+
+        public string LastMessageReceived =&gt; _lastMessageReceived.Get();
+
+        public IEnumerable&lt;string&gt; AllMessages =&gt; _allMessages.Get();
+
+        public string MessageToSend
+        {
+            get =&gt; _messageToSend.Get();
+            set =&gt; _messageToSend.Set(value);
+        }
+
+        public bool MessageToSendIsEnabled =&gt; _messageToSendIsEnabled.Get();
+
+        public ICommand Connect =&gt; _connect;
+
+        public ICommand SendMessage =&gt; _sendMessage;
+    }
+}
+</code></pre>
+<p>While this code is fairly lengthy it includes a large number of behaviours such as asynchronous connection management and message handling for SignalR along with enabling and disabling controls based on the current state of the UI and/or connection. All these behaviours are separated into discrete methods allowing them to be easily modified, supplemented or removed by simply changing, adding or removing an appropriated named &quot;ShouldXXXX&quot; method.</p>
+<h3 id="view">View</h3>
+<p>With the ViewModel in place and taking care of all the fundamental logic for the application, we now need to use it from the view. In the code behind for <code>MainView.cs</code> add the following code:</p>
+<pre><code class="language-c#">using System;
+using System.Reactive.Linq;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Navigation;
+
+// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&amp;clcid=0x409
+
+namespace UnoChat.Client
+{
+    /// &lt;summary&gt;
+    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// &lt;/summary&gt;
+    public sealed partial class MainPage : Page
+    {
+        private readonly ViewModel _viewModel;
+        private IDisposable _behaviours;
+
+        public MainPage()
+        {
+            this.InitializeComponent();
+
+            _viewModel = new ViewModel();
+            DataContext = _viewModel;
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            base.OnNavigatedTo(e);
+
+            var messageToSendReturn = Observable
+                .FromEvent&lt;KeyEventHandler, KeyRoutedEventArgs&gt;(
+                    handler =&gt; (s, k) =&gt; handler(k),
+                    handler =&gt; MessageToSendTextBox.KeyUp += handler,
+                    handler =&gt; MessageToSendTextBox.KeyUp -= handler)
+                .Where(k =&gt; k.Key == Windows.System.VirtualKey.Enter);
+
+            _behaviours = _viewModel.Activate(messageToSendReturn);
+        }
+
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            base.OnNavigatingFrom(e);
+
+            if (_behaviours != null)
+            {
+                _behaviours.Dispose();
+                _behaviours = null;
+            }
+        }
+    }
+}
+</code></pre>
+<p>In this code we instantiate the ViewModel, set it as the View's <code>DataContext</code> and call it's <code>Activate</code> method when the user navigates to this view. Note how we pass an observable to the <code>Activate</code> method which will emit a value when the user hits return on the <code>MessageToSendTextBox</code>. This allows us to receive feedback from the UI without compromising View/ViewModel segregation.</p>
+<p>The <code>Activate</code> method returns an <code>IDisposable</code> which, when disposed, will tear down all the associated behaviours, unsubscribe from events and release resources. Accordingly, we dispose of this <code>IDisposable</code> when the user navigates away from this view, thereby correctly managing the lifetime of the ViewModel's resources.</p>
+<p>Finally, lets implement our UI by editing the <code>MainView.xaml</code> to the following:</p>
+<pre><code class="language-xml">&lt;Page
+    x:Class=&quot;UnoChat.Client.MainPage&quot;
+    xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+    xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+    xmlns:local=&quot;using:UnoChat.Client&quot;
+    xmlns:d=&quot;http://schemas.microsoft.com/expression/blend/2008&quot;
+    xmlns:mc=&quot;http://schemas.openxmlformats.org/markup-compatibility/2006&quot;
+    mc:Ignorable=&quot;d&quot;&gt;
+
+    &lt;Grid Background=&quot;{ThemeResource ApplicationPageBackgroundThemeBrush}&quot;&gt;
+        &lt;Grid.RowDefinitions&gt;
+            &lt;RowDefinition Height=&quot;Auto&quot;/&gt;
+            &lt;RowDefinition Height=&quot;*&quot;/&gt;
+            &lt;RowDefinition Height=&quot;Auto&quot;/&gt;
+        &lt;/Grid.RowDefinitions&gt;
+        &lt;Grid.ColumnDefinitions&gt;
+            &lt;ColumnDefinition Width=&quot;Auto&quot;/&gt;
+            &lt;ColumnDefinition Width=&quot;*&quot;/&gt;
+            &lt;ColumnDefinition Width=&quot;Auto&quot;/&gt;
+        &lt;/Grid.ColumnDefinitions&gt;
+        &lt;TextBlock Text=&quot;Name:&quot; Style=&quot;{StaticResource BaseTextBlockStyle}&quot; Grid.Row=&quot;0&quot; Grid.Column=&quot;0&quot; Margin=&quot;4&quot; VerticalAlignment=&quot;Center&quot; /&gt;
+        &lt;TextBox Text=&quot;{Binding Path=Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}&quot; Grid.Row=&quot;0&quot; Grid.Column=&quot;1&quot; Margin=&quot;4&quot;/&gt;
+        &lt;Button Command=&quot;{Binding Path=Connect}&quot; Content=&quot;Connect&quot; Grid.Row=&quot;0&quot; Grid.Column=&quot;2&quot; Margin=&quot;4&quot; Padding=&quot;16,4&quot; HorizontalAlignment=&quot;Stretch&quot;/&gt;
+        &lt;ItemsControl ItemsSource=&quot;{Binding Path=AllMessages}&quot; Grid.Row=&quot;1&quot; Grid.ColumnSpan=&quot;3&quot; Margin=&quot;4&quot; /&gt;
+        &lt;TextBlock Text=&quot;Message:&quot; Style=&quot;{StaticResource BaseTextBlockStyle}&quot; Grid.Row=&quot;2&quot; Grid.Column=&quot;0&quot; Margin=&quot;4&quot; VerticalAlignment=&quot;Center&quot;/&gt;
+        &lt;TextBox x:Name=&quot;MessageToSendTextBox&quot; Text=&quot;{Binding Path=MessageToSend, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}&quot; IsEnabled=&quot;{Binding Path=MessageToSendIsEnabled}&quot; Grid.Row=&quot;2&quot; Grid.Column=&quot;1&quot; Margin=&quot;4&quot;/&gt;
+        &lt;Button Command=&quot;{Binding Path=SendMessage}&quot; Content=&quot;Send&quot; Grid.Row=&quot;2&quot; Grid.Column=&quot;2&quot; Margin=&quot;4&quot; Padding=&quot;16,4&quot; HorizontalAlignment=&quot;Stretch&quot;/&gt;
+    &lt;/Grid&gt;
+&lt;/Page&gt;
+</code></pre>
+<p>And that's that. Let's give it a go!</p>
+<h3 id="testing">Testing</h3>
+<p>Set the <code>UnoChat.Client.UWP</code> project as the &quot;Startup Project&quot; and hit F5. After a short compilation cycle you should see the following:</p>
+<img src="/Content/UnoChat/UnoChatClientUWPRunningI.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Client UWP Running - 1"/>
+<p>Click &quot;Connect&quot; and, after a short pause you should see the &quot;Message&quot; textbox become enabled. Enter some text in the &quot;Message&quot; textbox and click the &quot;Send&quot; button (or hit enter) and the message should be sent to SignalR. SignalR will then publish this message to all connected clients which, given we are one of the connected clients, will result in the message being sent back to us and being displayed in ItemsControl in the middle of the window as shown below:</p>
+<img src="/Content/UnoChat/UnoChatClientUWPRunningII.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Client UWP Running - 2"/>
+<p>But having one client on one platform is no fun!</p>
+<p>Lets kick off the Android head project by right clicking on it and selection <code>Debug-&gt;Start New Instance</code>. After another short compilation an Android Emulator should started and our app should be deployed to it then run. Clicking &quot;Connect&quot; then (after connection is complete) entering a message in the &quot;Message&quot; text box and hitting &quot;Send&quot; should result in the following:</p>
+<img src="/Content/UnoChat/UnoChatRunningOnUwpAndAndroid.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Running On Uwp And Android"/>
+<p>Nice, two platforms for the price on one!</p>
+<p>Now (and you'll need to be <a href="https://docs.microsoft.com/en-us/xamarin/ios/get-started/installation/windows/connecting-to-mac/">paired to a Mac for this</a>), right click the iOS head project and select <code>Debug-&gt;Start New Instance</code>. Once the iOS device emulator has started, follow the same steps as with with other head projects and you'll see the following:</p>
+<img src="/Content/UnoChat/UnoChatRunningOnUwpAndroidAndiOS.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Running On Uwp, Android and iOS"/>
+<p>That's three for three.</p>
+<p>Now, right click on the WASM head and select <code>Debug-&gt;Start New Instance</code>. After a short compilation you'll see a browser window appear and.... get stuck at the splash screen.</p>
+<p>Booo! So close...</p>
+<h3 id="getting-wasm-linked">Getting WASM Linked</h3>
+<p>Opening the browser's &quot;Developer Tools&quot; with F12 we see this on the Console:</p>
+<img src="/Content/UnoChat/UnoChatWasmLinkerIssues.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Wasm Link Issues"/>
+<p>Well, we've seen these &quot;A suitable constructor ... could not be found&quot; exceptions <a href="https://ian.bebbs.co.uk/posts/UnoWithSwagger#this-missing-links">before</a>. They're due to the assemblies containing the associated types being omitted by the Mono linker. By looking up which assemblies the various types belong to we're able to explicitly instruct the linker to include the assemblies by modifying the <code>LinkerConfig.xml</code> file in the WASM head project.</p>
+<p>After a few &quot;start -&gt; fail -&gt; find type -&gt; amend config&quot; iterations I ended up with the following in my <code>LinkerConfig.xaml</code> file:</p>
+<pre><code class="language-xml">&lt;linker&gt;
+  &lt;assembly fullname=&quot;UnoChat.Client.Wasm&quot; /&gt;
+  &lt;assembly fullname=&quot;Uno.UI&quot; /&gt;
+
+  &lt;assembly fullname=&quot;Microsoft.AspnetCore.Http.Connections.Client&quot;/&gt;
+  &lt;assembly fullname=&quot;Microsoft.Extensions.Options&quot;/&gt;
+  &lt;assembly fullname=&quot;Microsoft.AspNetCore.SignalR.Client&quot;/&gt;
+  &lt;assembly fullname=&quot;Microsoft.AspNetCore.SignalR.Client.Core&quot;/&gt;
+  &lt;assembly fullname=&quot;Microsoft.AspNetCore.SignalR.Protocols.Json&quot;/&gt;
+
+  &lt;assembly fullname=&quot;System.Core&quot;&gt;
+	&lt;!-- This is required by JSon.NET and any expression.Compile caller --&gt;
+	  &lt;type fullname=&quot;System.Linq.Expressions*&quot; /&gt;
+  &lt;/assembly&gt;
+&lt;/linker&gt;
+</code></pre>
+<p>And, with this in place starting the WASM head resulted in:</p>
+<img src="/Content/UnoChat/UnoChatWasmRunning.png" class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" alt="UnoChat Wasm Running"/>
+<p>ooOOoo... exciting!! Could it be??</p>
+<video class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" controls autoplay loop>
+  <source src="/Content/UnoChat/UnoChatAllWingsCheckin.mp4" type="video/mp4"/>
+Your browser does not support the video tag
+</video>
+<p>Yes, yes it could.</p>
+<p>Here we have <code>UnoChat.Client.Console</code> (Red Leader), <code>UnoChat.Client.UWP</code> (Red 3), <code>UnoChat.Client.Wasm</code> (Red 6), <code>UnoChat.Client.Droid</code> (Red 5) and <code>UnoChat.Client.iOS</code> (Red Buttons) all connected to the SignalR service and all receiving real-time updates.</p>
+<p>Nice.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>And there we go. In about an hour (hey I stopped for lunch) we have an app which is capable of receiving real-time updates and which runs on pretty much every OS - either natively or through the browser. Moreover, the code to deliver this somewhat epic feat is short, concise, maintainable and - most importantly - 99% shared amongst the various project heads.</p>
+<p>The Uno platform really has matured amazingly well since I first blogged about it as part of last December's <a href="https://ian.bebbs.co.uk/posts/Uno">Third Annual C# Advent</a>. Back then I found that it worked... mostly... but not all the head projects functioned correctly and it required a whole host of kludges to get them all running from a shared codebase. Just over seven months later and the change is incredible: You now have an expectation of things working &quot;out-of-the-box&quot; and any minor difference/issue on a given platform to be an easy work around.</p>
+<p>I can't wait to see what the Uno Platform has in store for us at <a href="https://platform.uno/blog/unoconf-2020-virtual-free-aug-12-2020-save-the-date/">UnoConf 2020</a> (personally I'm hoping for Uno on Linux and - most importantly - Raspberry Pis). Hope to see you all there on August 12th!</p>
+<h2 id="lastly">Lastly...</h2>
+<p>If you're interested in using the Uno Platform to deliver cross-platform apps or have an upcoming project for which you'd like evaluate Uno Platform's fit, then please feel free to drop me a line to discuss your project/ideas using any of the links below or from my <a href="https://ian.bebbs.co.uk/about">about page</a>. As a freelance software developer and remote contractor I'm always interested in hearing from potential new clients or about potential new collaborations.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2020. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
