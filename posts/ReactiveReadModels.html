@@ -33,22 +33,6 @@
         <meta property="og:url" content="http://ian.bebbs.co.uk/posts/ReactiveReadModels" />
         <!-- TODO: More social graph meta tags -->
 
-        <script src="/assets/js/jquery.min.js"></script>
-        <script src="/assets/js/bootstrap.min.js"></script>     
-        <script src="/assets/js/highlight.pack.js"></script>   
-        <script src="/assets/js/clean-blog.js"></script>
-        <script src="/assets/js/d3.v3.min.js"></script>
-        <script src="/assets/js/trianglify.min.js"></script>
-        <script src="/assets/js/Please-compressed.js"></script>
-        <script src="/assets/js/background-check.min.js"></script>
-                
-        <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-        <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-        <!--[if lt IE 9]>
-                <script src="/assets/js/html5shiv.js"></script>
-                <script src="/assets/js/respond.min.js"></script>
-        <![endif]-->
-        
         <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
 <link href="/assets/css/ekko-override.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
@@ -234,7 +218,7 @@ Published on 23 November 2015<br>    </div>
 <p>Well, lets look at this from a functional perspective. The action we want to perform when receiving each type of event can be considered to be a function in the form of <code>Func&lt;TReadModel, TEvent, TReadModel&gt;</code>. This is very similar to the third parameter of the <code>Observable.Scan</code> function with the problem being that we have multiple types of <code>TEvent</code>. If only there was a way to produce a generic function that would operate correctly across all the event types.</p>
 <p>Well, by leaning on a concept from functional languages, this might be possible. <a href="https://en.wikipedia.org/wiki/Partial_application" title="Partial Application definition from wikipedia">Partial application</a> has been available in C# - via <a href="http://csharpindepth.com/Articles/Chapter5/Closures.aspx" title="C# in Depth - The Beauty Of Closures">closures</a> - since lambdas were introduced and allows you to:</p>
 <blockquote class="blockquote">
-<p partial>fix a number of arguments to a function, producing another function of smaller arity. Given a function f:(X * Y * Z) -&gt; N , we might fix (or 'bind') the first argument, producing a function of type (f):(Y * Z) -&gt; N . Evaluation of this function might be represented as f(2, 3). Note that the result of partial function application in this case is a function that takes two arguments</p>
+<p partial="">fix a number of arguments to a function, producing another function of smaller arity. Given a function f:(X * Y * Z) -&gt; N , we might fix (or 'bind') the first argument, producing a function of type (f):(Y * Z) -&gt; N . Evaluation of this function might be represented as f(2, 3). Note that the result of partial function application in this case is a function that takes two arguments</p>
 </blockquote>
 <p>So is there some way we can leverage this to remove the <code>TEvent</code> argument from the function? Absolutely, by making the observable emit a <em>stream of partial functions</em> in the form <code>Func&lt;ReadModel,ReadModel&gt;</code> which can then be applied to the read model as follows:</p>
 <pre><code>public IObservable&lt;ReadModel&gt; For(Guid id)
@@ -338,6 +322,22 @@ Published on 23 November 2015<br>    </div>
 </div>
                 </footer> 
 
+                <script src="/assets/js/jquery.min.js"></script>
+                <script src="/assets/js/bootstrap.min.js"></script>     
+                <script src="/assets/js/highlight.pack.js"></script>   
+                <script src="/assets/js/clean-blog.js"></script>
+                <script src="/assets/js/d3.v3.min.js"></script>
+                <script src="/assets/js/trianglify.min.js"></script>
+                <script src="/assets/js/Please-compressed.js"></script>
+                <script src="/assets/js/background-check.min.js"></script>
+
+                <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+                <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+                <!--[if lt IE 9]>
+                        <script src="/assets/js/html5shiv.js"></script>
+                        <script src="/assets/js/respond.min.js"></script>
+                <![endif]-->
+                
                 
                 <script>hljs.initHighlightingOnLoad();</script>
 
