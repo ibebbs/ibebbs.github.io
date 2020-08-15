@@ -5,8 +5,108 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2020</copyright>
-		<pubDate>Wed, 12 Aug 2020 11:14:45 GMT</pubDate>
-		<lastBuildDate>Wed, 12 Aug 2020 11:14:45 GMT</lastBuildDate>
+		<pubDate>Sat, 15 Aug 2020 23:35:47 GMT</pubDate>
+		<lastBuildDate>Sat, 15 Aug 2020 23:35:47 GMT</lastBuildDate>
+		<item>
+			<title>Running UWP on Linux With Uno</title>
+			<link>http://ian.bebbs.co.uk/posts/UnoLinux</link>
+			<description>&lt;p&gt;At &lt;a href="https://unoconf.com/"&gt;UnoConf 2020&lt;/a&gt;, the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; team wowed attendees with the announcement of preliminary support for Linux. This had been something I had very much been hoping for and, first chance I got, I just had to give it a try. In this article I share how I went about getting set up for building and running a UWP app on Linux using the Uno Platform.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/UnoLinux</guid>
+			<pubDate>Sun, 16 Aug 2020 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;At &lt;a href="https://unoconf.com/"&gt;UnoConf 2020&lt;/a&gt;, the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; team wowed attendees with the announcement of preliminary support for Linux. This had been something I had very much been hoping for and, first chance I got, I just had to give it a try. In this article I share how I went about getting set up for building and running a UWP app on Linux using the Uno Platform.&lt;/p&gt;
+&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;UnoConf 2020 was held on 12th August 2020. If you weren't &amp;quot;there&amp;quot; then I would highly encourage you to &lt;a href="https://unoconf.com/"&gt;check out the recording&lt;/a&gt;. Over the course of several hours, (virtual) attendees were treated to numerous demos and descriptions of the Uno Platform, it's use and (rather a lot on) it's history.&lt;/p&gt;
+&lt;p&gt;However, &lt;a href="https://youtu.be/nbqe9uHWT_c?t=7931"&gt;the session by CEO Francois Tanguay and CTO Jérôme Laban&lt;/a&gt; was were the Uno team really notched up the shock and awe. After numerous amazing announcements such as the release of Uno Platform 3.0 with out-of-the-box support for both Fluent &lt;em&gt;and&lt;/em&gt; Material design aesthetics, and several &amp;quot;anything you can do [Flutter] we can do better/faster&amp;quot; demos, they then proceeded to blow everyone's minds by showing a UWP app running on a Raspberry Pi under Linux.&lt;/p&gt;
+&lt;p&gt;Yes, you read that correctly: Uno Platform now lets you run your UWP apps &lt;em&gt;on Linux&lt;/em&gt;. Just let that sink in for a second.&lt;/p&gt;
+&lt;p&gt;Back? Good.&lt;/p&gt;
+&lt;p&gt;Well, I just had to give this a shot. Despite a lack of documentation it turned out to be a fairly simple process once some preliminary software had been installed and the results were honestly better than I could have hoped for (hint: keep reading to the end for a bonus section).&lt;/p&gt;
+&lt;p&gt;Below I've outlined all the steps you need to follow to get an Uno app running under Linux.&lt;/p&gt;
+&lt;h2 id="setup"&gt;Setup&lt;/h2&gt;
+&lt;p&gt;Before being able to build or run a UWP app under Linux, you'll first need to get the following set up:&lt;/p&gt;
+&lt;h3 id="windows-terminal"&gt;Windows Terminal&lt;/h3&gt;
+&lt;p&gt;We will be firing lots of commands into both Windows and Linux shells. While you don't technically &lt;em&gt;need&lt;/em&gt; Windows Terminal, having a single app which is able to interact with both shells will really make your life easier. If you don't have it and want to install it, you can find it in the Windows Store, &lt;a href="https://www.microsoft.com/en-gb/p/windows-terminal/9n0dx20hk701?activetab=pivot:overviewtab"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;In the following steps I endeavour to highlight which shell to use for each command by putting the OS in bold (i.e. &lt;strong&gt;Windows&lt;/strong&gt; or &lt;strong&gt;Ubuntu&lt;/strong&gt;).&lt;/p&gt;
+&lt;h3 id="net-core-sdk-v3.1.100"&gt;.NET Core SDK v3.1.100&lt;/h3&gt;
+&lt;p&gt;Compiling an Uno Platform project for Linux requires a fairly recent version of the .NET Core toolchain so make sure you have SDK version 3.1.100 or higher installed. The latest version can be found &lt;a href="https://dotnet.microsoft.com/download/visual-studio-sdks"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Once you have an up to date version of the .NET Core SDK, install the latest pre-release version of the Uno ProjectTemplates. You can find latest version of the packages &lt;a href="https://www.nuget.org/packages/Uno.ProjectTemplates.Dotnet"&gt;here&lt;/a&gt; which at the time of writing is version &lt;code&gt;3.1.0-dev.39&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;From the &lt;strong&gt;Windows&lt;/strong&gt; command line, install the templates using the following command:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;dotnet new --install Uno.ProjectTemplates.Dotnet::3.1.0-dev.39
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="wsl2-ubuntu"&gt;WSL2 + Ubuntu&lt;/h3&gt;
+&lt;p&gt;We're going to be running our app in a Linux distribution running under WSL2. To do this you'll need to be running Windows 10 version 2004 (Build 19041) or higher and have WSL2 installed by following the instructions &lt;a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Once you have WSL2 installed, you'll need to install a Linux distribution. This can be done from the Windows Store, I used Ubuntu 20.04 LTS which can be found &lt;a href="https://www.microsoft.com/en-gb/p/windows-terminal/9n0dx20hk701?activetab=pivot:overviewtab"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;h3 id="x-window-server"&gt;X Window Server&lt;/h3&gt;
+&lt;p&gt;In order to run graphic apps from WSL2, we need to install an X Window Server on our Windows 10 host machine. There are a surprising number of alternatives here including &lt;a href="https://sourceforge.net/projects/xming/"&gt;Xming&lt;/a&gt; and &lt;a href="https://sourceforge.net/projects/vcxsrv/"&gt;VcXsrv&lt;/a&gt; but I went for &lt;a href="https://www.microsoft.com/en-gb/p/x410/9nlp712zmn9q?activetab=pivot:overviewtab"&gt;X410&lt;/a&gt; because it was in the Windows Store, super-easy to use and - until the end of August - heavily discounted to just £8.39.&lt;/p&gt;
+&lt;p&gt;After installing X410, all you need to do is run the app, the right click on it's system tray icon and click &amp;quot;Allow Public Networks&amp;quot; as shown below:&lt;/p&gt;
+&lt;img src="/Content/UnoLinux/X410 Allow Public Networks.png" class="img-responsive" style="margin: auto; max-width:90%; margin-top: 6px; margin-bottom: 6px;" alt="X410 Allow Public Networks"/&gt;
+&lt;p&gt;With that done, leave it running so we can...&lt;/p&gt;
+&lt;h2 id="test"&gt;Test&lt;/h2&gt;
+&lt;p&gt;Before digging into building our own app, we're going to test our &amp;quot;WSL2 + X Window Server&amp;quot; combo. So from a command prompt inside your &lt;strong&gt;Ubuntu&lt;/strong&gt; distribution run the following commands:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;sudo apt-get update
+sudo apt-get install vim-gtk
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This will install the graphic version of Vim which we can use to check that we're able to run a graphical Linux app from Windows (just sounds weird doesn't it!).&lt;/p&gt;
+&lt;p&gt;Next find the IP address of the WSL adapter on your Windows 10 host machine. This can be done using &lt;code&gt;ipconfig&lt;/code&gt; from the &lt;strong&gt;Windows&lt;/strong&gt; command line as shown below:&lt;/p&gt;
+&lt;img src="/Content/UnoLinux/Windows 10 WSL Adapter IP Address.png" class="img-responsive" style="margin: auto; max-width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Windows 10 WSL Adapter IP Address"/&gt;
+&lt;p&gt;With this in hand, enter the following on the &lt;strong&gt;Ubuntu&lt;/strong&gt; command prompt (told you that you'd want Windows Terminal!) substituting your IP address appropriately:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;export DISPLAY=[IP ADDRESS]:0
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally, start vim-gtk by running the following command, again from the &lt;strong&gt;Ubuntu&lt;/strong&gt; prompt:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;gvim
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If everything is set up correctly, you should see the following window appear:&lt;/p&gt;
+&lt;img src="/Content/UnoLinux/Gvim on Windows 10.png" class="img-responsive" style="margin: auto; max-width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Gvim on Windows 10"/&gt;
+&lt;p&gt;If the window doesn't appear try following the troubleshooting section &lt;a href="https://github.com/cascadium/wsl-windows-toolbar-launcher/blob/master/README.md#troubleshooting"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="build"&gt;Build&lt;/h2&gt;
+&lt;p&gt;Still with me? Aces. Now lets use Uno to create a UWP app which will run in Ubuntu!&lt;/p&gt;
+&lt;p&gt;From the &lt;strong&gt;Windows&lt;/strong&gt; command prompt, navigate to the directory where you want to create the new solution and type the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;dotnet new unoapp -o UnoLinux -w=false -wasm=false -ios=false -android=false -macos=false -sw=false
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This will create a new folder named UnoLinux inside of which will be an Uno Solution containing just the &lt;code&gt;UWP&lt;/code&gt; and &lt;code&gt;Skia.Gtk&lt;/code&gt; head projects.&lt;/p&gt;
+&lt;p&gt;Next, still on the &lt;strong&gt;Windows&lt;/strong&gt; command line, navigate to the &lt;code&gt;UnoLinux.Skia.Gtk&lt;/code&gt; project and build it using:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd .\UnoLinux\UnoLinux.Skia.Gtk\
+dotnet build
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You will probably see a few warnings but as long as you see &amp;quot;Build Succeeded&amp;quot; you should be golden. My build output looks as follows:&lt;/p&gt;
+&lt;img src="/Content/UnoLinux/UnoLinux Build Output.png" class="img-responsive" style="margin: auto; max-width:90%; margin-top: 6px; margin-bottom: 6px;" alt="UnoLinux Build Output"/&gt;
+&lt;p&gt;Finally we want to build the project for the Linux runtime and publish it as a self contained executable. This is done using the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;dotnet publish --runtime linux-x64 -c Release --self-contained
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You're likely to see the same warnings again here but there shouldn't be any errors.&lt;/p&gt;
+&lt;p&gt;Once this command completes you should be able to navigate to &lt;code&gt;.\bin\Release\netcoreapp3.1\linux-x64\&lt;/code&gt; where you will find a &lt;code&gt;UnoLinux.Skia.Gtk&lt;/code&gt; file.&lt;/p&gt;
+&lt;p&gt;Got it? Brills!&lt;/p&gt;
+&lt;h2 id="running-uwp-on-ubuntu"&gt;Running UWP on Ubuntu&lt;/h2&gt;
+&lt;p&gt;Back at the &lt;strong&gt;Ubuntu&lt;/strong&gt; command prompt, navigate to the &lt;code&gt;bin\Release&lt;/code&gt; directory above. In WSL all your Windows drives should be mounted under &lt;code&gt;/mnt/&lt;/code&gt; so you should be able to run a command similar to the following (with [DRIVE LETTER] and [PATH] replaced):&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd /mnt/[DRIVE LETTER]/[PATH]/UnoLinux/UnoLinux.Skia.Gtk/bin/Release/netcoreapp3.1/linux-x64
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally - and here comes the magic - run the &lt;code&gt;UnoLinux.Skia.Gtk&lt;/code&gt; app from the &lt;strong&gt;Ubuntu&lt;/strong&gt; command line using:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;./UnoLinux.Skia.Gtk
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Again, if everything has gone smoothly, the following window should pop-up after a few seconds:&lt;/p&gt;
+&lt;img src="/Content/UnoLinux/UnoLinux Hello World.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="UnoLinux Hello World"/&gt;
+&lt;p&gt;Now sit back and let this sink in for a second.&lt;/p&gt;
+&lt;p&gt;This is a Universal &lt;em&gt;Windows&lt;/em&gt; Platform application, rendering to a Skia backend, within a GTK host, running in Ubuntu, running under Windows. Given we're this many layers down, perhaps I might be able to plant an idea:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;UWP... &lt;em&gt;all... the... things&lt;/em&gt;!&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id="bonus"&gt;Bonus&lt;/h2&gt;
+&lt;p&gt;Now, thanks to the Uno team, all the above was fairly painless and I still had some time left so.... I decided to see how far I could push UWP under Linux.&lt;/p&gt;
+&lt;p&gt;Using the &lt;a href="https://github.com/ibebbs/UnoChat"&gt;UnoChat sample&lt;/a&gt; I created for my &lt;a href="https://ian.bebbs.co.uk/posts/UnoChat"&gt;&amp;quot;Cross-Platform Real-Time Communication with Uno &amp;amp; SignalR&amp;quot;&lt;/a&gt; post, I updated all the Uno packages to the latest pre-release versions. I then copied the &lt;code&gt;UnoLinux.Skia.Gtk&lt;/code&gt; project folder from the &lt;code&gt;UnoLinux&lt;/code&gt; solution we just created and added it to the &lt;code&gt;UnoChat&lt;/code&gt; solution. Some monkeying ensured to re-namespace everything and correct project and package references but without too much effort, I got everything building.&lt;/p&gt;
+&lt;p&gt;With baited breath, I tried this:&lt;/p&gt;
+&lt;video class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" controls autoplay loop&gt;
+  &lt;source src="/Content/UnoLinux/UnoChat for Linux.mp4" type="video/mp4"/&gt;
+Your browser does not support the video tag
+&lt;/video&gt;
+&lt;p&gt;Woah! Without modifying &lt;em&gt;any&lt;/em&gt; of the shared code, the &lt;em&gt;exact same application&lt;/em&gt; compiled, ran &lt;em&gt;&lt;strong&gt;and functioned&lt;/strong&gt;&lt;/em&gt; under Linux.&lt;/p&gt;
+&lt;p&gt;That's not to say there weren't problems. There seemed to be an issue with &lt;code&gt;TextBox&lt;/code&gt; controls which prevented me from sending messages from the Linux head and the fonts didn't quite match across the platforms. But, given this is just a preliminary release, the fact that the app could receive messages from a remote SignalR server then template and render the messages correctly on Linux is just stunning.&lt;/p&gt;
+&lt;p&gt;Absolutely. Stunning.&lt;/p&gt;
+&lt;h2 id="code"&gt;Code&lt;/h2&gt;
+&lt;p&gt;The code for this sample is available in the &amp;quot;Prerelease&amp;quot; branch of my UnoChat repository &lt;a href="https://github.com/ibebbs/UnoChat/tree/Prerelease"&gt;here&lt;/a&gt;. Once Linux support is a little more mature, I'll update the more advanced &amp;quot;Uno.ChatSignalR&amp;quot; app I prepared for UnoConf which can be found &lt;a href="https://github.com/unoplatform/Uno.Samples/tree/master/UI/ChatSignalR"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="and-lastly"&gt;And lastly...&lt;/h2&gt;
+&lt;p&gt;If you're interested in using the Uno Platform to deliver cross-platform apps or have an upcoming project for which you'd like evaluate Uno Platform's fit, then please feel free to drop me a line to discuss your project/ideas using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;. As a freelance software developer and remote contractor I'm always interested in hearing from potential new clients or ideas for new collaborations.&lt;/p&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>On the incredible value proposition of .NET &amp; the Uno Platform</title>
 			<link>http://ian.bebbs.co.uk/posts/UnoValue</link>
@@ -4455,54 +4555,6 @@ volumes:
 &lt;p&gt;Furthermore, being able to aggregate and analyse this data retrospectively has allowed us to make informed decisions on future sustainability choices like whether to get an electric car or solar battery. Unfortunately neither of these options have yet made the cut, mostly due to RoI considerations.&lt;/p&gt;
 &lt;p&gt;In future posts, I'll show some of the ways in which I've used this data and other forms of technology to further promote sustainable living. For now though I would like to conclude by saying that having solar panels installed and being able to see the impact they're having has had a profound effect on our electricity usage and our views on sustainability in general. We feel very good about having made this important step to reducing our carbon foot-print and that, in itself, has provided the motivation to explore more ways to live more sustainably.&lt;/p&gt;
 &lt;img src="../Content/TechAdventuresInSustainability-PartI/EnvironmentalBenefits.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Environmental Benefits"&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>Be Brave. Like BAT, man!</title>
-			<link>http://ian.bebbs.co.uk/posts/BeBraveLikeBATMan</link>
-			<description>&lt;p&gt;Brave is a privacy focused browser with a revolutionary means of supporting content publisher's revenue streams. Here's why you  should &lt;a href="https://brave.com/beb095"&gt;give it a try&lt;/a&gt;, particularly if you maintain a blog or publish open-source software.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/BeBraveLikeBATMan</guid>
-			<pubDate>Fri, 06 Sep 2019 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;h1 id="tldr"&gt;TL;DR&lt;/h1&gt;
-&lt;p&gt;Brave is a privacy focused browser with a revolutionary means of supporting content publisher's revenue streams. Here's why you  should &lt;a href="https://brave.com/beb095"&gt;give it a try&lt;/a&gt;, particularly if you maintain a blog or publish open-source software.&lt;/p&gt;
-&lt;h2 id="it-all-starts-with-privacy"&gt;It all starts with Privacy&lt;/h2&gt;
-&lt;p&gt;As anyone who knows me will tell you, I care deeply about privacy. In fact, should you happen to ask one of these people about my insistence on privacy, they'll give a nod confirmation accompanied by a not so subtle eye-roll of derision. This used to bother me but I've learned the hard way the lesson which Cory Doctorow states so eloquently:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;It’s really hard to get people to care about dangers that are far in the future, especially when the action that puts you in danger and the consequences of that action are separated by an unbridgeable gap of time and space. Privacy disclosures are a public health problem, like smoking. No one puff on a cigarette will definitely give you cancer, but take enough puffs and you’ll virtually guarantee cancer, eventually. No one act of disclosure of personal information will harm you, but once enough disclosures have taken place, over enough time, you’re going to get into serious privacy trouble.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;I am that schmuck who actual reads (and, more often than not, is terrified by) the list of permissions installing an app on your phone requires. Therefore, when my beloved Windows Mobile phone was finally - and somewhat forcibly - supplanted by an Android device, my first action was to endeavour to replace all the privacy invading dross that came pre-installed and find more secure alternatives.&lt;/p&gt;
-&lt;p&gt;And so it was that I chose &lt;a href="https://brave.com/beb095"&gt;Brave&lt;/a&gt; to replace the stock Chrome browser.&lt;/p&gt;
-&lt;h2 id="the-brave-browser"&gt;The Brave Browser&lt;/h2&gt;
-&lt;p&gt;Brave is a Chromium based browser focused on user privacy. It's privacy features include the ability to block ads, cross site trackers, cross site cookies and device identification; all features used by nefarious advertising agencies to aggressively profile and target individuals without consent. Moreover, on a mobile device, using Brave saves time, money and battery as adverts and trackers are not downloaded resulting in sites that load quicker, use less data allowance and consume less power.&lt;/p&gt;
-&lt;p&gt;It works really well and, to me, is a no brainer. I've yet to find a site that didn't work in Brave or has been otherwise negatively impacted by the removal of adverts/trackers. I would unreservedly recommend that everyone swap Google Chrome for Brave immediately; you won't look back.&lt;/p&gt;
-&lt;h2 id="its-a-win-win-but-not-a-win-win-win"&gt;It's a win-win, but not a win-win-win.&lt;/h2&gt;
-&lt;p&gt;Of course, there's an issue with blocking adverts: Many content publishers rely on the use of advertising to pay the bills and, by preventing adverts from appearing, you're depriving the sites you visit most of a vital source of revenue.&lt;/p&gt;
-&lt;p&gt;Brave's founders were very aware of the web's dependence on the trichotomy of users, content publishers and advertisers when they released their browser. In the years since, they have released and refined various approaches to resolving this issue, finally arriving at the BAT.&lt;/p&gt;
-&lt;h2 id="basic-attention-token-bat"&gt;Basic Attention Token (BAT)&lt;/h2&gt;
-&lt;p&gt;The Basic Attention Token endeavours to address this issue by providing a means for advertisers to reach users through content publisher's sites while doing so anonymously and providing financial incentives to &lt;em&gt;all the involved parties&lt;/em&gt;.&lt;/p&gt;
-&lt;p&gt;As the old adage goes, a picture is worth a thousand words so here's one worth many times that, direct from the &lt;a href="https://basicattentiontoken.org"&gt;basicattentiontoken.org&lt;/a&gt; website:&lt;/p&gt;
-&lt;img src="https://basicattentiontoken.org/wp-content/uploads/2017/03/bat_triad_diagram.png" class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" alt="BAT Triad"&gt;
-&lt;p&gt;In short, users are able to support the sites they visit most by being exposed to advertisements that are truly relevant to them, all without compromising privacy. Amazingly the user is even &lt;em&gt;rewarded&lt;/em&gt; for being exposed to these ads and will accumulate BAT (directly tradable against other crypto - and by extension - fiat currencies) in the browser's built-in wallet.&lt;/p&gt;
-&lt;h1 id="brave-rewards"&gt;Brave Rewards&lt;/h1&gt;
-&lt;p&gt;This really is a revolution in how the modern web operates and is monetized yet, amazingly, it is entirely optional in the Brave Browser.&lt;/p&gt;
-&lt;p&gt;It is enabled by opting in to 'Brave Rewards' as shown below:&lt;/p&gt;
-&lt;img src="../Content/BeBraveLikeBATman/BraveRewards.jpg" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Brave Rewards Summary"&gt;
-&lt;p&gt;I enabled &amp;quot;Brave Rewards&amp;quot; a couple of months back after being prompted by Brave and reading about it in depth. As you can see, just by using the browser as I normal would, without any obvious, annoying or intrusive ads, and despite having 'Auto-Contribute' enabled, I have accumulated ~26 BAT.&lt;/p&gt;
-&lt;p&gt;&amp;quot;But that's less than five dollars!&amp;quot; I hear you say. True, but that's five dollars that would otherwise have been in the pockets of the big internet advertising agencies and, as with other crypto currencies, has the possibility to be worth much more should the BAT continue it's current growth. More importantly though, by auto-contributing accrued BAT to the sites I visit most, I have directly supported these sites with (micro) payments in a way I ordinarily would not have been able to do.&lt;/p&gt;
-&lt;h2 id="now-get-pay-for-attention"&gt;Now [get] pay [for] attention!&lt;/h2&gt;
-&lt;p&gt;All in all, I feel pretty good about my adoption and promotion of BAT. So much so that I recently registered as a &lt;a href="https://publishers.basicattentiontoken.org/"&gt;'Verified Content Creator'&lt;/a&gt; and added both my &lt;a href="ian.bebbs.co.uk"&gt;blog&lt;/a&gt; and my &lt;a href="https://github.com/ibebbs"&gt;github account&lt;/a&gt; as revenue channels. By registering in this way, anyone who uses the Brave browser to read my blog or open-source projects will automatically help support the further creation of these forms of content by contributing BAT.&lt;/p&gt;
-&lt;p&gt;The &lt;a href="https://publishers.basicattentiontoken.org/"&gt;Brave Rewards Creators program&lt;/a&gt; allows you to accrue BAT through numerous channels including (at the time of writing) web sites, YouTube, Twitch, Twitter, Vimeo, Reddit and Github. If you create content in any of these ways, I very much recommend you register as a verified content creator. Brave maintains historical contributions to creators not currently registered, so you could be in for a windfall of BAT when you do!&lt;/p&gt;
-&lt;h2 id="bat-sht-crazy"&gt;BAT-sh*t crazy!&lt;/h2&gt;
-&lt;p&gt;More recently I've moved to using Brave as my primary desktop browser too. Initial experiences are that it provides the same excellent browsing characteristics of it's Android cousin but that it's use of system notifications for ad delivery is a little too &amp;quot;in your face&amp;quot;. I'm going to stick with it for a while and see how it goes. If the ads get too much, I'll simply disable &amp;quot;Brave Rewards&amp;quot; on the desktop while continuing to enjoy privacy and speed enhancements delivered by this excellent browser.&lt;/p&gt;
-&lt;h2 id="support-me"&gt;Support me&lt;/h2&gt;
-&lt;p&gt;If you have had your interest piqued by this post and are now interested in trying out the Brave browser, it would be great if you could use this &lt;a href="https://brave.com/beb095"&gt;referral link&lt;/a&gt; for download. It will net me approximately $5 of BAT via the &lt;a href="https://brave.com/referral-program/"&gt;Brave referral program&lt;/a&gt;. Thanks!&lt;/p&gt;
-&lt;h2 id="further-reading"&gt;Further Reading&lt;/h2&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://basicattentiontoken.org/"&gt;Basic Attention Token homepage&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://arunoda.me/blog/all-about-basic-attention-token"&gt;All about Basic Attention Token (BAT)&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://locusmag.com/2016/07/cory-doctorow-peak-indifference/"&gt;Cory Doctorow: Peak Indifference&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://batgrowth.com/"&gt;BATGrowth.com&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
 </content:encoded>
 		</item>
 	</channel>

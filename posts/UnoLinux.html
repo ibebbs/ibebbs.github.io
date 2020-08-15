@@ -1,0 +1,315 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Running UWP on Linux With Uno</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Running UWP on Linux With Uno" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/UnoLinux" />
+        <!-- TODO: More social graph meta tags -->
+
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Running UWP on Linux With Uno</h1>
+        <h2 class="subheading">Yeah, really.</h2>
+    <div class="meta">        
+Published on 16 August 2020<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/Linux" class="btn btn-default btn-xs">Linux</a>
+                    <a role="button" href="/tags/Raspberry-Pi" class="btn btn-default btn-xs">Raspberry Pi</a>
+                    <a role="button" href="/tags/Uno-Platform" class="btn btn-default btn-xs">Uno Platform</a>
+                    <a role="button" href="/tags/UWP" class="btn btn-default btn-xs">UWP</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="tldr">TL;DR</h2>
+<p>At <a href="https://unoconf.com/">UnoConf 2020</a>, the <a href="https://platform.uno/">Uno Platform</a> team wowed attendees with the announcement of preliminary support for Linux. This had been something I had very much been hoping for and, first chance I got, I just had to give it a try. In this article I share how I went about getting set up for building and running a UWP app on Linux using the Uno Platform.</p>
+<h2 id="intro">Intro</h2>
+<p>UnoConf 2020 was held on 12th August 2020. If you weren't &quot;there&quot; then I would highly encourage you to <a href="https://unoconf.com/">check out the recording</a>. Over the course of several hours, (virtual) attendees were treated to numerous demos and descriptions of the Uno Platform, it's use and (rather a lot on) it's history.</p>
+<p>However, <a href="https://youtu.be/nbqe9uHWT_c?t=7931">the session by CEO Francois Tanguay and CTO Jérôme Laban</a> was were the Uno team really notched up the shock and awe. After numerous amazing announcements such as the release of Uno Platform 3.0 with out-of-the-box support for both Fluent <em>and</em> Material design aesthetics, and several &quot;anything you can do [Flutter] we can do better/faster&quot; demos, they then proceeded to blow everyone's minds by showing a UWP app running on a Raspberry Pi under Linux.</p>
+<p>Yes, you read that correctly: Uno Platform now lets you run your UWP apps <em>on Linux</em>. Just let that sink in for a second.</p>
+<p>Back? Good.</p>
+<p>Well, I just had to give this a shot. Despite a lack of documentation it turned out to be a fairly simple process once some preliminary software had been installed and the results were honestly better than I could have hoped for (hint: keep reading to the end for a bonus section).</p>
+<p>Below I've outlined all the steps you need to follow to get an Uno app running under Linux.</p>
+<h2 id="setup">Setup</h2>
+<p>Before being able to build or run a UWP app under Linux, you'll first need to get the following set up:</p>
+<h3 id="windows-terminal">Windows Terminal</h3>
+<p>We will be firing lots of commands into both Windows and Linux shells. While you don't technically <em>need</em> Windows Terminal, having a single app which is able to interact with both shells will really make your life easier. If you don't have it and want to install it, you can find it in the Windows Store, <a href="https://www.microsoft.com/en-gb/p/windows-terminal/9n0dx20hk701?activetab=pivot:overviewtab">here</a>.</p>
+<p>In the following steps I endeavour to highlight which shell to use for each command by putting the OS in bold (i.e. <strong>Windows</strong> or <strong>Ubuntu</strong>).</p>
+<h3 id="net-core-sdk-v3.1.100">.NET Core SDK v3.1.100</h3>
+<p>Compiling an Uno Platform project for Linux requires a fairly recent version of the .NET Core toolchain so make sure you have SDK version 3.1.100 or higher installed. The latest version can be found <a href="https://dotnet.microsoft.com/download/visual-studio-sdks">here</a>.</p>
+<p>Once you have an up to date version of the .NET Core SDK, install the latest pre-release version of the Uno ProjectTemplates. You can find latest version of the packages <a href="https://www.nuget.org/packages/Uno.ProjectTemplates.Dotnet">here</a> which at the time of writing is version <code>3.1.0-dev.39</code>.</p>
+<p>From the <strong>Windows</strong> command line, install the templates using the following command:</p>
+<pre><code>dotnet new --install Uno.ProjectTemplates.Dotnet::3.1.0-dev.39
+</code></pre>
+<h3 id="wsl2-ubuntu">WSL2 + Ubuntu</h3>
+<p>We're going to be running our app in a Linux distribution running under WSL2. To do this you'll need to be running Windows 10 version 2004 (Build 19041) or higher and have WSL2 installed by following the instructions <a href="https://docs.microsoft.com/en-us/windows/wsl/install-win10">here</a>.</p>
+<p>Once you have WSL2 installed, you'll need to install a Linux distribution. This can be done from the Windows Store, I used Ubuntu 20.04 LTS which can be found <a href="https://www.microsoft.com/en-gb/p/windows-terminal/9n0dx20hk701?activetab=pivot:overviewtab">here</a>.</p>
+<h3 id="x-window-server">X Window Server</h3>
+<p>In order to run graphic apps from WSL2, we need to install an X Window Server on our Windows 10 host machine. There are a surprising number of alternatives here including <a href="https://sourceforge.net/projects/xming/">Xming</a> and <a href="https://sourceforge.net/projects/vcxsrv/">VcXsrv</a> but I went for <a href="https://www.microsoft.com/en-gb/p/x410/9nlp712zmn9q?activetab=pivot:overviewtab">X410</a> because it was in the Windows Store, super-easy to use and - until the end of August - heavily discounted to just £8.39.</p>
+<p>After installing X410, all you need to do is run the app, the right click on it's system tray icon and click &quot;Allow Public Networks&quot; as shown below:</p>
+<img src="/Content/UnoLinux/X410 Allow Public Networks.png" class="img-responsive" style="margin: auto; max-width:90%; margin-top: 6px; margin-bottom: 6px;" alt="X410 Allow Public Networks"/>
+<p>With that done, leave it running so we can...</p>
+<h2 id="test">Test</h2>
+<p>Before digging into building our own app, we're going to test our &quot;WSL2 + X Window Server&quot; combo. So from a command prompt inside your <strong>Ubuntu</strong> distribution run the following commands:</p>
+<pre><code>sudo apt-get update
+sudo apt-get install vim-gtk
+</code></pre>
+<p>This will install the graphic version of Vim which we can use to check that we're able to run a graphical Linux app from Windows (just sounds weird doesn't it!).</p>
+<p>Next find the IP address of the WSL adapter on your Windows 10 host machine. This can be done using <code>ipconfig</code> from the <strong>Windows</strong> command line as shown below:</p>
+<img src="/Content/UnoLinux/Windows 10 WSL Adapter IP Address.png" class="img-responsive" style="margin: auto; max-width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Windows 10 WSL Adapter IP Address"/>
+<p>With this in hand, enter the following on the <strong>Ubuntu</strong> command prompt (told you that you'd want Windows Terminal!) substituting your IP address appropriately:</p>
+<pre><code>export DISPLAY=[IP ADDRESS]:0
+</code></pre>
+<p>Finally, start vim-gtk by running the following command, again from the <strong>Ubuntu</strong> prompt:</p>
+<pre><code>gvim
+</code></pre>
+<p>If everything is set up correctly, you should see the following window appear:</p>
+<img src="/Content/UnoLinux/Gvim on Windows 10.png" class="img-responsive" style="margin: auto; max-width:60%; margin-top: 6px; margin-bottom: 6px;" alt="Gvim on Windows 10"/>
+<p>If the window doesn't appear try following the troubleshooting section <a href="https://github.com/cascadium/wsl-windows-toolbar-launcher/blob/master/README.md#troubleshooting">here</a>.</p>
+<h2 id="build">Build</h2>
+<p>Still with me? Aces. Now lets use Uno to create a UWP app which will run in Ubuntu!</p>
+<p>From the <strong>Windows</strong> command prompt, navigate to the directory where you want to create the new solution and type the following:</p>
+<pre><code>dotnet new unoapp -o UnoLinux -w=false -wasm=false -ios=false -android=false -macos=false -sw=false
+</code></pre>
+<p>This will create a new folder named UnoLinux inside of which will be an Uno Solution containing just the <code>UWP</code> and <code>Skia.Gtk</code> head projects.</p>
+<p>Next, still on the <strong>Windows</strong> command line, navigate to the <code>UnoLinux.Skia.Gtk</code> project and build it using:</p>
+<pre><code>cd .\UnoLinux\UnoLinux.Skia.Gtk\
+dotnet build
+</code></pre>
+<p>You will probably see a few warnings but as long as you see &quot;Build Succeeded&quot; you should be golden. My build output looks as follows:</p>
+<img src="/Content/UnoLinux/UnoLinux Build Output.png" class="img-responsive" style="margin: auto; max-width:90%; margin-top: 6px; margin-bottom: 6px;" alt="UnoLinux Build Output"/>
+<p>Finally we want to build the project for the Linux runtime and publish it as a self contained executable. This is done using the following:</p>
+<pre><code>dotnet publish --runtime linux-x64 -c Release --self-contained
+</code></pre>
+<p>You're likely to see the same warnings again here but there shouldn't be any errors.</p>
+<p>Once this command completes you should be able to navigate to <code>.\bin\Release\netcoreapp3.1\linux-x64\</code> where you will find a <code>UnoLinux.Skia.Gtk</code> file.</p>
+<p>Got it? Brills!</p>
+<h2 id="running-uwp-on-ubuntu">Running UWP on Ubuntu</h2>
+<p>Back at the <strong>Ubuntu</strong> command prompt, navigate to the <code>bin\Release</code> directory above. In WSL all your Windows drives should be mounted under <code>/mnt/</code> so you should be able to run a command similar to the following (with [DRIVE LETTER] and [PATH] replaced):</p>
+<pre><code>cd /mnt/[DRIVE LETTER]/[PATH]/UnoLinux/UnoLinux.Skia.Gtk/bin/Release/netcoreapp3.1/linux-x64
+</code></pre>
+<p>Finally - and here comes the magic - run the <code>UnoLinux.Skia.Gtk</code> app from the <strong>Ubuntu</strong> command line using:</p>
+<pre><code>./UnoLinux.Skia.Gtk
+</code></pre>
+<p>Again, if everything has gone smoothly, the following window should pop-up after a few seconds:</p>
+<img src="/Content/UnoLinux/UnoLinux Hello World.png" class="img-responsive" style="margin: auto; width:60%; margin-top: 6px; margin-bottom: 6px;" alt="UnoLinux Hello World"/>
+<p>Now sit back and let this sink in for a second.</p>
+<p>This is a Universal <em>Windows</em> Platform application, rendering to a Skia backend, within a GTK host, running in Ubuntu, running under Windows. Given we're this many layers down, perhaps I might be able to plant an idea:</p>
+<blockquote class="blockquote">
+<p>UWP... <em>all... the... things</em>!</p>
+</blockquote>
+<h2 id="bonus">Bonus</h2>
+<p>Now, thanks to the Uno team, all the above was fairly painless and I still had some time left so.... I decided to see how far I could push UWP under Linux.</p>
+<p>Using the <a href="https://github.com/ibebbs/UnoChat">UnoChat sample</a> I created for my <a href="https://ian.bebbs.co.uk/posts/UnoChat">&quot;Cross-Platform Real-Time Communication with Uno &amp; SignalR&quot;</a> post, I updated all the Uno packages to the latest pre-release versions. I then copied the <code>UnoLinux.Skia.Gtk</code> project folder from the <code>UnoLinux</code> solution we just created and added it to the <code>UnoChat</code> solution. Some monkeying ensured to re-namespace everything and correct project and package references but without too much effort, I got everything building.</p>
+<p>With baited breath, I tried this:</p>
+<video class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" controls autoplay loop>
+  <source src="/Content/UnoLinux/UnoChat for Linux.mp4" type="video/mp4"/>
+Your browser does not support the video tag
+</video>
+<p>Woah! Without modifying <em>any</em> of the shared code, the <em>exact same application</em> compiled, ran <em><strong>and functioned</strong></em> under Linux.</p>
+<p>That's not to say there weren't problems. There seemed to be an issue with <code>TextBox</code> controls which prevented me from sending messages from the Linux head and the fonts didn't quite match across the platforms. But, given this is just a preliminary release, the fact that the app could receive messages from a remote SignalR server then template and render the messages correctly on Linux is just stunning.</p>
+<p>Absolutely. Stunning.</p>
+<h2 id="code">Code</h2>
+<p>The code for this sample is available in the &quot;Prerelease&quot; branch of my UnoChat repository <a href="https://github.com/ibebbs/UnoChat/tree/Prerelease">here</a>. Once Linux support is a little more mature, I'll update the more advanced &quot;Uno.ChatSignalR&quot; app I prepared for UnoConf which can be found <a href="https://github.com/unoplatform/Uno.Samples/tree/master/UI/ChatSignalR">here</a>.</p>
+<h2 id="and-lastly">And lastly...</h2>
+<p>If you're interested in using the Uno Platform to deliver cross-platform apps or have an upcoming project for which you'd like evaluate Uno Platform's fit, then please feel free to drop me a line to discuss your project/ideas using any of the links below or from my <a href="https://ian.bebbs.co.uk/about">about page</a>. As a freelance software developer and remote contractor I'm always interested in hearing from potential new clients or ideas for new collaborations.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2020. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                <script src="/assets/js/jquery.min.js"></script>
+                <script src="/assets/js/bootstrap.min.js"></script>     
+                <script src="/assets/js/highlight.pack.js"></script>   
+                <script src="/assets/js/clean-blog.js"></script>
+                <script src="/assets/js/d3.v3.min.js"></script>
+                <script src="/assets/js/trianglify.min.js"></script>
+                <script src="/assets/js/Please-compressed.js"></script>
+                <script src="/assets/js/background-check.min.js"></script>
+
+                <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+                <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+                <!--[if lt IE 9]>
+                        <script src="/assets/js/html5shiv.js"></script>
+                        <script src="/assets/js/respond.min.js"></script>
+                <![endif]-->
+                
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
