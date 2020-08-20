@@ -4,7 +4,7 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-08-20T11:17:52Z</updated>
+	<updated>2020-08-20T11:22:41Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/UnoPi</id>
@@ -96,7 +96,7 @@ Broadcom Videocore-IV&lt;br/&gt;
 &lt;p&gt;There were a couple of minor issues - &lt;code&gt;UIElement.Opacity&lt;/code&gt; doesn't seem to work and an inline control template for the button seemed to cause the button to disappear - but nothing that couldn't be easily worked around. In short, writing a UWP app that worked on the Raspberry Pi under Linux was no more difficult than writing a UWP app that runs on a phone under Android or iOS (which itself is a minor miracle!).&lt;/p&gt;
 &lt;p&gt;Below you can see a video of Unopify running on a Raspberry Pi 3B+. In it I'm using Spotify Web Player on the PC to control a Spotify Connect amp and running Unopify on the Pi you can &lt;em&gt;just&lt;/em&gt; see below the TV. At start-up, Unopify requests an authentication token from SignalR then starts polling the Spotify Web API for player state and using the responses to update the UI. Finally, the previous/next/play/pause buttons within Unopify directly call the Spotify Web API which causes the amp to play, pause or change track accordingly.&lt;/p&gt;
 &lt;p&gt;(Apologies for the poor quality but a direct screen capture wasn't an option as I wanted to include audio from the amp.)&lt;/p&gt;
-&lt;video class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" controls autoplay loop&gt;
+&lt;video class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" controls&gt;
   &lt;source src="/Content/UnoPi/Unopify on Raspberry Pi.mp4" type="video/mp4"/&gt;
 Your browser does not support the video tag
 &lt;/video&gt;
