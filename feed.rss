@@ -5,14 +5,14 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2020</copyright>
-		<pubDate>Thu, 20 Aug 2020 11:15:07 GMT</pubDate>
-		<lastBuildDate>Thu, 20 Aug 2020 11:15:07 GMT</lastBuildDate>
+		<pubDate>Thu, 20 Aug 2020 11:17:52 GMT</pubDate>
+		<lastBuildDate>Thu, 20 Aug 2020 11:17:52 GMT</lastBuildDate>
 		<item>
 			<title>Running UWP on a Raspberry Pi Using Uno Platform</title>
 			<link>http://ian.bebbs.co.uk/posts/UnoPi</link>
 			<description>&lt;p&gt;A few days ago I showed how the recent &lt;a href="https://platform.uno/blog/announncing-uno-platform-3-0-linux-support-fluent-material-and-more/"&gt;v3 release&lt;/a&gt; of the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; allowed you to run UWP apps on Linux. This was fantastic but really only half the story I wanted to tell. What I really wanted to do was see if I could get an app written in my favourite UI framework running on my favourite SBC; to wit, UWP on the the &lt;a href="https://www.raspberrypi.org/"&gt;Raspberry Pi&lt;/a&gt;. In this post I show how, yet again, the Uno team have made this not only possible but startlingly easy and shockingly powerful.&lt;/p&gt;</description>
 			<guid>http://ian.bebbs.co.uk/posts/UnoPi</guid>
-			<pubDate>Wed, 19 Aug 2020 00:00:00 GMT</pubDate>
+			<pubDate>Thu, 20 Aug 2020 00:00:00 GMT</pubDate>
 			<content:encoded>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
 &lt;p&gt;A few days ago I showed how the recent &lt;a href="https://platform.uno/blog/announncing-uno-platform-3-0-linux-support-fluent-material-and-more/"&gt;v3 release&lt;/a&gt; of the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; allowed you to run UWP apps on Linux. This was fantastic but really only half the story I wanted to tell. What I really wanted to do was see if I could get an app written in my favourite UI framework running on my favourite SBC; to wit, UWP on the the &lt;a href="https://www.raspberrypi.org/"&gt;Raspberry Pi&lt;/a&gt;. In this post I show how, yet again, the Uno team have made this not only possible but startlingly easy and shockingly powerful.&lt;/p&gt;
 &lt;h2 id="intro"&gt;Intro&lt;/h2&gt;

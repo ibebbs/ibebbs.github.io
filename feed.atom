@@ -4,13 +4,13 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-08-20T11:15:07Z</updated>
+	<updated>2020-08-20T11:17:52Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/UnoPi</id>
 		<title>Running UWP on a Raspberry Pi Using Uno Platform</title>
 		<link href="http://ian.bebbs.co.uk/posts/UnoPi" />
-		<updated>2020-08-19T00:00:00Z</updated>
+		<updated>2020-08-20T00:00:00Z</updated>
 		<content>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
 &lt;p&gt;A few days ago I showed how the recent &lt;a href="https://platform.uno/blog/announncing-uno-platform-3-0-linux-support-fluent-material-and-more/"&gt;v3 release&lt;/a&gt; of the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; allowed you to run UWP apps on Linux. This was fantastic but really only half the story I wanted to tell. What I really wanted to do was see if I could get an app written in my favourite UI framework running on my favourite SBC; to wit, UWP on the the &lt;a href="https://www.raspberrypi.org/"&gt;Raspberry Pi&lt;/a&gt;. In this post I show how, yet again, the Uno team have made this not only possible but startlingly easy and shockingly powerful.&lt;/p&gt;
 &lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
