@@ -1,0 +1,323 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Running UWP on a Raspberry Pi Using Uno Platform</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Running UWP on a Raspberry Pi Using Uno Platform" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/UnoPi" />
+        <!-- TODO: More social graph meta tags -->
+
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Running UWP on a Raspberry Pi Using Uno Platform</h1>
+        <h2 class="subheading">UWP from edge to cloud</h2>
+    <div class="meta">        
+Published on 19 August 2020<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/Linux" class="btn btn-default btn-xs">Linux</a>
+                    <a role="button" href="/tags/Raspberry-Pi" class="btn btn-default btn-xs">Raspberry Pi</a>
+                    <a role="button" href="/tags/Uno-Platform" class="btn btn-default btn-xs">Uno Platform</a>
+                    <a role="button" href="/tags/UWP" class="btn btn-default btn-xs">UWP</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="tldr">TL;DR</h2>
+<p>A few days ago I showed how the recent <a href="https://platform.uno/blog/announncing-uno-platform-3-0-linux-support-fluent-material-and-more/">v3 release</a> of the <a href="https://platform.uno/">Uno Platform</a> allowed you to run UWP apps on Linux. This was fantastic but really only half the story I wanted to tell. What I really wanted to do was see if I could get an app written in my favourite UI framework running on my favourite SBC; to wit, UWP on the the <a href="https://www.raspberrypi.org/">Raspberry Pi</a>. In this post I show how, yet again, the Uno team have made this not only possible but startlingly easy and shockingly powerful.</p>
+<h2 id="intro">Intro</h2>
+<p>In my last post <a href="https://ian.bebbs.co.uk/posts/UnoLinux">&quot;Running UWP on Linux With Uno&quot;</a>, I used the Uno Platform to write a UWP app which could run on Linux under WSL2. This was a great proof-of-concept and showed that, despite only in preview, Uno's support for UWP under Linux was <a href="https://ian.bebbs.co.uk/posts/UnoLinux#bonus">more than skin deep</a>. However, running UWP in Linux on the desktop, while cool, wasn't my primary motivator here. No, what I really wanted to do was run a UWP app on a <a href="https://www.raspberrypi.org/">Raspberry Pi</a>.</p>
+<p>Now, those who have worked in the UWP space for a while probably know that you've been able to run UWP on a Pi for some time via <a href="https://docs.microsoft.com/en-us/windows/iot-core/windows-iot-core">Windows 10 IoT Core</a>. Unfortunately Windows 10 IoT Core seems destined for the same fate as many cool Microsoft technologies, namely <a href="https://reddwarf.fandom.com/wiki/Silicon_Heaven">silicon heaven</a>. The last release of Windows 10 IoT Core was back in 2018 and, despite <a href="https://www.raspberrypi.org/products/raspberry-pi-4-model-b/">a new and incredibly powerful Raspberry Pi coming to market</a>, there are no signs of a compatible Windows 10 IoT Core release coming any time soon.</p>
+<p>Furthermore, the choice to use Windows 10 IoT Core on a Raspberry Pi was a costly one. While you got to run a UWP app, you did so at the expense of huge swathes of other software, open-source libraries, educational material and community support which are available for the Raspberry Pi when running a Linux variant. Indeed, while .NET now enjoys excellent support for interfacing with electronic devices via the <a href="https://github.com/dotnet/iot">&quot;dotnet/iot&quot;</a> library, when Windows 10 IoT Core was first released, just toggling a GPIO pin was a somewhat tricky proposition.</p>
+<p>As such I run <a href="https://en.wikipedia.org/wiki/Raspberry_Pi_OS">Raspberry Pi OS</a> (formerly Raspbian) on almost all of the (<a href="https://discord.com/channels/372137812037730304/550416151172087808/743474362002440302">embarrassingly large number of</a>) Pi's I own. This has lead to my development on the Pi being mainly being targeted at console apps via .NET Core's support for Linux.</p>
+<p>But no more...</p>
+<h2 id="uwp-on-raspberry-pi-os">UWP on Raspberry Pi OS</h2>
+<p>The Uno team have made compiling a UWP app for the Raspberry Pi almost embarrassingly easy. Assuming you have a Windows PC with <a href="https://dotnet.microsoft.com/download/visual-studio-sdks">.NET Core SDK v3.1</a> and the <a href="https://www.nuget.org/packages/Uno.ProjectTemplates.Dotnet">pre-release Uno Project Templates</a> installed, and assuming you have a Raspberry Pi running 32-bit Raspberry Pi OS (and which has SSH &amp; GTK correctly configured), then Uno's basic &quot;Hello world&quot; app can be run on the Pi by simply doing the following (note the change in prompt towards the bottom as we shift from executing commands on Windows to executing them remotely on the Pi):</p>
+<pre><code>PS&gt; mkdir UnoHelloWorld
+PS&gt; cd UnoHelloWorld
+PS&gt; dotnet new unoapp
+PS&gt; cd UnoHelloWorld.Skia.Gtk
+PS&gt; dotnet build
+PS&gt; dotnet publish --runtime linux-arm -c Release --self-contained
+PS&gt; scp -rp bin\Release\netcoreapp3.1\linux-arm\publish pi&#64;[RPI IP ADDRESS]:~/UnoHelloWorld
+PS&gt; ssh pi&#64;[RPI IP ADDRESS]
+pi&#64;raspberrypi:~ $ cd UnoHelloWorld
+pi&#64;raspberrypi:~/UnoHelloWorld $ chmod +x UnoHelloWorld.Skia.Gtk
+pi&#64;raspberrypi:~/UnoHelloWorld $ export DISPLAY=:0
+pi&#64;raspberrypi:~/UnoHelloWorld $ ./UnoHelloWorld.Skia.Gtk
+</code></pre>
+<p>If everything was setup correctly, you should see something like this on the Raspberry Pi screen:</p>
+<img src="/Content/UnoPi/UnoHelloWorld on Raspberry Pi.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="UnoHelloWorld on Raspberry Pi"/>
+<p>A UWP app, running under Raspberry Pi OS on a Raspberry Pi 3B+. As I said, almost embarrassingly easy!</p>
+<h2 id="performance">Performance</h2>
+<p>So, after showing that we could run a UWP app on the Pi, I was interested to compare the performance of an app running on the Pi with one running on my PC. I then remembered that during <a href="https://unoconf.com/">UnoConf</a> there had been a discussion of <a href="https://github.com/unoplatform/uno.dopesbench">Dopes Bench</a>. Unfortunately the code in this repo didn't (at the time of writing) contain Skia backend projects so, following the process above, I quickly knocked up a new Uno project and simply copied the &quot;MainPage.*&quot; and &quot;Random2.cs&quot; files from the Dopes Bench project into it (cue amazement that <em>exactly</em> the same code runs on Windows, Mac, Android, iOS, Web and, now, Linux).</p>
+<p>I then compiled and ran the test on my PC (DopeTestUno.UWP / release build) and the Raspberry Pi 3B+ (DopeTestUno.Skia.GTK / release build). Here are the results:</p>
+<table>
+<tr>
+<td>
+<img src="/Content/UnoPi/DopeTestUno on PC.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="DopeTestUno on PC"/>
+</td>
+<td>
+<img src="/Content/UnoPi/DopeTestUno on Raspberry Pi.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="DopeTestUno on Raspberry Pi"/>
+</td>
+</tr>
+<tr>
+<td style="text-align: center; font-weight: bold">
+9217.42 Dopes/s
+</td>
+<td style="text-align: center; font-weight: bold">
+401.05 Dopes/s
+</td>
+</tr>
+<tr>
+<td style="text-align: center">
+Dell Precision T7910<br/>
+6 Core (12 Thread) Xeon E5-2620v3 &#64; 2.4GHz<br/>
+32 Gb RAM<br/>
+NVidia GeForce GTX 980<br/>
+</td>
+<td style="text-align: center">
+Raspberry Pi 3B+<br/>
+4 Core BCM2837B0 A53 (ARMv8) 64-bit &#64; 1.4GHz<br/>
+1Gb RAM<br/>
+Broadcom Videocore-IV<br/>
+</td>
+</tr>
+</table>
+<p>Well, given the difference in spec between the PC and the Pi, it's not surprising that there's a large difference in &quot;Dopes&quot; but is 401.05 dopes good or bad? Furthermore what does this mean for real world performance of an app?</p>
+<p>No idea, guess we're going to have to build a &quot;real world&quot; app...</p>
+<h2 id="unopify-uno-pi-fy">Unopify (&quot;Uno-Pi-fy&quot;):</h2>
+<br/>
+<img src="/Content/UnoPi/Unopify on Raspberry Pi.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Unopify on Raspberry Pi"/>
+<p>Unopify is a UWP Spotify client written using the fantastic <a href="https://www.nuget.org/packages/SpotifyApi.NetCore/3.5.0?_src=template">SpotifyApi.NetCore</a> library along with the usual compliment of supporting libraries including <a href="https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/3.1.7?_src=template">Microsoft.Extensions.DependencyInjection</a>, <a href="https://www.nuget.org/packages/System.Net.Http/4.3.4?_src=template">System.Net.Http</a>, <a href="https://www.nuget.org/packages/System.Reactive/">System.Reactive</a> and, of course, my faithful <a href="https://www.nuget.org/packages/MVx.Observable/2.0.0?_src=template">MVx.Observable</a>.</p>
+<p>While only a proof-of-concept which took just a few hours to write, it already demonstrates a significant amount of functionality such as:</p>
+<ul>
+<li>Frictionless support for .NET Standard 2.0 libraries</li>
+<li>Functional, Reactive, MVVM</li>
+<li>Navigation (the app moves from an &quot;Authenticating&quot; view to a &quot;Home&quot; view)</li>
+<li>Visual States &amp; Visual State Triggers</li>
+<li>Full layout capabilities (uses auto, proportional and explicit sizing of elements)</li>
+<li>Image fetching, display and scaling (the image URI's retrieved from Spotify web calls are directly bound to each Image's <code>Source</code> property)</li>
+<li>Opacity (a semi-transparent white rectangle is laid over the background image)</li>
+<li>Lookless controls (via the previous, play, next buttons)</li>
+<li>Command binding and dispatch (via the previous, play, next buttons)</li>
+<li>XAML drawing primitives (via <code>Ellipse</code> and <code>Path</code> elements in the previous, play and next buttons)</li>
+<li>... and loads more</li>
+</ul>
+<p>In fact, about the only thing I wasn't able to get working was the web-based OAuth2 authentication flow. This wasn't particularly surprising given that this flow needs to invoke and interact with a system browser so I simply worked around this (temporary) limitation by using another UWP app to do the authentication and shared the access token with Unopify via SignalR (there were probably better ways to do this but I had the SignalR code to hand).</p>
+<p>There were a couple of minor issues - <code>UIElement.Opacity</code> doesn't seem to work and an inline control template for the button seemed to cause the button to disappear - but nothing that couldn't be easily worked around. In short, writing a UWP app that worked on the Raspberry Pi under Linux was no more difficult than writing a UWP app that runs on a phone under Android or iOS (which itself is a minor miracle!).</p>
+<p>Below you can see a video of Unopify running on a Raspberry Pi 3B+. In it I'm using Spotify Web Player on the PC to control a Spotify Connect amp and running Unopify on the Pi you can <em>just</em> see below the TV. At start-up, Unopify requests an authentication token from SignalR then starts polling the Spotify Web API for player state and using the responses to update the UI. Finally, the previous/next/play/pause buttons within Unopify directly call the Spotify Web API which causes the amp to play, pause or change track accordingly.</p>
+<p>(Apologies for the poor quality but a direct screen capture wasn't an option as I wanted to include audio from the amp.)</p>
+<video class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" controls autoplay loop>
+  <source src="/Content/UnoPi/Unopify on Raspberry Pi.mp4" type="video/mp4"/>
+Your browser does not support the video tag
+</video>
+<p>As you can see, while start-up was a little slow (exacerbated by there currently being no splash-screen) the running app is completely usable. Furthermore, while the app is very raw (as I said, it only took a few hours) many of the rough edges (i.e. the delay between showing track name and album image and the play/pause button glitch caused by the 1 second polling interval) could easily be smoothed with a few simple changes.</p>
+<p>To put this in perspective, this is a <em>preview</em> build of a UWP app running on a two year old Raspberry Pi which has 1Gb of RAM, an 80Mb/s capable SD card for a hard drive and costs just £35!</p>
+<p>I have a(nother!) 4Gb Raspberry Pi 4B+ on order and will update this post once with performance metrics and &quot;real world&quot; experience once it arrives.</p>
+<p>Finally, the code for Unopify can be found on <a href="https://github.com/ibebbs/Unopify">Github</a>. Should you wish to run it, you will need to deploy the <code>Unopify.AuthRelay</code> service (for which a free-tier AppService on Azure works well) and implement partial methods on the &quot;Secrets.cs&quot; files in a couple of projects (appropriate exceptions will be thrown if you fail to do this).</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>Uno Platform have once again significantly expanded the vista for UWP (definitely no pun intended) and left me almost dizzy with new possibilities. By supporting Linux on low-power devices, the Uno team has propelled UWP beyond desktop, mobile and web applications into the realm of <em>appliances</em>. Want UWP on your fridge? Sure! Watch? No problem. A graphical, touch-driven interface for your thermostat? You got it.</p>
+<p><strong>UWP is now a truly <em>Universal Platform</em> and your &quot;write-once&quot; code really can &quot;run anywhere&quot;.</strong></p>
+<p>From a commercial perspective, the recent <a href="https://all3dp.com/1/single-board-computer-raspberry-pi-alternative/">deluge of single-board computers</a> and their <a href="https://www.nvidia.com/en-gb/autonomous-machines/embedded-systems/jetson-nano/">rapidly advancing capabilities</a> provides this technology with immense value. Leveraging the power of UWP and the .NET ecosystem on everything from embedded devices to mobile phones allows businesses to benefit from the incredible cost savings and RoI value proposition of a <a href="https://ian.bebbs.co.uk/posts/UnoValue">&quot;one stack&quot;</a> approach. With little to no training, your .NET developers are now able to deliver on the promise of <a href="https://www.webopedia.com/TERM/A/ambient-computing.html">ambient computing</a>, efficiently supporting every use-case on every device &quot;from edge to cloud&quot;.</p>
+<p>Wow.</p>
+<h2 id="finally">Finally</h2>
+<p>If you're interested in using the Uno Platform to deliver cross-platform apps or have an upcoming project for which you'd like evaluate Uno Platform's fit, then please feel free to drop me a line using any of the links below or from my <a href="https://ian.bebbs.co.uk/about">about page</a>. As a freelance software developer and remote contractor I'm always interested in hearing from potential new clients or ideas for new collaborations.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2020. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                <script src="/assets/js/jquery.min.js"></script>
+                <script src="/assets/js/bootstrap.min.js"></script>     
+                <script src="/assets/js/highlight.pack.js"></script>   
+                <script src="/assets/js/clean-blog.js"></script>
+                <script src="/assets/js/d3.v3.min.js"></script>
+                <script src="/assets/js/trianglify.min.js"></script>
+                <script src="/assets/js/Please-compressed.js"></script>
+                <script src="/assets/js/background-check.min.js"></script>
+
+                <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+                <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+                <!--[if lt IE 9]>
+                        <script src="/assets/js/html5shiv.js"></script>
+                        <script src="/assets/js/respond.min.js"></script>
+                <![endif]-->
+                
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+

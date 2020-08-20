@@ -5,8 +5,116 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2020</copyright>
-		<pubDate>Sat, 15 Aug 2020 23:35:47 GMT</pubDate>
-		<lastBuildDate>Sat, 15 Aug 2020 23:35:47 GMT</lastBuildDate>
+		<pubDate>Thu, 20 Aug 2020 11:15:07 GMT</pubDate>
+		<lastBuildDate>Thu, 20 Aug 2020 11:15:07 GMT</lastBuildDate>
+		<item>
+			<title>Running UWP on a Raspberry Pi Using Uno Platform</title>
+			<link>http://ian.bebbs.co.uk/posts/UnoPi</link>
+			<description>&lt;p&gt;A few days ago I showed how the recent &lt;a href="https://platform.uno/blog/announncing-uno-platform-3-0-linux-support-fluent-material-and-more/"&gt;v3 release&lt;/a&gt; of the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; allowed you to run UWP apps on Linux. This was fantastic but really only half the story I wanted to tell. What I really wanted to do was see if I could get an app written in my favourite UI framework running on my favourite SBC; to wit, UWP on the the &lt;a href="https://www.raspberrypi.org/"&gt;Raspberry Pi&lt;/a&gt;. In this post I show how, yet again, the Uno team have made this not only possible but startlingly easy and shockingly powerful.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/UnoPi</guid>
+			<pubDate>Wed, 19 Aug 2020 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;A few days ago I showed how the recent &lt;a href="https://platform.uno/blog/announncing-uno-platform-3-0-linux-support-fluent-material-and-more/"&gt;v3 release&lt;/a&gt; of the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; allowed you to run UWP apps on Linux. This was fantastic but really only half the story I wanted to tell. What I really wanted to do was see if I could get an app written in my favourite UI framework running on my favourite SBC; to wit, UWP on the the &lt;a href="https://www.raspberrypi.org/"&gt;Raspberry Pi&lt;/a&gt;. In this post I show how, yet again, the Uno team have made this not only possible but startlingly easy and shockingly powerful.&lt;/p&gt;
+&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;In my last post &lt;a href="https://ian.bebbs.co.uk/posts/UnoLinux"&gt;&amp;quot;Running UWP on Linux With Uno&amp;quot;&lt;/a&gt;, I used the Uno Platform to write a UWP app which could run on Linux under WSL2. This was a great proof-of-concept and showed that, despite only in preview, Uno's support for UWP under Linux was &lt;a href="https://ian.bebbs.co.uk/posts/UnoLinux#bonus"&gt;more than skin deep&lt;/a&gt;. However, running UWP in Linux on the desktop, while cool, wasn't my primary motivator here. No, what I really wanted to do was run a UWP app on a &lt;a href="https://www.raspberrypi.org/"&gt;Raspberry Pi&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Now, those who have worked in the UWP space for a while probably know that you've been able to run UWP on a Pi for some time via &lt;a href="https://docs.microsoft.com/en-us/windows/iot-core/windows-iot-core"&gt;Windows 10 IoT Core&lt;/a&gt;. Unfortunately Windows 10 IoT Core seems destined for the same fate as many cool Microsoft technologies, namely &lt;a href="https://reddwarf.fandom.com/wiki/Silicon_Heaven"&gt;silicon heaven&lt;/a&gt;. The last release of Windows 10 IoT Core was back in 2018 and, despite &lt;a href="https://www.raspberrypi.org/products/raspberry-pi-4-model-b/"&gt;a new and incredibly powerful Raspberry Pi coming to market&lt;/a&gt;, there are no signs of a compatible Windows 10 IoT Core release coming any time soon.&lt;/p&gt;
+&lt;p&gt;Furthermore, the choice to use Windows 10 IoT Core on a Raspberry Pi was a costly one. While you got to run a UWP app, you did so at the expense of huge swathes of other software, open-source libraries, educational material and community support which are available for the Raspberry Pi when running a Linux variant. Indeed, while .NET now enjoys excellent support for interfacing with electronic devices via the &lt;a href="https://github.com/dotnet/iot"&gt;&amp;quot;dotnet/iot&amp;quot;&lt;/a&gt; library, when Windows 10 IoT Core was first released, just toggling a GPIO pin was a somewhat tricky proposition.&lt;/p&gt;
+&lt;p&gt;As such I run &lt;a href="https://en.wikipedia.org/wiki/Raspberry_Pi_OS"&gt;Raspberry Pi OS&lt;/a&gt; (formerly Raspbian) on almost all of the (&lt;a href="https://discord.com/channels/372137812037730304/550416151172087808/743474362002440302"&gt;embarrassingly large number of&lt;/a&gt;) Pi's I own. This has lead to my development on the Pi being mainly being targeted at console apps via .NET Core's support for Linux.&lt;/p&gt;
+&lt;p&gt;But no more...&lt;/p&gt;
+&lt;h2 id="uwp-on-raspberry-pi-os"&gt;UWP on Raspberry Pi OS&lt;/h2&gt;
+&lt;p&gt;The Uno team have made compiling a UWP app for the Raspberry Pi almost embarrassingly easy. Assuming you have a Windows PC with &lt;a href="https://dotnet.microsoft.com/download/visual-studio-sdks"&gt;.NET Core SDK v3.1&lt;/a&gt; and the &lt;a href="https://www.nuget.org/packages/Uno.ProjectTemplates.Dotnet"&gt;pre-release Uno Project Templates&lt;/a&gt; installed, and assuming you have a Raspberry Pi running 32-bit Raspberry Pi OS (and which has SSH &amp;amp; GTK correctly configured), then Uno's basic &amp;quot;Hello world&amp;quot; app can be run on the Pi by simply doing the following (note the change in prompt towards the bottom as we shift from executing commands on Windows to executing them remotely on the Pi):&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;PS&amp;gt; mkdir UnoHelloWorld
+PS&amp;gt; cd UnoHelloWorld
+PS&amp;gt; dotnet new unoapp
+PS&amp;gt; cd UnoHelloWorld.Skia.Gtk
+PS&amp;gt; dotnet build
+PS&amp;gt; dotnet publish --runtime linux-arm -c Release --self-contained
+PS&amp;gt; scp -rp bin\Release\netcoreapp3.1\linux-arm\publish pi&amp;#64;[RPI IP ADDRESS]:~/UnoHelloWorld
+PS&amp;gt; ssh pi&amp;#64;[RPI IP ADDRESS]
+pi&amp;#64;raspberrypi:~ $ cd UnoHelloWorld
+pi&amp;#64;raspberrypi:~/UnoHelloWorld $ chmod +x UnoHelloWorld.Skia.Gtk
+pi&amp;#64;raspberrypi:~/UnoHelloWorld $ export DISPLAY=:0
+pi&amp;#64;raspberrypi:~/UnoHelloWorld $ ./UnoHelloWorld.Skia.Gtk
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If everything was setup correctly, you should see something like this on the Raspberry Pi screen:&lt;/p&gt;
+&lt;img src="/Content/UnoPi/UnoHelloWorld on Raspberry Pi.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="UnoHelloWorld on Raspberry Pi"/&gt;
+&lt;p&gt;A UWP app, running under Raspberry Pi OS on a Raspberry Pi 3B+. As I said, almost embarrassingly easy!&lt;/p&gt;
+&lt;h2 id="performance"&gt;Performance&lt;/h2&gt;
+&lt;p&gt;So, after showing that we could run a UWP app on the Pi, I was interested to compare the performance of an app running on the Pi with one running on my PC. I then remembered that during &lt;a href="https://unoconf.com/"&gt;UnoConf&lt;/a&gt; there had been a discussion of &lt;a href="https://github.com/unoplatform/uno.dopesbench"&gt;Dopes Bench&lt;/a&gt;. Unfortunately the code in this repo didn't (at the time of writing) contain Skia backend projects so, following the process above, I quickly knocked up a new Uno project and simply copied the &amp;quot;MainPage.*&amp;quot; and &amp;quot;Random2.cs&amp;quot; files from the Dopes Bench project into it (cue amazement that &lt;em&gt;exactly&lt;/em&gt; the same code runs on Windows, Mac, Android, iOS, Web and, now, Linux).&lt;/p&gt;
+&lt;p&gt;I then compiled and ran the test on my PC (DopeTestUno.UWP / release build) and the Raspberry Pi 3B+ (DopeTestUno.Skia.GTK / release build). Here are the results:&lt;/p&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;img src="/Content/UnoPi/DopeTestUno on PC.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="DopeTestUno on PC"/&gt;
+&lt;/td&gt;
+&lt;td&gt;
+&lt;img src="/Content/UnoPi/DopeTestUno on Raspberry Pi.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="DopeTestUno on Raspberry Pi"/&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: center; font-weight: bold"&gt;
+9217.42 Dopes/s
+&lt;/td&gt;
+&lt;td style="text-align: center; font-weight: bold"&gt;
+401.05 Dopes/s
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: center"&gt;
+Dell Precision T7910&lt;br/&gt;
+6 Core (12 Thread) Xeon E5-2620v3 &amp;#64; 2.4GHz&lt;br/&gt;
+32 Gb RAM&lt;br/&gt;
+NVidia GeForce GTX 980&lt;br/&gt;
+&lt;/td&gt;
+&lt;td style="text-align: center"&gt;
+Raspberry Pi 3B+&lt;br/&gt;
+4 Core BCM2837B0 A53 (ARMv8) 64-bit &amp;#64; 1.4GHz&lt;br/&gt;
+1Gb RAM&lt;br/&gt;
+Broadcom Videocore-IV&lt;br/&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;Well, given the difference in spec between the PC and the Pi, it's not surprising that there's a large difference in &amp;quot;Dopes&amp;quot; but is 401.05 dopes good or bad? Furthermore what does this mean for real world performance of an app?&lt;/p&gt;
+&lt;p&gt;No idea, guess we're going to have to build a &amp;quot;real world&amp;quot; app...&lt;/p&gt;
+&lt;h2 id="unopify-uno-pi-fy"&gt;Unopify (&amp;quot;Uno-Pi-fy&amp;quot;):&lt;/h2&gt;
+&lt;br/&gt;
+&lt;img src="/Content/UnoPi/Unopify on Raspberry Pi.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Unopify on Raspberry Pi"/&gt;
+&lt;p&gt;Unopify is a UWP Spotify client written using the fantastic &lt;a href="https://www.nuget.org/packages/SpotifyApi.NetCore/3.5.0?_src=template"&gt;SpotifyApi.NetCore&lt;/a&gt; library along with the usual compliment of supporting libraries including &lt;a href="https://www.nuget.org/packages/Microsoft.Extensions.DependencyInjection/3.1.7?_src=template"&gt;Microsoft.Extensions.DependencyInjection&lt;/a&gt;, &lt;a href="https://www.nuget.org/packages/System.Net.Http/4.3.4?_src=template"&gt;System.Net.Http&lt;/a&gt;, &lt;a href="https://www.nuget.org/packages/System.Reactive/"&gt;System.Reactive&lt;/a&gt; and, of course, my faithful &lt;a href="https://www.nuget.org/packages/MVx.Observable/2.0.0?_src=template"&gt;MVx.Observable&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;While only a proof-of-concept which took just a few hours to write, it already demonstrates a significant amount of functionality such as:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Frictionless support for .NET Standard 2.0 libraries&lt;/li&gt;
+&lt;li&gt;Functional, Reactive, MVVM&lt;/li&gt;
+&lt;li&gt;Navigation (the app moves from an &amp;quot;Authenticating&amp;quot; view to a &amp;quot;Home&amp;quot; view)&lt;/li&gt;
+&lt;li&gt;Visual States &amp;amp; Visual State Triggers&lt;/li&gt;
+&lt;li&gt;Full layout capabilities (uses auto, proportional and explicit sizing of elements)&lt;/li&gt;
+&lt;li&gt;Image fetching, display and scaling (the image URI's retrieved from Spotify web calls are directly bound to each Image's &lt;code&gt;Source&lt;/code&gt; property)&lt;/li&gt;
+&lt;li&gt;Opacity (a semi-transparent white rectangle is laid over the background image)&lt;/li&gt;
+&lt;li&gt;Lookless controls (via the previous, play, next buttons)&lt;/li&gt;
+&lt;li&gt;Command binding and dispatch (via the previous, play, next buttons)&lt;/li&gt;
+&lt;li&gt;XAML drawing primitives (via &lt;code&gt;Ellipse&lt;/code&gt; and &lt;code&gt;Path&lt;/code&gt; elements in the previous, play and next buttons)&lt;/li&gt;
+&lt;li&gt;... and loads more&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;In fact, about the only thing I wasn't able to get working was the web-based OAuth2 authentication flow. This wasn't particularly surprising given that this flow needs to invoke and interact with a system browser so I simply worked around this (temporary) limitation by using another UWP app to do the authentication and shared the access token with Unopify via SignalR (there were probably better ways to do this but I had the SignalR code to hand).&lt;/p&gt;
+&lt;p&gt;There were a couple of minor issues - &lt;code&gt;UIElement.Opacity&lt;/code&gt; doesn't seem to work and an inline control template for the button seemed to cause the button to disappear - but nothing that couldn't be easily worked around. In short, writing a UWP app that worked on the Raspberry Pi under Linux was no more difficult than writing a UWP app that runs on a phone under Android or iOS (which itself is a minor miracle!).&lt;/p&gt;
+&lt;p&gt;Below you can see a video of Unopify running on a Raspberry Pi 3B+. In it I'm using Spotify Web Player on the PC to control a Spotify Connect amp and running Unopify on the Pi you can &lt;em&gt;just&lt;/em&gt; see below the TV. At start-up, Unopify requests an authentication token from SignalR then starts polling the Spotify Web API for player state and using the responses to update the UI. Finally, the previous/next/play/pause buttons within Unopify directly call the Spotify Web API which causes the amp to play, pause or change track accordingly.&lt;/p&gt;
+&lt;p&gt;(Apologies for the poor quality but a direct screen capture wasn't an option as I wanted to include audio from the amp.)&lt;/p&gt;
+&lt;video class="img-responsive" style="margin: auto; width:90%; margin-top: 6px; margin-bottom: 6px;" controls autoplay loop&gt;
+  &lt;source src="/Content/UnoPi/Unopify on Raspberry Pi.mp4" type="video/mp4"/&gt;
+Your browser does not support the video tag
+&lt;/video&gt;
+&lt;p&gt;As you can see, while start-up was a little slow (exacerbated by there currently being no splash-screen) the running app is completely usable. Furthermore, while the app is very raw (as I said, it only took a few hours) many of the rough edges (i.e. the delay between showing track name and album image and the play/pause button glitch caused by the 1 second polling interval) could easily be smoothed with a few simple changes.&lt;/p&gt;
+&lt;p&gt;To put this in perspective, this is a &lt;em&gt;preview&lt;/em&gt; build of a UWP app running on a two year old Raspberry Pi which has 1Gb of RAM, an 80Mb/s capable SD card for a hard drive and costs just £35!&lt;/p&gt;
+&lt;p&gt;I have a(nother!) 4Gb Raspberry Pi 4B+ on order and will update this post once with performance metrics and &amp;quot;real world&amp;quot; experience once it arrives.&lt;/p&gt;
+&lt;p&gt;Finally, the code for Unopify can be found on &lt;a href="https://github.com/ibebbs/Unopify"&gt;Github&lt;/a&gt;. Should you wish to run it, you will need to deploy the &lt;code&gt;Unopify.AuthRelay&lt;/code&gt; service (for which a free-tier AppService on Azure works well) and implement partial methods on the &amp;quot;Secrets.cs&amp;quot; files in a couple of projects (appropriate exceptions will be thrown if you fail to do this).&lt;/p&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Uno Platform have once again significantly expanded the vista for UWP (definitely no pun intended) and left me almost dizzy with new possibilities. By supporting Linux on low-power devices, the Uno team has propelled UWP beyond desktop, mobile and web applications into the realm of &lt;em&gt;appliances&lt;/em&gt;. Want UWP on your fridge? Sure! Watch? No problem. A graphical, touch-driven interface for your thermostat? You got it.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;UWP is now a truly &lt;em&gt;Universal Platform&lt;/em&gt; and your &amp;quot;write-once&amp;quot; code really can &amp;quot;run anywhere&amp;quot;.&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;From a commercial perspective, the recent &lt;a href="https://all3dp.com/1/single-board-computer-raspberry-pi-alternative/"&gt;deluge of single-board computers&lt;/a&gt; and their &lt;a href="https://www.nvidia.com/en-gb/autonomous-machines/embedded-systems/jetson-nano/"&gt;rapidly advancing capabilities&lt;/a&gt; provides this technology with immense value. Leveraging the power of UWP and the .NET ecosystem on everything from embedded devices to mobile phones allows businesses to benefit from the incredible cost savings and RoI value proposition of a &lt;a href="https://ian.bebbs.co.uk/posts/UnoValue"&gt;&amp;quot;one stack&amp;quot;&lt;/a&gt; approach. With little to no training, your .NET developers are now able to deliver on the promise of &lt;a href="https://www.webopedia.com/TERM/A/ambient-computing.html"&gt;ambient computing&lt;/a&gt;, efficiently supporting every use-case on every device &amp;quot;from edge to cloud&amp;quot;.&lt;/p&gt;
+&lt;p&gt;Wow.&lt;/p&gt;
+&lt;h2 id="finally"&gt;Finally&lt;/h2&gt;
+&lt;p&gt;If you're interested in using the Uno Platform to deliver cross-platform apps or have an upcoming project for which you'd like evaluate Uno Platform's fit, then please feel free to drop me a line using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;. As a freelance software developer and remote contractor I'm always interested in hearing from potential new clients or ideas for new collaborations.&lt;/p&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>Running UWP on Linux With Uno</title>
 			<link>http://ian.bebbs.co.uk/posts/UnoLinux</link>
@@ -4401,160 +4509,6 @@ EndSection
 &lt;/code&gt;&lt;/pre&gt;
 &lt;p&gt;Paste the block of text you copied earlier, save and exit, then reboot.&lt;/p&gt;
 &lt;p&gt;Voila, a perfectly configured touch overlay. Enjoy!&lt;/p&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>Tech Adventures in Sustainability</title>
-			<link>http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI</link>
-			<description>&lt;p&gt;Installing solar panels and monitoring solar production not only provides immediate benefits in sustainable living but also highlights new, simple ways to change your lifestyle to further save money and energy. Here's how we do it.&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI</guid>
-			<pubDate>Thu, 26 Sep 2019 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
-&lt;p&gt;Installing solar panels and monitoring solar production not only provides immediate benefits in sustainable living but also highlights new, simple ways to change your lifestyle to further save money and energy. Here's how we do it.&lt;/p&gt;
-&lt;h2 id="background"&gt;Background&lt;/h2&gt;
-&lt;p&gt;As with most people nowadays, the environment and climate change is weighing heavily on my thoughts. As such, my partner and I have been looking into ways we can make our lifestyle more sustainable. Being in tech, I have chosen to &amp;quot;use what I know&amp;quot; to enable or facilitate changes to our lifestyle that promote sustainability without compromising on quality of living or requiring unnecessarily onerous daily chores.&lt;/p&gt;
-&lt;p&gt;In this series of blog posts, I will be describing the decisions, approaches, tools and devices we've employed since starting down this road. Where possible, I will share as much of the tech as possible so others can adopt or adapt similar practises and, hopefully, enhance the sustainability of their lifestyle too.&lt;/p&gt;
-&lt;h2 id="solar-power"&gt;Solar Power&lt;/h2&gt;
-&lt;p&gt;Our first - and possibly most significant - step towards a more sustainable lifestyle has been to install solar panels. Until recently, installing solar panels on a domestic property in the UK has been a questionable value proposition due to the return on investment sometimes being longer than the lifetime of the panels/inverter. The UK government went someway to alleviating this issue with &lt;a href="https://www.gov.uk/feed-in-tariffs"&gt;Feed-in Tarrifs (FiT)&lt;/a&gt; but still repayment times tended to be longer than the warranty period of many of the components in the installation.&lt;/p&gt;
-&lt;p&gt;Nowadays, the drop in costs and improved efficiency of solar panels coupled with improved and more robust technology in other components (particularly the inverter) mean that, despite the UK government ending the FIT program, a solar installation can easily provide a return on investment within the warrantied lifetime it's components.&lt;/p&gt;
-&lt;p&gt;And so it was that, when we moved into our new house, we set aside money to install solar panels. After a lot of research into the underlying technologies, comparing features provided by various manufactures and talking to a number of solar installation specialists, we chose a local company to install a 6.18kWp system comprising of &lt;a href="http://www.jasolar.com/html/en/"&gt;JA Solar&lt;/a&gt; panels and a &lt;a href="http://www.jasolar.com/html/en/"&gt;SolarEdge&lt;/a&gt; inverter.&lt;/p&gt;
-&lt;h2 id="monitoring-solar-production"&gt;Monitoring Solar Production&lt;/h2&gt;
-&lt;p&gt;While JA Solar was chosen simply due to it's price/performance ratio, we were especially keen to install a SolarEdge system due to it's ability to be monitored in multiple ways.&lt;/p&gt;
-&lt;p&gt;First up, SolarEdge provides an excellent cloud-based monitoring platform with both web and native apps compatible with major platforms. Furthermore SolarEdge provide a &lt;a href="https://www.solaredge.com/sites/default/files/se_monitoring_api.pdf"&gt;RESTful API&lt;/a&gt; facilitating automated data collection and monitoring. Unfortunately the cloud-based apps/API require that all data collection (and a significant amount of inverter control) is delegated to SolarEdge servers (with all the &lt;a href="https://horusscenario.com/what-is-the-horus-scenario/"&gt;privacy and security considerations&lt;/a&gt; that implies) and are then subject to usage-restrictions, request limits and significant latency.&lt;/p&gt;
-&lt;p&gt;Fortunately, the SolarEdge inverter also provides numerous means of &lt;a href="https://www.solaredge.com/sites/default/files/solaredge-communication_options_application_note_v2_250_and_above.pdf"&gt;local data collection and control&lt;/a&gt;. The most powerful of these means is the onboard RS-485 connector which allows full control over the inverter and the ability to collect virtually all data generated by the unit. The github user &lt;a href="https://github.com/jbuehl"&gt;'jbuehl'&lt;/a&gt; has by-far the most accomplished open-source code available for interacting with this interface in his &lt;a href="https://github.com/jbuehl/solaredge"&gt;'solaredge'&lt;/a&gt; repository. Unfortunately, while it is the most powerful, it is also the most difficult means of recording data from the inverter, requiring the user to open the inverter and wire up to the RS-485 connector directly.&lt;/p&gt;
-&lt;p&gt;However, if you don't require control over the inverter and merely want to record the data being generated, there is a much easier means: &lt;a href="https://www.solaredge.com/sites/default/files/sunspec-implementation-technical-note.pdf"&gt;ModBus over TCP&lt;/a&gt;. While this does require a setting to be enabled on the inverter (a completely trivial series of button presses), connection is made via standard TCP/IP on port 502.&lt;/p&gt;
-&lt;h2 id="solaredge.monitor"&gt;SolarEdge.Monitor&lt;/h2&gt;
-&lt;p&gt;While there were &lt;a href="https://github.com/search?q=solaredge"&gt;numerous repositories on Github&lt;/a&gt; for interacting with SolarEdge inverters, there didn't seem to be any that met all my requirements. Specifically, I wanted a solution that could be easily deployed to a variety of target platforms, which could read all available inverter parameters and publish these parameters to an MQTT broker (for consumption by other services) at a configurable interval.&lt;/p&gt;
-&lt;p&gt;I therefore wrote &lt;a href="https://github.com/ibebbs/SolarEdge.Monitor"&gt;SolarEdge.Monitor&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;This project was a lot of fun and utilised the following technologies and techniques:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://github.com/dotnet/core"&gt;.NET Core 2.2&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://www.docker.com/"&gt;Docker&lt;/a&gt; (and &lt;a href="https://www.docker.com/products/docker-hub"&gt;Docker Hub&lt;/a&gt;)&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://github.com/xamarin/mqtt"&gt;MQTT&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://github.com/rossmann-engineering/EasyModbusTCP.NET"&gt;ModBus over TCP&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/hosted-services?view=aspnetcore-3.0&amp;amp;tabs=visual-studio"&gt;Background tasks with hosted services in ASP.NET Core&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.0"&gt;The .NET Core Options pattern for configuration&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://ian.bebbs.co.uk/posts/FluentNamespacing"&gt;Fluent Namespacing&lt;/a&gt;&lt;/li&gt;
-&lt;li&gt;&lt;a href="http://ian.bebbs.co.uk/posts/ReactiveStateMachines"&gt;Reactive State Machines&lt;/a&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;While it can be cloned and run locally, it's real value comes when used as a containerized application as part of a composed solution.&lt;/p&gt;
-&lt;h2 id="docker-docker-compose"&gt;Docker &amp;amp; Docker Compose&lt;/h2&gt;
-&lt;p&gt;SolarEdge.Monitor is available as a Linux container image from &lt;a href="https://hub.docker.com/r/ibebbs/solaredge.monitor"&gt;Docker Hub&lt;/a&gt;. It can therefore be run from any docker host (anything from a RaspberryPi to Windows Server) by simply issuing the following commands:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;docker pull ibebbs/solaredge.monitor
-docker run [environment variables] ibebbs/solaredge.monitor
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The various environment variables are (or will be shortly) fully documented on Docker Hub but here are a simple set that will get the service running:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;Solaredge:Monitor:Inverter:Address=[IP Address of the Inverter]
-Solaredge:Monitor:MQTT:Address=[IP Address of the MQTT broker]
-Solaredge:Monitor:Service:ModelsToRead=inverter
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Running with these settings will poll the inverter every 10 seconds and publish a JSON serialized message containing data read from the inverter to the MQTT broker on a topic named &lt;code&gt;home/solar/inverter&lt;/code&gt;. This can be consumed by any MQTT client for further processing.&lt;/p&gt;
-&lt;p&gt;To provide data persistence, aggregation and visualization, I use docker-compose to supplement SolarEdge.Monitor with other services such as:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;a href="https://nodered.org/"&gt;Node-Red&lt;/a&gt; - for receiving MQTT messages and reshaping them into metrics for submission to...&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://www.influxdata.com/"&gt;InfluxDB&lt;/a&gt; - for persisting the metrics and providing a querying back-end to...&lt;/li&gt;
-&lt;li&gt;&lt;a href="https://grafana.com/"&gt;Grafana&lt;/a&gt; - for visualizing persisted data and extracting insights&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Here's an example &lt;code&gt;docker-compose.yml&lt;/code&gt; that, while requiring some substitution of environment variables, provides most of the ground work for getting these services running together (I'm afraid I don't yet have the customised Node-Red image or flows hosted in a public repository, but I hope to have this available soon):&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;version: &amp;quot;3.2&amp;quot;
-
-services:
-  # https://hub.docker.com/_/eclipse-mosquitto
-  mqtt:
-    image: eclipse-mosquitto
-    ports:
-      - &amp;quot;1883:1883&amp;quot;
-      - &amp;quot;9001:9001&amp;quot;
-
-  # https://hub.docker.com/r/nodered/node-red-docker/
-  nodered:
-    build: ./nodered
-    ports:
-      - &amp;quot;1880:1880&amp;quot;
-    volumes:
-      - type: volume
-        source: nodered
-        target: /data
-        volume:
-          nocopy: true
-    depends_on:
-      - &amp;quot;mqtt&amp;quot;
-
-  # https://hub.docker.com/_/influxdb
-  influxdb:
-    image: influxdb
-    ports:
-      - &amp;quot;8086:8086&amp;quot;
-    environment:
-    - INFLUXDB_DB=SmartHome
-    - INFLUXDB_HTTP_AUTH_ENABLED
-    - INFLUXDB_ADMIN_USER=InfluxAdmin
-    - INFLUXDB_ADMIN_PASSWORD=[Admin password]
-    - INFLUXDB_USER=InfluxUser
-    - INFLUXDB_USER_PASSWORD=[User password]
-    volumes:
-      - type: volume
-        source: influxdb
-        target: /var/lib/influxdb
-        volume:
-          nocopy: true
-
-  # https://hub.docker.com/r/grafana/grafana
-  grafana:
-    image: grafana/grafana
-    ports:
-      - &amp;quot;3000:3000&amp;quot;
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=[Admin password to set for Grafana]
-      - GF_PANELS_DISABLE_SANITIZE_HTML=true
-    depends_on:
-      - influxdb
-    volumes:
-      - type: volume
-        source: grafana
-        target: /var/lib/grafana
-        volume:
-          nocopy: true
-
-  # https://hub.docker.com/r/ibebbs/solaredge.monitor
-  solaredgemonitor:
-    image: ibebbs/solaredge.monitor
-    environment:
-      - Solaredge:Monitor:Inverter:Address=[Address of SolarEdge Inverter]
-      - Solaredge:Monitor:MQTT:Address=mqtt
-      - Solaredge:Monitor:MQTT:ClientId=InverterMonitor
-      - Solaredge:Monitor:Service:ModelsToRead=inverter
-    depends_on:
-      - mqtt
-
-volumes:
-  nodered:
-    driver_opts:
-      type: nfs
-      o: &amp;quot;addr=192.168.1.11,nolock,soft,rw&amp;quot;
-      device: &amp;quot;:/smartHome/nodered&amp;quot;
-  influxdb:
-    driver_opts:
-      type: nfs
-      o: &amp;quot;addr=192.168.1.11,nolock,soft,rw&amp;quot;
-      device: &amp;quot;:/smartHome/influxdb&amp;quot;
-  grafana:
-    driver_opts:
-      type: nfs
-      o: &amp;quot;addr=192.168.1.11,nolock,soft,rw&amp;quot;
-      device: &amp;quot;:/smartHome/grafana&amp;quot;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Note that I use IP-Address protected NFS volume shares for persisting data to a Windows Server. These can be quite tricky to set up but it's the most reliable means I've found of persisting docker volumes with stock docker-compose (i.e. without additional plugins).&lt;/p&gt;
-&lt;p&gt;With this file in hand (or, more to the point, on disk), all the services can be started together by simply navigating to the file's location and issuing the following command:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;docker-compose up
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Here's a screen capture of my current Grafana dashboard (today hasn't been a great day for solar):&lt;/p&gt;
-&lt;img src="../Content/TechAdventuresInSustainability-PartI/GrafanaDashboard.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Grafana Dashboard"&gt;
-&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
-&lt;p&gt;Being able to quickly and reliably monitor our solar production has drastically changed how we use electricity in the house. For example, the washing machine and (shock, horror!) tumble dryer (sorry, we have kids and therefore too much washing to hang everything out) now get put on only when we have surplus electricity. We've also become super conscious of the multitude of energy zapping devices we have plugged in all over the house which we now endeavour to turn off as often as possible.&lt;/p&gt;
-&lt;p&gt;Furthermore, being able to aggregate and analyse this data retrospectively has allowed us to make informed decisions on future sustainability choices like whether to get an electric car or solar battery. Unfortunately neither of these options have yet made the cut, mostly due to RoI considerations.&lt;/p&gt;
-&lt;p&gt;In future posts, I'll show some of the ways in which I've used this data and other forms of technology to further promote sustainable living. For now though I would like to conclude by saying that having solar panels installed and being able to see the impact they're having has had a profound effect on our electricity usage and our views on sustainability in general. We feel very good about having made this important step to reducing our carbon foot-print and that, in itself, has provided the motivation to explore more ways to live more sustainably.&lt;/p&gt;
-&lt;img src="../Content/TechAdventuresInSustainability-PartI/EnvironmentalBenefits.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Environmental Benefits"&gt;
 </content:encoded>
 		</item>
 	</channel>
