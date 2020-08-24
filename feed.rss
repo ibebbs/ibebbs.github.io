@@ -5,8 +5,505 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2020</copyright>
-		<pubDate>Thu, 20 Aug 2020 11:22:41 GMT</pubDate>
-		<lastBuildDate>Thu, 20 Aug 2020 11:22:41 GMT</lastBuildDate>
+		<pubDate>Mon, 24 Aug 2020 20:43:50 GMT</pubDate>
+		<lastBuildDate>Mon, 24 Aug 2020 20:43:50 GMT</lastBuildDate>
+		<item>
+			<title>State-of-the-art ML in UWP</title>
+			<link>http://ian.bebbs.co.uk/posts/MLinUWP</link>
+			<description>&lt;p&gt;In this post I show how to use a state-of-the-art machine learning model to implement Salient Object Detection and Image Segmentation. I then show this model can be used to provide local inference capabilities entirely within a UWP app.&lt;/p&gt;</description>
+			<guid>http://ian.bebbs.co.uk/posts/MLinUWP</guid>
+			<pubDate>Mon, 24 Aug 2020 00:00:00 GMT</pubDate>
+			<content:encoded>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;In this post I show how to use a state-of-the-art machine learning model to implement Salient Object Detection and Image Segmentation. I then show this model can be used to provide local inference capabilities entirely within a UWP app.&lt;/p&gt;
+&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;A while ago I found myself prototyping a UI in which I wanted to show portrait images of people. However, I wanted to remove the background from these portrait images so that they appeared integrated into the UI rather than layered on top of it. For example, something like this Premier League Player of the Month card:&lt;/p&gt;
+&lt;img src="/Content/MLinUWP/Pukki.png" class="img-responsive" style="margin: auto; max-width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Premier League Player of the Month card"/&gt;
+&lt;p&gt;Looking around I came across &lt;a href="https://www.remove.bg/"&gt;this website&lt;/a&gt; which purported to use &amp;quot;sophisticated AI technology to detect foreground layers and separate them from the background&amp;quot;. Intrigued I gave it a go and was shocked at how good the results were. Here's an image of my little girl (endeavouring to learn how to go cross-eyed) followed by the image produced by &lt;a href="https://www.remove.bg/"&gt;Remove.bg&lt;/a&gt;:&lt;/p&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;img src="/Content/MLinUWP/CrossEyed-Original.png" class="img-responsive" style="margin: auto; max-width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Original"/&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img src="/Content/MLinUWP/CrossEyed-removebg-preview.png" class="img-responsive" style="margin: auto; max-width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Background Removed"/&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: center"&gt;Original&lt;/td&gt;
+&lt;td style="text-align: center"&gt;Background Removed&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;Very cool and easily integrated using their API.&lt;/p&gt;
+&lt;p&gt;Unfortunately my use-case required background removal from user supplied content and the project costing probably wouldn't extend to paying for (potentially) thousands of calls a month.&lt;/p&gt;
+&lt;p&gt;So, like any good hacker, I hit the books to learn how this &amp;quot;sophisticated AI&amp;quot; worked...&lt;/p&gt;
+&lt;h2 id="salient-object-detection-image-segmentation"&gt;Salient Object Detection &amp;amp; Image Segmentation&lt;/h2&gt;
+&lt;p&gt;A thoroughly enjoyable couple of hours study commenced whereupon I learned of the wonders of &lt;a href="https://paperswithcode.com/task/salient-object-detection"&gt;Salient Object Detection&lt;/a&gt; and &lt;a href="https://towardsdatascience.com/image-segmentation-in-2020-756b77fa88fc"&gt;Image Segmentation&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;During this research I happened upon &lt;a href="https://github.com/NathanUA/U-2-Net"&gt;U²-Net&lt;/a&gt;, a very recently published (May 2020) &amp;quot;deep network architecture&amp;quot; for salient object detection. In this repository they provided everything needed to start using their model including all weights and even sample code for inference. Moreover this model had already been used to great effect in the &amp;quot;AR Cut &amp;amp; Paste&amp;quot; demo shown below (&lt;a href="https://twitter.com/cyrildiagne/status/1256916982764646402"&gt;link here for Firefox users (like me) who don't see the tweet embedded correctly&lt;/a&gt;):&lt;/p&gt;
+&lt;blockquote class="twitter-tweet tw-align-center"&gt;&lt;p lang="en" dir="ltr"&gt;4/10 - Cut &amp;amp; paste your surroundings to Photoshop&lt;br&gt;&lt;br&gt;Code: &lt;a href="https://t.co/cVddH3u3ik"&gt;https://t.co/cVddH3u3ik&lt;/a&gt;&lt;br&gt;&lt;br&gt;Book: &lt;a href="https://twitter.com/HOLOmagazine?ref_src=twsrc%5Etfw"&gt;&amp;#64;HOLOmagazine&lt;/a&gt;&lt;br&gt;Garment: SS17 by &lt;a href="https://twitter.com/thekarentopacio?ref_src=twsrc%5Etfw"&gt;&amp;#64;thekarentopacio&lt;/a&gt; &lt;br&gt;Type: Sainte Colombe by &lt;a href="https://twitter.com/MinetYoann?ref_src=twsrc%5Etfw"&gt;&amp;#64;MinetYoann&lt;/a&gt; &lt;a href="https://twitter.com/ProductionType?ref_src=twsrc%5Etfw"&gt;&amp;#64;ProductionType&lt;/a&gt;&lt;br&gt;Technical Insights: ↓&lt;a href="https://twitter.com/hashtag/ML?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#ML&lt;/a&gt; &lt;a href="https://twitter.com/hashtag/AR?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#AR&lt;/a&gt; &lt;a href="https://twitter.com/hashtag/AI?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#AI&lt;/a&gt; &lt;a href="https://twitter.com/hashtag/AIUX?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#AIUX&lt;/a&gt; &lt;a href="https://twitter.com/hashtag/Adobe?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#Adobe&lt;/a&gt; &lt;a href="https://twitter.com/hashtag/Photoshop?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#Photoshop&lt;/a&gt; &lt;a href="https://t.co/LkTBe0t0rF"&gt;pic.twitter.com/LkTBe0t0rF&lt;/a&gt;&lt;/p&gt;&amp;mdash; Cyril Diagne (&amp;#64;cyrildiagne) &lt;a href="https://twitter.com/cyrildiagne/status/1256916982764646402?ref_src=twsrc%5Etfw"&gt;May 3, 2020&lt;/a&gt;&lt;/blockquote&gt; &lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8"&gt;&lt;/script&gt;
+&lt;p&gt;I was inspired. I wanted that tech in my product. But how?&lt;/p&gt;
+&lt;h2 id="the-easy-way"&gt;The &amp;quot;Easy&amp;quot; Way&lt;/h2&gt;
+&lt;p&gt;In this day and age we, as developers, are somewhat spoiled. Once you understand enough about what it is you need to be able to ask the right questions, you can almost guarantee that someone out there has already posted the answers. This is very much why I endeavour to document my continued learnings on this blog; a sort of &amp;quot;pay-it-forward&amp;quot; thank-you for all the myriad blogs and SO answers I've benefitted from across the years.&lt;/p&gt;
+&lt;p&gt;Anyway, once I knew I wanted to use U²-Net, it didn't take me long to find &lt;a href="https://hub.docker.com/r/luukio/u2net-bg-removal"&gt;a docker image&lt;/a&gt; which provided an Http endpoint for performing U²-Net inference on a supplied image and which returned the supplied image with the background removed. Perfecto!&lt;/p&gt;
+&lt;p&gt;Unfortunately, trying to run this docker image caused an error. Looking at the &lt;a href="https://github.com/ideo/bg-removal-with-u2net/blob/master/Dockerfile"&gt;Dockerfile&lt;/a&gt; in the associated &lt;a href="https://github.com/ideo/bg-removal-with-u2net"&gt;Github repository&lt;/a&gt; explained why: the &lt;a href="https://pytorch.org/"&gt;PyTorch&lt;/a&gt; image on which this docker image was based expected to have CUDA hardware available to it. As I was running on Windows, with the docker container running within WSL2 (&lt;a href="https://docs.microsoft.com/en-us/windows/win32/direct3d12/gpu-cuda-in-wsl"&gt;and didn't want to go back to running a Fast Ring build&lt;/a&gt;) this docker image was of little direct use.&lt;/p&gt;
+&lt;p&gt;However, given the Dockerfile provided a good breakdown of all the software required to get U²-Net running, it wasn't rocket science (but perhaps artificial brain surgery?) to write a new Dockerfile which limited PyTorch to only using cpu inference. Spinning this up provided me a local (and free!) endpoint which could take my original sample image and return one with the background removed as shown below:&lt;/p&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;img src="/Content/MLinUWP/CrossEyed-Original.png" class="img-responsive" style="margin: auto; max-width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Original"/&gt;&lt;/td&gt;
+&lt;td&gt;&lt;img src="/Content/MLinUWP/CrossEyed-u2net-local.png" class="img-responsive" style="margin: auto; max-width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Background Removed"/&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: center"&gt;Original&lt;/td&gt;
+&lt;td style="text-align: center"&gt;U²-Net Result&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;For some this would be enough and, accordingly, I pushed the &lt;a href="https://hub.docker.com/r/ibebbs/u2net-http"&gt;docker image&lt;/a&gt; and &lt;a href="https://github.com/ibebbs/U2Net-cpu-HTTP"&gt;associated repository&lt;/a&gt; for others to use (please star them should you find them useful/helpful).&lt;/p&gt;
+&lt;p&gt;But... why pay for docker instance hosting when my users could perform the inference on their own machines from within a UWP app?&lt;/p&gt;
+&lt;h2 id="the-hard-way"&gt;The &amp;quot;Hard&amp;quot; Way&lt;/h2&gt;
+&lt;p&gt;For those that are unaware, Windows actually ships with strong support for machine learning in UWP via the &lt;a href="https://docs.microsoft.com/en-us/uwp/api/windows.ai.machinelearning?view=winrt-19041"&gt;Windows.AI.MachineLearning&lt;/a&gt; namespace. Using the types provided here, a developer is able to load and perform inference using ONNX (Open Neural Network eXchange) models (up to version 1.4 -opset 9) in a (relatively) straight forward manner.&lt;/p&gt;
+&lt;p&gt;However, in accordance with their strategy of decoupling core technologies from releases of the OS, Microsoft have recently shifted development toward the &lt;a href="https://github.com/Microsoft/onnxruntime"&gt;open-source&lt;/a&gt; &lt;a href="https://www.nuget.org/packages/Microsoft.AI.MachineLearning"&gt;Microsoft.AI.MachineLearning&lt;/a&gt; nuget package. This package can can be installed on any recent build of windows (I believe back to 18362) and provides compatibility for the very latest ONNX models (versiol 1.7 - opset 12).&lt;/p&gt;
+&lt;p&gt;Given, PyTorch (the ML framework used for U²-Net) has strong support for exporting to ONNX, my challenge was clear:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Export a fully weighted U²-Net model from PyTorch to ONNX.&lt;/li&gt;
+&lt;li&gt;Use the Microsoft.AI.MachineLearning package to load the ONNX model.&lt;/li&gt;
+&lt;li&gt;Write code to process a source image into U²-Net's input tensor.&lt;/li&gt;
+&lt;li&gt;Use the ONNX model to perform inference on the input image.&lt;/li&gt;
+&lt;li&gt;Write code to process a result image using U²-Net's output tensor as an alpha channel.&lt;/li&gt;
+&lt;li&gt;Test&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Now, while none of these tasks are super-difficult, you will need to be fairly analytical as they involve interpreting Python code (along with lots of Python packages) and byte bashing pixel data to/from 4 dimensional arrays.&lt;/p&gt;
+&lt;h3 id="exporting-from-pytorch-to-onnx"&gt;Exporting from PyTorch to ONNX&lt;/h3&gt;
+&lt;p&gt;Given we already have a docker image that has everything needed to perform inference using U²-Net, I am going to use this image to export the ONNX model. This can be achieved by running the docker image and overriding the entry-point such that we get access to a command prompt; like so:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;docker run -it --entrypoint /bin/bash ibebbs/u2net-http
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Once we have access to a command prompt within the container, we can use Python interactively to load and export the ONNX model. So, from the container's command prompt, start Python (in the &lt;code&gt;U-2-Net&lt;/code&gt; directory) by running:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;cd U-2-Net
+python3
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This will land you at the Python command prompt &lt;code&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/code&gt; from which we can follow the steps in &lt;a href="https://github.com/ibebbs/U2Net-cpu-HTTP/blob/master/u2net.py"&gt;&lt;code&gt;u2net.py&lt;/code&gt;&lt;/a&gt; to load the model as shown below (many of these imports are unnessary but it was just easier to include them all):&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;import sys
+sys.path.insert(0, 'U-2-Net')
+
+from skimage import io, transform
+import torch
+import torchvision
+from torch.autograd import Variable
+import torch.nn as nn
+import torch.nn.functional as F
+from torch.utils.data import Dataset, DataLoader
+from torchvision import transforms
+
+from torch.utils.data import Dataset, DataLoader
+
+import numpy as np
+from PIL import Image
+
+from data_loader import RescaleT
+from data_loader import ToTensorLab
+
+from model import U2NET
+
+model_dir = './saved_models/u2net/u2net.pth'
+net = U2NET(3, 1)
+net.load_state_dict(torch.load(model_dir, map_location=torch.device('cpu')))
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;At this point we have the &lt;code&gt;net&lt;/code&gt; variable loaded with the U²-Net architecture and weights from &amp;quot;u2net.pth&amp;quot;. Now we need to export this variable as an ONNX model.&lt;/p&gt;
+&lt;p&gt;Fortunately, PyTorch has some excellent documentation for exporting ONNX (for example &lt;a href="https://pytorch.org/tutorials/advanced/super_resolution_with_onnxruntime.html?highlight=onnx"&gt;here&lt;/a&gt; and &lt;a href="https://pytorch.org/docs/master/onnx.html"&gt;here&lt;/a&gt;) which made exporting the model fairly trivial:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;import torch.onnx
+dummy_input = torch.randn(1, 3, 320, 320, device='cpu')
+input_names = [ &amp;quot;input&amp;quot; ]
+output_names = [ &amp;quot;o0&amp;quot;, &amp;quot;o1&amp;quot;, &amp;quot;o2&amp;quot;, &amp;quot;o3&amp;quot;, &amp;quot;o4&amp;quot;, &amp;quot;o5&amp;quot;, &amp;quot;o6&amp;quot; ]
+torch.onnx.export(net, dummy_input, &amp;quot;u2net.onnx&amp;quot;, export_params=True, opset_version=12, input_names=input_names, output_names=output_names)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here we create a random dummy input, name the input and output tensors and then export the model to ONNX using the latest operator set (&lt;code&gt;opset_version=12&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;This will take a few seconds and you might see a few warnings about various functions having been deprecated but, once complete, if you exit interactive Python (using &lt;code&gt;exit()&lt;/code&gt;) and return to the container's command prompt, you should be able to see a &amp;quot;u2net.onnx&amp;quot; file in the directory as shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;gt;&amp;gt;&amp;gt; exit()
+root&amp;#64;88fa6881c8ea:/app/U-2-Net# dir
+LICENSE    __pycache__     figures  saved_models  u2net.onnx     u2net_train.py
+README.md  data_loader.py  model    test_data     u2net_test.py
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;You now need to extract the &amp;quot;u2net.onnx&amp;quot; from the container. There are many ways to do this, for me the easiest was to use &lt;a href="https://en.wikipedia.org/wiki/Secure_copy_protocol"&gt;&amp;quot;secure copy&amp;quot;&lt;/a&gt; to transfer the file to my machine, but do whatever is easiest for you.&lt;/p&gt;
+&lt;h3 id="load-the-onnx-model-from-a-uwp-app"&gt;Load the ONNX model from a UWP app&lt;/h3&gt;
+&lt;p&gt;With the &amp;quot;u2net.onnx&amp;quot; model in hand, we're now going to use the &lt;code&gt;Microsoft.AI.MachineLearning&lt;/code&gt; package to load the model in preparation for running inference.&lt;/p&gt;
+&lt;p&gt;Before we create the UWP app though, we're going to install the &lt;a href="https://marketplace.visualstudio.com/items?itemName=WinML.mlgenv2"&gt;&amp;quot;Windows Machine Learning Code Generator&amp;quot;&lt;/a&gt; extension which automatically scaffolds code for interacting with an ONNX model and makes getting started with ML super-easy. So, start VS and install the extension before continuing to the next step (if you're not using VS or would prefer not to install the extension, you can simply copy the file generated in the next step from &lt;a href="https://github.com/ibebbs/UwpMl/blob/master/UwpMl/u2net.cs%5D"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Now, from Visual Studio and with the extension installed, create a new UWP project - I named mine &amp;quot;UwpMl&amp;quot; - and add the &amp;quot;u2net.onnx&amp;quot; model to the Assets folder. As you do so, you should see that a &amp;quot;u2net.cs&amp;quot; file is also added to the project thanks to the &amp;quot;Windows Machine Learning Code Generator&amp;quot; extension. Opening this file should show class definitions similar to the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;// This file was automatically generated by VS extension Windows Machine Learning Code Generator v3
+// from model file u2net.onnx
+// Warning: This file may get overwritten if you add add an onnx file with the same name
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Windows.Media;
+using Windows.Storage;
+using Windows.Storage.Streams;
+using Windows.AI.MachineLearning;
+namespace UwpMl
+{
+    
+    public sealed class u2netInput
+    {
+        public TensorFloat input; // shape(1,3,320,320)
+    }
+    
+    public sealed class u2netOutput
+    {
+        public TensorFloat o0; // shape(1,1,320,320)
+        public TensorFloat o1; // shape(1,1,320,320)
+        public TensorFloat o2; // shape(1,1,320,320)
+        public TensorFloat o3; // shape(1,1,320,320)
+        public TensorFloat o4; // shape(1,1,320,320)
+        public TensorFloat o5; // shape(1,1,320,320)
+        public TensorFloat o6; // shape(1,1,320,320)
+    }
+    
+    public sealed class u2netModel
+    {
+        private LearningModel model;
+        private LearningModelSession session;
+        private LearningModelBinding binding;
+        public static async Task&amp;lt;u2netModel&amp;gt; CreateFromStreamAsync(IRandomAccessStreamReference stream)
+        {
+            u2netModel learningModel = new u2netModel();
+            learningModel.model = await LearningModel.LoadFromStreamAsync(stream);
+            learningModel.session = new LearningModelSession(learningModel.model);
+            learningModel.binding = new LearningModelBinding(learningModel.session);
+            return learningModel;
+        }
+        public async Task&amp;lt;u2netOutput&amp;gt; EvaluateAsync(u2netInput input)
+        {
+            binding.Bind(&amp;quot;input&amp;quot;, input.input);
+            var result = await session.EvaluateAsync(binding, &amp;quot;0&amp;quot;);
+            var output = new u2netOutput();
+            output.o0 = result.Outputs[&amp;quot;o0&amp;quot;] as TensorFloat;
+            output.o1 = result.Outputs[&amp;quot;o1&amp;quot;] as TensorFloat;
+            output.o2 = result.Outputs[&amp;quot;o2&amp;quot;] as TensorFloat;
+            output.o3 = result.Outputs[&amp;quot;o3&amp;quot;] as TensorFloat;
+            output.o4 = result.Outputs[&amp;quot;o4&amp;quot;] as TensorFloat;
+            output.o5 = result.Outputs[&amp;quot;o5&amp;quot;] as TensorFloat;
+            output.o6 = result.Outputs[&amp;quot;o6&amp;quot;] as TensorFloat;
+            return output;
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Well, there you go. By just adding the &amp;quot;onnx&amp;quot; file to the project, we now have a &amp;quot;u2netModel&amp;quot; which is able to load the model (&lt;code&gt;CreateFromStreamAsync&lt;/code&gt;) and use it to perform inference (&lt;code&gt;EvaluateAsync&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;However, we should note the &lt;code&gt;using Windows.AI.MachineLearning;&lt;/code&gt; line. As discussed earlier, the &amp;quot;Windows.AI.MachineLearning&amp;quot; namespace is included as part of recent builds of Windows and, while it allows us to use ONNX models without any additional packages, it only supports ONNX models up to version 1.4 (opset 9). Given we exported the ONNX model for U²-Net using opset 12 we need to migrate to using the more recent &amp;quot;Microsoft.AI.MachineLearning&amp;quot; package. Fortunately this is very straight forward and simply involves installing the &lt;a href="https://www.nuget.org/packages/Microsoft.AI.MachineLearning/"&gt;&amp;quot;Microsoft.AI.MachineLearning&amp;quot; nuget package&lt;/a&gt; into the project then changing the above &lt;code&gt;using&lt;/code&gt; clause to &lt;code&gt;using Microsoft.AI.MachineLearning&lt;/code&gt;. Everything else remains the same.&lt;/p&gt;
+&lt;p&gt;Next we'll implement a UI which will allow us to load the image on which we want to perform inference and which will display both input and output images. For simplicity, we'll eschew MVVM and use the code-behind file for &amp;quot;MainPage&amp;quot; to implement this functionality.&lt;/p&gt;
+&lt;p&gt;So, in &amp;quot;MainPage.xaml&amp;quot;, add the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-xaml"&gt;&amp;lt;Page
+    x:Class=&amp;quot;UwpMl.MainPage&amp;quot;
+    xmlns=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&amp;quot;
+    xmlns:x=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml&amp;quot;
+    xmlns:local=&amp;quot;using:UwpMl&amp;quot;
+    xmlns:d=&amp;quot;http://schemas.microsoft.com/expression/blend/2008&amp;quot;
+    xmlns:mc=&amp;quot;http://schemas.openxmlformats.org/markup-compatibility/2006&amp;quot;
+    mc:Ignorable=&amp;quot;d&amp;quot;
+    Background=&amp;quot;{ThemeResource ApplicationPageBackgroundThemeBrush}&amp;quot;&amp;gt;
+
+    &amp;lt;Grid&amp;gt;
+        &amp;lt;Grid.RowDefinitions&amp;gt;
+            &amp;lt;RowDefinition Height=&amp;quot;0.6*&amp;quot;/&amp;gt;
+            &amp;lt;RowDefinition Height=&amp;quot;0.3*&amp;quot;/&amp;gt;
+            &amp;lt;RowDefinition Height=&amp;quot;Auto&amp;quot;/&amp;gt;
+        &amp;lt;/Grid.RowDefinitions&amp;gt;
+        &amp;lt;Grid.ColumnDefinitions&amp;gt;
+            &amp;lt;ColumnDefinition Width=&amp;quot;0.5*&amp;quot;/&amp;gt;
+            &amp;lt;ColumnDefinition Width=&amp;quot;0.5*&amp;quot;/&amp;gt;
+        &amp;lt;/Grid.ColumnDefinitions&amp;gt;
+        &amp;lt;Image Grid.Column=&amp;quot;0&amp;quot; Source=&amp;quot;/Assets/Checkerboard.png&amp;quot; Width=&amp;quot;320&amp;quot; Height=&amp;quot;320&amp;quot; Stretch=&amp;quot;UniformToFill&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+        &amp;lt;Image Grid.Column=&amp;quot;0&amp;quot; x:Name=&amp;quot;sourceImage&amp;quot; Stretch=&amp;quot;None&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+        &amp;lt;Image Grid.Column=&amp;quot;1&amp;quot; Source=&amp;quot;/Assets/Checkerboard.png&amp;quot; Width=&amp;quot;320&amp;quot; Height=&amp;quot;320&amp;quot; Stretch=&amp;quot;UniformToFill&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+        &amp;lt;Image Grid.Column=&amp;quot;1&amp;quot;  x:Name=&amp;quot;targetImage&amp;quot; Stretch=&amp;quot;None&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+        &amp;lt;ScrollViewer Grid.Row=&amp;quot;1&amp;quot; Grid.ColumnSpan=&amp;quot;2&amp;quot; HorizontalScrollMode=&amp;quot;Auto&amp;quot; HorizontalScrollBarVisibility=&amp;quot;Auto&amp;quot; VerticalScrollMode=&amp;quot;Disabled&amp;quot; VerticalScrollBarVisibility=&amp;quot;Hidden&amp;quot;&amp;gt;
+            &amp;lt;StackPanel Orientation=&amp;quot;Horizontal&amp;quot;&amp;gt;
+                &amp;lt;Image x:Name=&amp;quot;o6&amp;quot; Grid.Row=&amp;quot;6&amp;quot; Stretch=&amp;quot;Uniform&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+                &amp;lt;Image x:Name=&amp;quot;o5&amp;quot; Grid.Row=&amp;quot;5&amp;quot; Stretch=&amp;quot;Uniform&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+                &amp;lt;Image x:Name=&amp;quot;o4&amp;quot; Grid.Row=&amp;quot;4&amp;quot; Stretch=&amp;quot;Uniform&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+                &amp;lt;Image x:Name=&amp;quot;o3&amp;quot; Grid.Row=&amp;quot;3&amp;quot; Stretch=&amp;quot;Uniform&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+                &amp;lt;Image x:Name=&amp;quot;o2&amp;quot; Grid.Row=&amp;quot;2&amp;quot; Stretch=&amp;quot;Uniform&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+                &amp;lt;Image x:Name=&amp;quot;o1&amp;quot; Grid.Row=&amp;quot;1&amp;quot; Stretch=&amp;quot;Uniform&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+            &amp;lt;/StackPanel&amp;gt;
+        &amp;lt;/ScrollViewer&amp;gt;
+        &amp;lt;StackPanel Grid.Row=&amp;quot;2&amp;quot; Orientation=&amp;quot;Horizontal&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; Margin=&amp;quot;4&amp;quot; Grid.ColumnSpan=&amp;quot;2&amp;quot;&amp;gt;
+            &amp;lt;Button Content=&amp;quot;Go!&amp;quot; Padding=&amp;quot;32,16&amp;quot; Margin=&amp;quot;4&amp;quot; Click=&amp;quot;Button_Click&amp;quot;/&amp;gt;
+        &amp;lt;/StackPanel&amp;gt;
+    &amp;lt;/Grid&amp;gt;
+&amp;lt;/Page&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here you'll see that we add an &lt;code&gt;Image&lt;/code&gt; named &amp;quot;sourceImage&amp;quot; which is used to display the input image and another &lt;code&gt;Image&lt;/code&gt; named &amp;quot;targetImage&amp;quot; which is used to display the output. Behind these images I add additional &lt;code&gt;Image&lt;/code&gt; elements which display a checkerboard pattern; this is to demonstrate opacity in the target image and is completely optional but should you wish to display these you can find the &amp;quot;Checkerboard.png&amp;quot; file &lt;a href="https://github.com/ibebbs/UwpMl/blob/master/UwpMl/Assets/Checkerboard.png"&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Underneath these images I add a horizontally oriented &lt;code&gt;StackPanel&lt;/code&gt; containing further &lt;code&gt;Image&lt;/code&gt; elements. These are used to display the intermediate results of the U²-Net architecture which I found very useful for debugging but again is completely optional as it has no bearing on the final output.&lt;/p&gt;
+&lt;p&gt;Finally, in the bottom row of the UI we have a &lt;code&gt;StackPanel&lt;/code&gt; containing a singular &lt;code&gt;Button&lt;/code&gt; displaying the content &amp;quot;Go!&amp;quot;. This button will be used to load and display an image, perform inference and, finally, display the output image. We'll use the &amp;quot;Click&amp;quot; event to invoke this functionality in the &amp;quot;MainPage.xaml.cs&amp;quot; file as shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;using Microsoft.AI.MachineLearning;
+using System;
+using System.Threading.Tasks;
+using Windows.Graphics.Imaging;
+using Windows.Storage;
+using Windows.Storage.Streams;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Imaging;
+
+namespace UwpMl
+{
+    /// &amp;lt;summary&amp;gt;
+    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// &amp;lt;/summary&amp;gt;
+    public sealed partial class MainPage : Page
+    {
+        public MainPage()
+        {
+            this.InitializeComponent();
+        }
+
+        private async void Button_Click(object sender, RoutedEventArgs e)
+        {
+            // Use Picket to get file
+            var file = await GetImageFile();
+
+            SoftwareBitmap softwareBitmap;
+            byte[] bytes;
+
+
+            // Load image &amp;amp; scale to tensor input dimensions
+            using (IRandomAccessStream stream = await file.OpenAsync(FileAccessMode.Read))
+            {
+                bytes = await GetImageAsByteArrayAsync(stream, 320, 320, BitmapPixelFormat.Rgba8);
+                softwareBitmap = await GetImageAsSoftwareBitmapAsync(stream, 320, 320, BitmapPixelFormat.Bgra8);
+            }
+
+            // Display source image
+            var source = new SoftwareBitmapSource();
+            await source.SetBitmapAsync(softwareBitmap);
+
+            sourceImage.Source = source;
+
+            // Convert rgba-rgba-...-rgba to bb...b-rr...r-gg...g as colour weighted tensor (0..1)
+            var input = TensorFloat.CreateFromIterable(new long[] { 1, 3, 320, 320 }, TensorBrg(bytes));
+
+            // Load model &amp;amp; perform inference
+            StorageFile modelFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri($&amp;quot;ms-appx:///Assets/u2net.onnx&amp;quot;));
+            u2netModel model = await u2netModel.CreateFromStreamAsync(modelFile);
+            u2netOutput output = await model.EvaluateAsync(new u2netInput { input = input });
+
+            // Display intermediate results
+            await ToImage(output.o6, o6);
+            await ToImage(output.o5, o5);
+            await ToImage(output.o4, o4);
+            await ToImage(output.o3, o3);
+            await ToImage(output.o2, o2);
+            await ToImage(output.o1, o1);
+
+            // Display final result using the tensor as alpha mask on source image
+            await ToImage(bytes, output.o0, targetImage);
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As you can see, quality has been traded for clarity here to ensure the flow of how an image is retrieved and passed to a &lt;code&gt;u2netmodel&lt;/code&gt; instance is clear. Pasting this code into &amp;quot;MainPage.xaml.cs&amp;quot; will give you a bunch of red squigglies indicating undefined methods which we'll implement next, starting with the easy bits:&lt;/p&gt;
+&lt;h4 id="getimagefile"&gt;GetImageFile&lt;/h4&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;private async Task&amp;lt;StorageFile&amp;gt; GetImageFile()
+{
+    var picker = new Windows.Storage.Pickers.FileOpenPicker();
+    picker.ViewMode = Windows.Storage.Pickers.PickerViewMode.Thumbnail;
+    picker.SuggestedStartLocation = Windows.Storage.Pickers.PickerLocationId.PicturesLibrary;
+    picker.FileTypeFilter.Add(&amp;quot;.jpg&amp;quot;);
+    picker.FileTypeFilter.Add(&amp;quot;.jpeg&amp;quot;);
+    picker.FileTypeFilter.Add(&amp;quot;.png&amp;quot;);
+
+    var file = await picker.PickSingleFileAsync();
+
+    return file;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This code uses a file picker to allow the user to select the source image.&lt;/p&gt;
+&lt;h4 id="getimageassoftwarebitmapasync"&gt;GetImageAsSoftwareBitmapAsync&lt;/h4&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;private async Task&amp;lt;SoftwareBitmap&amp;gt; GetImageAsSoftwareBitmapAsync(IRandomAccessStream stream, uint width, uint height, BitmapPixelFormat pixelFormat)
+{
+    BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream);
+
+    var transform = new BitmapTransform() { ScaledWidth = width, ScaledHeight = height, InterpolationMode = BitmapInterpolationMode.NearestNeighbor };
+    var softwareBitmap = await decoder.GetSoftwareBitmapAsync(pixelFormat, BitmapAlphaMode.Premultiplied, transform, ExifOrientationMode.IgnoreExifOrientation, ColorManagementMode.DoNotColorManage);
+
+    return softwareBitmap;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This code loads an image from the specified &lt;code&gt;IRandomAccessStream&lt;/code&gt; and uses a &lt;code&gt;BitmapTransform&lt;/code&gt; and a &lt;code&gt;BitmapPixelFormat&lt;/code&gt; to transform the source image to the desired size and pixel format for displaying in the UI. Finally it returns a &lt;code&gt;SoftwareBitmap&lt;/code&gt; which can be conveniently displayed.&lt;/p&gt;
+&lt;h4 id="getimageasbytearrayasync"&gt;GetImageAsByteArrayAsync&lt;/h4&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;private async Task&amp;lt;byte[]&amp;gt; GetImageAsByteArrayAsync(IRandomAccessStream stream, uint width, uint height, BitmapPixelFormat pixelFormat)
+{
+    BitmapDecoder decoder = await BitmapDecoder.CreateAsync(stream);
+
+    var transform = new BitmapTransform() { ScaledWidth = width, ScaledHeight = height, InterpolationMode = BitmapInterpolationMode.NearestNeighbor };
+    var data = await decoder.GetPixelDataAsync(pixelFormat, BitmapAlphaMode.Premultiplied, transform, ExifOrientationMode.IgnoreExifOrientation, ColorManagementMode.DoNotColorManage);
+
+    return data.DetachPixelData();
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This code loads an image from the specified &lt;code&gt;IRandomAccessStream&lt;/code&gt; and uses a &lt;code&gt;BitmapTransform&lt;/code&gt; and a &lt;code&gt;BitmapPixelFormat&lt;/code&gt; to transform the source image to the desired size and pixel format for convenient translation into our ONNX model. Finally it returns a &lt;code&gt;byte[]&lt;/code&gt; representing the transformed image.&lt;/p&gt;
+&lt;p&gt;Now comes the tricky bits...&lt;/p&gt;
+&lt;h3 id="transform-the-source-image-into-u2-nets-input-tensor"&gt;Transform the source image into U²-Net's input tensor.&lt;/h3&gt;
+&lt;p&gt;To perform inference, the input image needs to be translated into a &amp;quot;Tensor&amp;quot;. Don't let the terminology scare you here, a &amp;quot;tensor&amp;quot; is simply a multi-dimensional array of floating point numbers with a defined &amp;quot;shape&amp;quot; (i.e. the size of each dimension). We can see the desired &amp;quot;shape&amp;quot; of the input tensor by looking at the &lt;code&gt;u2netInput&lt;/code&gt; class which contains the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public sealed class u2netInput
+{
+    public TensorFloat input; // shape(1,3,320,320)
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;In case it's not apparent, the sizes of each dimension relate to the values per pixel (3 - red, green &amp;amp; blue) along with the height (320 pixels) and width (320 pixels) dimensions of the source image. We needn't worry about the initial dimension here which - in this instance - just acts as a &amp;quot;container&amp;quot; for the other dimensions and will always have a size of 1.&lt;/p&gt;
+&lt;p&gt;Now, while translating our input image into this tensor, it's important to ensure we provide the tensor values in the format/order the underlying model expects them. Specifically here we must:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Provide multiple greyscale images&lt;br /&gt;
+Given the shape of this input tensor - (3, 320, 320) - we can see the model is expecting to see 3 greyscale images, sized 320x320 apiece, with each &amp;quot;grayscale&amp;quot; image calculated from one of the input image's colour channels. Furthermore, careful examination of &lt;a href="https://github.com/NathanUA/U-2-Net/blob/0b27f5cc958bac88825b1001f8245f663faeb1b8/data_loader.py#L218"&gt;&lt;code&gt;data_loader.py&lt;/code&gt;&lt;/a&gt; shows that the model is expecting these images in blue, red, green order. This means that our (scaled) input image needs to be translated such that the index [1,1,1] - which would ordinarily return the red component of the top left pixel - returns the blue component of the top left pixel instead, and the index [2,1,1] - which would return the red component of the second pixel from the left on the top row of the image - instead returns the red component of the top left pixel of the image. And so on and so forth.&lt;/li&gt;
+&lt;li&gt;&amp;quot;Normalize&amp;quot; pixel values&lt;br /&gt;
+Pixels in our input image are in the Rgba8 format (as shown in the call to &lt;code&gt;GetImageAsByteArrayAsync&lt;/code&gt;) meaning each pixel is composed of 4 channels (red, green, blue and alpha) and each channel is represented by a single byte ranging in value from 0 to 255. Each of these pixel values need to be translated into a value between 0 and 1 and &amp;quot;normalized&amp;quot; with a &lt;a href="https://github.com/NathanUA/U-2-Net/blob/0b27f5cc958bac88825b1001f8245f663faeb1b8/data_loader.py#L212"&gt;channel specific divisor&lt;/a&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;I implement these considerations in the &lt;code&gt;TensorBrg&lt;/code&gt; method as shown here:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;public IEnumerable&amp;lt;float&amp;gt; TensorBrg(byte[] bytes)
+{
+    // Original in rgb (0,1,2), we want brg(2,0,1)
+
+    // Return the blue channel
+    for (int i = 2; i &amp;lt; bytes.Length; i += 4)
+    {
+        var b = Convert.ToSingle(((bytes[i] / 255.0) - 0.406) / 0.225);
+        yield return b;
+    }
+
+    // Return the red channel
+    for (int i = 0; i &amp;lt; bytes.Length; i += 4)
+    {
+        var r = Convert.ToSingle(((bytes[i] / 255.0) - 0.485) / 0.229);
+        yield return r;
+    }
+
+    // Return the green channel
+    for (int i = 1; i &amp;lt; bytes.Length; i += 4)
+    {
+        var g = Convert.ToSingle(((bytes[i] / 255.0) - 0.456) / 0.224);
+        yield return g;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This method uses the &lt;code&gt;yield return&lt;/code&gt; keyword to return the result of the mapping as an IEnumerable&lt;float&gt; thereby alleviating the need for an intermediate buffer and is used as follows:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;// Convert rgba-rgba-...-rgba to bb...b-rr...r-gg...g as colour weighted tensor (0..1)
+TensorFloat input = TensorFloat.CreateFromIterable(new long[] { 1, 3, 320, 320 }, TensorBrg(bytes));
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="perform-inference"&gt;Perform inference&lt;/h3&gt;
+&lt;p&gt;Now we have a tensor of the expected shape containing the expected values, we're able to use our ONNX model to perform inference. This is - thanks to the &amp;quot;Windows Machine Learning Code Generator&amp;quot; - extremely easy as shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;// Load model &amp;amp; perform inference
+StorageFile modelFile = await StorageFile.GetFileFromApplicationUriAsync(new Uri($&amp;quot;ms-appx:///Assets/u2net.onnx&amp;quot;));
+u2netModel model = await u2netModel.CreateFromStreamAsync(modelFile);
+u2netOutput output = await model.EvaluateAsync(new u2netInput { input = input });
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And that's it. We have successfully used an ONNX model to perform inference using a state-of-the-art machine learning model. Just one small thing left... interpreting the results.&lt;/p&gt;
+&lt;h3 id="transform-the-source-image-into-target-image-using-u2-nets-output-tensor-as-an-alpha-channel"&gt;Transform the source image into target image using U²-Net's output tensor as an alpha channel.&lt;/h3&gt;
+&lt;p&gt;We have two methods left to implement: &lt;code&gt;ToImage&lt;/code&gt; &amp;amp; &lt;code&gt;ToBlendedImage&lt;/code&gt;. The first of these takes an output tensor and converts it to a grey scale image. This method is used with the &amp;quot;intermediate&amp;quot; output tensors to show the progression towards the result and is really just used for debugging purposes or out of interest. The code is shown here:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;private async Task ToImage(TensorFloat tensorFloat, Image image)
+{
+    var pixels = tensorFloat
+            .GetAsVectorView()
+            .SelectMany(
+                f =&amp;gt;
+                {
+                    byte v = Convert.ToByte(f * 255);
+                    return new byte[] { v, v, v, 255 };
+                })
+            .ToArray();
+
+    var writeableBitmap = new WriteableBitmap(320, 320);
+
+    // Open a stream to copy the image contents to the WriteableBitmap's pixel buffer 
+    using (Stream stream = writeableBitmap.PixelBuffer.AsStream())
+    {
+        await stream.WriteAsync(pixels, 0, pixels.Length);
+    }
+
+    var dest = SoftwareBitmap.CreateCopyFromBuffer(writeableBitmap.PixelBuffer, BitmapPixelFormat.Bgra8, 320, 320, BitmapAlphaMode.Premultiplied);
+    var destSouce = new SoftwareBitmapSource();
+    await destSouce.SetBitmapAsync(dest);
+
+    image.Source = destSouce;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Conversely, &lt;code&gt;ToBlendedImage&lt;/code&gt; composes our desired output image by using the final output tensor of the U²-Net model as both a mask and an alpha channel for the input image. This is shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;private IEnumerable&amp;lt;byte&amp;gt; ApplyTensorAsMask(byte[] data, TensorFloat tensorFloat, float cutoff)
+{
+    var tensorData = tensorFloat.GetAsVectorView().ToArray();
+
+    for (int i = 0; i &amp;lt; data.Length; i += 4)
+    {
+        var alpha = Math.Clamp(tensorData[i / 4], 0, 1);
+
+        if (alpha &amp;gt; cutoff)
+        {
+            yield return Convert.ToByte(data[i + 2] * alpha);
+            yield return Convert.ToByte(data[i + 1] * alpha);
+            yield return Convert.ToByte(data[i + 0] * alpha);
+            yield return Convert.ToByte(alpha * 255);
+        }
+        else
+        {
+            yield return 0;
+            yield return 0;
+            yield return 0;
+            yield return 0;
+        }
+
+    }
+}
+
+private async Task ToBlendedImage(byte[] data, TensorFloat tensorFloat, Image target)
+{
+    var image = ApplyTensorAsMask(data, tensorFloat, 0.0f).ToArray();
+    var writeableBitmap = new WriteableBitmap(320, 320);
+
+    // Open a stream to copy the image contents to the WriteableBitmap's pixel buffer 
+    using (Stream stream = writeableBitmap.PixelBuffer.AsStream())
+    {
+        await stream.WriteAsync(image, 0, image.Length);
+    }
+
+    var dest = SoftwareBitmap.CreateCopyFromBuffer(writeableBitmap.PixelBuffer, BitmapPixelFormat.Bgra8, 320, 320, BitmapAlphaMode.Premultiplied);
+    var destSouce = new SoftwareBitmapSource();
+    await destSouce.SetBitmapAsync(dest);
+
+    target.Source = destSouce;
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;With these methods implemented, there should be no more sqigglies in our &lt;code&gt;MainPage.xaml.cs&lt;/code&gt; and we should be able to successfully compile and run the project.&lt;/p&gt;
+&lt;h3 id="testing"&gt;Testing&lt;/h3&gt;
+&lt;p&gt;Run the project and click the &amp;quot;Go!&amp;quot; button. While you are free to use any source image you like to test the code above, I would suggest that, when prompted for a source image, you use one of the &lt;a href="https://github.com/NathanUA/U-2-Net/tree/master/test_data/test_images"&gt;test images provided by U²-Net&lt;/a&gt;; in the screen shot below I've used &lt;a href="https://github.com/NathanUA/U-2-Net/blob/master/test_data/test_images/bike.jpg"&gt;bike.jpg&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;After selecting the image, it will be scaled and displayed in the UI before performing inference and displaying the output images. It should only take a few seconds for the output image to appear and, of this time, inference via the ONNX model should - depending on your hardware - be less than a second. This shows that there is significant potential for optimization in the preparation of the input tensor and the processing of the output tensor but, given &lt;a href="https://stackify.com/premature-optimization-evil/"&gt;premature optimisation is the root of all evil&lt;/a&gt;, I didn't attempt to optimize these processes and instead just focused on getting the solution running.&lt;/p&gt;
+&lt;p&gt;Anyway, once processing is complete, you should see something similar to this:&lt;/p&gt;
+&lt;img src="/Content/MLinUWP/UWP Background Removal.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="UWP Background Removal"/&gt;
+&lt;p&gt;Nice! Let's compare it to the docker produced image of my girl above:&lt;/p&gt;
+&lt;img src="/Content/MLinUWP/CrossEyed-u2net-UWP.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="CrossEyed Background Removal from UWP"/&gt;
+&lt;p&gt;That is pretty good, just as fast as as the Docker solution and doesn't require an internet connection. Sweet!&lt;/p&gt;
+&lt;h1 id="bonus"&gt;Bonus&lt;/h1&gt;
+&lt;p&gt;Now we're able to remove backgrounds using a state-of-the-art machine learning model both in and out of process, let's revisit the &amp;quot;Premier League Player of the Month&amp;quot; to see if we can easily create one of our own. Quickly combining the following XAML with a processed image of my boy gives us:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-xaml"&gt;&amp;lt;Viewbox&amp;gt;
+    &amp;lt;Canvas xmlns=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&amp;quot; xmlns:x=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml&amp;quot; x:Name=&amp;quot;Layer_3_0&amp;quot; Width=&amp;quot;640.089&amp;quot; Height=&amp;quot;896.125&amp;quot; Canvas.Left=&amp;quot;0&amp;quot; Canvas.Top=&amp;quot;0&amp;quot;&amp;gt;
+        &amp;lt;Path Width=&amp;quot;594.812&amp;quot; Height=&amp;quot;887.356&amp;quot; Canvas.Left=&amp;quot;0.00104256&amp;quot; Canvas.Top=&amp;quot;6.10352e-005&amp;quot; Stretch=&amp;quot;Fill&amp;quot; Fill=&amp;quot;#FF3C9A24&amp;quot; Data=&amp;quot;...&amp;quot;/&amp;gt;
+        &amp;lt;controls:DropShadowPanel BlurRadius=&amp;quot;50.0&amp;quot; ShadowOpacity=&amp;quot;0.80&amp;quot; OffsetX=&amp;quot;114.0&amp;quot; OffsetY=&amp;quot;0.0&amp;quot; Color=&amp;quot;#AF000000&amp;quot;&amp;gt;
+            &amp;lt;Image Source=&amp;quot;Assets/Poopi.png&amp;quot; Width=&amp;quot;640&amp;quot; Height=&amp;quot;547&amp;quot; /&amp;gt;
+        &amp;lt;/controls:DropShadowPanel&amp;gt;
+        &amp;lt;Rectangle Width=&amp;quot;595&amp;quot; Height=&amp;quot;50&amp;quot; Canvas.Top=&amp;quot;494&amp;quot; &amp;gt;
+            &amp;lt;Rectangle.Fill&amp;gt;
+                &amp;lt;LinearGradientBrush EndPoint=&amp;quot;0.5,1&amp;quot; StartPoint=&amp;quot;0.5,0&amp;quot;&amp;gt;
+                    &amp;lt;GradientStop Color=&amp;quot;#00000000&amp;quot;/&amp;gt;
+                    &amp;lt;GradientStop Color=&amp;quot;#7F000000&amp;quot; Offset=&amp;quot;1&amp;quot;/&amp;gt;
+                &amp;lt;/LinearGradientBrush&amp;gt;
+            &amp;lt;/Rectangle.Fill&amp;gt;
+        &amp;lt;/Rectangle&amp;gt;
+        &amp;lt;Canvas x:Name=&amp;quot;Layer_4&amp;quot; Width=&amp;quot;640.089&amp;quot; Height=&amp;quot;855&amp;quot; Canvas.Left=&amp;quot;0&amp;quot; Canvas.Top=&amp;quot;91&amp;quot;&amp;gt;
+            &amp;lt;Path Width=&amp;quot;868.328&amp;quot; Height=&amp;quot;171.341&amp;quot; Canvas.Left=&amp;quot;-138.987&amp;quot; Canvas.Top=&amp;quot;437.023&amp;quot; Stretch=&amp;quot;Fill&amp;quot; Fill=&amp;quot;#FFD7533E&amp;quot; Data=&amp;quot;...&amp;quot;/&amp;gt;
+        &amp;lt;/Canvas&amp;gt;
+        &amp;lt;TextBlock Text=&amp;quot;POOPI&amp;quot; Canvas.Left=&amp;quot;29&amp;quot; Canvas.Top=&amp;quot;553&amp;quot; Height=&amp;quot;119&amp;quot; Width=&amp;quot;532&amp;quot; FontFamily=&amp;quot;Impact&amp;quot; FontSize=&amp;quot;96&amp;quot; Foreground=&amp;quot;White&amp;quot; TextAlignment=&amp;quot;Center&amp;quot; /&amp;gt;
+    &amp;lt;/Canvas&amp;gt;
+&amp;lt;/Viewbox&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;img src="/Content/MLinUWP/Poopi.png" class="img-responsive" style="margin: auto; max-width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Poopi"/&gt;
+&lt;p&gt;Yup, that works.&lt;/p&gt;
+&lt;p&gt;(Sorry son but, after what happened Sunday, you deserve it ;0)&lt;/p&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;As you can see, using state-of-the machine learning models from UWP is fairly straight forward and certainly not any more complicated than using them from Python. UWP - via &amp;quot;Microsoft.AI.MachineLearning&amp;quot; - has excellent support for the very latest versions of ONNX and, given most mainstream machine learning frameworks can export to ONNX, allows UWP developers to easily leverage the entire vista of modern machine learning algorithms for their purposes (resources permitting).&lt;/p&gt;
+&lt;p&gt;The source code for this article can be found in my &lt;a href="https://github.com/ibebbs/UwpMl"&gt;UwpMl repository&lt;/a&gt; on GitHub; please star it if you find it helpful or informative. Should you have any questions or comments, please feel free to drop me a line using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;.&lt;/p&gt;
+</content:encoded>
+		</item>
 		<item>
 			<title>Running UWP on a Raspberry Pi Using Uno Platform</title>
 			<link>http://ian.bebbs.co.uk/posts/UnoPi</link>
@@ -4412,103 +4909,6 @@ steps:
 &lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
 &lt;p&gt;I am very impressed with Azure pipelines. The tools they've made available in their Yaml based build system are fantastic and make building a project easy and clean yet flexible and powerful. Furthermore, the actual build process is very fast. From git push to package in my nuget repository took less than a minute. Yes, it's just a small library without any tests (for now), but each build required installing a new version of the .NET Core SDK onto the build agent and, even though this was all hosted on the Free tier, I never had to wait for a build agent to become available.&lt;/p&gt;
 &lt;p&gt;If they could just tighten up the OAuth permission requested from GitHub I'd be very tempted to adopt Azure DevOps for all my projects. I'd certainly consider recommending it to clients should they be looking to move away from other CI/CD solutions.&lt;/p&gt;
-</content:encoded>
-		</item>
-		<item>
-			<title>Using A Touch Overlay, In Portrait, On Raspbian Buster</title>
-			<link>http://ian.bebbs.co.uk/posts/UsingATouchOverlayInPortrainOnRaspbian</link>
-			<description>&lt;p&gt;This is just a short post - mostly for my own benefit - on how to use a touch-overlay, in portrait, on Raspbian Buster&lt;/p&gt;</description>
-			<guid>http://ian.bebbs.co.uk/posts/UsingATouchOverlayInPortrainOnRaspbian</guid>
-			<pubDate>Thu, 03 Oct 2019 00:00:00 GMT</pubDate>
-			<content:encoded>&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
-&lt;p&gt;This is just a short post - mostly for my own benefit - on how to use a touch-overlay, in portrait, on Raspbian Buster&lt;/p&gt;
-&lt;p&gt;These instructions are for using a standard HDMI monitor (I'm using a Samsung ME46B) and USB Touchscreen overlay (I'm using a Samsung TM46LBC) in a &lt;code&gt;right&lt;/code&gt; portrait (i.e rotated 270° clockwise) configuration. They probably won't work for hat/phat style LCDs with built-in touch-panels.&lt;/p&gt;
-&lt;h2 id="changing-to-portrait"&gt;Changing to portrait&lt;/h2&gt;
-&lt;p&gt;Raspbian Buster has moved to the 'G2 GL (Fake KMS) OpenGL desktop driver with fake KMS' OpenGL driver by default (&lt;code&gt;dtoverlay=vc4-fkms-v3d&lt;/code&gt; in &lt;code&gt;/boot/config.txt&lt;/code&gt;). Fortunately, as they moved to the 'fake' driver, you're still given significant control over the display configuration from &lt;code&gt;/boot/config.txt&lt;/code&gt; and changing the display orientation remains unchanged.&lt;/p&gt;
-&lt;p&gt;As such, use the command &lt;code&gt;sudo nano /boot/config.txt&lt;/code&gt; to start editing the file and add the following lines at the bottom (uncommenting the appropriate line):&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# display_rotate=1 # rotate 90° clockwise
-# display_rotate=2 # rotate 180° clockwise
-display_rotate=3 # rotate 270° clockwise
-avoid_warnings=1
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Reboot the Pi (&lt;code&gt;sudo reboot&lt;/code&gt;) and you should see that the display is now in the correct orientation.&lt;/p&gt;
-&lt;h2 id="correcting-overscan"&gt;Correcting Overscan&lt;/h2&gt;
-&lt;p&gt;Before moving onto installing/calibrating the touch-panel, it is well worth spending some time correcting the Overscan on your display. To do this, again edit &lt;code&gt;config.txt&lt;/code&gt; and find lines similar to below:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;# uncomment this if your display has a black border of unused pixels visible
-# and your display can output without overscan
-disable_overscan=0
-
-# uncomment the following to adjust overscan. Use positive numbers if console
-# goes off screen, and negative if there is too much border
-overscan_left=-10
-overscan_right=-10
-overscan_top=8
-overscan_bottom=8
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The values you see above are those required to make my panel display correctly (nothing off-screen, no big borders). If you need to change overscan you'll need to find the values that work for you by changing values and rebooting to see the effect.&lt;/p&gt;
-&lt;h2 id="calibrating-the-touch-panel"&gt;Calibrating the Touch-Panel&lt;/h2&gt;
-&lt;p&gt;While the touch panel I am using was correctly identified as a 'Nexio Touch Device' by &lt;code&gt;xinput --list&lt;/code&gt; getting it to respect the display orientation and calibrating it correctly turned out to be a pain. After &lt;em&gt;a lot&lt;/em&gt; of searching I finally found &lt;a href="https://www.instructables.com/id/Rotate-Raspberry-Pi-Display-and-Touchscreen/"&gt;two&lt;/a&gt; &lt;a href="https://www.raspberrypi.org/forums/viewtopic.php?t=179477#p1163460"&gt;posts&lt;/a&gt; which, when combined, got the touch panel working correctly.&lt;/p&gt;
-&lt;p&gt;Firstly, you'll need to install the &lt;code&gt;evdev&lt;/code&gt; driver and the &lt;code&gt;xinput_calibrator&lt;/code&gt; using the command:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;sudo apt-get install xserver-xorg-input-evdev xinput_calibrator
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Next locate the touch-panel display configuration file as described in this &lt;a href="https://www.instructables.com/id/Rotate-Raspberry-Pi-Display-and-Touchscreen/"&gt;instructable&lt;/a&gt;; mine was &lt;code&gt;/usr/share/X11/xorg.conf.d/40-libinput.conf&lt;/code&gt;&lt;/p&gt;
-&lt;p&gt;In this file, find the &lt;code&gt;InputClass&lt;/code&gt; Section which includes the Identifier &lt;code&gt;libinput touchscreen catchall&lt;/code&gt;. In this section, change the &lt;code&gt;Driver&lt;/code&gt; value from &lt;code&gt;libinput&lt;/code&gt; to &lt;code&gt;evdev&lt;/code&gt; and add a &lt;code&gt;TransformationMatrix&lt;/code&gt; option to reflect to display orientation as shown below:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;Section &amp;quot;InputClass&amp;quot;
-        Identifier &amp;quot;libinput touchscreen catchall&amp;quot;
-        MatchIsTouchscreen &amp;quot;on&amp;quot;
-        MatchDevicePath &amp;quot;/dev/input/event*&amp;quot;
-        Driver &amp;quot;evdev&amp;quot; # &amp;lt;- change this
-        Option &amp;quot;TransformationMatrix&amp;quot; &amp;quot;0 1 0 -1 0 1 0 0 1&amp;quot; # &amp;lt;- Add this
-EndSection
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;The exact transformation matrix you need is available in the instructable but I've repeated them here for easy reference:&lt;/p&gt;
-&lt;table class="table"&gt;
-&lt;thead&gt;
-&lt;tr&gt;
-&lt;th&gt;Angle&lt;/th&gt;
-&lt;th&gt;Transformation Matrix&lt;/th&gt;
-&lt;/tr&gt;
-&lt;/thead&gt;
-&lt;tbody&gt;
-&lt;tr&gt;
-&lt;td&gt;90°&lt;/td&gt;
-&lt;td&gt;&amp;quot;0 -1 1 1 0 0 0 0 1&amp;quot;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;180°&lt;/td&gt;
-&lt;td&gt;&amp;quot;-1 0 1 0 -1 1 0 0 1&amp;quot;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;tr&gt;
-&lt;td&gt;270°&lt;/td&gt;
-&lt;td&gt;&amp;quot;0 1 0 -1 0 1 0 0 1&amp;quot;&lt;/td&gt;
-&lt;/tr&gt;
-&lt;/tbody&gt;
-&lt;/table&gt;
-&lt;p&gt;Now, if you restart your Pi you should notice that the touch panel is at least in the correct orientation (mouse cursor moves in the same direction as your finger). To calibrate it such that the mouse cursor moves to exactly where you touch, use the &lt;code&gt;xinput_calibrator&lt;/code&gt; tool by running it from the Terminal window in a desktop session.&lt;/p&gt;
-&lt;p&gt;Follow the instructions and &lt;code&gt;input_calibrator&lt;/code&gt; will do two things:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Correctly calibrate the display - the mouse cursor should now be under your touch; and&lt;/li&gt;
-&lt;li&gt;Give you a block of text to add to persistent configuration as shown below:&lt;/li&gt;
-&lt;/ol&gt;
-&lt;pre&gt;&lt;code&gt;Calibrating EVDEV driver for &amp;quot;Nexio Touch Device(HS) Nexio HID Multi-Touch ATI0460-06 &amp;quot; id=7
-	current calibration values (from XInput): min_x=15929, max_x=149 and min_y=16328, max_y=171
-
-Doing dynamic recalibration:
-	Setting calibration data: 15872, 0, 16498, -69
-	--&amp;gt; Making the calibration permanent &amp;lt;--
-  copy the snippet below into '/etc/X11/xorg.conf.d/99-calibration.conf' (/usr/share/X11/xorg.conf.d/ in some distro's)
-Section &amp;quot;InputClass&amp;quot;
-	Identifier	&amp;quot;calibration&amp;quot;
-	MatchProduct	&amp;quot;Nexio Touch Device(HS) Nexio HID Multi-Touch ATI0460-06 &amp;quot;
-	Option	&amp;quot;Calibration&amp;quot;	&amp;quot;15872 0 16498 -69&amp;quot;
-	Option	&amp;quot;SwapAxes&amp;quot;	&amp;quot;0&amp;quot;
-EndSection
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Follow the instructions it provides by copying the region from &lt;code&gt;Section &amp;quot;InputClass&amp;quot;&lt;/code&gt; down to &lt;code&gt;EndSection&lt;/code&gt; then using the following command to create (or edit) the persistent configuration file:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;sudo nano /usr/share/X11/xorg.conf.d/99-calibration.conf
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Paste the block of text you copied earlier, save and exit, then reboot.&lt;/p&gt;
-&lt;p&gt;Voila, a perfectly configured touch overlay. Enjoy!&lt;/p&gt;
 </content:encoded>
 		</item>
 	</channel>
