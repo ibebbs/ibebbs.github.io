@@ -4,7 +4,7 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-08-24T20:43:50Z</updated>
+	<updated>2020-08-24T20:50:42Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/MLinUWP</id>
@@ -12,7 +12,7 @@
 		<link href="http://ian.bebbs.co.uk/posts/MLinUWP" />
 		<updated>2020-08-24T00:00:00Z</updated>
 		<content>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
-&lt;p&gt;In this post I show how to use a state-of-the-art machine learning model to implement Salient Object Detection and Image Segmentation. I then show this model can be used to provide local inference capabilities entirely within a UWP app.&lt;/p&gt;
+&lt;p&gt;In this post I show how to use a state-of-the-art machine learning model to implement Salient Object Detection and Image Segmentation. I then show how this model can be used to provide local inference capabilities entirely within a UWP app.&lt;/p&gt;
 &lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
 &lt;p&gt;A while ago I found myself prototyping a UI in which I wanted to show portrait images of people. However, I wanted to remove the background from these portrait images so that they appeared integrated into the UI rather than layered on top of it. For example, something like this Premier League Player of the Month card:&lt;/p&gt;
 &lt;img src="/Content/MLinUWP/Pukki.png" class="img-responsive" style="margin: auto; max-width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Premier League Player of the Month card"/&gt;
@@ -501,7 +501,7 @@ private async Task ToBlendedImage(byte[] data, TensorFloat tensorFloat, Image ta
 &lt;p&gt;As you can see, using state-of-the machine learning models from UWP is fairly straight forward and certainly not any more complicated than using them from Python. UWP - via &amp;quot;Microsoft.AI.MachineLearning&amp;quot; - has excellent support for the very latest versions of ONNX and, given most mainstream machine learning frameworks can export to ONNX, allows UWP developers to easily leverage the entire vista of modern machine learning algorithms for their purposes (resources permitting).&lt;/p&gt;
 &lt;p&gt;The source code for this article can be found in my &lt;a href="https://github.com/ibebbs/UwpMl"&gt;UwpMl repository&lt;/a&gt; on GitHub; please star it if you find it helpful or informative. Should you have any questions or comments, please feel free to drop me a line using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;.&lt;/p&gt;
 </content>
-		<summary>&lt;p&gt;In this post I show how to use a state-of-the-art machine learning model to implement Salient Object Detection and Image Segmentation. I then show this model can be used to provide local inference capabilities entirely within a UWP app.&lt;/p&gt;</summary>
+		<summary>&lt;p&gt;In this post I show how to use a state-of-the-art machine learning model to implement Salient Object Detection and Image Segmentation. I then show how this model can be used to provide local inference capabilities entirely within a UWP app.&lt;/p&gt;</summary>
 	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/UnoPi</id>

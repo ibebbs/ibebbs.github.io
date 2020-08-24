@@ -5,16 +5,16 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2020</copyright>
-		<pubDate>Mon, 24 Aug 2020 20:43:50 GMT</pubDate>
-		<lastBuildDate>Mon, 24 Aug 2020 20:43:50 GMT</lastBuildDate>
+		<pubDate>Mon, 24 Aug 2020 20:50:42 GMT</pubDate>
+		<lastBuildDate>Mon, 24 Aug 2020 20:50:42 GMT</lastBuildDate>
 		<item>
 			<title>State-of-the-art ML in UWP</title>
 			<link>http://ian.bebbs.co.uk/posts/MLinUWP</link>
-			<description>&lt;p&gt;In this post I show how to use a state-of-the-art machine learning model to implement Salient Object Detection and Image Segmentation. I then show this model can be used to provide local inference capabilities entirely within a UWP app.&lt;/p&gt;</description>
+			<description>&lt;p&gt;In this post I show how to use a state-of-the-art machine learning model to implement Salient Object Detection and Image Segmentation. I then show how this model can be used to provide local inference capabilities entirely within a UWP app.&lt;/p&gt;</description>
 			<guid>http://ian.bebbs.co.uk/posts/MLinUWP</guid>
 			<pubDate>Mon, 24 Aug 2020 00:00:00 GMT</pubDate>
 			<content:encoded>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
-&lt;p&gt;In this post I show how to use a state-of-the-art machine learning model to implement Salient Object Detection and Image Segmentation. I then show this model can be used to provide local inference capabilities entirely within a UWP app.&lt;/p&gt;
+&lt;p&gt;In this post I show how to use a state-of-the-art machine learning model to implement Salient Object Detection and Image Segmentation. I then show how this model can be used to provide local inference capabilities entirely within a UWP app.&lt;/p&gt;
 &lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
 &lt;p&gt;A while ago I found myself prototyping a UI in which I wanted to show portrait images of people. However, I wanted to remove the background from these portrait images so that they appeared integrated into the UI rather than layered on top of it. For example, something like this Premier League Player of the Month card:&lt;/p&gt;
 &lt;img src="/Content/MLinUWP/Pukki.png" class="img-responsive" style="margin: auto; max-width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Premier League Player of the Month card"/&gt;
