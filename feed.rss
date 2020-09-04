@@ -5,17 +5,17 @@
 		<link>http://ian.bebbs.co.uk/</link>
 		<description>IObservable&lt;Opinion&gt;</description>
 		<copyright>2020</copyright>
-		<pubDate>Fri, 04 Sep 2020 20:39:05 GMT</pubDate>
-		<lastBuildDate>Fri, 04 Sep 2020 20:39:05 GMT</lastBuildDate>
+		<pubDate>Fri, 04 Sep 2020 20:42:14 GMT</pubDate>
+		<lastBuildDate>Fri, 04 Sep 2020 20:42:14 GMT</lastBuildDate>
 		<item>
 			<title>A Blogging Milestone</title>
 			<link>http://ian.bebbs.co.uk/posts/BlogMilestone</link>
-			<description>&lt;p&gt;Today my blog hit a minor milestone: over 12,000 page views in the last 366 (it's a leap year) days. That's over two-thousand page views a month! While a long way short of other notable tech bloggers (yes, I'm looking at you &lt;a href="https://www.hanselman.com/blog/"&gt;Hanselman&lt;/a&gt;), I think it's a pretty decent number, particularly when considering the somewhat limited audience for my very targeted content. In this post I provide insights into my "Top 20" posts and my plans for the coming months.&lt;/p&gt;</description>
+			<description>&lt;p&gt;Today my blog hit a minor milestone: over 12,000 page views in the last 365 days. That's over two-thousand page views a month! While a long way short of other notable tech bloggers (yes, I'm looking at you &lt;a href="https://www.hanselman.com/blog/"&gt;Hanselman&lt;/a&gt;), I think it's a pretty decent number, particularly when considering the somewhat limited audience for my very targeted content. In this post I provide insights into my "Top 20" posts and my plans for the coming months.&lt;/p&gt;</description>
 			<enclosure url="http://ian.bebbs.co.uk/Content/BlogMilestone/Weighted%20Posts%20-%20Background.png" length="0" type="image" />
 			<guid>http://ian.bebbs.co.uk/posts/BlogMilestone</guid>
 			<pubDate>Fri, 04 Sep 2020 00:00:00 GMT</pubDate>
 			<content:encoded>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
-&lt;p&gt;Today my blog hit a minor milestone: over 12,000 page views in the last 366 (it's a leap year) days. That's over two-thousand page views a month! While a long way short of other notable tech bloggers (yes, I'm looking at you &lt;a href="https://www.hanselman.com/blog/"&gt;Hanselman&lt;/a&gt;), I think it's a pretty decent number, particularly when considering the somewhat limited audience for my very targeted content. In this post I provide insights into my &amp;quot;Top 20&amp;quot; posts and my plans for the coming months.&lt;/p&gt;
+&lt;p&gt;Today my blog hit a minor milestone: over 12,000 page views in the last 365 days. That's over two-thousand page views a month! While a long way short of other notable tech bloggers (yes, I'm looking at you &lt;a href="https://www.hanselman.com/blog/"&gt;Hanselman&lt;/a&gt;), I think it's a pretty decent number, particularly when considering the somewhat limited audience for my very targeted content. In this post I provide insights into my &amp;quot;Top 20&amp;quot; posts and my plans for the coming months.&lt;/p&gt;
 &lt;h2 id="top-20"&gt;Top 20&lt;/h2&gt;
 &lt;h3 id="posts-by-weighted-page-view"&gt;Posts By Weighted Page View&lt;/h3&gt;
 &lt;p&gt;While looking over the blog statistics for the past year, I was very interested to understand which were my &amp;quot;top&amp;quot; posts. Initially I thought total page views for each post would be a good metric but, given older posts will naturally have more hits, I decided to weight total page views by publication date. This gave me the following:&lt;/p&gt;
