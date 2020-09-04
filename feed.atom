@@ -4,8 +4,410 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-08-24T20:50:42Z</updated>
+	<updated>2020-09-04T20:39:05Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/BlogMilestone</id>
+		<title>A Blogging Milestone</title>
+		<link href="http://ian.bebbs.co.uk/posts/BlogMilestone" />
+		<link rel="enclosure" type="image" href="http://ian.bebbs.co.uk/Content/BlogMilestone/Weighted%20Posts%20-%20Background.png" />
+		<updated>2020-09-04T00:00:00Z</updated>
+		<content>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;Today my blog hit a minor milestone: over 12,000 page views in the last 366 (it's a leap year) days. That's over two-thousand page views a month! While a long way short of other notable tech bloggers (yes, I'm looking at you &lt;a href="https://www.hanselman.com/blog/"&gt;Hanselman&lt;/a&gt;), I think it's a pretty decent number, particularly when considering the somewhat limited audience for my very targeted content. In this post I provide insights into my &amp;quot;Top 20&amp;quot; posts and my plans for the coming months.&lt;/p&gt;
+&lt;h2 id="top-20"&gt;Top 20&lt;/h2&gt;
+&lt;h3 id="posts-by-weighted-page-view"&gt;Posts By Weighted Page View&lt;/h3&gt;
+&lt;p&gt;While looking over the blog statistics for the past year, I was very interested to understand which were my &amp;quot;top&amp;quot; posts. Initially I thought total page views for each post would be a good metric but, given older posts will naturally have more hits, I decided to weight total page views by publication date. This gave me the following:&lt;/p&gt;
+&lt;img src="/Content/BlogMilestone/Weighted Posts.png" class="img-responsive" style="margin: auto; max-width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Weighted Posts"/&gt;
+&lt;p&gt;In this chart the outer ring is the Top 20 blog posts based on weighted total page views and the inner ring is the same 20 blog posts based on actual total page views.&lt;/p&gt;
+&lt;p&gt;The Top 20 are as follows:&lt;/p&gt;
+&lt;table class="table"&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Post&lt;/th&gt;
+&lt;th style="text-align: right;"&gt;Weighted Views&lt;/th&gt;
+&lt;th style="text-align: right;"&gt;Total Views&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/UnoValue"&gt;On the incredible value proposition of .NET &amp;amp; the Uno Platform&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;152.19&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;739&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/LessReSTMoreHotChocolate"&gt;Less ReST, more Hot Chocolate&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;112.25&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1741&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/UnoLinux"&gt;Running UWP on Linux With Uno&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;100.57&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;445&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/UnoPi"&gt;Running UWP on a Raspberry Pi Using Uno Platform&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;88.17&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;348&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/MLinUWP"&gt;State-of-the-art ML in UWP&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;87.87&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;299&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/BuildingDotNetCore3WithAzurePipelines"&gt;Building .NET Core 3.0 With Azure Pipelines&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;62.03&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1138&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/UnoChat"&gt;Cross-Platform Real-Time Communication with Uno &amp;amp; SignalR&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;56.38&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;401&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/Uno"&gt;The Seven GUIs of Christmas&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;53.81&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1028&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/AugmentingTheGenericHost"&gt;Augmenting the .NET Core 3.0 Generic Host&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;47.2&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;806&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/COduo-Part4"&gt;Many platforms, one world - Part 4&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;31.36&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;340&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/LightweightRuntimeCompositionForGenericHost"&gt;Light-weight run-time composition for the .NET Core 3.0 Generic Host&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;28.24&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;488&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/UnoWasmDocker"&gt;Uno WebAssembly Containerization&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;25.47&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;220&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/NetworkBootingManyRaspberryPis"&gt;Network Booting Many Raspberry Pis&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;22.61&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;355&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/COduo-Part1"&gt;Many platforms, one world - Part 1&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;19.54&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;230&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/COduo-Part3"&gt;Many platforms, one world - Part 3&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;12.12&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;138&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/ReactiveStateMachines"&gt;Reactive State Machines&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;11.83&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;442&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/UnoWithSwagger"&gt;Giving Uno Some Swagger&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;11.63&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;105&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/UsingHyperlinkInMVVM"&gt;Using a Hyperlink in MVVM&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;11.44&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;440&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/COduo-Part2"&gt;Many platforms, one world - Part 2&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;10.69&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;124&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/Codewars"&gt;A Kata for Katas&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;10.47&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;98&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;This Top 20 by weighted total page views accounts for almost 90% of the page views this year and, interestingly, aligns pretty well with my (hypothetical) favourite blog post list.&lt;/p&gt;
+&lt;h3 id="posts-by-weighted-engagement"&gt;Posts By Weighted Engagement&lt;/h3&gt;
+&lt;p&gt;Next I was interested to see if there was a close correlation between page views and &amp;quot;engagement&amp;quot;. In this instance I deemed engagement to be based on the average time spent reading a given page but, given readers will naturally take longer to read lengthier posts, I weighted time spent on the page by word count (excluding posts with less than 500 words). Here's what I ended up with:&lt;/p&gt;
+&lt;table class="table"&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Post&lt;/th&gt;
+&lt;th style="text-align: right;"&gt;Word Count&lt;/th&gt;
+&lt;th style="text-align: right;"&gt;Average Reading Time&lt;/th&gt;
+&lt;th style="text-align: right;"&gt;Weighted Engagement&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartIII"&gt;Home Network Monitoring - Part III&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;849&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:08:08&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;16748&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/ReactiveReadModels"&gt;Reactive ReadModels&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1069&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:09:02&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;16577&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/UsingSVGInUWP"&gt;The absolute easiest way to use SVG icons in UWP apps&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;663&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:05:59&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;13942&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/DartInVisualStudioCode"&gt;Dart web development with Visual Studio Code&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1538&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:07:25&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;11347&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/Nano2Docker"&gt;Nano2Docker&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1870&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:07:33&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;10476&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/TechAdventuresInSustainability-PartI"&gt;Tech Adventures in Sustainability&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1364&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:05:54&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;9585&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/Codewars"&gt;A Kata for Katas&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1979&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:07:05&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;9554&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartII"&gt;Home Network Monitoring - Part II&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1384&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:05:19&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;8575&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/ASmartHome-Part2"&gt;A SmartHome... NoT - Part II&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1883&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:05:52&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;8112&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/CqrsEsMvvmRxEfSqlUwpPcl"&gt;CQRS/ES &amp;amp; MVVM using RX, EF &amp;amp; SQL in UWP &amp;amp; PCL&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1081&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:04:24&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;8030&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/UsingATouchOverlayInPortrainOnRaspbian"&gt;Using A Touch Overlay, In Portrait, On Raspbian Buster&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;620&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:03:16&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;7872&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/FluentNamespacing"&gt;Fluent Namespacing&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1165&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:04:14&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;7442&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/ReactiveBehaviors"&gt;Reactive Behaviors&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;926&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:03:43&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;7328&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/UnoPi"&gt;Running UWP on a Raspberry Pi Using Uno Platform&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1808&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:04:56&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;6961&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/COduo-Part1"&gt;Many platforms, one world - Part 1&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;2037&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:05:05&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;6769&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/CombiningUwpSpeechSynthesizerWithAudioGraph"&gt;Combining the UWP SpeechSynthesizer and AudioGraph APIs&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;965&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:03:21&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;6470&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/HomeNetworkMonitoring-PartI"&gt;Home Network Monitoring - Part I&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;2183&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:04:58&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;6378&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a href="https://ian.bebbs.co.uk/posts/ASmartHome-Part1"&gt;A SmartHome... NoT - Part I&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;2187&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:04:21&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;5581&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;Interestingly this bares little resemblance to the &amp;quot;Top 20 Posts By Weighted Page View&amp;quot; and contains many of my older posts. My guess here is that these are posts that people have come across these posts by actively searching for related keywords. As such, they're likely to have spent longer reading the page in more depth or interactively following steps therein as they're related to what they were searching for. In contrast to this, I imagine a large number of posts in the &amp;quot;Top 20 Posts By Weighted Page View&amp;quot; list are encountered via social media (Twitter) or news aggregator (The Morning Brew, Dotnet Kicks, Dew Drop, etc) and, as such, are read out of idle curiosity rather than specific interest which might explain the lower &amp;quot;engagement&amp;quot;.&lt;/p&gt;
+&lt;h3 id="tags-by-total-time"&gt;Tags By Total Time&lt;/h3&gt;
+&lt;p&gt;Lastly I was interested to see just how much of the internet's time I've occupied with my myriad ramblings. The chart below shows the total time the internet has spent reading articles on my blog by tag (calculated as &lt;code&gt;average time on page * total views&lt;/code&gt;):&lt;/p&gt;
+&lt;img src="/Content/BlogMilestone/Tags By Total Time.png" class="img-responsive" style="margin: auto; max-width:90%; margin-top: 6px; margin-bottom: 6px;" alt="Tags By Total Time"/&gt;
+&lt;p&gt;Somewhat amazingly, over 6 person-days (!!!) has been spent reading articles on my blog about XAML and over 5 person-days reading articles about &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt;. That's pretty cool - although I very much hope this time has helped developers achieve goals rather than just killing time at work.&lt;/p&gt;
+&lt;p&gt;Anyway, here's the full Top 20 (apologies if some of the tag links don't work, I've been a bit inconsistent with casing):&lt;/p&gt;
+&lt;table class="table"&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="text-align: left;"&gt;Tag&lt;/th&gt;
+&lt;th style="text-align: right;"&gt;Total Views&lt;/th&gt;
+&lt;th style="text-align: right;"&gt;Average Time On Page&lt;/th&gt;
+&lt;th style="text-align: right;"&gt;Total Time On Page&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/xaml"&gt;xaml&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;3018&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:03:04.4648148&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;6.00:27:37&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/uwp"&gt;uwp&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;3784&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:02:18.4156249&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;5.20:28:43&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/uno-platform"&gt;uno platform&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;4271&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:02:05.8527777&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;5.13:24:03&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/net-core"&gt;.net core&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;6184&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:01:36.6097803&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;4.10:16:13&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/android"&gt;android&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;2414&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:02:01.3119047&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;3.00:51:41&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/raspberry-pi"&gt;raspberry pi&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1263&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:02:18.9000000&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;2.13:32:44&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/mvvm"&gt;mvvm&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;440&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:07:32&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;2.07:14:40&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/rx"&gt;rx&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;684&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:03:11.2500000&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;2.05:01:45&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/ios"&gt;ios&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1233&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:02:16.9366666&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.23:31:10&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/reactive"&gt;reactive&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;522&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:02:45&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.21:19:07&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/patterns"&gt;patterns&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;481&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:03:57.6666666&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.17:36:22&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/state-machines"&gt;state machines&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;442&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:05:24&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.15:46:48&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/linux"&gt;linux&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;793&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:02:57.9000000&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.12:00:19&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/rest"&gt;rest&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1852&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:01:28.7192982&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.10:04:10&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/nswag"&gt;nswag&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1846&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:02:02.5789473&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.10:02:04&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/surface"&gt;surface&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;832&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:02:12.0208333&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.06:04:33&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/graphql"&gt;graphql&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1741&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:00:59.1578947&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.04:36:34&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/dual"&gt;dual&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;492&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:02:43.2500000&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.02:27:20&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/gui"&gt;gui&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1181&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:01:22.2500000&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.01:20:31&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: left;"&gt;&lt;a href="https://ian.bebbs.co.uk/tags/webassembly"&gt;webassembly&lt;/a&gt;&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;726&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;00:02:06.6166666&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1.01:08:42&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h2 id="still-being-brave"&gt;Still Being Brave&lt;/h2&gt;
+&lt;p&gt;Just under a year ago I wrote &lt;a href="https://ian.bebbs.co.uk/posts/BeBraveLikeBATMan.html"&gt;&amp;quot;Be Brave. Like BAT, man!&amp;quot;&lt;/a&gt; about my transition to using the &lt;a href="https://brave.com/beb095"&gt;Brave browser&lt;/a&gt; and signing up to the &lt;a href="https://publishers.basicattentiontoken.org/"&gt;Brave Rewards Creators Program&lt;/a&gt;. I'm pleased to say that I'm still using Brave as my default browser on Android (additional browser on PC) and have yet to find a website that didn't work correctly (or at least no worse than Chrome) despite having lots of ads/trackers blocked.&lt;/p&gt;
+&lt;p&gt;Furthermore the Brave Rewards Creators Program has proven to be &lt;em&gt;relatively&lt;/em&gt; lucrative. Here's my current Uphold wallet:&lt;/p&gt;
+&lt;img src="/Content/BlogMilestone/Uphold.png" class="img-responsive" style="margin: auto; max-width:33%; margin-top: 6px; margin-bottom: 6px;" alt="Uphold"/&gt;
+&lt;p&gt;While earnings of £50 (it was actually &amp;gt; £60 just a few days back) certainly aren't going to see me retire any time soon, it's still a decent amount for doing &lt;em&gt;nothing&lt;/em&gt;. Indeed, I'd have written these blog posts anyway so any earnings from them are a bonus. Moreover, it's got me into the &amp;quot;crypto game&amp;quot; - effectively for free - and I'm very much enjoying speculating on relative rise and fall of BAT and BTC using just my Brave Rewards earnings.&lt;/p&gt;
+&lt;p&gt;Should you be a privacy conscious person - &lt;a href="https://locusmag.com/2016/09/cory-doctorowthe-privacy-wars-are-about-to-get-a-whole-lot-worse/"&gt;and you really ought to be&lt;/a&gt; - then I'd definitely recommend dumping Chrome ASAP and moving to a browser not created by a company that makes most of it's money from selling data about you. Firefox is a great choice for PC, especially with their &lt;a href="https://addons.mozilla.org/en-US/firefox/addon/multi-account-containers/"&gt;Multi-Account Container&lt;/a&gt; extension. On mobile though I would definitely recommend Brave due to it's additional privacy features which save you time and money.&lt;/p&gt;
+&lt;p&gt;If you'd like to try Brave browser, then please use my referral link &lt;a href="https://brave.com/beb095"&gt;here&lt;/a&gt; as it'll net me a few additional BAT.&lt;/p&gt;
+&lt;h2 id="the-future"&gt;The Future&lt;/h2&gt;
+&lt;p&gt;Writing this blog has been - and continues to be - a fantastic experience. Not only has it put me in contact with loads of brilliant people but it has also fundamentally improved my understanding of many of the technologies I've written about. Or, to quote one of my personal heroes:&lt;/p&gt;
+&lt;blockquote class="twitter-tweet tw-align-center"&gt;&lt;p lang="en" dir="ltr"&gt;If you want to master something, teach it. The more you teach, the better you learn. Teaching is a powerful tool to learning. - Richard Feynman &lt;a href="https://twitter.com/hashtag/Math?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#Math&lt;/a&gt; &lt;a href="https://twitter.com/hashtag/STEM?src=hash&amp;amp;ref_src=twsrc%5Etfw"&gt;#STEM&lt;/a&gt; &lt;a href="https://t.co/xY3AdtW5EL"&gt;pic.twitter.com/xY3AdtW5EL&lt;/a&gt;&lt;/p&gt;&amp;mdash; Math Meaning 🧠🚀 (&amp;#64;MathMeaning) &lt;a href="https://twitter.com/MathMeaning/status/1299006155268685824?ref_src=twsrc%5Etfw"&gt;August 27, 2020&lt;/a&gt;&lt;/blockquote&gt; &lt;script async src="https://platform.twitter.com/widgets.js" charset="utf-8"&gt;&lt;/script&gt; 
+&lt;p&gt;Moving forwards my hope is to publish at least a couple of new posts each month. I've got loads of interesting projects afoot which should afford me the opportunity to expand on some of the technologies I've already covered (i.e. &lt;a href="https://ian.bebbs.co.uk/tags/uno-platform"&gt;Uno platform&lt;/a&gt;, &lt;a href="https://ian.bebbs.co.uk/tags/ML"&gt;ML&lt;/a&gt;, etc) and a whole new bunch of technologies I'm currently interested in (Azure AD B2C Authentication and RDF stores/ SparQL queries to name just a couple). I'm also considering migrating my blog from &lt;a href="https://wyam.io/"&gt;Wyam&lt;/a&gt; to &lt;a href="https://statiq.dev/"&gt;Statiq&lt;/a&gt; (both written by the amazing &lt;a href="https://twitter.com/daveaglick"&gt;Dave Glick&lt;/a&gt;) and will certainly write about the migration if/when it happens.&lt;/p&gt;
+&lt;h2 id="finally"&gt;Finally...&lt;/h2&gt;
+&lt;p&gt;... a huge thank-you to my readers! I sincerely hope you've all enjoyed reading my blog as much as I've enjoyed writing it. If there's something in particular you'd like me to write about (either expanding on a previous post or something new you feel I might be interested in) then just drop me a line using the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;; I'm always happy to make new acquaintances and always interested in new collaborations.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;Today my blog hit a minor milestone: over 12,000 page views in the last 366 (it's a leap year) days. That's over two-thousand page views a month! While a long way short of other notable tech bloggers (yes, I'm looking at you &lt;a href="https://www.hanselman.com/blog/"&gt;Hanselman&lt;/a&gt;), I think it's a pretty decent number, particularly when considering the somewhat limited audience for my very targeted content. In this post I provide insights into my "Top 20" posts and my plans for the coming months.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/MLinUWP</id>
 		<title>State-of-the-art ML in UWP</title>
@@ -4755,159 +5157,5 @@ await builder
 &lt;p&gt;If you require runtime composition for projects utilizing the .NET Core Generic Host then watch this space as I hope to have a more versatile solution in place within the next week or so.&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;&lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition"&gt;Cogenity.Extensions.Hosting.Composition&lt;/a&gt; can provide lightweight, runtime composition for the &lt;a href="(https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0)"&gt;.NET Core 3.0 Generic Host&lt;/a&gt;... with some caveats. &lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5"&gt;An issue&lt;/a&gt; has been created as an RFC on how best to address these caveats with comments/contributions welcomed.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/BuildingDotNetCore3WithAzurePipelines</id>
-		<title>Building .NET Core 3.0 With Azure Pipelines</title>
-		<link href="http://ian.bebbs.co.uk/posts/BuildingDotNetCore3WithAzurePipelines" />
-		<updated>2019-10-04T00:00:00Z</updated>
-		<content>&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
-&lt;p&gt;My &amp;quot;go to&amp;quot; build system and package repository - &lt;a href="https://www.myget.org/"&gt;MyGet&lt;/a&gt; - doesn't yet support building .NET Core 3.0 (or more specifically .NET Standard 2.1) projects. Having recently read about some of the features Microsoft have been adding to Azure DevOps I thought I'd see how easy (or not) it was to get a Pipeline setup to build my project and publish the package back to MyGet.&lt;/p&gt;
-&lt;h2 id="you-need-what"&gt;You need what?!?&lt;/h2&gt;
-&lt;p&gt;Azure DevOps is very welcoming and it takes almost no time to set up your organisation and project... all for free no less! Unfortunately, when I then started creating a new build pipeline and selected GitHub in answer to the &amp;quot;Where is your code?&amp;quot; prompt, I was presented with this OAuth request:&lt;/p&gt;
-&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/YouNeedWhatNow.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="You need what now?"&gt;
-&lt;p&gt;Yup. In order to build a single, public repository from my GitHub account, I needed to let Azure have access to &lt;em&gt;everything&lt;/em&gt;; public &lt;em&gt;and&lt;/em&gt; private. How about &amp;quot;No&amp;quot;.&lt;/p&gt;
-&lt;h2 id="ahh-classic"&gt;Ahh, classic!&lt;/h2&gt;
-&lt;p&gt;Fortunately, Azure provides a second means of creating a pipeline - ostensibly, but not necessarily, without Yaml - through the use of a small &amp;quot;Use the classic editor&amp;quot; hyperlink below the main options.&lt;/p&gt;
-&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/UseTheClassicEditor.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Guess I'll be using this then"&gt;
-&lt;p&gt;When you do this, you're once again asked to &amp;quot;Select a source&amp;quot; and authenticate with that source as shown below. This time however, you're able to &amp;quot;Authorize with a GitHub personal access token&amp;quot;.&lt;/p&gt;
-&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/GitHubPersonalAccessToken.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="GitHub Personal Access Token"&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Note: it may be possible to use a &amp;quot;personal access token&amp;quot;&amp;quot; with the new &amp;quot;Where is your code?&amp;quot; editor. Unfortunately, I wasn't able to confirm this as I seemed to be stuck in a OAuth loop wherein, each time I click &amp;quot;GitHub&amp;quot;, it no longer asks me to log in but immediately prompts me to &amp;quot;Authorize Azure Pipelines&amp;quot; with all the privileges shown above. As there's no &amp;quot;Cancel&amp;quot; button, my only recourse is to use the browser's back button which doesn't seem to cancel the OAuth flow. ¯\&lt;em&gt;(ツ)&lt;/em&gt;/¯&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;I then quickly nipped over to GitHub and created a personal access token (Settings-&amp;gt;Developer settings-&amp;gt;Personal access tokens) which only has access to &lt;em&gt;public&lt;/em&gt; repositories, web-hook settings and basic user information as shown below:&lt;/p&gt;
-&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/NewPersonalAccessToken.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="New Personal Access Token"&gt;
-&lt;p&gt;Clicking &amp;quot;Generate token&amp;quot; provided me with a token which I copy/pasted into Azure pipelines. I was then able to select the repository I wanted to build from a list of only my public repositories. Ace!&lt;/p&gt;
-&lt;h2 id="yet-still-with-yaml"&gt;Yet still with Yaml!&lt;/h2&gt;
-&lt;p&gt;I was then asked to &amp;quot;Select a template&amp;quot;. At this point, I could elect to use a Yaml file (per the &amp;quot;new editor&amp;quot;) as shown below:&lt;/p&gt;
-&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/SelectATemplate.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Select A Token"&gt;
-&lt;p&gt;This seemed to be exactly what I wanted until I realised that this path doesn't actually create a Yaml build template for you but instead expects find one in the repository.&lt;/p&gt;
-&lt;p&gt;As I hadn't written an Azure Pipelines Yaml file before, the idea of creating one from scratch was a little daunting. I therefore decided to cheat. I copied the repository from GitHub to Azure DevOps Repos and recreated a build pipeline using the new &amp;quot;Where is your code?&amp;quot; editor. I then copied the Yaml file this produced into my GitHub repository and continued building this pipeline.&lt;/p&gt;
-&lt;p&gt;So here's the template &lt;code&gt;azure-pipelines.yml&lt;/code&gt; file I ended up with:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-yaml"&gt;# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
-trigger:
-- master
-
-pool:
-  vmImage: 'windows-latest'
-
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
-
-steps:
-- task: NuGetToolInstaller&amp;#64;1
-
-- task: NuGetCommand&amp;#64;2
-  inputs:
-    restoreSolution: '$(solution)'
-
-- task: VSBuild&amp;#64;1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation=&amp;quot;$(build.artifactStagingDirectory)\WebApp.zip&amp;quot; /p:DeployIisAppPath=&amp;quot;Default Web Site&amp;quot;'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-
-- task: VSTest&amp;#64;2
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h2 id="its-good-but-its-not-right"&gt;It's good but it's not right&lt;/h2&gt;
-&lt;p&gt;Not a bad start but this template was designed to &amp;quot;Build and test ASP.NET Core projects targeting the full .NET Framework.&amp;quot;. I wasn't targeting the full .NET Framework so I &lt;a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/?view=azure-devops"&gt;hit the books&lt;/a&gt; and quickly found a section on the &lt;a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/dotnet-core?view=azure-devops"&gt;.NET Core Ecosystem&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;The information here allowed me to move from &lt;code&gt;VSBuild&lt;/code&gt; based tasks to &lt;code&gt;dotnet&lt;/code&gt; based scripts. Moving to using Ubuntu for the build, only including build steps and removing everything else resulted in this:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-yaml"&gt;trigger:
-- master
-
-pool:
-  vmImage: 'ubuntu-16.04'
-
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
-  version: 1.0.1
-
-steps:
-- script: dotnet restore
-- script: dotnet build
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Tentatively, I enqueued a build which resulted in...&lt;/p&gt;
-&lt;h2 id="a-spectacular-failure"&gt;A spectacular failure&lt;/h2&gt;
-&lt;p&gt;It didn't take long to find the cause of the failure. Digging into the build logs showed the following failure for one of the script steps:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;&amp;quot;The current .NET SDK does not support targeting .NET Standard 2.1.  Either target .NET Standard 2.0 or lower, or use a version of the .NET SDK that supports .NET Standard 2.1.&amp;quot;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;&amp;quot;Oh, exactly the same error as Myget&amp;quot; I thought. Fortunately, from perusing the documentation earlier, I had come across the section on &lt;a href="https://docs.microsoft.com/en-us/azure/devops/pipelines/ecosystems/dotnet-core?view=azure-devops#build-environment"&gt;&amp;quot;Build Environment&amp;quot;&lt;/a&gt; and the fact that the Microsoft-hosted build agents don't provide all versions of the .NET Core SDK. They do however provide a very simple means of installing additional frameworks by simply adding a &amp;quot;DotNetCoreInstaller&amp;quot; task to your Yaml. I figured it couldn't hurt to try and amended my 'azure-pipelines.yml` to this:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-yaml"&gt;trigger:
-- master
-
-pool:
-  vmImage: 'ubuntu-16.04'
-
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
-  version: 1.0.1
-
-steps:
-- task: UseDotNet&amp;#64;2
-  displayName: 'Use .NET Core sdk'
-  inputs:
-    packageType: sdk
-    version: 3.x
-    installationPath: $(Agent.ToolsDirectory)/dotnet
-- script: dotnet restore
-- script: dotnet build
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;And, somewhat amazingly, it worked.&lt;/p&gt;
-&lt;h2 id="move-em-on-head-em-up"&gt;Move 'em on, head 'em up!&lt;/h2&gt;
-&lt;p&gt;With a successful build running, all that was left was to package the built assembly into a nuget package and push it to MyGet. From prior reading I knew that the first thing I had to do here was add a &amp;quot;Service Connection&amp;quot; to the project from the settings. Which.... are.... where???&lt;/p&gt;
-&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/ProjectSettings.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Project Settings"&gt;
-&lt;p&gt;Ah, here they are! Of course! Hidden until you [accidentally] move your mouse over project header bar. (!?!)&lt;/p&gt;
-&lt;img src="../Content/BuildingADotNetCore3LibraryWithAzurePipelines/AhHereTheyAre.png" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Ah Here They Are!"&gt;
-&lt;p&gt;Weird.&lt;/p&gt;
-&lt;p&gt;Anyway, having finally found the project settings I was able to add a new &amp;quot;Nuget&amp;quot; connection (from &amp;quot;Pipelines-&amp;gt;Service connections&amp;quot;) which I populated with details provided by MyGet. I then populated the package settings within my library's &lt;code&gt;.csproj&lt;/code&gt; file and enabled the &amp;quot;Generate Nuget package on build&amp;quot; setting. With this all done, I simply needed 'push' the package as follows:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-yaml"&gt;trigger:
-- master
-
-pool:
-  vmImage: 'ubuntu-16.04'
-
-variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
-  version: 1.0.1
-
-steps:
-- task: UseDotNet&amp;#64;2
-  displayName: 'Use .NET Core sdk'
-  inputs:
-    packageType: sdk
-    version: 3.x
-    installationPath: $(Agent.ToolsDirectory)/dotnet
-- script: dotnet restore
-- script: dotnet build
-- task: NuGetCommand&amp;#64;2
-  inputs:
-    command: push
-    nuGetFeedType: external
-    packagesToPush: '$(Build.Repository.LocalPath)/**/*.nupkg;!$(Build.Repository.LocalPath)/**/*.symbols.nupkg'
-    publishFeedCredentials: 'MyGet Bebbs Feed'
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;And the compiled package appeared in my MyGet repository. Boom!&lt;/p&gt;
-&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
-&lt;p&gt;I am very impressed with Azure pipelines. The tools they've made available in their Yaml based build system are fantastic and make building a project easy and clean yet flexible and powerful. Furthermore, the actual build process is very fast. From git push to package in my nuget repository took less than a minute. Yes, it's just a small library without any tests (for now), but each build required installing a new version of the .NET Core SDK onto the build agent and, even though this was all hosted on the Free tier, I never had to wait for a build agent to become available.&lt;/p&gt;
-&lt;p&gt;If they could just tighten up the OAuth permission requested from GitHub I'd be very tempted to adopt Azure DevOps for all my projects. I'd certainly consider recommending it to clients should they be looking to move away from other CI/CD solutions.&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;My "go to" build system and package repository - &lt;a href="https://www.myget.org/"&gt;MyGet&lt;/a&gt; - doesn't yet support building .NET Core 3.0 (or more specifically .NET Standard 2.1) projects. Having recently read about some of the features Microsoft have been adding to Azure DevOps I thought I'd see how easy (or not) it was to get a Pipeline setup to build my project and publish the package back to MyGet.&lt;/p&gt;</summary>
 	</entry>
 </feed>
