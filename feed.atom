@@ -4,8 +4,534 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2020</rights>
-	<updated>2020-09-04T20:42:14Z</updated>
+	<updated>2020-11-11T21:12:02Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/UnoB2C</id>
+		<title>Cross-Platform App Authentication with Azure AD B2C And The Uno Platform</title>
+		<link href="http://ian.bebbs.co.uk/posts/UnoB2C" />
+		<updated>2020-11-11T00:00:00Z</updated>
+		<content>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;In this post I comprehensively show how apps written using the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; can leverage &lt;a href="https://azure.microsoft.com/en-us/services/active-directory/external-identities/b2c/"&gt;Azure AD B2C&lt;/a&gt; &amp;amp; &lt;a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet"&gt;MSAL.Net&lt;/a&gt; to provide Identity and Access Management services across platforms as diverse as Windows, Android, iOS and the web. As you will see, this combination of technologies provides extremely cheap, simple and flexible identity management functionality that runs from a single code base.&lt;/p&gt;
+&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;Seamless identity management in client-facing apps is critically important to customer engagement yet extremely difficult to implement correctly. In recent years, numerous IDentity as a Service (IDaaS) providers have emerged to help developers address this challenge yet somehow secure authentication and authorization remain one of the most arduous parts of app development.&lt;/p&gt;
+&lt;p&gt;In this article I present a suite of technologies that can be leveraged to provide identity management in a simple and affordable yet flexible and scalable manner. I show how recent changes to these technologies allow you to leverage the most recent and secure authentication flows (i.e. &lt;a href="https://romikoderbynew.com/2019/09/20/oauth-2-0-authorization-code-with-pkce-vs-implicit-grant/#:%7E:text=Does%20your%20Authorization%20Server%20supprot%20CORS%3F%20Can,your%20clients%20use%20modern%20browsers%20that%20support%20CORS%3F"&gt;&amp;quot;Authorization Code with PKCE&amp;quot; instead of  &amp;quot;Implicit Grant&amp;quot;&lt;/a&gt;) and I illustrate how this technology stack can be used to implement apps that run across all major platforms - including the web - without the need for the developer to maintain onerous platform-specific code.&lt;/p&gt;
+&lt;p&gt;Finally, much of this post is composed of information from - and links to - other articles from around the web. I have aggregated and annotated these posts below such that the reader is provided a comprehensive guide to using these technologies within a cross-platform Uno application. While I specifically discuss only the major platforms (UWP, Android, iOS and Web) the approaches used below should be pertinent to any platform supported by Uno.&lt;/p&gt;
+&lt;h2 id="technologies"&gt;Technologies&lt;/h2&gt;
+&lt;p&gt;The suite of technologies used in this article is comprised of: &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt;, &lt;a href="https://azure.microsoft.com/en-us/services/active-directory/external-identities/b2c/"&gt;Azure AD B2C&lt;/a&gt; and &lt;a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet"&gt;MSAL.Net&lt;/a&gt;. I provide a brief introduction to these technologies below before proceeding to show how they can be combined to provide a holistic cloud-based user-management solution.&lt;/p&gt;
+&lt;h3 id="uno-platform"&gt;Uno Platform&lt;/h3&gt;
+&lt;p&gt;Regular readers of my blog will be well aware of the Uno Platform by now but, for new readers, the Uno Platform allows UWP apps to run &lt;em&gt;natively&lt;/em&gt; on every major platform including desktop (Windows, Mac, Linux), mobile (Android &amp;amp; iOS) and the web (in pretty much any browser). It achieves this by implementing WinRT APIs on top of Xamarin (for desktop/mobile) and WASM (for the web) which allows the developer to write a single code-base which can be transparently shared across each of these platforms.&lt;/p&gt;
+&lt;p&gt;I have &lt;a href="https://ian.bebbs.co.uk/tags/uno-platform"&gt;blogged about Uno Platform extensively over the past year&lt;/a&gt; as, in my opinion, it represents the best platform for cross-platform UI develop and empowers developers to utilise a &lt;a href="https://ian.bebbs.co.uk/posts/UnoValue"&gt;&amp;quot;one-stack&amp;quot; solution architecture&lt;/a&gt;. My consultancy - &lt;a href="https://www.cogenity.com/"&gt;Cogenity&lt;/a&gt; - specialise in providing support for, and bespoke development of, cross-platform applications written using the Uno Platform. Should you have any questions regarding this article or the Uno Platform in general, please feel free to &lt;a href="https://www.cogenity.com/#three"&gt;drop us a line&lt;/a&gt; - we love to hear about applications being built with Uno and help our clients deliver on the promise of this amazing technology.&lt;/p&gt;
+&lt;h3 id="azure-ad-b2c"&gt;Azure AD B2C&lt;/h3&gt;
+&lt;p&gt;Azure Active Directory B2C (AAD B2C) is Microsoft's Azure based Identity and Access Management (IAM) offering for business-to-consumer (B2C) applications. Unlike regular &lt;a href="https://azure.microsoft.com/en-us/services/active-directory/"&gt;Azure Active Directory&lt;/a&gt; which is very much aimed at B2B and LoB applications, AAD B2C has been designed from the ground up for providing seamless IAM for customer-facing apps. As such it allows the developer to easily leverage advanced scenarios such as social login and multi-factor authentication while simultaneous providing the means to customise &amp;quot;every pixel of the registration and sign-in experience&amp;quot;.&lt;/p&gt;
+&lt;p&gt;Amazingly, this service is offered at an incredibly low price-point. The first 50,000 monthly actives users are free and subsequent users cost just £0.002423p/m! This is easily enough to bootstrap an application and gain market traction prior to being faced with a significant bill for IDaaS and, in any event, these costs will almost certainly be less than the cost of writing and hosting a bespoke solution.&lt;/p&gt;
+&lt;h3 id="msal.net"&gt;MSAL.Net&lt;/h3&gt;
+&lt;p&gt;Microsoft Authentication Library for .NET (MSAL.NET) is Microsoft's successor to Active Directory Authentication Library for .NET (ADAL.NET). It is part of the &lt;a href="https://docs.microsoft.com/en-gb/azure/active-directory/develop/v2-overview"&gt;Microsoft Identify Platform for Developers&lt;/a&gt; and represents current best practise for Azure AD authentication from .NET applications.&lt;/p&gt;
+&lt;p&gt;As we will see below, authentication with MSAL.NET is really very simple and works beautifully in cross-platform scenarios on the Uno Platform.&lt;/p&gt;
+&lt;h2 id="getting-started-with-azure-ad-b2c"&gt;Getting started with Azure AD B2C&lt;/h2&gt;
+&lt;p&gt;So, with introductions out the way, let get started with Azure AD B2C by creating a new tenant. This is by far the most complicated part of the process and covering it in detail could easily balloon this post to an unmanageable size. Fortunately &lt;a href="https://twitter.com/CodeMillMatt"&gt;Matthew Soucoup&lt;/a&gt; has covered all the steps for creating a Azure AD B2C tenant on his &lt;a href="https://codemilltech.com/"&gt;blog&lt;/a&gt;. In the steps below I will be pointing you to Matt's blog posts which I very much encourage you to read and follow before continuing.&lt;/p&gt;
+&lt;h3 id="step-1-understanding-terminology"&gt;Step 1 - Understanding terminology&lt;/h3&gt;
+&lt;p&gt;One of the most confusing parts of authentication is understanding the various terminology. In his &lt;a href="https://codemilltech.com/xamarin-authentication-with-azure-active-directory-b2c/"&gt;first post about Azure AD B2C&lt;/a&gt; Matt digs into the various terminology you'll need to understand in order to correctly setup and use Azure AD B2C. If you're at all unsure about terms such as Tenant, Providers or Policies, I'd very much recommend a read of this post before continuing.&lt;/p&gt;
+&lt;h3 id="step-2-creating-a-tenant"&gt;Step 2 - Creating A Tenant&lt;/h3&gt;
+&lt;p&gt;Now we understand the terminology used, we can go ahead and create an Azure AD B2C Tenant. Again, Matt covers this fantastically well in a &lt;a href="https://codemilltech.com/creating-an-ad-b2c-tenant/"&gt;blog post&lt;/a&gt;. He also covers the process in a &lt;a href="https://www.youtube.com/watch?v=zfyHwD9sJJ4&amp;amp;feature=youtu.be"&gt;YouTube&lt;/a&gt; video which helps convey some of the &amp;quot;tricky&amp;quot; behaviour of Azure Directories. Read or view either of these links and follow the steps therein. Once complete you should have a new &amp;quot;[tenant].onmicrosoft.com&amp;quot; directory with an Azure AD B2C service as shown here:&lt;/p&gt;
+&lt;img src="/Content/UnoB2C/New B2C Tenant.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="New B2C Tenant"/&gt;
+&lt;h3 id="step-3-adding-a-policy"&gt;Step 3 - Adding A Policy&lt;/h3&gt;
+&lt;p&gt;While the Azure AD B2C Tenant provides the infrastructure for cloud-based IDaaS, policies dictate who can use this service and how. In order for users of your app to be able to register and/or log in, you need to create a &amp;quot;User flow&amp;quot; policy in your tenant. Matt covers this process in the &amp;quot;Creating A Policy&amp;quot; section of this &lt;a href="https://codemilltech.com/adding-authentication-and-authorization-with-azure-ad-b2c/#creatingapolicy"&gt;blog post&lt;/a&gt; however the post is slightly out of date as the Azure Portal has changed significantly since he authored it. I would suggest reading Matt's blog post so you understand the process then following the screen shots shown below (tap to enlarge):&lt;/p&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a data-fancybox="addingapolicy" href="/Content/UnoB2C/New User Flow.png"&gt;&lt;img src="/Content/UnoB2C/New User Flow.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="New User Flow"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a data-fancybox="addingapolicy" href="/Content/UnoB2C/Sign Up and sign in flow.png"&gt;&lt;img src="/Content/UnoB2C/Sign Up and sign in flow.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Sign Up and sign in flow"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;1. Create a new user flow&lt;/h5&gt;&lt;/td&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;2. Select recommended sign up and sign in flow&lt;/h5&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a data-fancybox="addingapolicy" href="/Content/UnoB2C/New User Flow Name.png"&gt;&lt;img src="/Content/UnoB2C/New User Flow Name.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="New User Flow Name"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a id="newuserflowclaims" data-fancybox="addingapolicy" href="/Content/UnoB2C/New User Flow Claims.png"&gt;&lt;img src="/Content/UnoB2C/New User Flow Claims.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="New User Flow Claims"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;3. Name the user flow&lt;/h5&gt;&lt;/td&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;4. Select registration attributes and token claims&lt;/h5&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;Make sure you take note of your sign-up and sign-in flow name as you'll need this later.&lt;/p&gt;
+&lt;h3 id="step-4-add-app-registration"&gt;Step 4 - Add App Registration&lt;/h3&gt;
+&lt;p&gt;The last step is to add an app registration. This controls how your app is expected to interact with Azure AD B2C and it's credentials for doing so. Again &lt;a href="https://codemilltech.com/adding-authentication-and-authorization-with-azure-ad-b2c/#step2settinguptheazureadb2capplication"&gt;Matt has us covered&lt;/a&gt; but again, his descriptions and screenshots are a little out of date. Furthermore we need to add a couple of &amp;quot;platforms&amp;quot; to the app registration in order to support the variety of operating systems and devices available to Uno applications.&lt;/p&gt;
+&lt;p&gt;The screen shots below show how to set up an app registration that leverages Authorization Code Flow with PKCE for UWP/WASM authentication and protocol activation for Android / iOS:&lt;/p&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a data-fancybox="addappregistration" href="/Content/UnoB2C/App Registrations.png"&gt;&lt;img src="/Content/UnoB2C/App Registrations.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="App Registrations"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a data-fancybox="addappregistration" href="/Content/UnoB2C/New App Registration.png"&gt;&lt;img src="/Content/UnoB2C/New App Registration.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Add App Registration"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;1. Navigate to app registration&lt;/h5&gt;&lt;/td&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;2. Add a new registration&lt;/h5&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a data-fancybox="addappregistration" href="/Content/UnoB2C/Register an Application.png"&gt;&lt;img src="/Content/UnoB2C/Register an Application.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Register the Application"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a data-fancybox="addappregistration" href="/Content/UnoB2C/Note Application Id.png"&gt;&lt;img src="/Content/UnoB2C/Note Application Id.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Note Application Id"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;3. Name the application and change Redirect URI&lt;/h5&gt;&lt;/td&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;4. Note the application id and click Redirect URIs&lt;/h5&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a data-fancybox="addappregistration" href="/Content/UnoB2C/Confirm Authorization Code Flow with PKCE.png"&gt;&lt;img src="/Content/UnoB2C/Confirm Authorization Code Flow with PKCE.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Confirm Authorization Code Flow with PKCE"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a data-fancybox="addappregistration" href="/Content/UnoB2C/Add a platform.png"&gt;&lt;img src="/Content/UnoB2C/Add a platform.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Add a platform"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;5. Confirm Authorization Code Flow with PKCE&lt;/h5&gt;&lt;/td&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;6. Click 'Add a platform'&lt;/h5&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;&lt;a data-fancybox="addappregistration" href="/Content/UnoB2C/Select Mobile and desktop applications.png"&gt;&lt;img src="/Content/UnoB2C/Select Mobile and desktop applications.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Select Mobile and desktop applications"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;td&gt;&lt;a data-fancybox="addappregistration" href="/Content/UnoB2C/Add msal redirect uri.png"&gt;&lt;img src="/Content/UnoB2C/Add msal redirect uri.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Add msal redirect uri"/&gt;&lt;/a&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;7. Select 'Mobile and desktop applications'&lt;/h5&gt;&lt;/td&gt;
+&lt;td style="text-align: center"&gt;&lt;h5&gt;8. Add MSAL Redirect URI then click Configure&lt;/h5&gt;&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;And there we go. We now have an Azure AD B2C tenant set up that is able to authenticate users using best practices across a variety of platforms. If everything is set up correctly, your tenant should look similar to this:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="addappregistration" href="/Content/UnoB2C/SPA and desktop Redirect URIs.png"&gt;&lt;img src="/Content/UnoB2C/SPA and desktop Redirect URIs.png" class="img-responsive" style="margin: auto; max-width:50%; margin-top: 6px; margin-bottom: 6px;" alt="SPA and desktop Redirect URIs"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h2 id="create-an-uno-application"&gt;Create an Uno Application&lt;/h2&gt;
+&lt;p&gt;We'll now use Visual Studio to create a cross-platform Uno Platform application which is able to authenticate users using the Azure AD B2C tenant we set up above. If you're not sure how to create a new Uno Platform application then follow the steps &lt;a href="https://platform.uno/docs/articles/getting-started-tutorial-1.html"&gt;here&lt;/a&gt;. I'm going to name my project &lt;code&gt;UnoAuth&lt;/code&gt;.&lt;/p&gt;
+&lt;h3 id="install-dependencies"&gt;Install Dependencies&lt;/h3&gt;
+&lt;p&gt;We're going to need to install the following packages to all projects in the solution:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;a href="https://www.nuget.org/packages/Microsoft.Identity.Client"&gt;Microsoft.Identity.Client&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.nuget.org/packages/Uno.UI.MSAL"&gt;Uno.UI.MSAL&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a href="https://www.nuget.org/packages/System.IdentityModel.Tokens.Jwt"&gt;System.IdentityModel.Tokens.Jwt&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;The easiest way to do this is the &amp;quot;Manage Packages for Solution&amp;quot; (via right-clicking on the solution in Solution Explorer) as shown here:&lt;/p&gt;
+&lt;img src="/Content/UnoB2C/Manage Packages for Solution.png" class="img-responsive" style="margin: auto; max-width:66%; margin-top: 6px; margin-bottom: 6px;" alt="Manage Packages for Solution"/&gt;
+&lt;h3 id="authentication-configuration"&gt;Authentication Configuration&lt;/h3&gt;
+&lt;p&gt;With the prerequisite dependencies installed we're going to provide the authentication settings required by Azure AD B2C. As some of these settings should be considered sensitive (i.e. the ClientId) we're going to use a partial class (&lt;code&gt;Authentication&lt;/code&gt;) split between two files (&lt;code&gt;Authentication.cs&lt;/code&gt; and &lt;code&gt;Authentication.Secrets.cs&lt;/code&gt;) so that we can put access logic in one and sensitive values in the other. We can then ensure the second file doesn't get committed to source control (via &lt;code&gt;.gitignore&lt;/code&gt;).&lt;/p&gt;
+&lt;p&gt;The &lt;code&gt;Authentication.cs&lt;/code&gt; should look like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;using System.Collections.Generic;
+
+namespace UnoAuth
+{
+    public static partial class Authentication
+    {
+        // ClientIdSecret should be provided in `Authentication.Secrets.cs` as part of the 
+        // partial class
+        public static string Tenant =&amp;gt; TenantSecret;
+
+        // ClientIdSecret should be provided in `Authentication.Secrets.cs` as part of the 
+        // partial class
+        public static string ClientId =&amp;gt; ClientIdSecret;
+
+        // PolicySecret should be provided in `Authentication.Secrets.cs` as part of the 
+        // partial class
+        public static string Policy =&amp;gt; PolicySecret;
+
+        // RedirectUriSecret should be provided in `Authentication.Secrets.cs` as part of the 
+        // partial class
+#if __ANDROID__ || __IOS__
+        public static string RedirectUri =&amp;gt; RedirectUriSecretDesktop;
+#else
+        public static string RedirectUri =&amp;gt; RedirectUriSecret;
+#endif
+
+#if __IOS__
+        // BundleNameSecret should be provided in `Authentication.Secrets.cs` as part of the 
+        // partial class
+        public static string BundleName =&amp;gt; BundleNameSecret;
+#endif
+
+        // ScopesSecret should be provided in `Authentication.Secrets.cs` as part of the 
+        // partial class
+        public static IEnumerable&amp;lt;string&amp;gt; Scopes =&amp;gt; ScopesSecret;
+
+        public static string AuthorityBase =&amp;gt; $&amp;quot;https://{Tenant}.b2clogin.com/tfp/{Tenant}.onmicrosoft.com/&amp;quot;;
+
+        public static string Authority =&amp;gt; $&amp;quot;{AuthorityBase}{Policy}&amp;quot;;
+
+        public static string GivenNameClaimType =&amp;gt; &amp;quot;given_name&amp;quot;;
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Note the &lt;code&gt;#if ... #else ... #endif&lt;/code&gt; compiler directives. These directives allows us to use &lt;a href="https://platform.uno/docs/articles/platform-specific-csharp.html"&gt;platform specific code&lt;/a&gt; such that the correct redirect URI is used on each platform and platform specific values can be provided only only the platforms that require them.&lt;/p&gt;
+&lt;p&gt;Next, &lt;code&gt;Authentication.Secrets.cs&lt;/code&gt; should look like this (but with the appropriate values):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;using System.Collections.Generic;
+
+namespace UnoAuth
+{
+    public static partial class Authentication
+    {
+        // In this sample, this value will be &amp;quot;bebbsauthspike&amp;quot;
+        private static readonly string TenantSecret = &amp;quot;[REPLACE THIS VALUE]&amp;quot;;
+
+        // This is the ClientId value from the app registration. 
+        // It will be in the form of &amp;quot;aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee&amp;quot;
+        private static readonly string ClientIdSecret = &amp;quot;[REPLACE THIS VALUE]&amp;quot;;
+
+        // In this sample, this value will be &amp;quot;B2C_1_signup-signin&amp;quot;
+        private static readonly string PolicySecret = &amp;quot;[REPLACE THIS VALUE]&amp;quot;;
+
+        // In this sample, this value will be &amp;quot;http://localhost:5000&amp;quot;
+        private static readonly string RedirectUriSecret = &amp;quot;[REPLACE THIS VALUE]&amp;quot;;
+
+        private static readonly string RedirectUriSecretDesktop = $&amp;quot;msal{ClientIdSecret}://auth&amp;quot;;
+
+        // In this sample, this value will be &amp;quot;com.companyname.UnoAuth&amp;quot;
+        private static readonly string BundleNameSecret = &amp;quot;[REPLACE THIS VALUE]&amp;quot;;
+
+        // Note, we're currently only interested in authenticating, not defining any additional scopes which a
+        // user may or may not have access to. As such, we only request access to the `openid` scope.
+        private static readonly IEnumerable&amp;lt;string&amp;gt; ScopesSecret = new[] { &amp;quot;https://graph.microsoft.com/openid&amp;quot; };
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="create-the-ui"&gt;Create the UI&lt;/h3&gt;
+&lt;p&gt;Finally we're going to create the UI. Given our app will have three distinct states - Unauthenticated, Authenticating &amp;amp; Authenticated - we're going to use &lt;a href="https://docs.microsoft.com/en-us/uwp/api/Windows.UI.Xaml.VisualState?view=winrt-19041"&gt;visual states&lt;/a&gt; to directly reflect these states in the UI. So, in &lt;code&gt;Main.xaml&lt;/code&gt;, update the Xaml to the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-xaml"&gt;&amp;lt;Page
+    x:Class=&amp;quot;UnoAuth.MainPage&amp;quot;
+    xmlns=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&amp;quot;
+    xmlns:x=&amp;quot;http://schemas.microsoft.com/winfx/2006/xaml&amp;quot;
+    xmlns:d=&amp;quot;http://schemas.microsoft.com/expression/blend/2008&amp;quot;
+    xmlns:mc=&amp;quot;http://schemas.openxmlformats.org/markup-compatibility/2006&amp;quot;
+    mc:Ignorable=&amp;quot;d&amp;quot;&amp;gt;
+
+    &amp;lt;Grid x:Name=&amp;quot;StateGrid&amp;quot; Background=&amp;quot;{ThemeResource ApplicationPageBackgroundThemeBrush}&amp;quot;&amp;gt;
+        &amp;lt;VisualStateManager.VisualStateGroups&amp;gt;
+            &amp;lt;VisualStateGroup x:Name=&amp;quot;AuthenticationStates&amp;quot;&amp;gt;
+                &amp;lt;VisualState x:Name=&amp;quot;Unauthenticated&amp;quot;/&amp;gt;
+                &amp;lt;VisualState x:Name=&amp;quot;Authenticating&amp;quot;&amp;gt;
+                    &amp;lt;VisualState.Setters&amp;gt;
+                        &amp;lt;Setter Target=&amp;quot;AuthenticatingGrid.(UIElement.Visibility)&amp;quot; Value=&amp;quot;Visible&amp;quot;/&amp;gt;
+                        &amp;lt;Setter Target=&amp;quot;AuthenticatedGrid.(UIElement.Visibility)&amp;quot; Value=&amp;quot;Collapsed&amp;quot;/&amp;gt;
+                        &amp;lt;Setter Target=&amp;quot;UnauthenticatedGrid.(UIElement.Visibility)&amp;quot; Value=&amp;quot;Collapsed&amp;quot;/&amp;gt;
+                    &amp;lt;/VisualState.Setters&amp;gt;
+                &amp;lt;/VisualState&amp;gt;
+                &amp;lt;VisualState x:Name=&amp;quot;Authenticated&amp;quot;&amp;gt;
+                    &amp;lt;VisualState.Setters&amp;gt;
+                        &amp;lt;Setter Target=&amp;quot;AuthenticatedGrid.(UIElement.Visibility)&amp;quot; Value=&amp;quot;Visible&amp;quot;/&amp;gt;
+                        &amp;lt;Setter Target=&amp;quot;AuthenticatingGrid.(UIElement.Visibility)&amp;quot; Value=&amp;quot;Collapsed&amp;quot;/&amp;gt;
+                        &amp;lt;Setter Target=&amp;quot;UnauthenticatedGrid.(UIElement.Visibility)&amp;quot; Value=&amp;quot;Collapsed&amp;quot;/&amp;gt;
+                    &amp;lt;/VisualState.Setters&amp;gt;
+                &amp;lt;/VisualState&amp;gt;
+            &amp;lt;/VisualStateGroup&amp;gt;
+        &amp;lt;/VisualStateManager.VisualStateGroups&amp;gt;
+        &amp;lt;Grid x:Name=&amp;quot;UnauthenticatedGrid&amp;quot; Visibility=&amp;quot;Visible&amp;quot; Background=&amp;quot;#FF1D437C&amp;quot;&amp;gt;
+            &amp;lt;StackPanel HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot;&amp;gt;
+                &amp;lt;TextBlock Text=&amp;quot;Click 'Sign In' To Authenticate&amp;quot; TextWrapping=&amp;quot;Wrap&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; Style=&amp;quot;{ThemeResource TitleTextBlockStyle}&amp;quot; Margin=&amp;quot;32,32,32,32&amp;quot; Foreground=&amp;quot;White&amp;quot;/&amp;gt;
+                &amp;lt;Button x:Name=&amp;quot;SignInButton&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; Padding=&amp;quot;32,16,32,16&amp;quot; Margin=&amp;quot;32,32,32,32&amp;quot; Click=&amp;quot;SignInButton_Click&amp;quot; Background=&amp;quot;#FF412663&amp;quot;&amp;gt;
+                    &amp;lt;TextBlock Text=&amp;quot;Sign In&amp;quot; TextWrapping=&amp;quot;Wrap&amp;quot; Style=&amp;quot;{ThemeResource SubtitleTextBlockStyle}&amp;quot; Foreground=&amp;quot;White&amp;quot;/&amp;gt;
+                &amp;lt;/Button&amp;gt;
+            &amp;lt;/StackPanel&amp;gt;
+        &amp;lt;/Grid&amp;gt;
+        &amp;lt;Grid x:Name=&amp;quot;AuthenticatingGrid&amp;quot; Visibility=&amp;quot;Collapsed&amp;quot; Background=&amp;quot;#FFC07000&amp;quot;&amp;gt;
+            &amp;lt;StackPanel Orientation=&amp;quot;Vertical&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot;&amp;gt;
+                &amp;lt;TextBlock HorizontalAlignment=&amp;quot;Center&amp;quot; Text=&amp;quot;Authenticating&amp;quot; Style=&amp;quot;{ThemeResource TitleTextBlockStyle}&amp;quot; Margin=&amp;quot;32&amp;quot; Foreground=&amp;quot;White&amp;quot;/&amp;gt;
+                &amp;lt;TextBlock HorizontalAlignment=&amp;quot;Center&amp;quot; Text=&amp;quot;One Sec...&amp;quot; Style=&amp;quot;{ThemeResource SubtitleTextBlockStyle}&amp;quot; Margin=&amp;quot;32&amp;quot; Foreground=&amp;quot;White&amp;quot;/&amp;gt;
+            &amp;lt;/StackPanel&amp;gt;
+        &amp;lt;/Grid&amp;gt;
+        &amp;lt;Grid x:Name=&amp;quot;AuthenticatedGrid&amp;quot; Visibility=&amp;quot;Collapsed&amp;quot; Background=&amp;quot;#FF1F6900&amp;quot;&amp;gt;
+            &amp;lt;StackPanel Orientation=&amp;quot;Vertical&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; VerticalAlignment=&amp;quot;Center&amp;quot;&amp;gt;
+                &amp;lt;TextBlock HorizontalAlignment=&amp;quot;Center&amp;quot; Style=&amp;quot;{ThemeResource TitleTextBlockStyle}&amp;quot; Margin=&amp;quot;32&amp;quot; Foreground=&amp;quot;White&amp;quot;&amp;gt;
+                    &amp;lt;Run Text=&amp;quot;Hi &amp;quot;/&amp;gt;&amp;lt;Run Text=&amp;quot;{x:Bind Path=GivenName, Mode=OneWay}&amp;quot;/&amp;gt;&amp;lt;Run Text=&amp;quot;!&amp;quot;/&amp;gt;
+                &amp;lt;/TextBlock&amp;gt;
+                &amp;lt;TextBlock HorizontalAlignment=&amp;quot;Center&amp;quot; Text=&amp;quot;How are you?&amp;quot; Style=&amp;quot;{ThemeResource SubtitleTextBlockStyle}&amp;quot; Margin=&amp;quot;32&amp;quot; Foreground=&amp;quot;White&amp;quot;/&amp;gt;
+                &amp;lt;Button x:Name=&amp;quot;SignOutButton&amp;quot; HorizontalAlignment=&amp;quot;Center&amp;quot; Padding=&amp;quot;32,16,32,16&amp;quot; Margin=&amp;quot;32,32,32,32&amp;quot; Click=&amp;quot;SignOutButton_Click&amp;quot; Background=&amp;quot;#FF412663&amp;quot;&amp;gt;
+                    &amp;lt;TextBlock Text=&amp;quot;Sign Out&amp;quot; TextWrapping=&amp;quot;Wrap&amp;quot; Style=&amp;quot;{ThemeResource SubtitleTextBlockStyle}&amp;quot; Foreground=&amp;quot;White&amp;quot;/&amp;gt;
+                &amp;lt;/Button&amp;gt;
+            &amp;lt;/StackPanel&amp;gt;
+        &amp;lt;/Grid&amp;gt;
+    &amp;lt;/Grid&amp;gt;
+&amp;lt;/Page&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here you can see the three visual states named: &lt;code&gt;Unauthenticated&lt;/code&gt;, &lt;code&gt;Authenticating&lt;/code&gt; &amp;amp; &lt;code&gt;Authenticated&lt;/code&gt;. In the &lt;code&gt;Unauthenticated&lt;/code&gt; state the &lt;code&gt;UnauthenticatedGrid&lt;/code&gt; will be visible while both the &lt;code&gt;AuthenticatingGrid&lt;/code&gt; and &lt;code&gt;AuthenticatedGrid&lt;/code&gt; will be collapsed. This pattern is repeated in the other states (&lt;code&gt;Authenticating&lt;/code&gt; only showing &lt;code&gt;AuthenticatingGrid&lt;/code&gt; &amp;amp; &lt;code&gt;Authenticated&lt;/code&gt; only showing &lt;code&gt;AuthenticatedGrid&lt;/code&gt;) such that only elements pertinent to the current state are displayed.&lt;/p&gt;
+&lt;p&gt;In the &lt;code&gt;UnauthenticatedGrid&lt;/code&gt; we have a &lt;code&gt;SignInButton&lt;/code&gt; from which we use the Click event handler to invoke the authentication process. While authentication is taking place, the &lt;code&gt;AuthenticatingGrid&lt;/code&gt; will be shown which asks the user to wait. Finally in the &lt;code&gt;AuthenticatedGrid&lt;/code&gt; we have a &lt;code&gt;TextBlock&lt;/code&gt; which will shown the given name of the authenticated user and a &lt;code&gt;SignOutButton&lt;/code&gt; which allows the user to sign-out.&lt;/p&gt;
+&lt;h3 id="implement-the-code"&gt;Implement the Code&lt;/h3&gt;
+&lt;p&gt;In the &lt;code&gt;MainPage.xaml.cs&lt;/code&gt; code-behind file we implement the &lt;code&gt;SignInButton_Click&lt;/code&gt; method to perform authentication using Azure AD B2C and the &lt;code&gt;SignOutButton_Click&lt;/code&gt; method to remove the cached authentication tokens. Here's the code:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;using Microsoft.Identity.Client;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
+using Uno.UI.MSAL;
+using Windows.UI.Xaml;
+using Windows.UI.Xaml.Controls;
+
+namespace UnoAuth
+{
+    [TemplateVisualState(GroupName = AuthenticationStatesGroupName, Name = UnauthenticatedStateName)]
+    [TemplateVisualState(GroupName = AuthenticationStatesGroupName, Name = AuthenticatingStateName)]
+    [TemplateVisualState(GroupName = AuthenticationStatesGroupName, Name = AuthenticatedStateName)]
+    public sealed partial class MainPage : Page
+    {
+        private const string AuthenticationStatesGroupName = &amp;quot;AuthenticationStates&amp;quot;;
+        private const string UnauthenticatedStateName = &amp;quot;Unauthenticated&amp;quot;;
+        private const string AuthenticatingStateName = &amp;quot;Authenticating&amp;quot;;
+        private const string AuthenticatedStateName = &amp;quot;Authenticated&amp;quot;;
+
+        public static readonly DependencyProperty GivenNameProperty = DependencyProperty.Register(&amp;quot;GivenName&amp;quot;, typeof(string), typeof(MainPage), new PropertyMetadata(string.Empty));
+
+        private readonly IPublicClientApplication _authenticationClient;
+
+        public MainPage()
+        {
+            this.InitializeComponent();
+
+            _authenticationClient = PublicClientApplicationBuilder
+                .Create(Authentication.ClientId)
+#if __IOS__
+                .WithIosKeychainSecurityGroup(Authentication.BundleName)
+#endif
+                .WithB2CAuthority(Authentication.Authority)
+                .WithRedirectUri(Authentication.RedirectUri)
+                .WithUnoHelpers()
+                .Build();
+        }
+
+        private void TransitionToAuthenticated(AuthenticationResult authResult)
+        {
+            var token = new JwtSecurityToken(authResult.IdToken);
+
+            GivenName = token.Claims
+                .Where(claim =&amp;gt; Authentication.GivenNameClaimType.Equals(claim.Type))
+                .Select(claim =&amp;gt; claim.Value)
+                .First();
+
+            VisualStateManager.GoToState(this, AuthenticatedStateName, true);
+        }
+
+        private async void SignInButton_Click(object sender, RoutedEventArgs e)
+        {
+            VisualStateManager.GoToState(this, AuthenticatingStateName, true);
+
+            try
+            {
+                var accounts = await _authenticationClient.GetAccountsAsync();
+
+                var result = await _authenticationClient
+                    .AcquireTokenSilent(Authentication.Scopes, accounts.FirstOrDefault())
+                    .ExecuteAsync();
+
+                TransitionToAuthenticated(result);
+            }
+            catch (MsalUiRequiredException)
+            {
+                try
+                {
+                    var result = await _authenticationClient
+                        .AcquireTokenInteractive(Authentication.Scopes)
+                        .WithPrompt(Prompt.ForceLogin)
+                        .WithUnoHelpers()
+                        .ExecuteAsync();
+
+                    TransitionToAuthenticated(result);
+                }
+                catch
+                {
+                    // Something went wrong, the the user try again
+                    VisualStateManager.GoToState(this, UnauthenticatedStateName, true);
+                }
+            }
+        }
+
+        private async void SignOutButton_Click(object sender, RoutedEventArgs e)
+        {
+            IEnumerable&amp;lt;IAccount&amp;gt; accounts = await _authenticationClient.GetAccountsAsync();
+
+            while (accounts.Any())
+            {
+                await _authenticationClient.RemoveAsync(accounts.First());
+                accounts = await _authenticationClient.GetAccountsAsync();
+            }
+
+            VisualStateManager.GoToState(this, UnauthenticatedStateName, true);
+        }
+
+        public string GivenName
+        {
+            get { return (string)GetValue(GivenNameProperty); }
+            set { SetValue(GivenNameProperty, value); }
+        }
+    }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;There's a lot here so lets break it down:&lt;/p&gt;
+&lt;h4 id="publicclientapplicationbuilder"&gt;PublicClientApplicationBuilder&lt;/h4&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;_authenticationClient = PublicClientApplicationBuilder
+    .Create(Authentication.ClientId)
+#if __IOS__
+    .WithIosKeychainSecurityGroup(Authentication.BundleName)
+#endif
+    .WithB2CAuthority(Authentication.Authority)
+    .WithRedirectUri(Authentication.RedirectUri)
+    .WithUnoHelpers()
+    .Build();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The &lt;code&gt;PublicClientApplicationBuilder&lt;/code&gt; class is used to configure and build a &lt;code&gt;PublicClientApplication&lt;/code&gt; instance. This class is used to:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;acquire tokens in desktop or mobile applications (Desktop / UWP / Xamarin.iOS / Xamarin.Android). Public client applications are not trusted to safely keep application secrets, and therefore they only access Web APIs in the name of the user only&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;To rephrase, because apps that get installed on desktop or mobile devices can be relatively easily decompiled, they can't effectively keep secrets in the way apps that run on a remote machine (i.e. server rendered web-apps) can. As such, this class is able to invoke an authentication flow using only a ClientId and RedirectUri which, while sensitive, do not directly grant the app any authentication rights and are therefore not considered secret. Equally, while this application is running in a browser (via WASM) as an SPA, we need to ensure no secrets are held in the JavaScript VM instance as these can also be retrieved by malicious actors.&lt;/p&gt;
+&lt;p&gt;To build a &lt;code&gt;PublicClientApplication&lt;/code&gt; instance we need to provide the &lt;code&gt;PublicClientApplicationBuilder&lt;/code&gt; with the ClientId, Authority and RedirectUri values we encountered while &lt;a href="http://localhost:5080/posts/UnoB2C#step-2-creating-a-tenant"&gt;creating our tenant&lt;/a&gt;. For iOS we also need to provide the 'IosKeychainSecurityGroup' value which we enclose in a compiler directive so that it is only used on that platform. We provide these values via the &lt;code&gt;Authentication&lt;/code&gt; class which will read the values from &lt;code&gt;Authentication.Secret.cs&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Of particular note here is the &lt;code&gt;.WithUnoHelpers()&lt;/code&gt; line. This extension method provides a custom implementation of &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.identity.client.extensibility.icustomwebui?view=azure-dotnet"&gt;&lt;code&gt;ICustomWebUI&lt;/code&gt;&lt;/a&gt; and &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/microsoft.identity.client.imsalhttpclientfactory?view=azure-dotnet"&gt;&lt;code&gt;IMsalHttpClientFactory&lt;/code&gt;&lt;/a&gt; to MSAL.NET which allows it to perform authentication in WASM in &lt;em&gt;exactly the same way&lt;/em&gt; as it would for an app running on a desktop or mobile device. This is just fantastic and both the MSAL.NET team and Uno Platform deserve kudos for creating and exploiting hooks that allow this use-case to function with so little friction.&lt;/p&gt;
+&lt;h4 id="acquiretokensilent"&gt;AcquireTokenSilent&lt;/h4&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;var accounts = await _authenticationClient.GetAccountsAsync();
+
+var result = await _authenticationClient
+    .AcquireTokenSilent(Authentication.Scopes, accounts.FirstOrDefault())
+    .ExecuteAsync();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;When a user successfully authenticates with Azure AD B2C, they are provided both an &lt;a href="https://auth0.com/docs/tokens/access-tokens"&gt;access token&lt;/a&gt; and a &lt;a href="https://auth0.com/docs/tokens/refresh-tokens"&gt;refresh token&lt;/a&gt;. Both these tokens are stored in a local cache associated with the application. These cached tokens can be used across/between sessions to ensure a user isn't constantly being prompted to authenticate with a service.&lt;/p&gt;
+&lt;p&gt;As such, the first thing we endeavour to do when starting the authentication process is to check to see if there is a valid access token or refresh token (which will be automatically exchanged for a new access token) in the local cache. If there is, then the user has already authenticated and we should use the current tokens to avoid prompting the user to authenticate a second time.&lt;/p&gt;
+&lt;p&gt;And this is what &lt;code&gt;AcquireTokenSilent&lt;/code&gt; silent does. We first get a list of accounts in the token cache and (for simplicity) use the first account we find to check for the presence of a valid token. If one is found, authentication succeeds and no further action is required. If a valid token is not found, then the &lt;code&gt;MsalUiRequiredException&lt;/code&gt; is thrown which we handle to perform authentication interactively.&lt;/p&gt;
+&lt;h4 id="acquiretokeninteractive"&gt;AcquireTokenInteractive&lt;/h4&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;var result = await _authenticationClient
+    .AcquireTokenInteractive(Authentication.Scopes)
+    .WithPrompt(Prompt.ForceLogin)
+    .WithUnoHelpers()
+    .ExecuteAsync();
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If a cached token was not available, we need to prompt the user to authenticate using an interactive process. This process involves opening a browser window and navigating to the authentication page for your Azure AD B2C tenant. Once authentication is complete, an authorization code is returned via the RedirectUri that MSAL is able to exchange for access and refresh tokens which are then stored in the local cache.&lt;/p&gt;
+&lt;p&gt;Again, note the call to &lt;code&gt;.WithUnoHelpers()&lt;/code&gt;. This call performs platform dependent set-up such that the browser/device is able to correctly display a browser and return to the calling application once authentication is complete.&lt;/p&gt;
+&lt;p&gt;Finally, you may be wondering about the &lt;code&gt;.WithPrompt(Prompt.ForceLogin)&lt;/code&gt;. Well, currently MSAL.NET doesn't &lt;a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/589"&gt;support a unified means to &amp;quot;sign out&amp;quot; of an account&lt;/a&gt;. While you are able to remove cached tokens (see the &amp;quot;sign out&amp;quot; code below) it doesn't clear cookies in the browser used to sign in to an account. This would result in a subsequent call to &lt;code&gt;AcquireTokenInteractive&lt;/code&gt; simply logging the user in to the previously used account without prompting them for credentials. To prevent this the &lt;code&gt;.WithPrompt(Prompt.ForceLogin)&lt;/code&gt; line is used to ensure the user is prompted for credentials regardless of cookie state.&lt;/p&gt;
+&lt;h4 id="transitiontoauthenticated"&gt;TransitionToAuthenticated&lt;/h4&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;private void TransitionToAuthenticated(AuthenticationResult authResult)
+{
+    var token = new JwtSecurityToken(authResult.IdToken);
+
+    GivenName = token.Claims
+        .Where(claim =&amp;gt; Authentication.GivenNameClaimType.Equals(claim.Type))
+        .Select(claim =&amp;gt; claim.Value)
+        .First();
+
+    VisualStateManager.GoToState(this, AuthenticatedStateName, true);
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Once a user has been authenticated (either silently or interactively) we transition to the &lt;code&gt;Authenticated&lt;/code&gt; state. Before doing so however, we use the access token returned from the authentication process to determine the name of the person who authenticated. As Azure AD B2C returns the access token as a &lt;a href="https://auth0.com/docs/tokens/json-web-tokens"&gt;JSON Web Token (JWT)&lt;/a&gt; we use the &lt;code&gt;JwtSecurityToken&lt;/code&gt; class from the &lt;code&gt;System.IdentityModel.Tokens.Jwt&lt;/code&gt; package to parse the token. The token will contain many claims many determined by the registration attributes and tokens claims &lt;a href="#newuserflowclaims"&gt;we selected while setting up the policy for our Azure AD B2C tenant&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;In this instance, we're interested in the &lt;code&gt;given_name&lt;/code&gt; claim so we enumerate through the claims and set the &lt;code&gt;GivenName&lt;/code&gt; property to the value of the first claim of this type.&lt;/p&gt;
+&lt;p&gt;Finally we use the &lt;code&gt;VisualStateManager&lt;/code&gt; to transition the UI to the &lt;code&gt;Authenticated&lt;/code&gt; state which will greet the user by name.&lt;/p&gt;
+&lt;h4 id="sign-out"&gt;Sign Out&lt;/h4&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;IEnumerable&amp;lt;IAccount&amp;gt; accounts = await _authenticationClient.GetAccountsAsync();
+
+while (accounts.Any())
+{
+    await _authenticationClient.RemoveAsync(accounts.First());
+    accounts = await _authenticationClient.GetAccountsAsync();
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;If we're able to sign-in then we need to be able to sign-out. Unfortunately this process is not quite a slick as the fluent, async methods we used for sign-in and, as described above, doesn't do anything to remove browser cookies which can be used to transparently re-authenticate. This does seem to be the subject of &lt;a href="https://stackoverflow.com/questions/47517434/how-to-sign-out-from-azure-ad-2-0-msal-in-a-desktop-application"&gt;much&lt;/a&gt; &lt;a href="https://stackoverflow.com/questions/37792244/logout-does-not-work-when-using-microsoft-authentication-library-msal"&gt;confusion&lt;/a&gt; on both StackOverflow and Github where many of the &lt;a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/589"&gt;associated&lt;/a&gt; &lt;a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/issues/425"&gt;issues&lt;/a&gt; have been closed without a satisfactory solution. Any mention of improving the sign-out experience even seems to have disappeared from the &lt;a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet/projects/1"&gt;MSAL.NET project boards&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Still, the &lt;code&gt;.WithPrompt(Prompt.ForceLogin)&lt;/code&gt; workaround resolves the primary issue for now so we're able to just rely on the code above to remove cached tokens.&lt;/p&gt;
+&lt;h3 id="android-changes"&gt;Android Changes&lt;/h3&gt;
+&lt;p&gt;In order for authentication to succeed on Android we need to modify both &lt;code&gt;AndroidManifest.xml&lt;/code&gt; and the &lt;code&gt;MainActivity.cs&lt;/code&gt;&lt;/p&gt;
+&lt;h4 id="androidmanifest.xml"&gt;AndroidManifest.xml&lt;/h4&gt;
+&lt;p&gt;In the 'UnoAuth.Droid' project, expand 'Properties' to show the &amp;quot;AndroidManifest.xml&amp;quot; file. Double-click this file to edit it such that it looks similar to the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-xml"&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;utf-8&amp;quot;?&amp;gt;
+&amp;lt;manifest xmlns:android=&amp;quot;http://schemas.android.com/apk/res/android&amp;quot; package=&amp;quot;UnoAuth&amp;quot; android:versionCode=&amp;quot;1&amp;quot; android:versionName=&amp;quot;1.0&amp;quot;&amp;gt;
+  &amp;lt;uses-sdk android:minSdkVersion=&amp;quot;16&amp;quot; android:targetSdkVersion=&amp;quot;29&amp;quot; /&amp;gt;
+  &amp;lt;application android:label=&amp;quot;UnoAuth&amp;quot;&amp;gt;
+    &amp;lt;activity android:name=&amp;quot;microsoft.identity.client.BrowserTabActivity&amp;quot;&amp;gt;
+      &amp;lt;intent-filter&amp;gt;
+        &amp;lt;action android:name=&amp;quot;android.intent.action.VIEW&amp;quot; /&amp;gt;
+        &amp;lt;category android:name=&amp;quot;android.intent.category.DEFAULT&amp;quot; /&amp;gt;
+        &amp;lt;category android:name=&amp;quot;android.intent.category.BROWSABLE&amp;quot; /&amp;gt;
+        &amp;lt;data android:scheme=&amp;quot;msal[ClientId]&amp;quot; android:host=&amp;quot;auth&amp;quot; /&amp;gt;
+      &amp;lt;/intent-filter&amp;gt;
+    &amp;lt;/activity&amp;gt;
+  &amp;lt;/application&amp;gt;
+&amp;lt;/manifest&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Make sure you amend the &lt;code&gt;android:scheme&lt;/code&gt; value to use the ClientId from your App Registration then save changes and close the file.&lt;/p&gt;
+&lt;h4 id="mainactivity"&gt;MainActivity&lt;/h4&gt;
+&lt;p&gt;Open the 'MainActivity.cs' file and amend it to include the following:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-c#"&gt;using Android.App;
+using Android.Content;
+using Android.Views;
+using Microsoft.Identity.Client;
+
+namespace UnoAuth.Droid
+{
+  [Activity(
+    MainLauncher = true, 
+    ConfigurationChanges = global::Uno.UI.ActivityHelper.AllConfigChanges, 
+    WindowSoftInputMode = SoftInput.AdjustPan | SoftInput.StateHidden)]
+  public class MainActivity : Windows.UI.Xaml.ApplicationActivity
+  {
+    protected override void OnActivityResult(int requestCode, Result resultCode, Intent data)
+    {
+      base.OnActivityResult(requestCode, resultCode, data);
+      AuthenticationContinuationHelper.SetAuthenticationContinuationEventArgs(requestCode, resultCode, data);
+    }
+  }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3 id="ios-changes"&gt;iOS Changes&lt;/h3&gt;
+&lt;p&gt;As with most everything on iOS, the changes to make authentication work are a little more tricky. We need to change the iOS project properties and both the 'Info.plist' and 'Entitlements.plist' files.&lt;/p&gt;
+&lt;h4 id="project-properties"&gt;Project Properties&lt;/h4&gt;
+&lt;p&gt;Right click on the iOS project properties, navigate to &amp;quot;iOS Bundle Signing&amp;quot; and select &amp;quot;Manual Provisioning&amp;quot;. Next, under Additional Resources, make sure the Custom Entitlements setting is set to &amp;quot;Entitlements.plist&amp;quot;.&lt;/p&gt;
+&lt;p&gt;Your iOS Bundle Signing page should now look like this:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="iosbundlesigning" href="/Content/UnoB2C/iOS Bundle Signing.png"&gt;&lt;img src="/Content/UnoB2C/iOS Bundle Signing.png" class="img-responsive" style="margin: auto; max-width:66%; margin-top: 6px; margin-bottom: 6px;" alt="iOS Bundle Signing"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;h4 id="info.plist"&gt;Info.plist&lt;/h4&gt;
+&lt;p&gt;Right click on the 'Info.plist' file in the iOS project and select &lt;code&gt;View Code&lt;/code&gt;. At the end of the root &lt;code&gt;&amp;lt;dict&amp;gt;&lt;/code&gt; element add the &lt;code&gt;CFBundleURLTypes&lt;/code&gt; key and value shown below (amending the &lt;code&gt;CFBundleURLSchemes&lt;/code&gt; value to use the ClientId for your app registration):&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-xml"&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;
+&amp;lt;!DOCTYPE plist PUBLIC &amp;quot;-//Apple//DTD PLIST 1.0//EN&amp;quot; &amp;quot;http://www.apple.com/DTDs/PropertyList-1.0.dtd&amp;quot;&amp;gt;
+&amp;lt;plist version=&amp;quot;1.0&amp;quot;&amp;gt;
+&amp;lt;dict&amp;gt;
+	&amp;lt;key&amp;gt;CFBundleDisplayName&amp;lt;/key&amp;gt;
+	&amp;lt;string&amp;gt;UnoAuth&amp;lt;/string&amp;gt;
+	&amp;lt;key&amp;gt;CFBundleIdentifier&amp;lt;/key&amp;gt;
+	&amp;lt;string&amp;gt;com.companyname.UnoAuth&amp;lt;/string&amp;gt;
+
+  ...
+
+	&amp;lt;key&amp;gt;CFBundleURLTypes&amp;lt;/key&amp;gt;
+	&amp;lt;array&amp;gt;
+		&amp;lt;dict&amp;gt;
+			&amp;lt;key&amp;gt;CFBundleURLName&amp;lt;/key&amp;gt;
+			&amp;lt;string&amp;gt;MSAL&amp;lt;/string&amp;gt;
+			&amp;lt;key&amp;gt;CFBundleURLSchemes&amp;lt;/key&amp;gt;
+			&amp;lt;array&amp;gt;
+				&amp;lt;string&amp;gt;msal[ClientID]&amp;lt;/string&amp;gt;
+			&amp;lt;/array&amp;gt;
+			&amp;lt;key&amp;gt;CFBundleTypeRole&amp;lt;/key&amp;gt;
+			&amp;lt;string&amp;gt;None&amp;lt;/string&amp;gt;
+		&amp;lt;/dict&amp;gt;
+	&amp;lt;/array&amp;gt;
+&amp;lt;/dict&amp;gt;
+&amp;lt;/plist&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Finally copy the &lt;code&gt;CFBundleIdentifier&lt;/code&gt; value (in this case &lt;code&gt;com.companyname.UnoAuth&lt;/code&gt;) then save and close the file.&lt;/p&gt;
+&lt;h4 id="entitlements.plist"&gt;Entitlements.plist&lt;/h4&gt;
+&lt;p&gt;Double click on the 'Entitlements.plist' file in the iOS project to open the visual editor. In the 'Entitlements' list select &amp;quot;Keychain&amp;quot; and then tick &amp;quot;Enable Keychain&amp;quot; in the 'Description' section. Finally, paste the bundle identifier you copied from 'Info.plist' into the 'Keychain Groups' text box so it looks like this:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="entitlementsplist" href="/Content/UnoB2C/Entitlements plist.png"&gt;&lt;img src="/Content/UnoB2C/Entitlements plist.png" class="img-responsive" style="margin: auto; max-width:66%; margin-top: 6px; margin-bottom: 6px;" alt="Entitlements plist"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Finally save the changes and close the file.&lt;/p&gt;
+&lt;h2 id="testing"&gt;Testing&lt;/h2&gt;
+&lt;p&gt;Now, if everything is set up correctly, you should be able to use Azure AD B2C and MSAL.NET to authenticate users. Here is UnoAuth running on...&lt;/p&gt;
+&lt;h3 id="uwp"&gt;UWP&lt;/h3&gt;
+&lt;video class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" controls&gt;
+  &lt;source src="/Content/UnoB2C/UWP Authentication.mp4" type="video/mp4"/&gt;
+Your browser does not support the video tag
+&lt;/video&gt;
+&lt;h3 id="wasm"&gt;WASM&lt;/h3&gt;
+&lt;video class="img-responsive" style="margin: auto; width:80%; margin-top: 6px; margin-bottom: 6px;" controls&gt;
+  &lt;source src="/Content/UnoB2C/WASM Authentication.mp4" type="video/mp4"/&gt;
+Your browser does not support the video tag
+&lt;/video&gt;
+&lt;h3 id="android"&gt;Android&lt;/h3&gt;
+&lt;video class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" controls&gt;
+  &lt;source src="/Content/UnoB2C/Droid Authentication.mp4" type="video/mp4"/&gt;
+Your browser does not support the video tag
+&lt;/video&gt;
+&lt;h3 id="ios"&gt;iOS&lt;/h3&gt;
+&lt;video class="img-responsive" style="margin: auto; width:40%; margin-top: 6px; margin-bottom: 6px;" controls&gt;
+  &lt;source src="/Content/UnoB2C/iOS Authentication.mp4" type="video/mp4"/&gt;
+Your browser does not support the video tag
+&lt;/video&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;As we can see, it is now possible to use Azure AD B2C and MSAL.NET to perform client-side authentication, across multiple platforms, using a single code-base. Furthermore, while a few platform specific tweaks are required in a couple of the head projects, the code to perform authentication is both concise, understandable and shared by all platforms.&lt;/p&gt;
+&lt;p&gt;While IAM remains a complicated subject (as attested to by the length of this post!) I hope the above provides sufficient information that a reader is able to quickly get these technologies working together and allow them to move on to more engaging parts of their app.&lt;/p&gt;
+&lt;h2 id="finally"&gt;Finally&lt;/h2&gt;
+&lt;p&gt;If you're interested in using the Uno Platform to deliver cross-platform apps or have an upcoming project for which you'd like evaluate Uno Platform's fit, then please feel free to drop me a line using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;. As a freelance software developer and remote contractor I'm always interested in hearing from potential new clients or ideas for new collaborations.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;In this post I comprehensively show how apps written using the &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; can leverage &lt;a href="https://azure.microsoft.com/en-us/services/active-directory/external-identities/b2c/"&gt;Azure AD B2C&lt;/a&gt; &amp;amp; &lt;a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet"&gt;MSAL.Net&lt;/a&gt; to provide Identity and Access Management services across platforms as diverse as Windows, Android, iOS and the web. As you will see, this combination of technologies provides extremely cheap, simple and flexible identity management functionality that runs from a single code base.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/BlogMilestone</id>
 		<title>A Blogging Milestone</title>
@@ -5057,105 +5583,5 @@ _ = _appServices.GetService&amp;lt;IConfiguration&amp;gt;();
 &lt;p&gt;Of course, this signature would provide all sorts of opportunities for naughtiness and smells and, while I could probably implement it using the method described above, I'm very much hoping the great minds behind this project might be able to propose something a little safer.&lt;/p&gt;
 </content>
 		<summary>&lt;p&gt;I love the .NET Core 3.0 Generic Host, I really do. As a framework for simplifying common scaffolding and lifetime management of long-running services, it's &lt;em&gt;almost&lt;/em&gt; faultless. Unfortunately, the mere fact of &lt;a href="http://tomasp.net/blog/2015/library-frameworks/"&gt;being a framework rather than a library&lt;/a&gt; can lead to issues where, as a user of the framework, you're unable to accomplish a specific goal. For me, this happened while trying to get instrumentation written to a various &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource"&gt;EventSource&lt;/a&gt; instances to be output - in a configurable manner - through the Generic Host's logging infrastructure. Sounds simple huh, and it really ought to be. But it wasn't. Here's why:&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/LightweightRuntimeCompositionForGenericHost</id>
-		<title>Light-weight run-time composition for the .NET Core 3.0 Generic Host</title>
-		<link href="http://ian.bebbs.co.uk/posts/LightweightRuntimeCompositionForGenericHost" />
-		<updated>2019-11-11T00:00:00Z</updated>
-		<content>&lt;h1 id="tldr"&gt;TL;DR&lt;/h1&gt;
-&lt;p&gt;&lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition"&gt;Cogenity.Extensions.Hosting.Composition&lt;/a&gt; can provide lightweight, runtime composition for the &lt;a href="(https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0)"&gt;.NET Core 3.0 Generic Host&lt;/a&gt;... with some caveats. &lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5"&gt;An issue&lt;/a&gt; has been created as an RFC on how best to address these caveats with comments/contributions welcomed.&lt;/p&gt;
-&lt;h1 id="did-you-know"&gt;Did you know...&lt;/h1&gt;
-&lt;p&gt;The &lt;a href="https://github.com/aspnet/AspNetCore/issues/9337"&gt;.NET Core 3.0 web stack has been &amp;quot;re-platformed&amp;quot; onto the generic host library&lt;/a&gt;?&lt;/p&gt;
-&lt;p&gt;Furthermore, did you know that &lt;code&gt;WebHost&lt;/code&gt; allows you to &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/platform-specific-configuration?view=aspnetcore-3.0"&gt;load additional non-referenced assemblies at runtime which can participate in service start-up by implementing the &lt;code&gt;IHostingStartup&lt;/code&gt; interface&lt;/a&gt;?&lt;/p&gt;
-&lt;p&gt;Well neither did I until I started looking for a way to perform runtime-composition for a service utilizing the &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0"&gt;.NET Core 3.0 Generic Host&lt;/a&gt;. It turns out that, while both the changes above are great for the web-platform, nothing similar exists out-of-the-box for the Generic Host. So here's what I did...&lt;/p&gt;
-&lt;h1 id="background"&gt;Background&lt;/h1&gt;
-&lt;p&gt;I'm currently working on a very interesting project which I hope to see open-sourced in a few weeks time. At the moment it's being developed behind closed doors but with various reusable components being segregated into open-source projects/packages for use by the community.&lt;/p&gt;
-&lt;p&gt;One facet of this project is a .NET Core 3.0 service which needs to be deployable in a variety of environments and across a number of platforms. While this service provides a set of core behaviours, these behaviours need to be augmented by arbitrary functionality specific to the environment/platform the service is being used within.&lt;/p&gt;
-&lt;p&gt;So it was that I came to look for a means to provide light-weight runtime-composition to services implemented using the .NET Core 3.0 Generic Host and, to my surprise, came up empty handed.&lt;/p&gt;
-&lt;h1 id="wait-runtime-composition"&gt;Wait, runtime composition?&lt;/h1&gt;
-&lt;p&gt;Yes, the ability to add functionality/behaviours to a software component, ostensibly by loading additional assemblies at runtime, without requiring re-compilation of said software component.&lt;/p&gt;
-&lt;p&gt;Specifically, my requirements were:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;A simple, fast, lightweight means to safely load and configure additional assemblies at service start-up; and&lt;/li&gt;
-&lt;li&gt;A means for these assemblies to participate in host composition (i.e. do something like '&lt;code&gt;IHostBuilder.UseRabbitMq&amp;lt;MyMessageHandler&amp;gt;()&lt;/code&gt;').&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;With a couple of nice-to-haves:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Allow for multiple instances of a specific assembly to be loaded with different configurations.&lt;/li&gt;
-&lt;li&gt;Allow multiple versions of specific assemblies to be loaded concurrently.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h1 id="surely-this-is-a-solved-problem"&gt;Surely this is a solved problem?&lt;/h1&gt;
-&lt;p&gt;I thought so too. Having used MEF (the Managed Extensibility Framework) in the past I went to see if it had been ported to .NET Core and &lt;a href="https://www.nuget.org/packages/System.Composition"&gt;indeed it had&lt;/a&gt;. Unfortunately, it seems to have fallen out of favour and there's very little documentation about it's use in .NET Core and even less about how one might integrate it into the Generic Host.&lt;/p&gt;
-&lt;p&gt;I then found &lt;a href="https://github.com/khellang/Scrutor"&gt;Scrutor&lt;/a&gt; which, while more integrated into the Generic Host eco-system (it provides fantastic assembly scanning and decoration capabilities specfically for Microsoft.Extensions.DependencyInjection), didn't provide a means for the discovered types to participate in host composition.&lt;/p&gt;
-&lt;p&gt;Finally I discovered &lt;a href="https://github.com/dapplo/Dapplo.Microsoft.Extensions.Hosting"&gt;Dapplo.Microsoft.Extensions.Hosting&lt;/a&gt; which provides the &lt;a href="https://www.nuget.org/packages/Dapplo.Microsoft.Extensions.Hosting.Plugins/"&gt;Dapplo.Microsoft.Extensions.Hosting.Plugins&lt;/a&gt; package. This was extremely close to what I wanted but relied too heavily on directory scanning (thereby not meeting the &amp;quot;fast and safe&amp;quot; requirements) and, like Scrutor and MEF, also didn't provide a means to participate in host composition (the &amp;quot;plugins&amp;quot; only have access to the &lt;code&gt;HostBuilderContent&lt;/code&gt;).&lt;/p&gt;
-&lt;h1 id="right-well-how-hard-can-this-be"&gt;Right, well how hard can this be?&lt;/h1&gt;
-&lt;p&gt;Not that hard it turns out... but with several caveats.&lt;/p&gt;
-&lt;p&gt;Within a few hours of deciding to roll-my-own solution to the requirements above, and by borrowing extensively from the various projects I'd already encountered, I'd written &lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition"&gt;Cogenity.Extensions.Hosting.Composition&lt;/a&gt;. This solution used configuration (rather than directory scanning) to specify the additional assemblies to load and, like the Dapplo project, used .NET Core's &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.runtime.loader.assemblyloadcontext?view=netcore-3.0"&gt;&lt;code&gt;AssemblyLoadContext&lt;/code&gt;&lt;/a&gt; to provide scoping of loaded assemblies providing additional safety and reliability characteristics (in the abscence of AppDomains).&lt;/p&gt;
-&lt;p&gt;A &lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/tree/master/samples"&gt;&lt;code&gt;GenericHostConsole&lt;/code&gt; sample project&lt;/a&gt; was written to show the library's use and demonstrate it's functionality which worked beautifully. From the host project, all that was required to provide runtime composition was a call to the &lt;code&gt;.UseComposition&lt;/code&gt; extension method and some associated configuration (I decided to use a &lt;a href="https://www.nuget.org/packages/NetEscapades.Configuration.Yaml"&gt;Yaml&lt;/a&gt; file but any &lt;a href="https://docs.microsoft.com/en-us/aspnet/core/fundamentals/configuration/?view=aspnetcore-3.0"&gt;configuration provider&lt;/a&gt; could be used) as shown below:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-c#"&gt;private static async Task Main(string[] args)
-{
-    var builder = Host.CreateDefaultBuilder(args)
-        .ConfigureHostConfiguration(configurationBuilder =&amp;gt; configurationBuilder.AddCommandLine(args))
-        .UseComposition(config =&amp;gt; config.AddYamlFile(args[0]), &amp;quot;composition&amp;quot;);
-
-    await builder
-        .Build()
-        .RunAsync();
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;pre&gt;&lt;code class="language-yaml"&gt;composition:
-  modules:
-    - name: ConsoleWriter
-      assembly: GenericHostConsole.Writer
-      configurationSection: consolewriterConfiguration
-      optional: true
-
-consolewriterConfiguration:
-  writeIntervalInSeconds: 2
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Then additional assemblies could be provided (in this case &lt;code&gt;GenericHostConsole.Writer&lt;/code&gt;) which simply needed to implement the &lt;code&gt;IModule&lt;/code&gt; interface as shown here:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-c#"&gt;public class Module : IModule
-{
-    public IHostBuilder Configure(IHostBuilder hostbuilder, string configurationSection)
-    {
-        return hostbuilder
-            .ConfigureServices(
-                (hostBuilderContext, serviceCollection) =&amp;gt;
-                {
-                    serviceCollection.AddOptions&amp;lt;Configuration&amp;gt;().Bind(hostBuilderContext.Configuration.GetSection(configurationSection));
-                    serviceCollection.AddSingleton&amp;lt;IHostedService, Service&amp;gt;();
-                })
-            .ConfigureLogging((hostingContext, logging) =&amp;gt; logging.AddConsole());
-    }
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;After compiling, copying the &lt;code&gt;GenericHostConsole.Writer&lt;/code&gt; assembly to the &lt;code&gt;GenericHostConsole&lt;/code&gt; project and running the latter's executable, the &lt;code&gt;GenericHostConsole.Writer.Service&lt;/code&gt; wrote to the console every two seconds, as configured.&lt;/p&gt;
-&lt;h1 id="boom-done.well.sort-of"&gt;Boom! Done... well... sort of.&lt;/h1&gt;
-&lt;p&gt;I returned to the project I required this for and followed the above pattern, expecting (ok, somewhat naively) everything to be rosy. &lt;em&gt;It failed spectacularly&lt;/em&gt;.&lt;/p&gt;
-&lt;p&gt;You see, while my sample project for Cogenity.Extensions.Hosting.Composition, simply augmented the host by adding a new service with no other dependencies, the original project required new services to interact with core functionality provided by the project, mainly by injection of services defined in a 'common' assembly (i.e. one referenced both by the host project and the composition modules). Starting the project resulting in the DI container reporting that it couldn't locate implementations of required services despite those services being registered with the host's DI container (by throwing a &lt;code&gt;System.InvalidOperationException: Unable to resolve service for type '&amp;lt;service&amp;gt;' while attempting to activate '&amp;lt;consumer&amp;gt;')&lt;/code&gt;).&lt;/p&gt;
-&lt;p&gt;It turned out that I was being bitten by the following:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;&lt;p&gt;Due to the requirement of needing to allow additional modules to participate in host composition, assemblies were being loaded at composition, not build time as shown below:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-c#"&gt;var builder = Host.CreateDefaultBuilder(args)
-    .ConfigureHostConfiguration(configurationBuilder =&amp;gt; configurationBuilder.AddCommandLine(args))
-    .UseComposition(config =&amp;gt; config.AddYamlFile(args[0]), &amp;quot;composition&amp;quot;); // &amp;lt;- Assemblies loaded here
-    .ConfigureServices(, serviceCollection) =&amp;gt; serviceCollection.AddSingleton&amp;lt;IEventBus, EventBus&amp;gt;())
-
-await builder
-    .Build() // &amp;lt;- Not here
-    .RunAsync();
-&lt;/code&gt;&lt;/pre&gt;
-&lt;/li&gt;
-&lt;li&gt;&lt;p&gt;This meant that the &lt;code&gt;AssemblyLoadContext&lt;/code&gt; used to isolate module assemblies was loading new instances of 'common' assemblies rather than using the ones being registered by the host service (i.e. the IEventBus in the above example), thereby explaining why the various implementations couldn't be found.&lt;/p&gt;
-&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h1 id="so-what-now"&gt;So what now?&lt;/h1&gt;
-&lt;p&gt;Well, it can be used as-is for basic composition functionality, but it's really not what I need moving forward.&lt;/p&gt;
-&lt;p&gt;I have considered several possible solutions ranging from simply removing assembly isolation (and no-longer providing the 'nice-to-haves') to working more intimately with the &lt;code&gt;HostBuilder.Build&lt;/code&gt; process to ensure shared assemblies are fully loaded prior to loading additional assemblies for composition. Each of the approaches have pros and cons which I am trying to consider from a 'general consumer' point of view before deciding on the solution to adopt.&lt;/p&gt;
-&lt;p&gt;To this end, I have &lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5"&gt;created an issue&lt;/a&gt; in the Github repository for this project in which I describe what I see as the various ways forward and, where possible, links to branches proving out the various approaches. I've labelled it as 'discussion' and would genuinely be interested to hear people's thoughts. If this project is of interest to you and/or you have suggestions about how best to resolve the above issues, please feel free to add a comment with your suggestions and/or requests for modified/additional functionality.&lt;/p&gt;
-&lt;p&gt;If you require runtime composition for projects utilizing the .NET Core Generic Host then watch this space as I hope to have a more versatile solution in place within the next week or so.&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;&lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition"&gt;Cogenity.Extensions.Hosting.Composition&lt;/a&gt; can provide lightweight, runtime composition for the &lt;a href="(https://docs.microsoft.com/en-us/aspnet/core/fundamentals/host/generic-host?view=aspnetcore-3.0)"&gt;.NET Core 3.0 Generic Host&lt;/a&gt;... with some caveats. &lt;a href="https://github.com/ibebbs/Cogenity.Extensions.Hosting.Composition/issues/5"&gt;An issue&lt;/a&gt; has been created as an RFC on how best to address these caveats with comments/contributions welcomed.&lt;/p&gt;</summary>
 	</entry>
 </feed>

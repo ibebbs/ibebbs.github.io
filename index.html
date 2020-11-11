@@ -33,9 +33,15 @@
         <meta property="og:url" content="http://ian.bebbs.co.uk/" />
         <!-- TODO: More social graph meta tags -->
 
-        <link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
 <link href="/assets/css/ekko-override.css" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
 <!-- Global site tag (gtag.js) - Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
 <script>
@@ -102,6 +108,14 @@
 <div class="row">
     <div class="col-sm-8 right-border">
                 <div class="post-preview">
+                    <a href="/posts/UnoB2C">
+                        <h2 class="post-title">Cross-Platform App Authentication with Azure AD B2C And The Uno Platform</h2>
+                            <h3 class="post-subtitle">AAD B2C, MSAL &amp; UNO FTW!</h3>
+                    </a>
+                    <p class="post-meta">Posted on 11 November 2020</p>
+<p>In this post I comprehensively show how apps written using the <a href="https://platform.uno/">Uno Platform</a> can leverage <a href="https://azure.microsoft.com/en-us/services/active-directory/external-identities/b2c/">Azure AD B2C</a> &amp; <a href="https://github.com/AzureAD/microsoft-authentication-library-for-dotnet">MSAL.Net</a> to provide Identity and Access Management services across platforms as diverse as Windows, Android, iOS and the web. As you will see, this combination of technologies provides extremely cheap, simple and flexible identity management functionality that runs from a single code base.</p>                </div>       
+                    <hr /> 
+                <div class="post-preview">
                     <a href="/posts/BlogMilestone">
                         <h2 class="post-title">A Blogging Milestone</h2>
                             <h3 class="post-subtitle">12,000 page views in 365 days</h3>
@@ -132,14 +146,6 @@
                     </a>
                     <p class="post-meta">Posted on 16 August 2020</p>
 <p>At <a href="https://unoconf.com/">UnoConf 2020</a>, the <a href="https://platform.uno/">Uno Platform</a> team wowed attendees with the announcement of preliminary support for Linux. This had been something I had very much been hoping for and, first chance I got, I just had to give it a try. In this article I share how I went about getting set up for building and running a UWP app on Linux using the Uno Platform.</p>                </div>       
-                    <hr /> 
-                <div class="post-preview">
-                    <a href="/posts/UnoValue">
-                        <h2 class="post-title">On the incredible value proposition of .NET &amp; the Uno Platform</h2>
-                            <h3 class="post-subtitle">Or how Uno changed &quot;Full Stack&quot; to &quot;One Stack&quot;</h3>
-                    </a>
-                    <p class="post-meta">Posted on 12 August 2020</p>
-<p>My company recently released <a href="https://www.zenue.uk/">Zenue</a>; a solution for small businesses in the UK hospitality industry struggling to meet post-lockdown governmental guidance. In just 48 hours, a team of two were able to progress from initial concept to app-store submission having delivered on all the fundamental use-cases. In this post I show how this was made possible by .NET and the <a href="https://platform.uno/">Uno Platform</a> and why you should be considering these technologies for your next project.</p>                </div>       
         <ul class="pager">
             <li class="previous">                
             </li>
@@ -225,14 +231,14 @@
 
             <h5>Top Tags</h5>
             <div>
-                    <a role="button" href="/tags/UWP" class="btn btn-default btn-sm"> UWP (18)</a>
-                    <a role="button" href="/tags/Uno-Platform" class="btn btn-default btn-sm"> Uno Platform (12)</a>
-                    <a role="button" href="/tags/NET-Core" class="btn btn-default btn-sm"> .NET Core (9)</a>
+                    <a role="button" href="/tags/UWP" class="btn btn-default btn-sm"> UWP (19)</a>
+                    <a role="button" href="/tags/Uno-Platform" class="btn btn-default btn-sm"> Uno Platform (13)</a>
                     <a role="button" href="/tags/XAML" class="btn btn-default btn-sm"> XAML (9)</a>
+                    <a role="button" href="/tags/NET-Core" class="btn btn-default btn-sm"> .NET Core (9)</a>
+                    <a role="button" href="/tags/Raspberry-Pi" class="btn btn-default btn-sm"> Raspberry Pi (8)</a>
+                    <a role="button" href="/tags/Rx" class="btn btn-default btn-sm"> Rx (7)</a>
                     <a role="button" href="/tags/Android" class="btn btn-default btn-sm"> Android (7)</a>
                     <a role="button" href="/tags/Reactive" class="btn btn-default btn-sm"> Reactive (7)</a>
-                    <a role="button" href="/tags/Raspberry-Pi" class="btn btn-default btn-sm"> Raspberry Pi (7)</a>
-                    <a role="button" href="/tags/Rx" class="btn btn-default btn-sm"> Rx (7)</a>
                     <a role="button" href="/tags/Docker" class="btn btn-default btn-sm"> Docker (6)</a>
                     <a role="button" href="/tags/iOS" class="btn btn-default btn-sm"> iOS (5)</a>
             </div>
@@ -245,10 +251,10 @@
 
             <h5>Older Posts</h5>
             <ul class="list-unstyled">
+                    <li><a href="/posts/UnoValue">On the incredible value proposition of .NET &amp; the Uno Platform</a></li>
                     <li><a href="/posts/UnoChat">Cross-Platform Real-Time Communication with Uno &amp; SignalR</a></li>
                     <li><a href="/posts/UnoWasmDocker">Uno WebAssembly Containerization</a></li>
                     <li><a href="/posts/UnoWithSwagger">Giving Uno Some Swagger</a></li>
-                    <li><a href="/posts/Codewars">A Kata for Katas</a></li>
             </ul>
                 <ul class="pager">
                     <li class="next">
