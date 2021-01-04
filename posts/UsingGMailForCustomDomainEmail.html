@@ -1,0 +1,264 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - Using GMail To Send  Email From A Custom Domain</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - Using GMail To Send  Email From A Custom Domain" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/UsingGMailForCustomDomainEmail" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>Using GMail To Send  Email From A Custom Domain</h1>
+        <h2 class="subheading">Establishing a free fa&#xE7;ade for email communication via your domain using a personal GMail account.</h2>
+    <div class="meta">        
+Published on 04 January 2021<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/Domain" class="btn btn-default btn-xs">Domain</a>
+                    <a role="button" href="/tags/GMail" class="btn btn-default btn-xs">GMail</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="tldr">TL;DR</h2>
+<p>Do you use a domain registrar that provides email forwarding facilities? Then read this post to see how to set up Gmail to ensure the correct &quot;From&quot; address when replying to emails sent to your domains.</p>
+<h2 id="intro">Intro</h2>
+<p>I am currently working with a couple of co-founders on an early stage start-up about which I hope to share more information shortly. Part of the prep work for this start-up has been registering a domain name and establishing communications channels.</p>
+<p>To do this, I use a domain registrar that provides free email forwarding facilities. This is great as it allows you to receive email sent to '[person]&#64;[yourdomain.com]' as part of your regular email account. However, if you subsequently reply to email you received this way, your reply will be &quot;From&quot; your regular email account, not '[person]&#64;[yourdomain.com]'.</p>
+<p>In this post I detail how to establish a completely free façade for email communication via your domain using a personal GMail account to receive and reply to email using a custom domain email addresses.</p>
+<h2 id="prerequisites">Prerequisites</h2>
+<p>Prior to following the steps below, you should ensure that you've enabled Two-Factor Authentication (2FA) on your GMail account. While it is possible to follow these steps without 2FA, this is not recommended as 2FA is basic practice for good security.</p>
+<p>You should also ensure you're able to receive email forwarded by your domain registrar in your GMail account. As each domain registrar will provide different mechanisms for setting up and maintaining email forwarding rules, it will not be covered as part of this post. So, before following the steps below, you should ensure you're able to send an email to '[person]&#64;[yourdomain.com]' and receive it in your GMail account.</p>
+<h2 id="app-password">App Password</h2>
+<p>Before being able to set up &quot;Send mail as&quot; functionality, you'll need an 'App Password'. An 'App Password' allows software/authentication flows that aren't compatible with 2FA to successfully authenticate with Google Services and is essentially just a 'special' password that is a) highly complex - to prevent brute-force attacks, and b) can be revoked should it ever be compromised.</p>
+<p>To set up an 'App Password', from your GMail inbox click your account icon in the top right hand corner, then click &quot;Manage your Google Account&quot; as shown below:</p>
+<p><a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/ManageGMailAccount.png"><img src="/Content/UsingGMailForCustomDomainEmail/ManageGMailAccount.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Manage GMail Account"/></a></p>
+<p>This will open a new tab for managing your Google Account. Select the &quot;Security&quot; category from the menu on the left (or across the top on smaller devices) and scroll down to the &quot;Signing in to Google&quot; section. Here, you should see that 2-Step verification has been turned on (if it isn't, turn it on now before continuing) and an &quot;App passwords&quot; option as shown below:</p>
+<p><a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/SigningInToGoogle.png"><img src="/Content/UsingGMailForCustomDomainEmail/SigningInToGoogle.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Signing In To Google"/></a></p>
+<p>Click the &quot;App passwords&quot; option to create a new App password. In the &quot;Select app&quot; drop-down select &quot;Other (Custom name)&quot; and enter a name for the app password (I tend to use the domain name). Once this is entered click the Generate button as shown below:</p>
+<p><a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/AddAppPassword.png"><img src="/Content/UsingGMailForCustomDomainEmail/AddAppPassword.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Add App Password"/></a></p>
+<p>Clicking &quot;Generate&quot; will display a dialog containing your new app password as shown below. Copy this password and keep it safe (I would recommend adding it to your password manager).</p>
+<p><a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/NewAppPassword.png"><img src="/Content/UsingGMailForCustomDomainEmail/NewAppPassword.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="New App Password"/></a></p>
+<p>You can now close the &quot;Google Account&quot; tab and return to Gmail.</p>
+<h2 id="send-mail-as">Send Mail As</h2>
+<p>Back in GMail, click the 'cog' icon in the top right to display &quot;Quick Settings&quot; and, from there, click the &quot;See all settings&quot; button as shown below:</p>
+<p><a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/SeeAllGmailSettings.png"><img src="/Content/UsingGMailForCustomDomainEmail/SeeAllGmailSettings.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="See All Gmail Settings"/></a></p>
+<p>This will take you to the Settings page where you should see an &quot;Accounts and Import&quot; category. Click this category to reveal the &quot;Send mail as&quot; options as shown below:</p>
+<p><a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/SendMailAs.png"><img src="/Content/UsingGMailForCustomDomainEmail/SendMailAs.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Send Mail As"/></a></p>
+<p>Click the &quot;Add another email address&quot; link which will display a new window allowing you to &quot;Enter information about your other email address&quot;. In the &quot;Email Address&quot; text box, enter the email address of the domain account set up to forward email to your Gmail account as shown below:</p>
+<p><a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/EnterEMailAddress.png"><img src="/Content/UsingGMailForCustomDomainEmail/EnterEMailAddress.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Enter EMail Address"/></a></p>
+<p>Click &quot;Next Step &gt;&gt;&quot; to reveal the &quot;Send emails through your SMTP server&quot; page. This is where we get clever and, instead of entering the details of our own SMTP server (which used to work until Google changed requirements a while back) we're instead going to send through GMails own servers. In the 'SMTP Server' text box enter 'smtp.gmail.com' then in the 'Username' text box enter your GMail username (i.e. me&#64;gmail.com). Finally, in the 'Password' box, enter the App Password we generated in the previous section. Once everything is entered the dialog should look similar to this:</p>
+<p><a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/SMTPServerConfiguration.png"><img src="/Content/UsingGMailForCustomDomainEmail/SMTPServerConfiguration.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="SMTP Server Configuration"/></a></p>
+<p>Click &quot;Add Account &gt;&gt;&quot; button which, if everything was entered correctly, should take you to the &quot;Confirm verification and add your email address&quot; screen. Here you are prompted for a confirmation code as shown below:</p>
+<p><a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/VerifyEmailAddress.png"><img src="/Content/UsingGMailForCustomDomainEmail/VerifyEmailAddress.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Verify Email Address"/></a></p>
+<p>Leaving the dialog window open, return to your GMail inbox where you should have received an email from &quot;Gmail Team&quot; titled &quot;Gmail Confirmation - Send Mail as [person]&#64;[yourdomain.com]&quot;. In this email you should see a confirmation code which you can copy and paste into the &quot;Confirm verification and add your email address&quot; dialog window.</p>
+<p>If you don't receive this email then you should double check your email forwarding rules to ensure the account your entered in the dialog above is configured to forward to your Gmail account. Also bear in mind that some domain registrars can take quite a while to forward email for new accounts (I've seen up to 24 hours previously) so, if you've confirmed that your settings are correct, you may simply need to be a little patient here.</p>
+<p>Anyway, assuming your received the confirmation code email and pasted it into the &quot;Enter and verify the confirmation code&quot; text box, you should be able to click Verify, at which point the dialog will disappear. Congratulations, you're now able to send email using your domain email address!</p>
+<h2 id="sending-email">Sending Email</h2>
+<p>Now, when composing a new email, you're able to click the &quot;From&quot; name and select the email address you want the recipient to see. Furthermore, when you receive email sent to the domain email address, GMail will automatically use this address as the &quot;From&quot; account when replying.</p>
+<p>Enjoy!</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2021. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                <script src="/assets/js/jquery.min.js"></script>
+                <script src="/assets/js/bootstrap.min.js"></script>     
+                <script src="/assets/js/highlight.pack.js"></script>   
+                <script src="/assets/js/clean-blog.js"></script>
+                <script src="/assets/js/d3.v3.min.js"></script>
+                <script src="/assets/js/trianglify.min.js"></script>
+                <script src="/assets/js/Please-compressed.js"></script>
+                <script src="/assets/js/background-check.min.js"></script>
+
+                <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+                <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+                <!--[if lt IE 9]>
+                        <script src="/assets/js/html5shiv.js"></script>
+                        <script src="/assets/js/respond.min.js"></script>
+                <![endif]-->
+                
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+

@@ -3,9 +3,54 @@
 	<id>http://ian.bebbs.co.uk/</id>
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
-	<rights>2020</rights>
-	<updated>2020-11-11T21:12:02Z</updated>
+	<rights>2021</rights>
+	<updated>2021-01-04T12:47:35Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/UsingGMailForCustomDomainEmail</id>
+		<title>Using GMail To Send  Email From A Custom Domain</title>
+		<link href="http://ian.bebbs.co.uk/posts/UsingGMailForCustomDomainEmail" />
+		<updated>2021-01-04T00:00:00Z</updated>
+		<content>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;Do you use a domain registrar that provides email forwarding facilities? Then read this post to see how to set up Gmail to ensure the correct &amp;quot;From&amp;quot; address when replying to emails sent to your domains.&lt;/p&gt;
+&lt;h2 id="intro"&gt;Intro&lt;/h2&gt;
+&lt;p&gt;I am currently working with a couple of co-founders on an early stage start-up about which I hope to share more information shortly. Part of the prep work for this start-up has been registering a domain name and establishing communications channels.&lt;/p&gt;
+&lt;p&gt;To do this, I use a domain registrar that provides free email forwarding facilities. This is great as it allows you to receive email sent to '[person]&amp;#64;[yourdomain.com]' as part of your regular email account. However, if you subsequently reply to email you received this way, your reply will be &amp;quot;From&amp;quot; your regular email account, not '[person]&amp;#64;[yourdomain.com]'.&lt;/p&gt;
+&lt;p&gt;In this post I detail how to establish a completely free façade for email communication via your domain using a personal GMail account to receive and reply to email using a custom domain email addresses.&lt;/p&gt;
+&lt;h2 id="prerequisites"&gt;Prerequisites&lt;/h2&gt;
+&lt;p&gt;Prior to following the steps below, you should ensure that you've enabled Two-Factor Authentication (2FA) on your GMail account. While it is possible to follow these steps without 2FA, this is not recommended as 2FA is basic practice for good security.&lt;/p&gt;
+&lt;p&gt;You should also ensure you're able to receive email forwarded by your domain registrar in your GMail account. As each domain registrar will provide different mechanisms for setting up and maintaining email forwarding rules, it will not be covered as part of this post. So, before following the steps below, you should ensure you're able to send an email to '[person]&amp;#64;[yourdomain.com]' and receive it in your GMail account.&lt;/p&gt;
+&lt;h2 id="app-password"&gt;App Password&lt;/h2&gt;
+&lt;p&gt;Before being able to set up &amp;quot;Send mail as&amp;quot; functionality, you'll need an 'App Password'. An 'App Password' allows software/authentication flows that aren't compatible with 2FA to successfully authenticate with Google Services and is essentially just a 'special' password that is a) highly complex - to prevent brute-force attacks, and b) can be revoked should it ever be compromised.&lt;/p&gt;
+&lt;p&gt;To set up an 'App Password', from your GMail inbox click your account icon in the top right hand corner, then click &amp;quot;Manage your Google Account&amp;quot; as shown below:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/ManageGMailAccount.png"&gt;&lt;img src="/Content/UsingGMailForCustomDomainEmail/ManageGMailAccount.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Manage GMail Account"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;This will open a new tab for managing your Google Account. Select the &amp;quot;Security&amp;quot; category from the menu on the left (or across the top on smaller devices) and scroll down to the &amp;quot;Signing in to Google&amp;quot; section. Here, you should see that 2-Step verification has been turned on (if it isn't, turn it on now before continuing) and an &amp;quot;App passwords&amp;quot; option as shown below:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/SigningInToGoogle.png"&gt;&lt;img src="/Content/UsingGMailForCustomDomainEmail/SigningInToGoogle.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Signing In To Google"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Click the &amp;quot;App passwords&amp;quot; option to create a new App password. In the &amp;quot;Select app&amp;quot; drop-down select &amp;quot;Other (Custom name)&amp;quot; and enter a name for the app password (I tend to use the domain name). Once this is entered click the Generate button as shown below:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/AddAppPassword.png"&gt;&lt;img src="/Content/UsingGMailForCustomDomainEmail/AddAppPassword.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Add App Password"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Clicking &amp;quot;Generate&amp;quot; will display a dialog containing your new app password as shown below. Copy this password and keep it safe (I would recommend adding it to your password manager).&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/NewAppPassword.png"&gt;&lt;img src="/Content/UsingGMailForCustomDomainEmail/NewAppPassword.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="New App Password"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;You can now close the &amp;quot;Google Account&amp;quot; tab and return to Gmail.&lt;/p&gt;
+&lt;h2 id="send-mail-as"&gt;Send Mail As&lt;/h2&gt;
+&lt;p&gt;Back in GMail, click the 'cog' icon in the top right to display &amp;quot;Quick Settings&amp;quot; and, from there, click the &amp;quot;See all settings&amp;quot; button as shown below:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/SeeAllGmailSettings.png"&gt;&lt;img src="/Content/UsingGMailForCustomDomainEmail/SeeAllGmailSettings.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="See All Gmail Settings"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;This will take you to the Settings page where you should see an &amp;quot;Accounts and Import&amp;quot; category. Click this category to reveal the &amp;quot;Send mail as&amp;quot; options as shown below:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/SendMailAs.png"&gt;&lt;img src="/Content/UsingGMailForCustomDomainEmail/SendMailAs.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Send Mail As"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Click the &amp;quot;Add another email address&amp;quot; link which will display a new window allowing you to &amp;quot;Enter information about your other email address&amp;quot;. In the &amp;quot;Email Address&amp;quot; text box, enter the email address of the domain account set up to forward email to your Gmail account as shown below:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/EnterEMailAddress.png"&gt;&lt;img src="/Content/UsingGMailForCustomDomainEmail/EnterEMailAddress.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Enter EMail Address"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Click &amp;quot;Next Step &amp;gt;&amp;gt;&amp;quot; to reveal the &amp;quot;Send emails through your SMTP server&amp;quot; page. This is where we get clever and, instead of entering the details of our own SMTP server (which used to work until Google changed requirements a while back) we're instead going to send through GMails own servers. In the 'SMTP Server' text box enter 'smtp.gmail.com' then in the 'Username' text box enter your GMail username (i.e. me&amp;#64;gmail.com). Finally, in the 'Password' box, enter the App Password we generated in the previous section. Once everything is entered the dialog should look similar to this:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/SMTPServerConfiguration.png"&gt;&lt;img src="/Content/UsingGMailForCustomDomainEmail/SMTPServerConfiguration.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="SMTP Server Configuration"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Click &amp;quot;Add Account &amp;gt;&amp;gt;&amp;quot; button which, if everything was entered correctly, should take you to the &amp;quot;Confirm verification and add your email address&amp;quot; screen. Here you are prompted for a confirmation code as shown below:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="gmail" href="/Content/UsingGMailForCustomDomainEmail/VerifyEmailAddress.png"&gt;&lt;img src="/Content/UsingGMailForCustomDomainEmail/VerifyEmailAddress.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Verify Email Address"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;Leaving the dialog window open, return to your GMail inbox where you should have received an email from &amp;quot;Gmail Team&amp;quot; titled &amp;quot;Gmail Confirmation - Send Mail as [person]&amp;#64;[yourdomain.com]&amp;quot;. In this email you should see a confirmation code which you can copy and paste into the &amp;quot;Confirm verification and add your email address&amp;quot; dialog window.&lt;/p&gt;
+&lt;p&gt;If you don't receive this email then you should double check your email forwarding rules to ensure the account your entered in the dialog above is configured to forward to your Gmail account. Also bear in mind that some domain registrars can take quite a while to forward email for new accounts (I've seen up to 24 hours previously) so, if you've confirmed that your settings are correct, you may simply need to be a little patient here.&lt;/p&gt;
+&lt;p&gt;Anyway, assuming your received the confirmation code email and pasted it into the &amp;quot;Enter and verify the confirmation code&amp;quot; text box, you should be able to click Verify, at which point the dialog will disappear. Congratulations, you're now able to send email using your domain email address!&lt;/p&gt;
+&lt;h2 id="sending-email"&gt;Sending Email&lt;/h2&gt;
+&lt;p&gt;Now, when composing a new email, you're able to click the &amp;quot;From&amp;quot; name and select the email address you want the recipient to see. Furthermore, when you receive email sent to the domain email address, GMail will automatically use this address as the &amp;quot;From&amp;quot; account when replying.&lt;/p&gt;
+&lt;p&gt;Enjoy!&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;Do you use a domain registrar that provides email forwarding facilities? Then read this post to see how to set up Gmail to ensure the correct "From" address when replying to emails sent to your domains.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/UnoB2C</id>
 		<title>Cross-Platform App Authentication with Azure AD B2C And The Uno Platform</title>
@@ -5514,74 +5559,5 @@ $(document).on('click', '[data-toggle="lightbox"]', function(event) {
 &lt;/div&gt;
 </content>
 		<summary>&lt;p&gt;The &lt;a href="https://platform.uno/"&gt;Uno platform&lt;/a&gt; allows native UWP code to be run across Windows, Android, iOS and even in the browser. In this post I will cover the use of the Uno Platform to implement the &lt;a href="https://eugenkiss.github.io/7guis/"&gt;7GUIs: A GUI Programming Benchmark&lt;/a&gt;, across 5 platforms, employing FRP paradigms and all in a (mostly) seasonal style! Will it all hang together? Read on to find out.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/AugmentingTheGenericHost</id>
-		<title>Augmenting the .NET Core 3.0 Generic Host</title>
-		<link href="http://ian.bebbs.co.uk/posts/AugmentingTheGenericHost" />
-		<updated>2019-11-18T00:00:00Z</updated>
-		<content>&lt;h1 id="background"&gt;Background&lt;/h1&gt;
-&lt;p&gt;I love the .NET Core 3.0 Generic Host, I really do. As a framework for simplifying common scaffolding and lifetime management of long-running services, it's &lt;em&gt;almost&lt;/em&gt; faultless. Unfortunately, the mere fact of &lt;a href="http://tomasp.net/blog/2015/library-frameworks/"&gt;being a framework rather than a library&lt;/a&gt; can lead to issues where, as a user of the framework, you're unable to accomplish a specific goal. For me, this happened while trying to get instrumentation written to a various &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource"&gt;EventSource&lt;/a&gt; instances to be output - in a configurable manner - through the Generic Host's logging infrastructure. Sounds simple huh, and it really ought to be. But it wasn't. Here's why:&lt;/p&gt;
-&lt;h1 id="the-open-closed-principle"&gt;The Open-Closed Principle&lt;/h1&gt;
-&lt;p&gt;In the unlikely event you're not familiar with this principle, you can read about it &lt;a href="https://en.wikipedia.org/wiki/Open%E2%80%93closed_principle"&gt;here&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;The Generic Host is a beacon of SOLID-design and seems to embrace the 'Open-closed principal' particularly closely. Perhaps this is due to the fact that, almost by definition, the Generic Host needs to be extremely extensible. Therefore, to ensure it's able to guide it's users into the &lt;a href="https://blog.codinghorror.com/falling-into-the-pit-of-success/"&gt;pit of success&lt;/a&gt;, the implementation of the Generic Host closes many avenues for modifying its default behaviours.&lt;/p&gt;
-&lt;p&gt;Unfortunately there are instances where users have good reason to want to modify default behaviour. For example, there have been &lt;a href="https://github.com/aspnet/Extensions/issues/1151"&gt;multiple&lt;/a&gt; &lt;a href="https://github.com/aspnet/Extensions/issues/810"&gt;feature&lt;/a&gt; &lt;a href="https://github.com/aspnet/Extensions/issues/525"&gt;requests&lt;/a&gt; for the Generic Host to provide a means for consumers to add behaviour to the start-up routine &lt;em&gt;after&lt;/em&gt; the dependency injection container has been created but before it's used to resolve any &lt;code&gt;IHostedService&lt;/code&gt; instances. In each of these instances, the maintainers of the &lt;a href="https://github.com/aspnet/Extensions"&gt;Microsoft.Extensions repository&lt;/a&gt; have suggested alternatives for the specific use-case being mooted even though, in my opinion, these alternatives seem to be rather poor workarounds for what I believe to be a valid feature request.&lt;/p&gt;
-&lt;p&gt;Why do I believe it's a valid feature when so many other &lt;a href="https://github.com/davidfowl"&gt;awesome&lt;/a&gt; &lt;a href="https://github.com/anurse"&gt;.NET&lt;/a&gt; &lt;a href="https://github.com/Tratcher"&gt;developers&lt;/a&gt; believe differently? Well, because the generic host itself uses this feature, as can be seen &lt;a href="https://github.com/aspnet/Extensions/blob/f4e9a5e1da193faad2338e0a8225a531a2c1417c/src/Hosting/Hosting/src/HostBuilder.cs#L242"&gt;here&lt;/a&gt;:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-c#"&gt;_appServices = _serviceProviderFactory.CreateServiceProvider(containerBuilder);
-
-if (_appServices == null)
-{
-    throw new InvalidOperationException($&amp;quot;The IServiceProviderFactory returned a null IServiceProvider.&amp;quot;);
-}
-
-// resolve configuration explicitly once to mark it as resolved within the
-// service provider, ensuring it will be properly disposed with the provider
-_ = _appServices.GetService&amp;lt;IConfiguration&amp;gt;();
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;As you can see, &lt;em&gt;for perfectly valid reasons&lt;/em&gt;, the Generic Host needs to perform an operation &lt;em&gt;after&lt;/em&gt; the service provider has been created but before any further types are resolved. I do not believe it's only the Generic Host infrastructure code that requires this entry-point. Indeed, this is the feature I required to ensure I could correctly instantiate and configure a singleton &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventlistener"&gt;EventListener&lt;/a&gt; instance prior to events being written to (and potentially lost from) various EventSource instances throughout my code.&lt;/p&gt;
-&lt;p&gt;So, rather than accept a workaround and potentially compromise some core requirements, I decided to see if there was a way I could implement the above feature without straying too far from canonical Generic Host start-up code.&lt;/p&gt;
-&lt;h1 id="ihostapplicationlifetime"&gt;IHostApplicationLifetime&lt;/h1&gt;
-&lt;p&gt;The GenericHost has an &lt;a href="https://github.com/aspnet/Extensions/blob/master/src/Hosting/Abstractions/src/IHostApplicationLifetime.cs"&gt;&lt;code&gt;IHostApplicationLifetime&lt;/code&gt;&lt;/a&gt; interface which is responsible for coordinating application lifetime notifications. Registered with the dependency injection container as a singleton, it is ordinarily injected into &lt;code&gt;IHostedService&lt;/code&gt; instances, providing the ability for any service to request that the application be stopped.&lt;/p&gt;
-&lt;p&gt;However, this interface is also injected into the various &lt;code&gt;IHostLifetime&lt;/code&gt; implementations (i.e. &lt;a href="https://github.com/aspnet/Extensions/blob/master/src/Hosting/Hosting/src/Internal/ConsoleLifetime.cs"&gt;ConsoleLifetime&lt;/a&gt; for console applications, &lt;a href="https://github.com/aspnet/Extensions/blob/master/src/Hosting/WindowsServices/src/WindowsServiceLifetime.cs"&gt;WindowsServiceLifetime&lt;/a&gt; for Windows services, etc) and, as such, it is instantiated once, after the dependency injection container is created but before any &lt;code&gt;IHostedService&lt;/code&gt; instances are resolved.&lt;/p&gt;
-&lt;p&gt;Sounds useful huh.&lt;/p&gt;
-&lt;p&gt;Best of all, this interface provides the means to react to application start and stop events via a &lt;a href="https://github.com/aspnet/Extensions/blob/f4e9a5e1da193faad2338e0a8225a531a2c1417c/src/Hosting/Hosting/src/Internal/ConsoleLifetime.cs#L48"&gt;novel use of &lt;code&gt;CancellationToken&lt;/code&gt; instances&lt;/a&gt;. I therefore chose this as my entry point for providing required functionality.&lt;/p&gt;
-&lt;h1 id="applicationlifetimeex-ugh"&gt;ApplicationLifetimeEx (ugh)&lt;/h1&gt;
-&lt;p&gt;Inheriting from the default the &lt;a href="https://github.com/aspnet/Extensions/blob/master/src/Hosting/Hosting/src/Internal/ApplicationLifetime.cs"&gt;IHostApplicationLifetime implementation&lt;/a&gt;, registering callbacks for the &lt;code&gt;ApplicationStarted&lt;/code&gt; and &lt;code&gt;ApplicationStopping&lt;/code&gt; cancellation tokens and then registering the derived class as the new &lt;code&gt;IHostApplicationLifetime&lt;/code&gt; implementation in the Generic Host's DI container worked perfectly. Using this approach I was able to leverage standard generic host start-up code and functionality to resolve an EventListener, with configuration, prior to any further types being instantiated.&lt;/p&gt;
-&lt;p&gt;An example of this can be found in the development branch my Cogenity.Extensions repository &lt;a href="https://github.com/ibebbs/Cogenity.Extensions/tree/develop/src/Cogenity.Extensions.Logging.EventSource"&gt;here&lt;/a&gt;.&lt;/p&gt;
-&lt;h1 id="sounds-good.so-why-only-in-the-development-branch"&gt;Sounds good. So why only in the development branch?&lt;/h1&gt;
-&lt;p&gt;Well, this approach has &lt;em&gt;a lot&lt;/em&gt; of drawbacks, the most significant of which being that it fails to adhere to another important OO design principal; that of &lt;a href="https://en.wikipedia.org/wiki/Composition_over_inheritance"&gt;'Composition over inheritance'&lt;/a&gt;. In fact, the above approach - in it's current form - is not composable &lt;em&gt;at all&lt;/em&gt;. If another library wanted to hijack the IHostApplicationLifetime interface in a similar way, then my implementation (and associated functionality) would be entirely lost.&lt;/p&gt;
-&lt;p&gt;As the Generic Host goes to great lengths to ensure that composability is maintained at all times and in all configurations  &lt;em&gt;this approach is probably not one I would recommend&lt;/em&gt;. Given there are no better options at the current time, I will probably proceed with this implementation as, to me, it is a &lt;a href="https://en.wikipedia.org/wiki/White_box_%28software_engineering%29"&gt;white box&lt;/a&gt;, but I don't intend to make a packaged version available for general consumption.&lt;/p&gt;
-&lt;p&gt;That said, when the &lt;a href="https://github.com/aspnet/Extensions/issues/2653"&gt;suggested decoration extensions&lt;/a&gt; are made available, decorating the default IHostApplicationLifetime implementation will become a composable operation and this approach could suddenly become a lot more attractive.&lt;/p&gt;
-&lt;h1 id="until-then"&gt;Until then...&lt;/h1&gt;
-&lt;p&gt;... I kind of hope the project maintainers will take another look at these feature requests and provide a more holistic solution. Perhaps something along the lines of:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-c#"&gt;private static async Task Main(string[] args)
-{
-    var builder = Host.CreateDefaultBuilder(args)
-        .ConfigureServices(
-            services =&amp;gt;
-            {
-                ...
-            })
-        .ConfigureApplicationLifetime(
-            (applicationLifetime, appServices) =&amp;gt;
-            {
-                applicationLifetime.ApplicationStarted.Register(() =&amp;gt; [do something with appServices])
-            }
-        );
-
-    await builder
-        .Build()
-        .RunAsync();
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;I think this could be quite nice as the GenericHost could then move the&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-c#"&gt;// resolve configuration explicitly once to mark it as resolved within the
-// service provider, ensuring it will be properly disposed with the provider
-_ = _appServices.GetService&amp;lt;IConfiguration&amp;gt;();
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;block into a &lt;code&gt;ConfigureApplicationLifetime&lt;/code&gt; configuration call back within the &lt;code&gt;CreateDefaultBuilder&lt;/code&gt; call.&lt;/p&gt;
-&lt;p&gt;Of course, this signature would provide all sorts of opportunities for naughtiness and smells and, while I could probably implement it using the method described above, I'm very much hoping the great minds behind this project might be able to propose something a little safer.&lt;/p&gt;
-</content>
-		<summary>&lt;p&gt;I love the .NET Core 3.0 Generic Host, I really do. As a framework for simplifying common scaffolding and lifetime management of long-running services, it's &lt;em&gt;almost&lt;/em&gt; faultless. Unfortunately, the mere fact of &lt;a href="http://tomasp.net/blog/2015/library-frameworks/"&gt;being a framework rather than a library&lt;/a&gt; can lead to issues where, as a user of the framework, you're unable to accomplish a specific goal. For me, this happened while trying to get instrumentation written to a various &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.diagnostics.tracing.eventsource"&gt;EventSource&lt;/a&gt; instances to be output - in a configurable manner - through the Generic Host's logging infrastructure. Sounds simple huh, and it really ought to be. But it wasn't. Here's why:&lt;/p&gt;</summary>
 	</entry>
 </feed>
