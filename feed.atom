@@ -4,8 +4,305 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2021</rights>
-	<updated>2021-01-04T12:47:35Z</updated>
+	<updated>2021-05-06T21:00:26Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
+	<entry>
+		<id>http://ian.bebbs.co.uk/posts/Unoonnx</id>
+		<title>State-Of-The-Art Natural Language Processing in .NET on the Edge</title>
+		<link href="http://ian.bebbs.co.uk/posts/Unoonnx" />
+		<updated>2021-05-06T00:00:00Z</updated>
+		<content>&lt;h2 id="tldr"&gt;TL;DR&lt;/h2&gt;
+&lt;p&gt;In this post I show how .NET can be used to run state-of-the-art Natural Language Processing (NLP) models on &amp;quot;the edge&amp;quot;. I provide a simple means for downloading and converting 'transformer' models from &lt;a href="https://huggingface.co/"&gt;HuggingFace&lt;/a&gt; into models that can perform inference from managed .NET code on resource constrained devices. Finally I use &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; to implement a cross-platform user-interface that allows real-time inference using these models.&lt;/p&gt;
+&lt;h2 id="bitizen"&gt;Bitizen&lt;/h2&gt;
+&lt;p&gt;At &lt;a href="https://www.bitizen.uk/"&gt;Bitizen&lt;/a&gt; we are working to revitalize democracy by promoting understanding of - and engagement with - politics in the UK. As a first step towards this goal, we have built a platform which is able to ingest hundreds of forms of data from across the political landscape and present this data to users as meaningful information. Much of this data is unstructured text so we use state-of-the-art machine learning models to help us analyse, categorise and summarise the data in a manner which facilitates downstream processing (i.e. cataloging, searching, presentation, etc).&lt;/p&gt;
+&lt;p&gt;Given that we are a .NET shop and that most research around ML and AI takes place using either R or Python, we usually deploy models by containerizing them in their native environment accompanied by an HTTP API. This allows us to call the model from .NET and works beautifully in our containerized, event-driven architecture.&lt;/p&gt;
+&lt;p&gt;However, as we move towards promoting engagement, we wanted our smartphone app to be... well... smart. For example, while users were interacting with the app (i.e. contributing to a discussion, searching for additional information, etc) we wanted to be able to perform inferences similar to those we run on the backend on the device itself. Privacy and latency considerations meant calling a hosted endpoint wasn't really a great solution so we started looking round for alternatives.&lt;/p&gt;
+&lt;p&gt;This is what we came up with...&lt;/p&gt;
+&lt;h3 id="a-quick-call-to-arms"&gt;A quick call-to-arms&lt;/h3&gt;
+&lt;p&gt;Bitizen is currently looking for a web-developer and/or designer to help improve our online presence and bring some of our app smarts to the web. If you have an interest in UK politics and like the idea of working with a intrepid, young, bootstrapped start-up, please do &lt;a href="mailto://ian&amp;#64;bitizen.uk"&gt;drop us a line&lt;/a&gt; as we'd love to hear from you.&lt;/p&gt;
+&lt;h2 id="ml.net-vs-nlp"&gt;ML.NET vs NLP&lt;/h2&gt;
+&lt;p&gt;Microsoft has a fairly strong ML offering for .NET developers in &lt;a href="https://dotnet.microsoft.com/apps/machinelearning-ai/ml-dotnet"&gt;ML.NET&lt;/a&gt;. Indeed, I illustrated ML.NET's capabilities in a blog post last year titled &lt;a href="https://ian.bebbs.co.uk/posts/MLinUWP"&gt;'State-of-the-art ML in UWP'&lt;/a&gt; which used a recent (at the time) ML model to perform salient object detection and image segmentation; a process very much suited to ML.NET strengths. Unfortunately the story around using ML.NET for NLP wasn't so strong and there were very few examples of how to use modern, &lt;a href="https://en.wikipedia.org/wiki/Transformer_(machine_learning_model)"&gt;'transformer'&lt;/a&gt; based models from within ML.NET.&lt;/p&gt;
+&lt;p&gt;Until, that is, &lt;a href="https://github.com/GerjanVlot"&gt;Gjeran Vlot&lt;/a&gt; published his &lt;a href="https://github.com/GerjanVlot/BERT-ML.NET"&gt;BERT-ML.NET repository on GitHub&lt;/a&gt;. In an incredibly concise and simple implementation, he illustrated how a &lt;a href="https://en.wikipedia.org/wiki/BERT_(language_model)"&gt;BERT based&lt;/a&gt; ONNX model could be used within ML.NET to perform 'Question Answering' (aka machine comprehension) based inference. This was fantastic and exactly what we had been looking for... except... we didn't want to perform (just) 'Question Answering' based inference. BERT - and related transformers - can be used for a broad variety of tasks including (but certainly not limited to) sentiment analysis, text classification and named entity recognition.&lt;/p&gt;
+&lt;p&gt;Given the other prepared models available in the &lt;a href="https://github.com/onnx/models"&gt;ONNX Model Zoo&lt;/a&gt; - from which Gjeran sourced his model - seemed fairly limited, we decided to go model hunting...&lt;/p&gt;
+&lt;h2 id="hugging-face"&gt;Hugging Face&lt;/h2&gt;
+&lt;p&gt;If you've not been to &lt;a href="https://huggingface.co/"&gt;Hugging Face&lt;/a&gt; before, I would certainly recommend checking it out. Through the provision of excellent tooling and the formation of a vibrant, open community of users, Hugging Face have established themselves as the de-facto source for NLP models. On a single site you can explore, test and download models (with accompanying parameters and code) from a huge variety of sources (including Microsoft, Google and Elastic), pretrained (but with &lt;a href="https://huggingface.co/transformers/training.html"&gt;fine-tuning recommended&lt;/a&gt;) for a huge variety of use cases.&lt;/p&gt;
+&lt;p&gt;I decided that I wanted to initially try something that would give me quantifiable results (i.e. something more than just a probability) and knew that I wanted to try to run a model on an 'edge' (i.e. resource constrained) device. This meant finding an alternative to the BERT based models which are typically in excess of 400Mb.&lt;/p&gt;
+&lt;p&gt;Fortunately Hugging Face had me covered and, in short order, I had decided to use a &lt;a href="https://huggingface.co/distilbert-base-uncased"&gt;DistilBERT&lt;/a&gt; based model trained for Token Classification (aka Named Entity Recognition). After quickly experimenting with a few, I found &lt;a href="https://huggingface.co/elastic/distilbert-base-cased-finetuned-conll03-english"&gt;a model by Elastic&lt;/a&gt; that provided pretty good results and, at less than half the size of a comparable BERT model, seemed like it might be usable on an edge device.&lt;/p&gt;
+&lt;h2 id="open-neural-network-exchange"&gt;Open Neural Network Exchange&lt;/h2&gt;
+&lt;p&gt;However, Hugging Face provides models for ease of consumption from it's own toolkit which usually means they're made available in either PyTorch or Tensorflow based formats. ML.NET, on the other hand, is only able to load models in the Open Neural Network Exchange (ONNX) format. This meant I needed to convert the models before I could use them.&lt;/p&gt;
+&lt;p&gt;Yet again, Hugging Face came to the rescue through the provision of &lt;a href="https://huggingface.co/transformers/serialization.html"&gt;an API&lt;/a&gt; which allows export of their models to ONNX. Knowing I would likely want to use multiple models in this manner (and not wanting to install various versions of Python on my workstation) I decided to build a docker container which would run the conversion and save the converted ONNX model to a mapped location. This proved to be shockingly easy with the image built using just a single Dockerfile containing:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;FROM python:latest
+
+RUN pip install tensorflow
+RUN pip install torch
+RUN pip install transformers
+RUN pip install keras2onnx
+RUN pip install onnxruntime
+
+ENTRYPOINT [ &amp;quot;python&amp;quot;, &amp;quot;/usr/local/lib/python3.9/site-packages/transformers/convert_graph_to_onnx.py&amp;quot; ]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This could then be run from Powershell like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;docker run --rm -v ${PWD}/Output:/Output ibebbs/huggingfacetoonnx:latest --framework pt --opset 12 --pipeline ner --model elastic/distilbert-base-cased-finetuned-conll03-english /Output/elastic/distilbert-base-cased-finetuned-conll03-english.onnx
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Whereupon the script will download the specified model (in this case 'elastic/distilbert-base-cased-finetuned-conll03-english') using the specified framework ('pt' for PyTorch, 'tf' for Tensorflow), convert it to ONNX (using opset 12) including layers for the specific pipeline (in this case 'ner' for named entity recognition) and finally write the converted model to the 'Output/elastic' subdirectory of the current folder.&lt;/p&gt;
+&lt;p&gt;Should you wish to use this docker image, it is available - accompanied by full usage instructions - on &lt;a href="https://hub.docker.com/r/ibebbs/huggingfacetoonnx"&gt;Docker Hub&lt;/a&gt; including a link to the &lt;a href="https://github.com/ibebbs/HuggingFaceToOnnx"&gt;source repository&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id="netron"&gt;Netron&lt;/h2&gt;
+&lt;p&gt;After downloading and converting the model, we need to examine it to determine the shape of the input and output layers. This is very easily done with &lt;a href="https://netron.app/"&gt;Netron&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Shown below is (a small section of) the DistilBERT model. By clicking on the 'input_ids' node a side-pane is shown which includes all the information we need.&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="Netron" href="/Content/Unoonnx/Netron - Full.png"&gt;&lt;img src="/Content/Unoonnx/Netron - Full.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Neutron"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;As can be seen, Netron shows us the two inputs to the model: &lt;code&gt;input_ids&lt;/code&gt; and &lt;code&gt;attention_mask&lt;/code&gt;, both of which being two dimensional arrays of &lt;code&gt;Int64&lt;/code&gt; values. It also shows us the output from the model: &lt;code&gt;output_0&lt;/code&gt;, a three dimensional array of &lt;code&gt;float&lt;/code&gt;.&lt;/p&gt;
+&lt;h3 id="model-input"&gt;Model Input&lt;/h3&gt;
+&lt;p&gt;While using this model for inference, the &lt;code&gt;attention_mask&lt;/code&gt; input is simply filled with 1s (each token has equal attention) so we will not discuss this input any further. Equally we will not be using multiple batches in this project so the &lt;code&gt;batch&lt;/code&gt; dimension can be ignored leaving us with a single, &lt;code&gt;sequence&lt;/code&gt; dimension of values to fill for &lt;code&gt;input_ids&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;In this model, the size of the &lt;code&gt;sequence&lt;/code&gt; dimension is not specified illustrating that this model can accept dynamically sized input. As such, should we wanted to perform NLP on the sentence &amp;quot;Sarah lives in London and works for Acme Corporation&amp;quot;, we might expect to provide something like this to the &lt;code&gt;input_ids&lt;/code&gt; input:&lt;/p&gt;
+&lt;table class="table"&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="text-align: right;"&gt;Sequence&lt;/th&gt;
+&lt;th&gt;Word&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;0&lt;/td&gt;
+&lt;td&gt;Sarah&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;1&lt;/td&gt;
+&lt;td&gt;lives&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;2&lt;/td&gt;
+&lt;td&gt;in&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;3&lt;/td&gt;
+&lt;td&gt;London&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;4&lt;/td&gt;
+&lt;td&gt;and&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;5&lt;/td&gt;
+&lt;td&gt;works&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;6&lt;/td&gt;
+&lt;td&gt;for&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;7&lt;/td&gt;
+&lt;td&gt;Acme&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;8&lt;/td&gt;
+&lt;td&gt;Corporation.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;But, as can be seen above, the model accepts integers, not strings, so we must first 'tokenize' the input using a vocabulary specific to this model. This is done by downloading the vocabulary for the model from Hugging Face (available &lt;a href="https://huggingface.co/elastic/distilbert-base-cased-finetuned-conll03-english/blob/main/vocab.txt"&gt;here&lt;/a&gt;) then using a specific tokenizer to convert the input text into a series of tokens in a format the model expects; for BERT based models, a &lt;a href="https://machinelearnit.com/2018/08/19/wordpiece-tokenisation/"&gt;&amp;quot;WordPiece Tokenizer&amp;quot;&lt;/a&gt; is used.&lt;/p&gt;
+&lt;p&gt;Fortunately for us, we're able to use the &amp;quot;WordPieceTokenizer&amp;quot; provided in Gjeran's &lt;a href="https://github.com/GerjanVlot/BERT-ML.NET/blob/master/Microsoft.ML.Models.BERT/Tokenizers/WordPieceTokenizer.cs"&gt;BERT-ML.NET repository&lt;/a&gt;. Running the above input through this tokenizer would give use the following &lt;code&gt;input_ids&lt;/code&gt; value:&lt;/p&gt;
+&lt;table class="table"&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th style="text-align: right;"&gt;Sequence&lt;/th&gt;
+&lt;th style="text-align: right;"&gt;Token Id&lt;/th&gt;
+&lt;th&gt;Token&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;0&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;101&lt;/td&gt;
+&lt;td&gt;[CLS]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;1&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;21718&lt;/td&gt;
+&lt;td&gt;sa&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;2&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;10659&lt;/td&gt;
+&lt;td&gt;##rah&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;3&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;2491&lt;/td&gt;
+&lt;td&gt;lives&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;4&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1107&lt;/td&gt;
+&lt;td&gt;in&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;5&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;25338&lt;/td&gt;
+&lt;td&gt;lo&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;6&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;17996&lt;/td&gt;
+&lt;td&gt;##ndon&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;7&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1105&lt;/td&gt;
+&lt;td&gt;and&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;8&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1759&lt;/td&gt;
+&lt;td&gt;works&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;9&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1111&lt;/td&gt;
+&lt;td&gt;for&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;10&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;170&lt;/td&gt;
+&lt;td&gt;a&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;11&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;1665&lt;/td&gt;
+&lt;td&gt;##c&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;12&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;3263&lt;/td&gt;
+&lt;td&gt;##me&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;13&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;9715&lt;/td&gt;
+&lt;td&gt;corporation&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;14&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;119&lt;/td&gt;
+&lt;td&gt;.&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td style="text-align: right;"&gt;15&lt;/td&gt;
+&lt;td style="text-align: right;"&gt;102&lt;/td&gt;
+&lt;td&gt;[SEP]&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;And it's these 'Token Ids' that are the input to our model.&lt;/p&gt;
+&lt;h3 id="model-output"&gt;Model Output&lt;/h3&gt;
+&lt;p&gt;As we can see, the &lt;code&gt;output_0&lt;/code&gt; layer consists of the same &lt;code&gt;batch&lt;/code&gt; and &lt;code&gt;sequence&lt;/code&gt; dimensions but adds an additional dimension with 9 elements. This additional dimension contains the probability of the token at &lt;code&gt;[batch,sequence]&lt;/code&gt; belonging to a specific classification. The labels for each classifications are provided by the model's &lt;a href="https://huggingface.co/elastic/distilbert-base-cased-finetuned-conll03-english/blob/main/config.json"&gt;'config.json' file on Hugging Face&lt;/a&gt; as shown below:&lt;/p&gt;
+&lt;pre&gt;&lt;code class="language-json"&gt;{
+  ...
+
+  &amp;quot;id2label&amp;quot;: {
+    &amp;quot;0&amp;quot;: &amp;quot;O&amp;quot;,
+    &amp;quot;1&amp;quot;: &amp;quot;B-PER&amp;quot;,
+    &amp;quot;2&amp;quot;: &amp;quot;I-PER&amp;quot;,
+    &amp;quot;3&amp;quot;: &amp;quot;B-ORG&amp;quot;,
+    &amp;quot;4&amp;quot;: &amp;quot;I-ORG&amp;quot;,
+    &amp;quot;5&amp;quot;: &amp;quot;B-LOC&amp;quot;,
+    &amp;quot;6&amp;quot;: &amp;quot;I-LOC&amp;quot;,
+    &amp;quot;7&amp;quot;: &amp;quot;B-MISC&amp;quot;,
+    &amp;quot;8&amp;quot;: &amp;quot;I-MISC&amp;quot;
+  },
+  ...
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;As can be seen, this model uses &lt;a href="https://en.wikipedia.org/wiki/Inside%E2%80%93outside%E2%80%93beginning_(tagging)"&gt;&lt;code&gt;Inside-outside-beginning&lt;/code&gt; tagging&lt;/a&gt; to delineate the beginning and inside of a specific classification from other classifications but, for the most part we can just treat this as 5 classifications:&lt;/p&gt;
+&lt;ol start="0"&gt;
+&lt;li&gt;Other&lt;/li&gt;
+&lt;li&gt;Person&lt;/li&gt;
+&lt;li&gt;Organisation&lt;/li&gt;
+&lt;li&gt;Location&lt;/li&gt;
+&lt;li&gt;Misc&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id="bertonnx"&gt;BertONNX&lt;/h2&gt;
+&lt;p&gt;Armed with the model and an understanding of how to provide input/interpret output, I spiked out a quick .NET Core test project. Looking to simplify Gjeran's implementation even further I ended up with end-to-end, command line based inference engine in just 7 classes (including Gjeran's WordPieceTokenizer along with a Hugging Face configuration deserializer).&lt;/p&gt;
+&lt;p&gt;Should you wish to take a look, the source for this spike can be found in my &lt;a href="https://github.com/ibebbs/BertOnnx"&gt;BertOnnx repository on Github&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;By far the biggest headache was working out how to shape the input (&lt;code&gt;Feature&lt;/code&gt;) and output (&lt;code&gt;Result&lt;/code&gt;) types to match the expected model shapes. ML.NET uses &lt;code&gt;[ColumnName([name])]&lt;/code&gt; and &lt;code&gt;[VectorType([x,y])]&lt;/code&gt; property attributes to bind properties to the model but, given the model was capable of processing dynamically sized input, I wasn't sure what values to use for the &lt;code&gt;VectorType&lt;/code&gt; attribute.&lt;/p&gt;
+&lt;p&gt;Initially I tried omitting shape information from the attribute (&lt;code&gt;[VectorType]&lt;/code&gt;) whereupon the app unceremoniously crashed with the error &amp;quot;Variable length input columns not supported&amp;quot;. A little searching revealed that this error meant exactly what it said and we couldn't use dynamically sized input with ML.NET!&lt;/p&gt;
+&lt;p&gt;So, instead I elected to use try a different approach and pad all input to a specific size (256 elements). This gave me &lt;code&gt;Feature&lt;/code&gt; and &lt;code&gt;Result&lt;/code&gt; types that looked like this:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;public class Feature
+{
+    [VectorType(1, 256)]
+    [ColumnName(&amp;quot;input_ids&amp;quot;)]
+    public long[] Tokens { get; set; }
+
+    [VectorType(1, 256)]
+    [ColumnName(&amp;quot;attention_mask&amp;quot;)]
+    public long[] Attention { get; set; }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;pre&gt;&lt;code&gt;public class Result
+{
+    [VectorType(1,256,9)]
+    [ColumnName(&amp;quot;output_0&amp;quot;)]
+    public float[] Output { get; set; }
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;After this it was fairly plain sailing and in short order I had this:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="BertONNX - Full" href="/Content/Unoonnx/BertONNX - Full.gif"&gt;&lt;img src="/Content/Unoonnx/BertONNX - Full.gif" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="BertONNX"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;As you can see, the DistilBERT model correct identifies 'Sarah' as a 'B-PER' (person), 'London' as a 'B-LOC' (location) and 'Acme' as a 'B-ORG' (organisation) in just 202ms. Perfect!&lt;/p&gt;
+&lt;h2 id="quantization"&gt;Quantization&lt;/h2&gt;
+&lt;p&gt;While having a custom built inference engine was pretty cool, I was a little concerned about memory consumption if I wanted to use the model on edge devices. Despite the DistilBERT model being significantly smaller than full BERT, memory consumption during inference hit around 1Gb. This would almost certainly be a stretch for many of the devices I'd like to run this model on.&lt;/p&gt;
+&lt;p&gt;Fortunately, ONNX has a little trick up it's sleeve called &lt;a href="https://www.onnxruntime.ai/docs/how-to/quantization.html"&gt;'Quantization'&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;Quoting &lt;a href="https://medium.com/microsoftazure/faster-and-smaller-quantized-nlp-with-hugging-face-and-onnx-runtime-ec5525473bb7"&gt;this article&lt;/a&gt; on the matter:&lt;/p&gt;
+&lt;blockquote class="blockquote"&gt;
+&lt;p&gt;Quantization approximates floating-point numbers with lower bit width numbers, dramatically reducing memory footprint and accelerating performance. Quantization can introduce accuracy loss since fewer bits limit the precision and range of values. However, researchers have extensively demonstrated that weights and activations can be represented using 8-bit integers (INT8) without incurring significant loss in accuracy.&lt;/p&gt;
+&lt;p&gt;Compared to FP32, INT8 representation reduces data storage and bandwidth by 4x, which also reduces energy consumed. In terms of inference performance, integer computation is more efficient than floating-point math.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Incredibly, quantizing a model using Hugging Face's ONNX export is as simple as specifying a &lt;code&gt;--quantize&lt;/code&gt; flag. This meant generating a quantized version of the model took no more than effort than just running the following command:&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;docker run --rm -v ${PWD}/Output:/Output ibebbs/huggingfacetoonnx:latest --framework pt --opset 12 --pipeline ner --model elastic/distilbert-base-cased-finetuned-conll03-english --quantize /Output/quantized-distilbert-base-cased-finetuned-conll03-english/model.onnx
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;The quantized version of the model was just 64Mb (75% smaller) and, due to it's input and output layers remaining unchanged, it was a drop in replacement for the unquantized model. Running with the quantized version resulted in:&lt;/p&gt;
+&lt;p&gt;&lt;a data-fancybox="BertONNX - Quantized" href="/Content/Unoonnx/BertONNX - Quantized.gif"&gt;&lt;img src="/Content/Unoonnx/BertONNX - Quantized.gif" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="BertONNX"/&gt;&lt;/a&gt;&lt;/p&gt;
+&lt;p&gt;As you can see, the model loaded significantly faster and inference speed also got a boost. Best of all, memory consumption during inference was reduced to just 265Mb, definitely within the realms of possibility for an edge device.&lt;/p&gt;
+&lt;p&gt;Buoyed by this success, I pushed on to...&lt;/p&gt;
+&lt;h2 id="unoonnx"&gt;UnoOnnx&lt;/h2&gt;
+&lt;p&gt;As per the initial driver for this exploration, I wanted an app on an edge device that would allow me to perform interactive inference. Knowing that &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; could easily create apps that run across a variety of devices, I decided to whip up an app to do just this.&lt;/p&gt;
+&lt;p&gt;And so was born UnoOnnx ('Oo-noo-nx'?):&lt;/p&gt;
+&lt;video class="img-responsive" style="margin: auto; width:66%; margin-top: 6px; margin-bottom: 6px;" controls&gt;
+  &lt;source src="/Content/Unoonnx/UnoOnnx - Windows.mp4" type="video/mp4"/&gt;
+Your browser does not support the video tag
+&lt;/video&gt;
+&lt;p&gt;As you can see, the first inference is quite slow as it (lazily) loads the model but subsequent inferences are more than fast enough for an interactive app.&lt;/p&gt;
+&lt;p&gt;Then, with a little Uno Platform magic, I ran exactly the same code under Linux ('Oo-noo-nux'?):&lt;/p&gt;
+&lt;video class="img-responsive" style="margin: auto; width:66%; margin-top: 6px; margin-bottom: 6px;" controls&gt;
+  &lt;source src="/Content/Unoonnx/UnoOnnx - Linux.mp4" type="video/mp4"/&gt;
+Your browser does not support the video tag
+&lt;/video&gt;
+&lt;p&gt;(BTW, Loading the model isn't usually that slow - my machine was busy doing something else while I recorded this video).&lt;/p&gt;
+&lt;p&gt;Pretty Neat!&lt;/p&gt;
+&lt;p&gt;As with BertOnnx, the source for UnoOnnx is &lt;a href="https://github.com/ibebbs/UnoOnnx"&gt;available on GitHub&lt;/a&gt; if you want to take a look.&lt;/p&gt;
+&lt;h2 id="moving-forward"&gt;Moving Forward&lt;/h2&gt;
+&lt;p&gt;In a subsequent post - and assuming there's sufficient interest - I hope to illustrate how to run these models on mobile devices (i.e. Android &amp;amp; iOS). If this is of interest to you, please drop me a tweet and/or star the repositories above to let me know.&lt;/p&gt;
+&lt;h2 id="conclusion"&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;As you can see, with the right toolset and a little bit of knowledge, it is fairly straight forward to use state-of-the-art machine learning models from .NET even within the resource constrained environment of an 'edge' device. While some use-cases that depend on sequence length (i.e. sentiment analysis) might be tricky to implement effectively in ML.NET, many other uses (text generation/classification, machine comprehension, translation, etc) should be pretty much pattern part.&lt;/p&gt;
+&lt;p&gt;However, working through the above has left me extremely concerned about Microsoft's strategy towards desktop (i.e. non-web) development. It seems to me that many of Microsoft's frameworks and SDKs for .NET desktop development are suffering from a distinct lack of resourcing/focus meaning development is slow and the frameworks are getting left behind by other languages/platforms. For example, here is the commit chart of ML.NET comparer to Hugging Face's native API:&lt;/p&gt;
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;
+&lt;a data-fancybox="CommitComparison" href="/Content/Unoonnx/ML Commits.png"&gt;&lt;img src="/Content/Unoonnx/ML Commits.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="ML.NET"/&gt;&lt;/a&gt;
+&lt;/td&gt;
+&lt;td&gt;
+&lt;a data-fancybox="CommitComparison" href="/Content/Unoonnx/Huggingface Commits.png"&gt;&lt;img src="/Content/Unoonnx/Huggingface Commits.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="HuggingFace"/&gt;&lt;/a&gt;
+&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+&lt;p&gt;I think you'll agree, one of these projects looks significantly healthier than the other.&lt;/p&gt;
+&lt;p&gt;Furthermore, Microsoft's strategy/execution around UWP/WinUI/Project Reunion is an &lt;strong&gt;utter shambles&lt;/strong&gt;. While I understand WinUI 3.0 is very new and Project Reunion still in preview, I honestly couldn't believe how poor the development experience was with these technologies.&lt;/p&gt;
+&lt;p&gt;&lt;em&gt;&lt;strong&gt;&amp;#64;Microsoft, were it not for Uno Platform providing at least a modicum of continuity through the disastrous landscape that is Windows UI development, I - and I believe many others - would have jumped ship to other UI platforms a long time ago.&lt;/strong&gt;&lt;/em&gt;
+&lt;em&gt;&lt;strong&gt;Please step up your game here. Many of us who have stuck with Windows UI technologies despite its fragmented and frustrating history really are getting to the end of our tether.&lt;/strong&gt;&lt;/em&gt;&lt;/p&gt;
+&lt;h2 id="finally"&gt;Finally&lt;/h2&gt;
+&lt;p&gt;If you're interested in deploying state-of-the-art machine learning models within .NET or using the Uno Platform to deliver cross-platform apps, then please feel free to drop me a line using any of the links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;. As a freelance software developer and .NET consultant I'm always interested in hearing from potential new clients or ideas for new collaborations.&lt;/p&gt;
+</content>
+		<summary>&lt;p&gt;In this post I show how .NET can be used to run state-of-the-art Natural Language Processing (NLP) models on "the edge". I provide a simple means for downloading and converting 'transformer' models from &lt;a href="https://huggingface.co/"&gt;HuggingFace&lt;/a&gt; into models that can perform inference from managed .NET code on resource constrained devices. Finally I use &lt;a href="https://platform.uno/"&gt;Uno Platform&lt;/a&gt; to implement a cross-platform user-interface that allows real-time inference using these models.&lt;/p&gt;</summary>
+	</entry>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/UsingGMailForCustomDomainEmail</id>
 		<title>Using GMail To Send  Email From A Custom Domain</title>
@@ -5023,541 +5320,5 @@ rpc.mountd[26471]: authenticated mount request from 192.168.1.112:843 for /nfs/r
 &lt;h2 id="enjoy"&gt;Enjoy&lt;/h2&gt;
 </content>
 		<summary>&lt;p&gt;This is just a short post - mostly for my own benefit - on how to network boot multiple Raspberry Pis from an x86 Linux Server. While this has been covered &lt;a href="https://hackaday.com/2019/11/11/network-booting-the-pi-4/"&gt;many&lt;/a&gt; &lt;a href="https://hackaday.com/2018/10/08/hack-my-house-running-raspberry-pi-without-an-sd-card/"&gt;times&lt;/a&gt; in &lt;a href="https://www.raspberrypi.org/documentation/hardware/raspberrypi/bootmodes/net_tutorial.md"&gt;other&lt;/a&gt; &lt;a href="https://github.com/raspberrypi/rpi-eeprom/blob/master/firmware/raspberry_pi4_network_boot_beta.md"&gt;posts&lt;/a&gt; none of them worked for me "out of the box". Here's what does.&lt;/p&gt;</summary>
-	</entry>
-	<entry>
-		<id>http://ian.bebbs.co.uk/posts/Uno</id>
-		<title>The Seven GUIs of Christmas</title>
-		<link href="http://ian.bebbs.co.uk/posts/Uno" />
-		<link rel="enclosure" type="image" href="http://ian.bebbs.co.uk/Content/Uno/Background.png" />
-		<updated>2019-12-01T00:00:00Z</updated>
-		<content>&lt;h1 id="tldr"&gt;TL;DR&lt;/h1&gt;
-&lt;p&gt;The &lt;a href="https://platform.uno/"&gt;Uno platform&lt;/a&gt; allows native UWP code to be run across Windows, Android, iOS and even in the browser. In this post I will cover the use of the Uno Platform to implement the &lt;a href="https://eugenkiss.github.io/7guis/"&gt;7GUIs: A GUI Programming Benchmark&lt;/a&gt;, across 5 platforms, employing FRP paradigms and all in a (mostly) seasonal style! Will it all hang together? Read on to find out.&lt;/p&gt;
-&lt;h1 id="the-twelve-days.err.seven-guis-of-christmas"&gt;The Twelve Days ... err.... Seven GUIs of Christmas&lt;/h1&gt;
-&lt;p&gt;This is a lengthy post so first up, let me provide you with a seasonal - if a little tenuous - index:&lt;/p&gt;
-&lt;p&gt;Ahem...&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;On the seventh day of Christmas my true love gave to me:&lt;br /&gt;
-&lt;a href="#seven-guis-shining"&gt;Seven GUIs shining&lt;/a&gt;&lt;br /&gt;
-&lt;a href="#six-points-opining"&gt;Six points opining&lt;/a&gt;&lt;br /&gt;
-&lt;a href="#five-platform-binaries"&gt;Five platform bin[arie]s&lt;/a&gt;!&lt;br /&gt;
-&lt;a href="#four-important-words"&gt;Four important words&lt;/a&gt;&lt;br /&gt;
-&lt;a href="#third-advent-yens"&gt;Third advent yens&lt;/a&gt;&lt;br /&gt;
-&lt;a href="#dual-screen-loves"&gt;Dual screen loves&lt;/a&gt;&lt;br /&gt;
-&lt;a href="#on-the-first-day-of-christmas.an-app-bridge-for-uwp"&gt;And an app-bridge for UWP&lt;/a&gt;&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Well, it almost works.&lt;/p&gt;
-&lt;p&gt;Anyway, this post starts with &amp;quot;the first day of Christmas&amp;quot; and provides some background to, and explanation of, the use of the Uno Platform for implementing the 7GUIs &amp;quot;programming benchmark&amp;quot;. If you're not interested in this background and just want to see the actual GUIs in action then feel free to jump ahead to the &lt;a href="#seven-guis-shining"&gt;&amp;quot;Seven GUIs shining&amp;quot;&lt;/a&gt; or the &lt;a href="#conclusion"&gt;Conclusion&lt;/a&gt; where I summarise my findings.&lt;/p&gt;
-&lt;h1 id="on-the-first-day-of-christmas.an-app-bridge-for-uwp"&gt;On the first day of Christmas... an app-bridge for UWP.&lt;/h1&gt;
-&lt;p&gt;Well, to be honest, it was some time before the first day of Xmas when I became aware of the &lt;a href="https://platform.uno/"&gt;Uno platform&lt;/a&gt; by &lt;a href="https://nventive.com/"&gt;nventive&lt;/a&gt;:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;a Universal Windows Platform Bridge that allows UWP-based code to run on iOS, Android, and WebAssembly.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;I have been writing Xaml for over a decade and find it to be the most powerful and productive UI framework I've ever encountered. As such, I was immediately intrigued by the Uno platform and interested in what it might bring to the table for a UI technology that is increasingly being overlooked in favour of (&lt;a href="https://hackernoon.com/how-it-feels-to-learn-javascript-in-2016-d3a717dd577f"&gt;the scourge that is&lt;/a&gt;) web front-ends.&lt;/p&gt;
-&lt;p&gt;Obviously there had been attempts at this kind of thing before - most notably &lt;a href="https://dotnet.microsoft.com/apps/xamarin"&gt;Xamarin&lt;/a&gt; and &lt;a href="http://avaloniaui.net/"&gt;Avalonia&lt;/a&gt; - but the approach taken by nventive is notable in that, instead of having to learn a new dialect of Xaml and/or buy into a framework to the exclusion of all else, they would allow UWP code to be run 'as is' across each platform. Furthermore, by supporting transpilation to WebAssembly, the same code could then be run in the browser.&lt;/p&gt;
-&lt;p&gt;Unfortunately, I was a little too busy to dive into it at the time so I added the Uno Platform to my (ever growing) backlog of things to evaluate and continued with current projects until...&lt;/p&gt;
-&lt;h1 id="dual-screen-loves"&gt;Dual Screen Loves&lt;/h1&gt;
-&lt;p&gt;... October, when Microsoft's Panos Panay surprised everyone with these beauties:&lt;/p&gt;
-&lt;img src="/Content/Uno/PanayNeoDuo.jpg" class="img-responsive" style="margin: auto; width:50%; margin-top: 6px; margin-bottom: 6px;" alt="Panos Panay Reveals Surface Neo and Duo"/&gt;
-&lt;p&gt;A new category of Surface device featuring dual screens, similar to the previously cancelled - but much lauded - &lt;a href="https://www.youtube.com/watch?v=UmIgNfp-MdI"&gt;Courier project&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Having been mourning the loss of Windows Mobile/Phone since begrudgingly switching to an Android device some months back, these devices looked like salvation. The two devices, aimed at productivity and mobility respectively, looked amazing in the &lt;a href="https://www.youtube.com/watch?v=kU78s9ExFFA"&gt;introductory videos&lt;/a&gt; and I was immediately, and unashamedly, sold.&lt;/p&gt;
-&lt;p&gt;Until, that is, I learned something rather perplexing. You see, while the larger device - the Surface Neo - would be running Microsoft's new Windows 10X OS, the smaller 'mobile' device - the Surface Duo - was apparently running a heavily customised version of Android.&lt;/p&gt;
-&lt;p&gt;What? Really? Surely not!&lt;/p&gt;
-&lt;p&gt;While I understood why Microsoft might not want to re-engage in a smartphone market war it had already fought for and lost (twice!), Windows 10X was supposedly based on CShell, a UI layer specifically designed to adapt to any form factor and - it would seem - perfectly suited to running on devices like these. Indeed, I wasn't the only one surprised by this announcement and many echoed my confusion, some even going so far as to set up a &lt;a href="https://www.change.org/p/panos-panay-satya-nadella-panos-satya-give-us-a-microsoft-surface-duo-running-windows-10x"&gt;petition to provide the Duo with Win 10X&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Despite the immediate outcry, Microsoft remained adamant that the Duo will run Android and so it was that I realised that the Uno platform seemed perfectly - and almost uniquely - positioned as a framework for developing apps for these devices. Then...&lt;/p&gt;
-&lt;h1 id="third-advent-yens"&gt;Third Advent Yens&lt;/h1&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;yen n. - A strong desire or inclination; a yearning or craving.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;... the day after Microsoft announced these devices, two articles arrived in my news feed: &lt;a href="https://crosscuttingconcerns.com/The-Third-Annual-csharp-Advent"&gt;&amp;quot;The Third Annual C# Advent&amp;quot;&lt;/a&gt; from &lt;a href="https://crosscuttingconcerns.com/"&gt;Matthew Groves's blog&lt;/a&gt; and, &lt;a href="https://eugenkiss.github.io/7guis/"&gt;7GUIs: A GUI Programming Benchmark&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;&amp;quot;So let's get this straight&amp;quot;, I thought, &amp;quot;I have a GUI framework I want to evaluate, a GUI programming benchmark to attempt and a call for blog posts on .NET technologies&amp;quot;. Well, sometimes synchronicity simply can't be ignored. I decided a blog post on the 7GUIs using the Uno platform would make for a great post while allowing me to evaluate this platform for UWP + Android development ahead of the release of the Surface Neo and Surface Duo devices.&lt;/p&gt;
-&lt;p&gt;I applied for a slot in the Annual C# Advent series and got the 16th December, which is what you're reading now. If you enjoy this post (or even if you don't!), perhaps you might like to take the time to visit the &lt;a href="https://crosscuttingconcerns.com/The-Third-Annual-csharp-Advent"&gt;full list of posts in this series&lt;/a&gt; and check out some of the others. There are &lt;em&gt;loads&lt;/em&gt; of great posts by some really terrific authors.&lt;/p&gt;
-&lt;h1 id="four-important-words"&gt;Four Important Words&lt;/h1&gt;
-&lt;p&gt;Over the course of a software engineering career spanning more than 20 years, I have developed and refined (and occasionally changed) opinions about how best to perform this craft. While most of my career has been spent following OOD/OOP paradigms, in recent years I have developed a strong preference for &lt;a href="https://en.wikipedia.org/wiki/Declarative_programming"&gt;declarative programming&lt;/a&gt; - typically using some form of &lt;a href="https://en.wikipedia.org/wiki/Functional_reactive_programming"&gt;functional, reactive programming (FRP)&lt;/a&gt; - following &lt;a href="https://en.wikipedia.org/wiki/Behavior-driven_development"&gt;behavioural/domain driven design&lt;/a&gt; principles. I &lt;a href="https://ian.bebbs.co.uk/posts/CqrsEsMvvmRxEfSqlUwpPcl"&gt;wrote a blog post&lt;/a&gt; back in 2016 showing a practical application of these principles for an app I had released and, in the intervening years, have become only more convinced that these approaches represent an elegant and productive means of taming complexity in many modern software systems.&lt;/p&gt;
-&lt;p&gt;Below I outline four &amp;quot;important words&amp;quot; (aka principles) I intend to use while implementing the 7GUIs.&lt;/p&gt;
-&lt;h3 id="behavioural"&gt;Behavioural&lt;/h3&gt;
-&lt;p&gt;From &lt;a href="https://en.wikipedia.org/wiki/Behavior-driven_development"&gt;Wikipedia&lt;/a&gt;:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Behavior-driven development combines the general techniques and principles of TDD with ideas from domain-driven design and object-oriented analysis and design to provide software development and management teams with shared tools and a shared process to collaborate on software development.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;While I agree with this quote, for me BDD doesn't stop at writing tests in a behavioural style but should instead permeate deep into the implementation of the software itself. Fundamentally I believe the desired behaviours of the software system should be encapsulated and expressed in such a way that even a non-technical reader could see reference to them should they happen across the code.&lt;/p&gt;
-&lt;p&gt;In a &lt;a href="https://ian.bebbs.co.uk/posts/ReactiveBehaviors"&gt;blog post&lt;/a&gt; back in 2015 I explored ways in which this might be achieved through the use of declarative FRP principles. While aged (and containing a questionable use of a Subject), I believe this post still provides a decent introduction to how specific behaviours - i.e. 'The login button should be enabled when the user has entered both a username and a password' - can be implemented in, and fully encapsulated within, a single appropriately named method - i.e. &lt;code&gt;ShouldEnableTheLogInButtonWhenTheUserHasEnteredBothUsernameAndPassword&lt;/code&gt;.&lt;/p&gt;
-&lt;h3 id="declarative"&gt;Declarative&lt;/h3&gt;
-&lt;p&gt;Paraphrased from &lt;a href="https://en.wikipedia.org/wiki/Declarative_programming"&gt;Wikipedia&lt;/a&gt;:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Declarative programming focuses on 'what' the program must accomplish instead of 'how' that task is to be accomplished. This is in contrast with imperative programming, which implements algorithms in explicit steps.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Ostensibly, this can be seen through a comparison of the following two code snippets, both of which sum a value from a collection:&lt;/p&gt;
-&lt;h4 id="imperative"&gt;Imperative:&lt;/h4&gt;
-&lt;pre&gt;&lt;code class="language-c#"&gt;int value = 0;
-foreach (var item in collection)
-{
-  value += item.Value;
-}
-return value;
-&lt;/code&gt;&lt;/pre&gt;
-&lt;h4 id="declarative-1"&gt;Declarative:&lt;/h4&gt;
-&lt;pre&gt;&lt;code class="language-c#"&gt;return collection.Sum(item =&amp;gt; item.Value);
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;Now being declarative &lt;a href="https://lispcast.com/is-functional-programming-declarative/"&gt;can be considered a somewhat relative term&lt;/a&gt; but, as you can see from the simplistic example above, if you follow the principle of expressing 'intent rather than algorithm' you can, in my opinion, greatly improve readability and transparency of functionality. Obviously this approach compliments the goals of behavioural design expressed above.&lt;/p&gt;
-&lt;h3 id="functional"&gt;Functional&lt;/h3&gt;
-&lt;p&gt;More &lt;a href="https://en.wikipedia.org/wiki/Functional_programming"&gt;Wikipedia&lt;/a&gt;:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;[Functional programming] is a declarative programming paradigm in that programming is done with expressions or declarations instead of statements. In functional code, the output value of a function depends only on its arguments, so calling a function with the same value for an argument always produces the same result. This is in contrast to imperative programming where, in addition to a function's arguments, global program state can affect a function's resulting value. Eliminating side effects, that is, changes in state that do not depend on the function inputs, can make understanding a program easier, which is one of the key motivations for the development of functional programming.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Functional programming (FP) has become fashionable in the software industry recently and support for functional paradigms are increasingly being released for - and, in some cases, are core to - many languages and frameworks that were once solely object-oriented. Unfortunately FP still faces significant opposition from many quarters, mainly - I believe - due to a perceived complexity around it's core principles; a perception somewhat fomented by the idiom of many functional practitioners! Indeed, I often encounter this issue when discussing FP with clients and have to explain how it is, in many ways, far simpler than many of the &lt;a href="https://scotch.io/bar-talk/s-o-l-i-d-the-first-five-principles-of-object-oriented-design"&gt;myriad principles&lt;/a&gt; employed by those writing object-oriented code.&lt;/p&gt;
-&lt;p&gt;C# has enjoyed first class support for functional constructs since the introduction of LINQ back in .NET 3.5 yet many using the language today - even those employing LINQ-to-X features - are unaware of functional programming or how it can be used to simplify and improve their code. This is a shame because - as will be seen in many of the GUIs below - C# is able to elegantly mix OO and FP paradigms such that the relative strengths of each can be leveraged where they make most sense.&lt;/p&gt;
-&lt;h3 id="reactive"&gt;Reactive&lt;/h3&gt;
-&lt;p&gt;Last couple of &lt;a href="https://en.wikipedia.org/wiki/Reactive_programming"&gt;Wikipedia&lt;/a&gt; quotes for a while:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Reactive programming is a declarative programming paradigm concerned with data streams and the propagation of change. [It] has been proposed as a way to simplify the creation of interactive user interfaces and near-real-time system animation.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Wikipedia goes on to state how:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;In an imperative programming setting, &lt;code&gt;a := b + c&lt;/code&gt; would mean that &lt;code&gt;a&lt;/code&gt; is being assigned the result of &lt;code&gt;b + c&lt;/code&gt; in the instant the expression is evaluated, and later, the values of &lt;code&gt;b&lt;/code&gt; and &lt;code&gt;c&lt;/code&gt; can be changed with no effect on the value of &lt;code&gt;a&lt;/code&gt;. On the other hand, in reactive programming, the value of &lt;code&gt;a&lt;/code&gt; is automatically updated whenever the values of &lt;code&gt;b&lt;/code&gt; or &lt;code&gt;c&lt;/code&gt; change, without the program having to re-execute the statement &lt;code&gt;a := b + c&lt;/code&gt; to determine the presently assigned value of &lt;code&gt;a&lt;/code&gt;.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;This is a somewhat long handed way of saying that, in reactive programming, state is derived from declarative flows of functional computations over source values such that it is not necessary to explicitly recompute state when one of these values change.&lt;/p&gt;
-&lt;p&gt;Again C# has had fantastic support for Reactive Programming for many years in the form of the &lt;a href="https://github.com/dotnet/reactive"&gt;Reactive Extensions library&lt;/a&gt;. In fact, such was the success of this library that, since it's original implementation in C#, it has been ported to numerous other languages and used within an incredible variety of software systems; not least of which being a significant number of modern web frameworks.&lt;/p&gt;
-&lt;h1 id="five-platform-binaries"&gt;Five Platform Bin[arie]s!&lt;/h1&gt;
-&lt;p&gt;Well, sort of.&lt;/p&gt;
-&lt;h3 id="wpf"&gt;WPF&lt;/h3&gt;
-&lt;p&gt;Out of the box, Uno supports four platforms; UWP, Android, iOS &amp;amp; WebAssembly. For this blog post, I also wanted to try supporting WPF due, in most part, to the following:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;WPF is XAML based and, in many ways, the progenitor to UWP so it should be able to leverage much of the code that will be written&lt;/li&gt;
-&lt;li&gt;WPF still plays an important role in the .NET GUI ecosystem, particularly for enterprise applications.&lt;/li&gt;
-&lt;li&gt;WPF was recently &lt;a href="https://github.com/dotnet/wpf"&gt;open-sourced as part of .NET Core 3.0&lt;/a&gt; and I hadn't yet had a chance to try it!&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;Fortunately, it turns out that, once various other considerations had been accounted for (see below) supporting WPF didn't present much friction at all. In fact, with the exception of a couple of compiler directives in &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.data.ivalueconverter?view=netframework-4.8"&gt;IValueConverter&lt;/a&gt; implementations, supporting WPF necessitated hardly any additional code at all.&lt;/p&gt;
-&lt;h3 id="ios"&gt;iOS&lt;/h3&gt;
-&lt;p&gt;Until recently, I viewed Apple devices as over-priced, walled-off, proprietary guff bought by fan-bois with more money than sense. In light of Apple's stance on privacy, this opinion has softened slightly in the last couple of years such that you &lt;em&gt;may&lt;/em&gt; no longer &lt;em&gt;have&lt;/em&gt; to be a fan-boi to buy an Apple device. Regardless I still refuse to buy Apple products and am extremely happy with a combination of devices from other manufactures - most notably Microsoft and Dell. These manufactures don't artificially limit the interoperability of their products nor do they engage in &lt;a href="https://www.itworld.com/article/3316958/apple-and-samsung-fined-for-planned-obsolescence.html"&gt;'planned obsolescence'&lt;/a&gt; to force consumers into a viscous and costly upgrade cycle (seriously, I have a 7 year old Dell laptop which - despite being bulky - is still my main mobile workhorse).&lt;/p&gt;
-&lt;p&gt;Unfortunately, given Apple's ludicrous position that you must own (or &lt;a href="https://www.macincloud.com/"&gt;rent!?!&lt;/a&gt;) an Apple device to build applications for iOS (it seems it's still illegal to run iOS on anything other than an approved Apple device), I have no way of testing the iOS binaries being produced herein. As such, all the screen shots for Apple will be a simple placeholder until some kind soul decides they want to run them for me (I promise not to call you a fan-boi) and provide screen shots / bug reports / PRs.&lt;/p&gt;
-&lt;h1 id="six-points-opining"&gt;Six Points Opining&lt;/h1&gt;
-&lt;p&gt;Some other considerations for implementation:&lt;/p&gt;
-&lt;h3 id="model-view-viewmodel"&gt;1. Model-View-ViewModel&lt;/h3&gt;
-&lt;p&gt;To me, the MVVM pattern is one of those methodologies that once you &amp;quot;get&amp;quot; you wonder how you ever managed to deliver anything without. In fact, decoupling a view from its interaction model is critical if you wish to achieve many of the paradigms listed above (i.e. behavioural driven, declarative, functional and reactive). Therefore, all GUIs presented here use this pattern despite it possibly rating lower on a number of the 7GUIs &lt;a href="https://eugenkiss.github.io/7guis/dimensions"&gt;Dimensions of Evaluation&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;This then leads us to the question of whether to adopt a 'View-First' or 'ViewModel-First' approach (a good comparison of which can be found in &lt;a href="https://stackoverflow.com/questions/3763072/what-are-the-pros-and-cons-of-view-first-vs-viewmodel-first-in-the-mvvm-pattern"&gt;this&lt;/a&gt; SO question). While I generally prefer the latter over the former - particularly when writing large applications - the 'ViewModel-First' is undeniably more complicated given that UWP and WPF apps adopt, by default, 'View-first' mechanisms (e.g. &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.application.startupuri?view=netframework-4.8"&gt;StartupUri&lt;/a&gt;). So, for simplicity's sake, I've used a 'View-First' approach for these GUIs wherein each View creates the associated ViewModel within it's constructor.&lt;/p&gt;
-&lt;p&gt;Lifetime management of the view model (and it's constituent behaviours) is provided by &lt;code&gt;Activate&lt;/code&gt;/&lt;code&gt;Deactivate&lt;/code&gt; calls to the ViewModel from within the &lt;code&gt;OnNavigatedTo&lt;/code&gt;/&lt;code&gt;OnNavigatedFrom&lt;/code&gt; methods (for UWP) or &lt;code&gt;OnActivated&lt;/code&gt;/&lt;code&gt;OnClosed&lt;/code&gt; (for WPF). Where the GUI being implemented requires intimate interaction with the UI (i.e. the CircleDrawer GUI), these interaction points are passed - as &lt;code&gt;IObservable&lt;/code&gt; instances - to the ViewModel as parameters to the &lt;code&gt;Activate&lt;/code&gt; call.&lt;/p&gt;
-&lt;h3 id="reactiveui"&gt;2. ReactiveUI&lt;/h3&gt;
-&lt;p&gt;The Uno platform comes with templates for implementing GUIs using &lt;a href="https://reactiveui.net/"&gt;ReactiveUI&lt;/a&gt;:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;An advanced, composable, functional reactive model-view-viewmodel framework for all .NET platforms that is inspired by functional reactive programming.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;Ostensibly this sounds like a great fit for satisfying the paradigms outlined above and I had initially intended to use ReactiveUI as another exploratory feature of this blog post. Unfortunately this intention was quashed almost immediately as I found the following:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;Platform support&lt;br /&gt;
-At the point of attempting to use ReactiveUI, the latest Universal Windows platform it supported was 1803 (the April 2018 Update). This was quite surprising and somewhat troubling given the age of this platform.&lt;/li&gt;
-&lt;li&gt;Inheriting a Framework&lt;br /&gt;
-ReactiveUI requires that ViewModels derive from specific base classes. This, to me, puts it firmly on the Framework side of the &lt;a href="http://tomasp.net/blog/2015/library-frameworks/"&gt;Framework vs Library debate&lt;/a&gt;. Given I would already be adopting various constraints from the Uno platform, I didn't want to find myself in a position of encountering potential incompatibility between these technologies some way down the line.&lt;/li&gt;
-&lt;li&gt;Overly complex API Structure&lt;br /&gt;
-Just getting started with ReactiveUI is a daunting prospect when its &lt;a href="https://reactiveui.net/docs/handbook/"&gt;handbook&lt;/a&gt; contains some 22 &lt;em&gt;sections&lt;/em&gt; on subjects ranging from data persistence to logging. While I appreciate that opinionated frameworks can have a lot to offer, this sort of complexity is indicative of one which, in my opinion, ought to be broken into smaller, composable libraries which can be adopted as and when necessary.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;h3 id="mvx.observable"&gt;3. MVx.Observable&lt;/h3&gt;
-&lt;p&gt;Rather than shoe-horn ReactiveUI into this evaluation I instead elected to modernize and generalize a package I had written some time ago: &lt;a href="https://github.com/ibebbs/Caliburn.Micro.Reactive.Extensions"&gt;Caliburn.Micro.Reactive.Extensions&lt;/a&gt;. This package, as it's name implies, was implemented specifically for use within the &lt;a href="https://caliburnmicro.com/"&gt;Caliburn Micro&lt;/a&gt; framework and provides all the &amp;quot;good stuff&amp;quot; of ReactiveUI (i.e. composable, functional, reactive) while remaining a library that places no untoward restrictions or dependencies on consumer code.&lt;/p&gt;
-&lt;p&gt;Fundamentally this library constitutes just three classes:&lt;/p&gt;
-&lt;ol&gt;
-&lt;li&gt;ObservableProperty&lt;T&gt;&lt;br /&gt;
-A class which implements both &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.iobservable-1?view=netframework-4.8"&gt;&lt;code&gt;IObservable&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/a&gt; and &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.iobserver-1?view=netframework-4.8"&gt;&lt;code&gt;IObserver&amp;lt;T&amp;gt;&lt;/code&gt;&lt;/a&gt; - such that it can be used within declarative reactive flows - and which provides some additional functionality to facilitate its use as a data-binding source (i.e. Get/Set methods).&lt;/li&gt;
-&lt;li&gt;ObservableCommand&lt;br /&gt;
-A class which implements &lt;a href="https://docs.microsoft.com/en-us/dotnet/api/system.windows.input.icommand?view=netframework-4.8"&gt;&lt;code&gt;ICommand&lt;/code&gt;&lt;/a&gt; through implementations of the &lt;code&gt;IObservable&amp;lt;bool&amp;gt;&lt;/code&gt; (for 'can execute' state changes) and &lt;code&gt;IObservable&amp;lt;T&amp;gt;&lt;/code&gt; (for invocations) interfaces.&lt;/li&gt;
-&lt;li&gt;ObservableBus&lt;br /&gt;
-An &amp;quot;observable&amp;quot; implementation of an &lt;a href="https://www.martinfowler.com/eaaDev/EventAggregator.html"&gt;Event Aggregator pattern&lt;/a&gt; for inter-ViewModel communication.&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;Generalizing this library required removing the use of Caliburn.Micro's base classes - which were typically used to facilitate property change notification - and replacing them with callbacks (which can then be hidden in derived classes for specific frameworks if so desired). Modernizing involved recreating the project as a .NET Standard 2.0 library and using up-to-date dependency versions (specifically System.Reactive 4.x).&lt;/p&gt;
-&lt;p&gt;The most difficult part of bringing this library up to date was undoubtedly picking a name for it. I spent ages playing with acronyms that accurately reflected the library's purpose and, for a second, even toyed with naming it the &lt;a href="https://www.youtube.com/watch?v=k8xFbWLUDoQ"&gt;&amp;quot;IBCBDFR&amp;quot;&lt;/a&gt;. Finally I decided on 'MVx.Observable' to indicate its reactive nature and its applicability to multiple forms of the Model-View pattern.&lt;/p&gt;
-&lt;p&gt;Source is available on &lt;a href="https://github.com/ibebbs/MVx"&gt;GitHub&lt;/a&gt; and a prebuilt package is available in &lt;a href="https://www.nuget.org/packages/MVx.Observable/"&gt;Nuget&lt;/a&gt; should you wish to give it a try.&lt;/p&gt;
-&lt;h3 id="separate-views"&gt;4. Separate Views&lt;/h3&gt;
-&lt;p&gt;The Uno platform is, somewhat amazingly, able to display (almost) the exact same XAML page across multiple platforms (or 'heads' to use Uno parlance) with a very high degree of fidelity. This is quite an achievement and the team at nventive are rightly proud of this capability.&lt;/p&gt;
-&lt;p&gt;However, from the perspective of someone looking to write large applications on this platform, I don't believe this facility is particularly important nor - to a certain extent - even desirable. You see, in my experience, it is often the case that each platform and/or form-factor requires such different UI and/or UX that trying to shoe-horn everything into a single XAML page results in a page that is difficult, if not impossible, to maintain. Instead I find it much better to be able to share business logic, user flows and - where it makes sense - common controls across platforms while using specific page layouts for each form-factor.&lt;/p&gt;
-&lt;p&gt;As such, the GUI's presented here will use a dedicated view implementation on each platform while using a common view-model to share interaction patterns and user-flows.&lt;/p&gt;
-&lt;h3 id="implementation-process"&gt;5. Implementation Process&lt;/h3&gt;
-&lt;p&gt;For each of the GUIs I separated implementation into two phases; first implementing the prerequisite functionality in UWP then porting (which mainly constituted lots of copy/pasting) the completed GUI to Uno. This allowed me to ensure the GUI was functionally complete prior to incurring the additional friction of multi-platform builds.&lt;/p&gt;
-&lt;h3 id="project-structure"&gt;6. Project Structure&lt;/h3&gt;
-&lt;p&gt;When you create a new Uno project, the standard template gives you the following structure:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;Solution
-|-Project.Droid
-|-Project.iOS
-|-Project.UWP
-|-Project.Wasm
-|-Project.Shared
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;In this structure, the 'Shared' project contains the majority of the code/Xaml including the App.xaml[.cs] and MainPage.xaml[.cs] files. It is literally a &lt;a href="http://rion.io/2017/03/22/sharing-is-caring-using-shared-projects-in-asp-net/"&gt;&amp;quot;Shared Project&amp;quot;&lt;/a&gt; which each of the other project reference in order to - in essence - copy its contents into themselves.&lt;/p&gt;
-&lt;p&gt;To support WPF and remove the need to share a single view across all platforms (as described above), I refactored to the following structure:&lt;/p&gt;
-&lt;pre&gt;&lt;code&gt;Solution
-|-Project.Common
-|-Project.Droid
-|-Project.iOS
-|-Project.UWP
-|-Project.Wasm
-|-Project.Wpf
-|-Project.Shared
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;In this structure, the (fully implemented) App.xaml[.cs] and MainPage.xaml[.cs] were copied from the Shared project to each head project where they could be suitably customised. Next the ViewModel (and any other reusable code) was moved to the new .Net Standard 2.0 Common project and referenced by each head project. This left the Shared project containing just assets and, where necessary, any common controls or &lt;code&gt;IValueConverter&lt;/code&gt; implementations.&lt;/p&gt;
-&lt;h1 id="seven-guis-shining"&gt;Seven GUIs Shining&lt;/h1&gt;
-&lt;p&gt;Now, without further ado (of which there has been plenty), may I present the &lt;a href="https://eugenkiss.github.io/7guis"&gt;7GUIs&lt;/a&gt;!&lt;/p&gt;
-&lt;p&gt;Each of the GUIs shown here represent an implementation of one of the tasks from the &lt;a href="https://eugenkiss.github.io/7guis/tasks"&gt;7 GUIs task list&lt;/a&gt;. Despite the fact that many of the GUIs in this list represent - in my opinion - particularly poor UI/UX implementations, I've endeavoured to stay as close as possible to the example GUI provided for the task so that my implementation might be easily compared to &lt;a href="https://eugenkiss.github.io/7guis/implementations"&gt;other implementations&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;Furthermore, given the various constraints presented by writing for multiple platforms, I have employed a 'lowest common denominator' approach to implementing some features. For example, dialogs are typically represented by messages appearing in the current UI rather than opening an additional modal overlay. Obviously each platform presents various mechanisms for implementing these common UI metaphors and it would be entirely possible, using the Uno platform, to leverage these mechanism by means of platform specific implementations of an abstracted interface. However, for expediency, I chose not to do this at this time and to just keep it simple.&lt;/p&gt;
-&lt;p&gt;For each GUI I have provided a visualization of the GUI running on each platform (click/press to see a larger version) along with a description of the specific challenges and issues presented by the implementation. It is my hope that these details provide the reader with a good insight into the value of implementing interaction patterns as a series of declarative, functional, behavioural flows along with how the Uno platform may be used to provide 'write-once, run-anywhere' style, cross-platform, native applications.&lt;/p&gt;
-&lt;h2 id="counter"&gt;1. Counter&lt;/h2&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Challenge: Understanding the basic ideas of a language/toolkit.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;div class="row justify-content-center unobackground"&gt;
-    &lt;div class="col-md-8"&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="https://eugenkiss.github.io/7guis/static/counter.9cd92091.png" data-toggle="lightbox" data-gallery="counter" data-title="Counter Task" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://eugenkiss.github.io/7guis/static/counter.9cd92091.png" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Counter-Android.gif" data-toggle="lightbox" data-gallery="counter" data-title="Counter on Android" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Counter-Android.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="counter" data-title="Counter on iOS" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="/Content/Uno/Counter-UWP.gif" data-toggle="lightbox" data-gallery="counter" data-title="Counter in UWP" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Counter-UWP.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Counter-WASM.gif" data-toggle="lightbox" data-gallery="counter" data-title="Counter in Edge" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Counter-WASM.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Counter-WPF.gif" data-toggle="lightbox" data-gallery="counter" data-title="Counter in WPF" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Counter-WPF.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;h3 id="implementation"&gt;Implementation&lt;/h3&gt;
-&lt;p&gt;This task required just a single &lt;code&gt;CounterShouldBeIncrementedWhenIncrementIsInvoked&lt;/code&gt; behaviour in the &lt;a href="https://github.com/ibebbs/SevenGuis/blob/master/src/Counter/Counter.Common/MainPageViewModel.cs"&gt;view model&lt;/a&gt;. Given its simplicity, here's the behaviour in full:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-c#"&gt;private IDisposable CounterShouldBeIncrementedWhenIncrementIsInvoked()
-{
-    return _increment
-        .Scan(0, (value, _) =&amp;gt; value + 1)
-        .Subscribe(_counter);
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;In this example, &lt;code&gt;_increment&lt;/code&gt; is an &lt;code&gt;Observable.Command&lt;/code&gt; and &lt;code&gt;_counter&lt;/code&gt; is an &lt;code&gt;Observable.Property&amp;lt;int&amp;gt;&lt;/code&gt;. Both these members are exposed as properties for data-binding. And that's it. There's no class level &lt;code&gt;_currentValue&lt;/code&gt; member variable as all state is encapsulated within the reactive function.&lt;/p&gt;
-&lt;h2 id="temperature-converter"&gt;2. Temperature Converter&lt;/h2&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Challenges: bidirectional data flow, user-provided text input.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;div class="row justify-content-center unobackground"&gt;
-    &lt;div class="col-md-8"&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="https://eugenkiss.github.io/7guis/static/tempconv.de9aff1f.png" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter Task" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://eugenkiss.github.io/7guis/static/tempconv.de9aff1f.png" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/TemperatureConverter-Android.gif" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter on Android" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/TemperatureConverter-Android.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter on iOS" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="/Content/Uno/TemperatureConverter-UWP.gif" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter in UWP" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/TemperatureConverter-UWP.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/TemperatureConverter-WASM.gif" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter in Edge" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/TemperatureConverter-WASM.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/TemperatureConverter-WPF.gif" data-toggle="lightbox" data-gallery="temperatureconverter" data-title="Temperature Converter in WPF" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/TemperatureConverter-WPF.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;h3 id="implementation-1"&gt;Implementation&lt;/h3&gt;
-&lt;p&gt;This task required just two behaviours in the &lt;a href="https://github.com/ibebbs/SevenGuis/blob/master/src/TemperatureConverter/TemperatureConverter.Common/MainPageViewModel.cs"&gt;view model&lt;/a&gt;; &lt;code&gt;ShouldUpdateFahrenheitWhenCelciusIsChanged&lt;/code&gt; and &lt;code&gt;ShouldUpdateCelciusWhenFahrenheitIsChanged&lt;/code&gt;. These behaviours follow the same pattern but use a different conversion so, for brevity, only the &lt;code&gt;ShouldUpdateFahrenheitWhenCelciusIsChanged&lt;/code&gt; behaviour as shown here:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-c#"&gt;private IDisposable ShouldUpdateFahrenheitWhenCelciusIsChanged()
-{
-    return _celcius
-        .DistinctUntilChanged()
-        .Select(Domain.ConvertCelciusToFahrenheit)
-        .Subscribe(_fahrenheit);
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;As you can see, the actual domain logic has been split into a static function on a &lt;code&gt;Domain&lt;/code&gt; class and used to convert the values from the &lt;code&gt;_celcius&lt;/code&gt; &lt;code&gt;Observable.Property&amp;lt;int&amp;gt;&lt;/code&gt; into Fahrenheit which is then forwarded to the &lt;code&gt;_fahrenheit&lt;/code&gt; &lt;code&gt;Observable.Property&amp;lt;int&amp;gt;&lt;/code&gt;. As these values write to each other, the &lt;code&gt;DistinctUntilChanged&lt;/code&gt; operator is used to prevent a feedback loop.&lt;/p&gt;
-&lt;h2 id="flight-booker"&gt;3. Flight Booker&lt;/h2&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Challenge: Constraints.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;div class="row justify-content-center unobackground"&gt;
-    &lt;div class="col-md-8"&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="https://eugenkiss.github.io/7guis/static/bookflight.a5434663.png" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker Task" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://eugenkiss.github.io/7guis/static/bookflight.a5434663.png" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/FlightBooker-Android.gif" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker on Android" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/FlightBooker-Android.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker on iOS" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="/Content/Uno/FlightBooker-UWP.gif" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker in UWP" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/FlightBooker-UWP.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/FlightBooker-WASM.gif" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker in Edge" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/FlightBooker-WASM.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/FlightBooker-WPF.gif" data-toggle="lightbox" data-gallery="flightbooker" data-title="Flight Booker in WPF" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/FlightBooker-WPF.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;h3 id="implementation-2"&gt;Implementation&lt;/h3&gt;
-&lt;p&gt;The relatively simple paragraph describing the behaviour of this task belies quite a bit of complexity and required five behaviours to fully implement:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ShouldEnableReturnWhenFlightTypeIsReturn&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldSetOutboundValidWhenOutboundDateHasValue&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldSetReturnValidWhenReturnDateHasValueOrFlightTypeIsOneWay&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldEnableBookWhenDatesAreValidForTheSelectedFlightType&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldDisplayMessageWhenBookInvoked&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;I won't dig into each of these behaviours as you should be getting the gist of how this might work now. If not you can find the implementation in the &lt;a href="https://github.com/ibebbs/SevenGuis/tree/master/src/FlightBooker"&gt;view model&lt;/a&gt;.&lt;/p&gt;
-&lt;p&gt;The &lt;code&gt;ShouldSetOutboundValidWhenOutboundDateHasValue&lt;/code&gt; and &lt;code&gt;ShouldSetReturnValidWhenReturnDateHasValueOrFlightTypeIsOneWay&lt;/code&gt; could have been implemented in the view with various bindings and converters but as they form part of the behaviour specification, they're kept in the view model so that they can be tested.&lt;/p&gt;
-&lt;p&gt;Amazingly, the most difficult bit of this task was finding a means of reliably setting the initial value of the &amp;quot;Flight Type&amp;quot; combo-box. It turns out that this was due to a bug in UWP that means the &lt;code&gt;SelectedValue&lt;/code&gt; property of a &lt;a href="https://stackoverflow.com/questions/35599479/combobox-does-not-select-binding-value-initially"&gt;combo-box doesn't support binding to an enumeration property&lt;/a&gt;. This was eventually resolved by binding the &lt;code&gt;SelectedIndex&lt;/code&gt; property of the combobox to the enumeration via a converter.&lt;/p&gt;
-&lt;h2 id="timer"&gt;4. Timer&lt;/h2&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Challenges: concurrency, competing user/signal interactions, responsiveness.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;div class="row justify-content-center unobackground"&gt;
-    &lt;div class="col-md-8"&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="https://eugenkiss.github.io/7guis/static/timer.ed46b6b4.png" data-toggle="lightbox" data-gallery="timer" data-title="Timer Task" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://eugenkiss.github.io/7guis/static/timer.ed46b6b4.png" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Timer-Android.gif" data-toggle="lightbox" data-gallery="timer" data-title="Timer on Android" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Timer-Android.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="timer" data-title="Timer on iOS" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="/Content/Uno/Timer-UWP.gif" data-toggle="lightbox" data-gallery="timer" data-title="Timer in UWP" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Timer-UWP.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Timer-WASM.gif" data-toggle="lightbox" data-gallery="timer" data-title="Timer in Edge" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Timer-WASM.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Timer-WPF.gif" data-toggle="lightbox" data-gallery="timer" data-title="Timer in WPF" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Timer-WPF.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;h3 id="implementation-3"&gt;Implementation&lt;/h3&gt;
-&lt;p&gt;This task is where the Reactive Extensions and MVx.Observables really shine. Here's the task description:&lt;/p&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;The task is to build a frame containing a gauge G for the elapsed time e, a label which shows the elapsed time as a numerical value, a slider S by which the duration d of the timer can be adjusted while the timer is running and a reset button R. Adjusting S must immediately reflect on d and not only when S is released. It follows that while moving S the filled amount of G will (usually) change immediately. When e ≥ d is true then the timer stops (and G will be full). If, thereafter, d is increased such that d &amp;gt; e will be true then the timer restarts to tick until e ≥ d is true again. Clicking R will reset e to zero.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;p&gt;And here's the single behaviour required to satisfy this specification:&lt;/p&gt;
-&lt;pre&gt;&lt;code class="language-c#"&gt;private IDisposable ShouldIncrementElapsedUntilResetOrEqualToMax()
-{
-    return _reset
-        .StartWith((object)null)
-        .Select(_ =&amp;gt; Observable
-            .Interval(Interval)
-            .WithLatestFrom(_max, (interval, max) =&amp;gt; max)
-            .Scan((long)0, (acc, max) =&amp;gt; acc + Interval.Ticks &amp;gt;= max ? max : acc + Interval.Ticks))
-            .DistinctUntilChanged()
-        .Switch()
-        .ObserveOn(_scheduler)
-        .Subscribe(_elapsed);
-}
-&lt;/code&gt;&lt;/pre&gt;
-&lt;p&gt;To break this down: Every time the &lt;code&gt;_reset&lt;/code&gt; &lt;code&gt;Observable.Command&lt;/code&gt; is invoked and starting with an initial invocation, select a new observable. This new observable will emit a value at a specific interval which will be incremented automatically until it is equal to the &lt;code&gt;_max&lt;/code&gt; value. Once it is equal to the &lt;code&gt;_max&lt;/code&gt; value, no further values will be emitted until &lt;code&gt;_max&lt;/code&gt; changes or the timer is reset. Finally, subscribe to the new observable and forward the emitted values to the &lt;code&gt;_elapsed&lt;/code&gt; &lt;code&gt;Observable.Property&amp;lt;int&amp;gt;&lt;/code&gt; on the UI thread.&lt;/p&gt;
-&lt;p&gt;Now, admittedly the timer underlying this observable doesn't 'stop' once the value has reached the max value per the description. While it would be possible to do this in a single behaviour, the required expression would be significantly more complicated and, given the low cost of recalculating the value every interval, I elected to keep the observable simple and obvious.&lt;/p&gt;
-&lt;h2 id="crud"&gt;5. CRUD&lt;/h2&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Challenges: separating the domain and presentation logic, managing mutation, building a non-trivial layout.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;div class="row justify-content-center unobackground"&gt;
-    &lt;div class="col-md-8"&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="https://eugenkiss.github.io/7guis/static/crud.515ce94b.png" data-toggle="lightbox" data-gallery="crud" data-title="CRUD Task" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://eugenkiss.github.io/7guis/static/crud.515ce94b.png" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Crud-Android.gif" data-toggle="lightbox" data-gallery="crud" data-title="CRUD on Android" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Crud-Android.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="crud" data-title="CRUD on iOS" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="/Content/Uno/Crud-UWP.gif" data-toggle="lightbox" data-gallery="crud" data-title="CRUD in UWP" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Crud-UWP.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Crud-WASM.gif" data-toggle="lightbox" data-gallery="crud" data-title="CRUD in Edge" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Crud-WASM.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Crud-WPF.gif" data-toggle="lightbox" data-gallery="crud" data-title="CRUD in WPF" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Crud-WPF.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;p&gt;CRUD is a great test of a UI as it forms a matrix of operations across numerous controls. This is shown by the &lt;a href="https://eugenkiss.github.io/7guis/tasks#crud"&gt;complexity of the description of the task&lt;/a&gt; and the number of behaviours required to meet this specification:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ShouldEnableUpdateWhenSelected&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldEnableDeleteWhenSelected&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldEnableCreateWhenNameAndSurnameArePopulated&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldPopulateNamesWithFilteredNames&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldAddFullNameWhenCreateInvoked&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldUpdateFullNameWhenUpdatedInvoked&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldRemoveFullNameWhenDeleteInvoked&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldPopulateNameWhenFullNameSelected&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldPopulateSurnameWhenFullNameSelected&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id="circle-drawer"&gt;6. Circle Drawer&lt;/h2&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Challenges: undo/redo, custom drawing, dialog control*.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;div class="row justify-content-center unobackground"&gt;
-    &lt;div class="col-md-8"&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="https://eugenkiss.github.io/7guis/static/circledraw.235dfd8b.png" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer Task" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://eugenkiss.github.io/7guis/static/circledraw.235dfd8b.png" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/CircleDrawer-Android.gif" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer on Android" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/CircleDrawer-Android.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer on iOS" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="/Content/Uno/CircleDrawer-UWP.gif" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer in UWP" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/CircleDrawer-UWP.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/CircleDrawer-WASM.gif" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer in Edge" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/CircleDrawer-WASM.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/CircleDrawer-WPF.gif" data-toggle="lightbox" data-gallery="circledrawer" data-title="Circle Drawer in WPF" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/CircleDrawer-WPF.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;p&gt;I think it's fair to say Uno struggled with this task. While the UWP version was completed in short order, neither the Android nor WASM heads worked &lt;em&gt;at all&lt;/em&gt; and the WPF project had several issues.&lt;/p&gt;
-&lt;p&gt;It turned out that both the UWP and WASM platforms suffered similar - but not the exactly the same - issues. The first issue I encountered was with determining where a user clicked on a Canvas used as an items container for a ListView control. Digging into this I found further issues where the &lt;code&gt;TappedRoutedEventArgs&lt;/code&gt; resulting from the click returned different &lt;code&gt;OriginalSource&lt;/code&gt; objects - sometimes the Canvas, sometimes the ListView - and getting the clicked position relative to the &lt;code&gt;OriginalSource&lt;/code&gt; always returned the position &lt;code&gt;{X: 0, Y: 0}&lt;/code&gt;. Then I found that the attached property binding mechanism I'd used to bind &lt;code&gt;Canvas.X&lt;/code&gt; and &lt;code&gt;Canvas.Y&lt;/code&gt; properties on the ListViewItem instances representing the circles just wasn't being applied consistently. The WPF head, on the other hand, struggled with distinguishing between clicks on an item and clicks in an empty area of the ListView such that it's not possible to reselect a circle once it's been deselected.&lt;/p&gt;
-&lt;p&gt;Perhaps a lot of the above issues could have been resolved by using a custom control or a custom item container for the ListView but, as the UWP solution worked perfectly, this was something I felt I ought not to have to do. Ultimately I hacked through as many of the issues as I could but this was one task where all the heads don't perform in the same way. Furthermore, I'm sure the WPF issue could be resolved by working out if the click caused an item to be selected but unfortunately I ran out of time before I could investigate this.&lt;/p&gt;
-&lt;p&gt;Anyway, this solution used a basic form of command processor to apply interactions to a state container which contained the current circles along with undo and redo stacks of commands. This provided a very simple mechanism for undoing or redoing a command such that the view model needed only the following behaviours:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ShouldPopulateCirclesFromState&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldEnableOrDisableUndoBasedOnState&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldEnableOrDisableRedoBasedOnState&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldEnableOrDisableAdjustDiameterBasedOnSelectedItem&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldSetSelectedFromState&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldShowAdjustDiameterDialogWhenAdjustDiameterInvoked&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id="cells"&gt;7. Cells&lt;/h2&gt;
-&lt;blockquote class="blockquote"&gt;
-&lt;p&gt;Challenges: change propagation, widget customization, implementing a more authentic/involved GUI application.&lt;/p&gt;
-&lt;/blockquote&gt;
-&lt;div class="row justify-content-center unobackground"&gt;
-    &lt;div class="col-md-8"&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="https://eugenkiss.github.io/7guis/static/cells.9544a72f.png" data-toggle="lightbox" data-gallery="cells" data-title="Cells Task" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://eugenkiss.github.io/7guis/static/cells.9544a72f.png" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Cells-Android.gif" data-toggle="lightbox" data-gallery="cells" data-title="Cells on Android" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Cells-Android.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" data-toggle="lightbox" data-gallery="cells" data-title="Cells on iOS" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-        &lt;div class="row"&gt;
-            &lt;a href="/Content/Uno/Cells-UWP.gif" data-toggle="lightbox" data-gallery="cells" data-title="Cells in UWP" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Cells-UWP.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Cells-WASM.gif" data-toggle="lightbox" data-gallery="cells" data-title="Cells in Edge" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Cells-WASM.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-            &lt;a href="/Content/Uno/Cells-WPF.gif" data-toggle="lightbox" data-gallery="cells" data-title="Cells in WPF" class="col-xs-4 col-sm-4"&gt;
-                &lt;img src="/Content/Uno/Cells-WPF.gif" class="img-fluid ekko-lightbox-image"&gt;
-            &lt;/a&gt;
-        &lt;/div&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;p&gt;This project was a lot of fun to write; well, at least for the UWP head anyway. Never before had I even conceived of trying to write a spreadsheet, yet here I was six GUI's in with one to go and I didn't want to turn back now. It actually turned out to be both easier and more difficult than I had imagined:&lt;/p&gt;
-&lt;p&gt;Easier in that the business logic of a spreadsheet application turned out to be surprisingly simple and involved building a recursive dependency tree whenever any cell changed and then evaluating each of the dependencies using an &lt;a href="https://www.nuget.org/packages/XLParser/"&gt;off-the-shelf expression parser&lt;/a&gt; married to a custom expression visitor implementation. All this was isolated in a &lt;a href="https://github.com/ibebbs/SevenGuis/tree/master/src/Cells/Cells.Common/Spreadsheet"&gt;business domain&lt;/a&gt; with communication between this domain and the MVVM layer taking place via events transmitted over a message bus.&lt;/p&gt;
-&lt;p&gt;The view layer on the other hand was very, very frustrating. It proved to be impossible to find a DataGrid control for UWP that worked with both row &lt;em&gt;and&lt;/em&gt; column virtualization so I ended up having to instantiate the entire spreadsheet ahead of time. This was possible due to the description of the problem specifying that there need be only 100 rows and 26 columns otherwise I would have had to write some (probably quite clunky) custom control or give up as it would have been too much work for a blog post. After this I then found that the DataGrid I had chosen to use (because it had been ported specifically to the Uno platform - &lt;a href="https://www.nuget.org/packages/Uno.Microsoft.Toolkit.Uwp.UI.Controls.DataGrid/5.1.0-build.200.gf9c311b069"&gt;Uno.Microsoft.Toolkit.Uwp.UI.Controls.DataGrid&lt;/a&gt;) didn't actually work for Android or WASM anyway and just displayed an empty grid.&lt;/p&gt;
-&lt;p&gt;It would have been fun to dig into the issues I found with the DataGrid on Android and WASM as it would have been cool to say that I'd written a cross-platform spreadsheet. Unfortunately I ran out of time and will, for now, have to admit defeat here.&lt;/p&gt;
-&lt;p&gt;Anyway, in this task the &lt;code&gt;MainPageViewModel&lt;/code&gt; simply consisted of a collection of &lt;code&gt;RowViewModel&lt;/code&gt; instances which, in turn, consisted of &lt;code&gt;CellViewModel&lt;/code&gt; instances. As I wasn't able to use virtualisation in the DataGrid, all behaviour was in the &lt;code&gt;CellViewModel&lt;/code&gt; and consisted of:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;ShouldUpdateContentWhenContentChangedReceived&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;ShouldPublishTextChangedWhenTextChanged&lt;/code&gt;&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Both these behaviours interact with the message bus to send change events or receive content updates.&lt;/p&gt;
-&lt;h1 id="conclusion"&gt;Conclusion&lt;/h1&gt;
-&lt;h3 id="uno-platform"&gt;Uno Platform&lt;/h3&gt;
-&lt;p&gt;As I hope you have seen from the above, the Uno Platform really does make it possible to develop true &amp;quot;write-once, run-anywhere&amp;quot; applications. Its ability to provide a consistent UWP API across multiple devices/browsers is truly a monumental achievement.&lt;/p&gt;
-&lt;p&gt;However, as we have also seen, it can sometimes struggle with low-level or complicated UIs which can make some advanced UX patterns difficult to get working consistently across all platforms. I was very surprised that the DataGrid control didn't function at all on Android or WASM as this control is often considered central to a lot of line-of-business applications.&lt;/p&gt;
-&lt;p&gt;Fortunately Uno is currently under active development and has a very engaged community of developers reporting issues and submitting pull-requests. Version 2.0 of the platform has &lt;a href="https://platform.uno/announcing-uno-platform-2-0/"&gt;just been released&lt;/a&gt; and new packages are pushed to &lt;a href="https://www.nuget.org/packages/Uno.UI"&gt;nuget&lt;/a&gt; almost every day. I therefore have high hopes that many of the issues I encountered here will be resolved in the near future.&lt;/p&gt;
-&lt;p&gt;So would I advocate the use of Uno platform? Well, as any good developer will tell you, &amp;quot;It depends&amp;quot;. It certainly has a great many strengths and should be considered a viable alternative to Xamarin but the fact that it's still suffering some growing pains can't be denied. I guess if I were &lt;a href="https://www.thoughtworks.com/radar"&gt;ThoughtWorks&lt;/a&gt;, the Uno Platform would feature in the 'Trial' section of my &lt;a href="https://www.thoughtworks.com/radar/languages-and-frameworks"&gt;Technology Radar&lt;/a&gt;.&lt;/p&gt;
-&lt;h3 id="guis"&gt;7GUIs&lt;/h3&gt;
-&lt;p&gt;The &amp;quot;7GUIs Programming Benchmark&amp;quot; provided a diverse and interesting set of challenges. From the super simple 'Counter' to the implementation of a full spreadsheet it really does cover a lot of common UI/UX patterns.&lt;/p&gt;
-&lt;p&gt;As a benchmark for evaluating the Uno platform however, I don't think it was a particularly good choice. Uno is targeted at rich visuals using controls which have native interaction patterns across multiple form-factors, something that almost certainly wasn't a consideration for the creators of the 7GUIs.&lt;/p&gt;
-&lt;h3 id="declarative-behaviours-frp"&gt;Declarative Behaviours &amp;amp; FRP&lt;/h3&gt;
-&lt;p&gt;While a significant amount of the detail regarding these aspects of the UI implementation had to be omitted from the descriptions of each task, I trust you are able to see how Behavioural Design can be incorporated into declarative code and how FRP can provide numerous benefits to an implementation.&lt;/p&gt;
-&lt;p&gt;I would very much encourage you to examine the use of these paradigms in the implementation of the UIs and more broadly from the growing body of code employing these practices. Also, if you get the chance, take some time to &lt;a href="https://fsharp.org/"&gt;learn F#&lt;/a&gt;; I almost guarantee that, once you hit that functional &amp;quot;light-bulb&amp;quot; moment, your C# will never be the same again.&lt;/p&gt;
-&lt;h3 id="dual-screen-devices"&gt;Dual-Screen Devices&lt;/h3&gt;
-&lt;p&gt;So how does this all fare for the underlying use case of developing applications for the Surface Neo and Surface Duo? Well, personally I'm very encouraged. The current version of Uno works beautifully with my preferred implementation paradigms and, with just a couple of exceptions, provided an extremely consistent and stable API surface to work with across all its supported platforms.&lt;/p&gt;
-&lt;p&gt;I am very much looking forward to getting my hands on these devices (nudge, nudge, Microsoft) and spending some serious time looking at what can be achieved with these tools and form-factors. I'm especially interested to try some of the new &lt;a href="https://platform.uno/winui-on-windows7-via-unoplatform/"&gt;WinUI features&lt;/a&gt; in a cross platform application; I mean, can you imagine some of the beautiful new &lt;a href="https://docs.microsoft.com/en-us/windows/uwp/design/style/acrylic"&gt;Acrylic UIs&lt;/a&gt; running natively on Android... woah.&lt;/p&gt;
-&lt;h3 id="source-questions-feedback"&gt;Source, Questions &amp;amp; Feedback&lt;/h3&gt;
-&lt;p&gt;All the source code for this article can be found in my &lt;a href="https://github.com/ibebbs/SevenGuis"&gt;SevenGuis Github Repository&lt;/a&gt;. Fork it and have a play (and send me a PR if you manage to resolve any of the issues I got stumped by).&lt;/p&gt;
-&lt;p&gt;I'd also love to hear any questions or feedback you may have about this article. Feel free to get in touch using any of the social links below or from my &lt;a href="https://ian.bebbs.co.uk/about"&gt;about page&lt;/a&gt;.&lt;/p&gt;
-&lt;h1 id="and-finally"&gt;And finally...&lt;/h1&gt;
-&lt;p&gt;&lt;img src="https://media.giphy.com/media/kBM8KY3zrk7D2/giphy.gif" class="img-fluid" alt="Merry Christmas" /&gt;&lt;/p&gt;
-&lt;script type="text/javascript"&gt;
-$(document).on('click', '[data-toggle="lightbox"]', function(event) {
-                event.preventDefault();
-                $(this).ekkoLightbox();
-            });
-&lt;/script&gt;
-&lt;div id="myModal" class="modal"&gt;
-  &lt;span class="close cursor" onclick="closeModal()"&gt;&amp;times;&lt;/span&gt;
-  &lt;div class="modal-content"&gt;
-    &lt;div class="mySlides"&gt;
-      &lt;div class="numbertext"&gt;1 / 4&lt;/div&gt;
-      &lt;img src="https://eugenkiss.github.io/7guis/static/counter.9cd92091.png" alt="Counter Task"&gt;
-    &lt;/div&gt;
-    &lt;div class="mySlides"&gt;
-      &lt;div class="numbertext"&gt;2 / 4&lt;/div&gt;
-      &lt;img src="/Content/Uno/Counter-Android.gif" alt="Counter on Android"&gt;
-    &lt;/div&gt;
-    &lt;div class="mySlides"&gt;
-      &lt;div class="numbertext"&gt;3 / 4&lt;/div&gt;
-      &lt;img src="https://media.giphy.com/media/D28t0Rto3daKI/giphy.gif" alt="Counter on iOS"/&gt;
-    &lt;/div&gt;
-    &lt;div class="mySlides"&gt;
-      &lt;div class="numbertext"&gt;4 / 4&lt;/div&gt;
-      &lt;img src="/Content/Uno/Counter-UWP.gif" alt="Counter on UWP"/&gt;
-    &lt;/div&gt;
-    &lt;div class="mySlides"&gt;
-      &lt;div class="numbertext"&gt;5 / 5&lt;/div&gt;
-      &lt;img src="/Content/Uno/Counter-WASM.gif" alt="Counter on WASM"/&gt;
-    &lt;/div&gt;
-    &lt;div class="mySlides"&gt;
-      &lt;div class="numbertext"&gt;6 / 6&lt;/div&gt;
-      &lt;img src="/Content/Uno/Counter-WPF.gif" alt="Counter on WPF"/&gt;
-    &lt;/div&gt;
-    &lt;!-- Next/previous controls --&gt;
-    &lt;a class="prev" onclick="plusSlides(-1)"&gt;&amp;#10094;&lt;/a&gt;
-    &lt;a class="next" onclick="plusSlides(1)"&gt;&amp;#10095;&lt;/a&gt;
-    &lt;!-- Caption text --&gt;
-    &lt;div class="caption-container"&gt;
-      &lt;p id="caption"&gt;&lt;/p&gt;
-    &lt;/div&gt;
-  &lt;/div&gt;
-&lt;/div&gt;
-</content>
-		<summary>&lt;p&gt;The &lt;a href="https://platform.uno/"&gt;Uno platform&lt;/a&gt; allows native UWP code to be run across Windows, Android, iOS and even in the browser. In this post I will cover the use of the Uno Platform to implement the &lt;a href="https://eugenkiss.github.io/7guis/"&gt;7GUIs: A GUI Programming Benchmark&lt;/a&gt;, across 5 platforms, employing FRP paradigms and all in a (mostly) seasonal style! Will it all hang together? Read on to find out.&lt;/p&gt;</summary>
 	</entry>
 </feed>

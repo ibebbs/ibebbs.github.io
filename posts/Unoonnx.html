@@ -1,0 +1,520 @@
+﻿
+<!DOCTYPE html>
+<html lang="en">
+        <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=Edge"/>
+
+        <title>Ian Bebbington - State-Of-The-Art Natural Language Processing in .NET on the Edge</title>
+        <meta name="description" content="IObservable&lt;Opinion&gt;" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">        
+
+        <link type="application/rss+xml" rel="alternate" title="Ian Bebbington" href="/feed.rss" />
+                <link type="application/atom+xml" rel="alternate" title="Ian Bebbington" href="/feed.atom" />
+        <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+        <link rel="icon" href="/favicon.ico" type="image/x-icon">
+
+        <link href="/assets/css/bootstrap.min.css" rel="stylesheet" />
+        <link href="/assets/css/highlight.css" rel="stylesheet">
+        <link href="/assets/css/clean-blog.css" rel="stylesheet" />
+        <link href="/assets/css/master.css" rel="stylesheet" />
+        <link href="/assets/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+        <link href='//fonts.googleapis.com/css?family=Lora:400,700,400italic,700italic' rel='stylesheet' type='text/css'>
+        <link href='//fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
+        <link href="/assets/css/override.css" rel="stylesheet" />
+
+
+        <meta name="application-name" content="Ian Bebbington" />
+        <meta name="msapplication-tooltip" content="Ian Bebbington" />
+        <meta name="msapplication-starturl" content="/" />
+
+        <meta property="og:title" content="Ian Bebbington - State-Of-The-Art Natural Language Processing in .NET on the Edge" />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content="http://ian.bebbs.co.uk/posts/Unoonnx" />
+        <!-- TODO: More social graph meta tags -->
+
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.css" rel="stylesheet">
+<link href="/assets/css/ekko-override.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ekko-lightbox/5.3.0/ekko-lightbox.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.css" />
+<script src="https://cdn.jsdelivr.net/gh/fancyapps/fancybox@3.5.7/dist/jquery.fancybox.min.js"></script>
+
+<!-- Global site tag (gtag.js) - Google Analytics -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-70151903-1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-70151903-1');
+</script>
+
+
+        </head>
+        <body>
+                
+                <!-- Navigation -->
+                <nav class="navbar navbar-default navbar-custom navbar-fixed-top">
+                        <div class="container-fluid">
+                                <!-- Brand and toggle get grouped for better mobile display -->
+                                <div class="navbar-header page-scroll">
+                                        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-collapse">
+                                        <span class="sr-only">Toggle navigation</span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        <span class="icon-bar"></span>
+                                        </button>
+                                        <a class="navbar-brand" href="/">Ian Bebbington</a>
+                                </div>
+                        
+                                <!-- Collect the nav links, forms, and other content for toggling -->
+                                <div class="collapse navbar-collapse" id="navbar-collapse">
+                                        <ul class="nav navbar-nav navbar-right">
+                                                        <li><a href="/posts">Archive</a></li>
+        <li><a href="/tags">Tags</a></li>
+        <li><a href="/about">About</a></li>
+ 
+                                        </ul>
+                                </div>
+                                <!-- /.navbar-collapse -->
+                        </div>
+                        <!-- /.container -->
+                </nav>
+                
+                <!-- Page Header -->
+                <header class="intro-header" id="intro-header">
+                        <div class="container">
+                                <div class="row">
+                                        <div class="col-md-12">
+
+    
+<div class="post-heading">
+    <h1>State-Of-The-Art Natural Language Processing in .NET on the Edge</h1>
+        <h2 class="subheading">HuggingFace &#x2B; .NET &#x2B; Uno Platform FTW!</h2>
+    <div class="meta">        
+Published on 06 May 2021<br>    </div>
+        <div class="tags">
+                    <a role="button" href="/tags/HuggingFace" class="btn btn-default btn-xs">HuggingFace</a>
+                    <a role="button" href="/tags/Linux" class="btn btn-default btn-xs">Linux</a>
+                    <a role="button" href="/tags/ML" class="btn btn-default btn-xs">ML</a>
+                    <a role="button" href="/tags/MLNET" class="btn btn-default btn-xs">ML.NET</a>
+                    <a role="button" href="/tags/Uno-Platform" class="btn btn-default btn-xs">Uno Platform</a>
+                    <a role="button" href="/tags/WinUI" class="btn btn-default btn-xs">WinUI</a>
+        </div>     
+</div>
+                                        </div>
+                                </div>
+                        </div>
+                </header>
+                
+                <!-- Main Content -->
+                <div class="container">
+                        <div class="row">
+                                <div id="content" class="col-md-12">
+                                        
+
+<h2 id="tldr">TL;DR</h2>
+<p>In this post I show how .NET can be used to run state-of-the-art Natural Language Processing (NLP) models on &quot;the edge&quot;. I provide a simple means for downloading and converting 'transformer' models from <a href="https://huggingface.co/">HuggingFace</a> into models that can perform inference from managed .NET code on resource constrained devices. Finally I use <a href="https://platform.uno/">Uno Platform</a> to implement a cross-platform user-interface that allows real-time inference using these models.</p>
+<h2 id="bitizen">Bitizen</h2>
+<p>At <a href="https://www.bitizen.uk/">Bitizen</a> we are working to revitalize democracy by promoting understanding of - and engagement with - politics in the UK. As a first step towards this goal, we have built a platform which is able to ingest hundreds of forms of data from across the political landscape and present this data to users as meaningful information. Much of this data is unstructured text so we use state-of-the-art machine learning models to help us analyse, categorise and summarise the data in a manner which facilitates downstream processing (i.e. cataloging, searching, presentation, etc).</p>
+<p>Given that we are a .NET shop and that most research around ML and AI takes place using either R or Python, we usually deploy models by containerizing them in their native environment accompanied by an HTTP API. This allows us to call the model from .NET and works beautifully in our containerized, event-driven architecture.</p>
+<p>However, as we move towards promoting engagement, we wanted our smartphone app to be... well... smart. For example, while users were interacting with the app (i.e. contributing to a discussion, searching for additional information, etc) we wanted to be able to perform inferences similar to those we run on the backend on the device itself. Privacy and latency considerations meant calling a hosted endpoint wasn't really a great solution so we started looking round for alternatives.</p>
+<p>This is what we came up with...</p>
+<h3 id="a-quick-call-to-arms">A quick call-to-arms</h3>
+<p>Bitizen is currently looking for a web-developer and/or designer to help improve our online presence and bring some of our app smarts to the web. If you have an interest in UK politics and like the idea of working with a intrepid, young, bootstrapped start-up, please do <a href="mailto://ian&#64;bitizen.uk">drop us a line</a> as we'd love to hear from you.</p>
+<h2 id="ml.net-vs-nlp">ML.NET vs NLP</h2>
+<p>Microsoft has a fairly strong ML offering for .NET developers in <a href="https://dotnet.microsoft.com/apps/machinelearning-ai/ml-dotnet">ML.NET</a>. Indeed, I illustrated ML.NET's capabilities in a blog post last year titled <a href="https://ian.bebbs.co.uk/posts/MLinUWP">'State-of-the-art ML in UWP'</a> which used a recent (at the time) ML model to perform salient object detection and image segmentation; a process very much suited to ML.NET strengths. Unfortunately the story around using ML.NET for NLP wasn't so strong and there were very few examples of how to use modern, <a href="https://en.wikipedia.org/wiki/Transformer_(machine_learning_model)">'transformer'</a> based models from within ML.NET.</p>
+<p>Until, that is, <a href="https://github.com/GerjanVlot">Gjeran Vlot</a> published his <a href="https://github.com/GerjanVlot/BERT-ML.NET">BERT-ML.NET repository on GitHub</a>. In an incredibly concise and simple implementation, he illustrated how a <a href="https://en.wikipedia.org/wiki/BERT_(language_model)">BERT based</a> ONNX model could be used within ML.NET to perform 'Question Answering' (aka machine comprehension) based inference. This was fantastic and exactly what we had been looking for... except... we didn't want to perform (just) 'Question Answering' based inference. BERT - and related transformers - can be used for a broad variety of tasks including (but certainly not limited to) sentiment analysis, text classification and named entity recognition.</p>
+<p>Given the other prepared models available in the <a href="https://github.com/onnx/models">ONNX Model Zoo</a> - from which Gjeran sourced his model - seemed fairly limited, we decided to go model hunting...</p>
+<h2 id="hugging-face">Hugging Face</h2>
+<p>If you've not been to <a href="https://huggingface.co/">Hugging Face</a> before, I would certainly recommend checking it out. Through the provision of excellent tooling and the formation of a vibrant, open community of users, Hugging Face have established themselves as the de-facto source for NLP models. On a single site you can explore, test and download models (with accompanying parameters and code) from a huge variety of sources (including Microsoft, Google and Elastic), pretrained (but with <a href="https://huggingface.co/transformers/training.html">fine-tuning recommended</a>) for a huge variety of use cases.</p>
+<p>I decided that I wanted to initially try something that would give me quantifiable results (i.e. something more than just a probability) and knew that I wanted to try to run a model on an 'edge' (i.e. resource constrained) device. This meant finding an alternative to the BERT based models which are typically in excess of 400Mb.</p>
+<p>Fortunately Hugging Face had me covered and, in short order, I had decided to use a <a href="https://huggingface.co/distilbert-base-uncased">DistilBERT</a> based model trained for Token Classification (aka Named Entity Recognition). After quickly experimenting with a few, I found <a href="https://huggingface.co/elastic/distilbert-base-cased-finetuned-conll03-english">a model by Elastic</a> that provided pretty good results and, at less than half the size of a comparable BERT model, seemed like it might be usable on an edge device.</p>
+<h2 id="open-neural-network-exchange">Open Neural Network Exchange</h2>
+<p>However, Hugging Face provides models for ease of consumption from it's own toolkit which usually means they're made available in either PyTorch or Tensorflow based formats. ML.NET, on the other hand, is only able to load models in the Open Neural Network Exchange (ONNX) format. This meant I needed to convert the models before I could use them.</p>
+<p>Yet again, Hugging Face came to the rescue through the provision of <a href="https://huggingface.co/transformers/serialization.html">an API</a> which allows export of their models to ONNX. Knowing I would likely want to use multiple models in this manner (and not wanting to install various versions of Python on my workstation) I decided to build a docker container which would run the conversion and save the converted ONNX model to a mapped location. This proved to be shockingly easy with the image built using just a single Dockerfile containing:</p>
+<pre><code>FROM python:latest
+
+RUN pip install tensorflow
+RUN pip install torch
+RUN pip install transformers
+RUN pip install keras2onnx
+RUN pip install onnxruntime
+
+ENTRYPOINT [ &quot;python&quot;, &quot;/usr/local/lib/python3.9/site-packages/transformers/convert_graph_to_onnx.py&quot; ]
+</code></pre>
+<p>This could then be run from Powershell like this:</p>
+<pre><code>docker run --rm -v ${PWD}/Output:/Output ibebbs/huggingfacetoonnx:latest --framework pt --opset 12 --pipeline ner --model elastic/distilbert-base-cased-finetuned-conll03-english /Output/elastic/distilbert-base-cased-finetuned-conll03-english.onnx
+</code></pre>
+<p>Whereupon the script will download the specified model (in this case 'elastic/distilbert-base-cased-finetuned-conll03-english') using the specified framework ('pt' for PyTorch, 'tf' for Tensorflow), convert it to ONNX (using opset 12) including layers for the specific pipeline (in this case 'ner' for named entity recognition) and finally write the converted model to the 'Output/elastic' subdirectory of the current folder.</p>
+<p>Should you wish to use this docker image, it is available - accompanied by full usage instructions - on <a href="https://hub.docker.com/r/ibebbs/huggingfacetoonnx">Docker Hub</a> including a link to the <a href="https://github.com/ibebbs/HuggingFaceToOnnx">source repository</a>.</p>
+<h2 id="netron">Netron</h2>
+<p>After downloading and converting the model, we need to examine it to determine the shape of the input and output layers. This is very easily done with <a href="https://netron.app/">Netron</a>.</p>
+<p>Shown below is (a small section of) the DistilBERT model. By clicking on the 'input_ids' node a side-pane is shown which includes all the information we need.</p>
+<p><a data-fancybox="Netron" href="/Content/Unoonnx/Netron - Full.png"><img src="/Content/Unoonnx/Netron - Full.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="Neutron"/></a></p>
+<p>As can be seen, Netron shows us the two inputs to the model: <code>input_ids</code> and <code>attention_mask</code>, both of which being two dimensional arrays of <code>Int64</code> values. It also shows us the output from the model: <code>output_0</code>, a three dimensional array of <code>float</code>.</p>
+<h3 id="model-input">Model Input</h3>
+<p>While using this model for inference, the <code>attention_mask</code> input is simply filled with 1s (each token has equal attention) so we will not discuss this input any further. Equally we will not be using multiple batches in this project so the <code>batch</code> dimension can be ignored leaving us with a single, <code>sequence</code> dimension of values to fill for <code>input_ids</code>.</p>
+<p>In this model, the size of the <code>sequence</code> dimension is not specified illustrating that this model can accept dynamically sized input. As such, should we wanted to perform NLP on the sentence &quot;Sarah lives in London and works for Acme Corporation&quot;, we might expect to provide something like this to the <code>input_ids</code> input:</p>
+<table class="table">
+<thead>
+<tr>
+<th style="text-align: right;">Sequence</th>
+<th>Word</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td>Sarah</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td>lives</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td>in</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td>London</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td>and</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td>works</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td>for</td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td>Acme</td>
+</tr>
+<tr>
+<td style="text-align: right;">8</td>
+<td>Corporation.</td>
+</tr>
+</tbody>
+</table>
+<p>But, as can be seen above, the model accepts integers, not strings, so we must first 'tokenize' the input using a vocabulary specific to this model. This is done by downloading the vocabulary for the model from Hugging Face (available <a href="https://huggingface.co/elastic/distilbert-base-cased-finetuned-conll03-english/blob/main/vocab.txt">here</a>) then using a specific tokenizer to convert the input text into a series of tokens in a format the model expects; for BERT based models, a <a href="https://machinelearnit.com/2018/08/19/wordpiece-tokenisation/">&quot;WordPiece Tokenizer&quot;</a> is used.</p>
+<p>Fortunately for us, we're able to use the &quot;WordPieceTokenizer&quot; provided in Gjeran's <a href="https://github.com/GerjanVlot/BERT-ML.NET/blob/master/Microsoft.ML.Models.BERT/Tokenizers/WordPieceTokenizer.cs">BERT-ML.NET repository</a>. Running the above input through this tokenizer would give use the following <code>input_ids</code> value:</p>
+<table class="table">
+<thead>
+<tr>
+<th style="text-align: right;">Sequence</th>
+<th style="text-align: right;">Token Id</th>
+<th>Token</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">101</td>
+<td>[CLS]</td>
+</tr>
+<tr>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">21718</td>
+<td>sa</td>
+</tr>
+<tr>
+<td style="text-align: right;">2</td>
+<td style="text-align: right;">10659</td>
+<td>##rah</td>
+</tr>
+<tr>
+<td style="text-align: right;">3</td>
+<td style="text-align: right;">2491</td>
+<td>lives</td>
+</tr>
+<tr>
+<td style="text-align: right;">4</td>
+<td style="text-align: right;">1107</td>
+<td>in</td>
+</tr>
+<tr>
+<td style="text-align: right;">5</td>
+<td style="text-align: right;">25338</td>
+<td>lo</td>
+</tr>
+<tr>
+<td style="text-align: right;">6</td>
+<td style="text-align: right;">17996</td>
+<td>##ndon</td>
+</tr>
+<tr>
+<td style="text-align: right;">7</td>
+<td style="text-align: right;">1105</td>
+<td>and</td>
+</tr>
+<tr>
+<td style="text-align: right;">8</td>
+<td style="text-align: right;">1759</td>
+<td>works</td>
+</tr>
+<tr>
+<td style="text-align: right;">9</td>
+<td style="text-align: right;">1111</td>
+<td>for</td>
+</tr>
+<tr>
+<td style="text-align: right;">10</td>
+<td style="text-align: right;">170</td>
+<td>a</td>
+</tr>
+<tr>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">1665</td>
+<td>##c</td>
+</tr>
+<tr>
+<td style="text-align: right;">12</td>
+<td style="text-align: right;">3263</td>
+<td>##me</td>
+</tr>
+<tr>
+<td style="text-align: right;">13</td>
+<td style="text-align: right;">9715</td>
+<td>corporation</td>
+</tr>
+<tr>
+<td style="text-align: right;">14</td>
+<td style="text-align: right;">119</td>
+<td>.</td>
+</tr>
+<tr>
+<td style="text-align: right;">15</td>
+<td style="text-align: right;">102</td>
+<td>[SEP]</td>
+</tr>
+</tbody>
+</table>
+<p>And it's these 'Token Ids' that are the input to our model.</p>
+<h3 id="model-output">Model Output</h3>
+<p>As we can see, the <code>output_0</code> layer consists of the same <code>batch</code> and <code>sequence</code> dimensions but adds an additional dimension with 9 elements. This additional dimension contains the probability of the token at <code>[batch,sequence]</code> belonging to a specific classification. The labels for each classifications are provided by the model's <a href="https://huggingface.co/elastic/distilbert-base-cased-finetuned-conll03-english/blob/main/config.json">'config.json' file on Hugging Face</a> as shown below:</p>
+<pre><code class="language-json">{
+  ...
+
+  &quot;id2label&quot;: {
+    &quot;0&quot;: &quot;O&quot;,
+    &quot;1&quot;: &quot;B-PER&quot;,
+    &quot;2&quot;: &quot;I-PER&quot;,
+    &quot;3&quot;: &quot;B-ORG&quot;,
+    &quot;4&quot;: &quot;I-ORG&quot;,
+    &quot;5&quot;: &quot;B-LOC&quot;,
+    &quot;6&quot;: &quot;I-LOC&quot;,
+    &quot;7&quot;: &quot;B-MISC&quot;,
+    &quot;8&quot;: &quot;I-MISC&quot;
+  },
+  ...
+}
+</code></pre>
+<p>As can be seen, this model uses <a href="https://en.wikipedia.org/wiki/Inside%E2%80%93outside%E2%80%93beginning_(tagging)"><code>Inside-outside-beginning</code> tagging</a> to delineate the beginning and inside of a specific classification from other classifications but, for the most part we can just treat this as 5 classifications:</p>
+<ol start="0">
+<li>Other</li>
+<li>Person</li>
+<li>Organisation</li>
+<li>Location</li>
+<li>Misc</li>
+</ol>
+<h2 id="bertonnx">BertONNX</h2>
+<p>Armed with the model and an understanding of how to provide input/interpret output, I spiked out a quick .NET Core test project. Looking to simplify Gjeran's implementation even further I ended up with end-to-end, command line based inference engine in just 7 classes (including Gjeran's WordPieceTokenizer along with a Hugging Face configuration deserializer).</p>
+<p>Should you wish to take a look, the source for this spike can be found in my <a href="https://github.com/ibebbs/BertOnnx">BertOnnx repository on Github</a>.</p>
+<p>By far the biggest headache was working out how to shape the input (<code>Feature</code>) and output (<code>Result</code>) types to match the expected model shapes. ML.NET uses <code>[ColumnName([name])]</code> and <code>[VectorType([x,y])]</code> property attributes to bind properties to the model but, given the model was capable of processing dynamically sized input, I wasn't sure what values to use for the <code>VectorType</code> attribute.</p>
+<p>Initially I tried omitting shape information from the attribute (<code>[VectorType]</code>) whereupon the app unceremoniously crashed with the error &quot;Variable length input columns not supported&quot;. A little searching revealed that this error meant exactly what it said and we couldn't use dynamically sized input with ML.NET!</p>
+<p>So, instead I elected to use try a different approach and pad all input to a specific size (256 elements). This gave me <code>Feature</code> and <code>Result</code> types that looked like this:</p>
+<pre><code>public class Feature
+{
+    [VectorType(1, 256)]
+    [ColumnName(&quot;input_ids&quot;)]
+    public long[] Tokens { get; set; }
+
+    [VectorType(1, 256)]
+    [ColumnName(&quot;attention_mask&quot;)]
+    public long[] Attention { get; set; }
+}
+</code></pre>
+<pre><code>public class Result
+{
+    [VectorType(1,256,9)]
+    [ColumnName(&quot;output_0&quot;)]
+    public float[] Output { get; set; }
+}
+</code></pre>
+<p>After this it was fairly plain sailing and in short order I had this:</p>
+<p><a data-fancybox="BertONNX - Full" href="/Content/Unoonnx/BertONNX - Full.gif"><img src="/Content/Unoonnx/BertONNX - Full.gif" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="BertONNX"/></a></p>
+<p>As you can see, the DistilBERT model correct identifies 'Sarah' as a 'B-PER' (person), 'London' as a 'B-LOC' (location) and 'Acme' as a 'B-ORG' (organisation) in just 202ms. Perfect!</p>
+<h2 id="quantization">Quantization</h2>
+<p>While having a custom built inference engine was pretty cool, I was a little concerned about memory consumption if I wanted to use the model on edge devices. Despite the DistilBERT model being significantly smaller than full BERT, memory consumption during inference hit around 1Gb. This would almost certainly be a stretch for many of the devices I'd like to run this model on.</p>
+<p>Fortunately, ONNX has a little trick up it's sleeve called <a href="https://www.onnxruntime.ai/docs/how-to/quantization.html">'Quantization'</a>.</p>
+<p>Quoting <a href="https://medium.com/microsoftazure/faster-and-smaller-quantized-nlp-with-hugging-face-and-onnx-runtime-ec5525473bb7">this article</a> on the matter:</p>
+<blockquote class="blockquote">
+<p>Quantization approximates floating-point numbers with lower bit width numbers, dramatically reducing memory footprint and accelerating performance. Quantization can introduce accuracy loss since fewer bits limit the precision and range of values. However, researchers have extensively demonstrated that weights and activations can be represented using 8-bit integers (INT8) without incurring significant loss in accuracy.</p>
+<p>Compared to FP32, INT8 representation reduces data storage and bandwidth by 4x, which also reduces energy consumed. In terms of inference performance, integer computation is more efficient than floating-point math.</p>
+</blockquote>
+<p>Incredibly, quantizing a model using Hugging Face's ONNX export is as simple as specifying a <code>--quantize</code> flag. This meant generating a quantized version of the model took no more than effort than just running the following command:</p>
+<pre><code>docker run --rm -v ${PWD}/Output:/Output ibebbs/huggingfacetoonnx:latest --framework pt --opset 12 --pipeline ner --model elastic/distilbert-base-cased-finetuned-conll03-english --quantize /Output/quantized-distilbert-base-cased-finetuned-conll03-english/model.onnx
+</code></pre>
+<p>The quantized version of the model was just 64Mb (75% smaller) and, due to it's input and output layers remaining unchanged, it was a drop in replacement for the unquantized model. Running with the quantized version resulted in:</p>
+<p><a data-fancybox="BertONNX - Quantized" href="/Content/Unoonnx/BertONNX - Quantized.gif"><img src="/Content/Unoonnx/BertONNX - Quantized.gif" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="BertONNX"/></a></p>
+<p>As you can see, the model loaded significantly faster and inference speed also got a boost. Best of all, memory consumption during inference was reduced to just 265Mb, definitely within the realms of possibility for an edge device.</p>
+<p>Buoyed by this success, I pushed on to...</p>
+<h2 id="unoonnx">UnoOnnx</h2>
+<p>As per the initial driver for this exploration, I wanted an app on an edge device that would allow me to perform interactive inference. Knowing that <a href="https://platform.uno/">Uno Platform</a> could easily create apps that run across a variety of devices, I decided to whip up an app to do just this.</p>
+<p>And so was born UnoOnnx ('Oo-noo-nx'?):</p>
+<video class="img-responsive" style="margin: auto; width:66%; margin-top: 6px; margin-bottom: 6px;" controls>
+  <source src="/Content/Unoonnx/UnoOnnx - Windows.mp4" type="video/mp4"/>
+Your browser does not support the video tag
+</video>
+<p>As you can see, the first inference is quite slow as it (lazily) loads the model but subsequent inferences are more than fast enough for an interactive app.</p>
+<p>Then, with a little Uno Platform magic, I ran exactly the same code under Linux ('Oo-noo-nux'?):</p>
+<video class="img-responsive" style="margin: auto; width:66%; margin-top: 6px; margin-bottom: 6px;" controls>
+  <source src="/Content/Unoonnx/UnoOnnx - Linux.mp4" type="video/mp4"/>
+Your browser does not support the video tag
+</video>
+<p>(BTW, Loading the model isn't usually that slow - my machine was busy doing something else while I recorded this video).</p>
+<p>Pretty Neat!</p>
+<p>As with BertOnnx, the source for UnoOnnx is <a href="https://github.com/ibebbs/UnoOnnx">available on GitHub</a> if you want to take a look.</p>
+<h2 id="moving-forward">Moving Forward</h2>
+<p>In a subsequent post - and assuming there's sufficient interest - I hope to illustrate how to run these models on mobile devices (i.e. Android &amp; iOS). If this is of interest to you, please drop me a tweet and/or star the repositories above to let me know.</p>
+<h2 id="conclusion">Conclusion</h2>
+<p>As you can see, with the right toolset and a little bit of knowledge, it is fairly straight forward to use state-of-the-art machine learning models from .NET even within the resource constrained environment of an 'edge' device. While some use-cases that depend on sequence length (i.e. sentiment analysis) might be tricky to implement effectively in ML.NET, many other uses (text generation/classification, machine comprehension, translation, etc) should be pretty much pattern part.</p>
+<p>However, working through the above has left me extremely concerned about Microsoft's strategy towards desktop (i.e. non-web) development. It seems to me that many of Microsoft's frameworks and SDKs for .NET desktop development are suffering from a distinct lack of resourcing/focus meaning development is slow and the frameworks are getting left behind by other languages/platforms. For example, here is the commit chart of ML.NET comparer to Hugging Face's native API:</p>
+<table>
+<tr>
+<td>
+<a data-fancybox="CommitComparison" href="/Content/Unoonnx/ML Commits.png"><img src="/Content/Unoonnx/ML Commits.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="ML.NET"/></a>
+</td>
+<td>
+<a data-fancybox="CommitComparison" href="/Content/Unoonnx/Huggingface Commits.png"><img src="/Content/Unoonnx/Huggingface Commits.png" class="img-responsive" style="margin: auto; max-width:80%; margin-top: 6px; margin-bottom: 6px;" alt="HuggingFace"/></a>
+</td>
+</tr>
+</table>
+<p>I think you'll agree, one of these projects looks significantly healthier than the other.</p>
+<p>Furthermore, Microsoft's strategy/execution around UWP/WinUI/Project Reunion is an <strong>utter shambles</strong>. While I understand WinUI 3.0 is very new and Project Reunion still in preview, I honestly couldn't believe how poor the development experience was with these technologies.</p>
+<p><em><strong>&#64;Microsoft, were it not for Uno Platform providing at least a modicum of continuity through the disastrous landscape that is Windows UI development, I - and I believe many others - would have jumped ship to other UI platforms a long time ago.</strong></em>
+<em><strong>Please step up your game here. Many of us who have stuck with Windows UI technologies despite its fragmented and frustrating history really are getting to the end of our tether.</strong></em></p>
+<h2 id="finally">Finally</h2>
+<p>If you're interested in deploying state-of-the-art machine learning models within .NET or using the Uno Platform to deliver cross-platform apps, then please feel free to drop me a line using any of the links below or from my <a href="https://ian.bebbs.co.uk/about">about page</a>. As a freelance software developer and .NET consultant I'm always interested in hearing from potential new clients or ideas for new collaborations.</p>
+
+
+
+                                </div>
+                        </div>
+                </div>
+                
+                <hr>
+                
+                <!-- Footer -->
+                <footer>
+                        <div class="container">
+        <div class="row">
+                <div class="col-md-12">
+                        <ul class="list-inline text-center">
+    <li>
+        <a href="https://twitter.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-twitter fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://www.linkedin.com/in/ianbebbington/">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-linkedin fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li />
+    <li>
+        <a href="https://github.com/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-github fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+    <li>
+        <a href="https://stackoverflow.com/users/628821/ibebbs">
+            <span class="fa-stack fa-lg">
+                <i class="fa fa-circle fa-stack-2x"></i>
+                <i class="fa fa-stack-overflow fa-stack-1x fa-inverse"></i>
+            </span>
+        </a>
+    </li>
+</ul>
+                        <br />
+                        <ul class="list-inline text-center">
+                                <li>                                
+                                        <!-- Buy Me A Coffee Button -->
+                                        <style>.bmc-button img{width: 27px !important;margin-bottom: 1px !important;box-shadow: none !important;border: none !important;vertical-align: middle !important;}.bmc-button{line-height: 36px !important;height:37px !important;text-decoration: none !important;display:inline-flex !important;color:#FFFFFF !important;background-color:#FF813F !important;border-radius: 3px !important;border: 1px solid transparent !important;padding: 1px 9px !important;font-size: 22px !important;letter-spacing: 0.6px !important;box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5) !important;-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;margin: 0 auto !important;font-family:'Cookie', cursive !important;-webkit-box-sizing: border-box !important;box-sizing: border-box !important;-o-transition: 0.3s all linear !important;-webkit-transition: 0.3s all linear !important;-moz-transition: 0.3s all linear !important;-ms-transition: 0.3s all linear !important;transition: 0.3s all linear !important;}.bmc-button:hover, .bmc-button:active, .bmc-button:focus {-webkit-box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;text-decoration: none !important;box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5) !important;opacity: 0.85 !important;color:#FFFFFF !important;}</style><link href="https://fonts.googleapis.com/css?family=Cookie" rel="stylesheet"><a class="bmc-button" target="_blank" href="https://www.buymeacoffee.com/BQKYdkpaN"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/BMC-btn-logo.svg" alt="Buy me a coffee"><span style="margin-left:5px">Buy me a coffee</span></a>
+                                </li>
+                        </ul>
+                        <p class="copyright text-muted">
+                                Copyright © 2021. The opinions expressed herein are my own and do not represent those of my employer or any other third-party views in any way. This work is licensed under a <a href="http://creativecommons.org/licenses/by/4.0/" rel="license">Creative Commons Attribution 4.0 International License</a>.
+                                <br />
+                                <a href="/feed.rss"><i class="fa fa-rss"></i> RSS Feed</a> | <a href="/feed.atom"><i class="fa fa-rss"></i> Atom Feed</a>
+                                <br />
+                                <strong><a href="https://wyam.io">Generated by Wyam</a></strong>
+                                <br />
+                        <br />
+                        </p>
+                </div>
+        </div>
+</div>
+                </footer> 
+
+                <script src="/assets/js/jquery.min.js"></script>
+                <script src="/assets/js/bootstrap.min.js"></script>     
+                <script src="/assets/js/highlight.pack.js"></script>   
+                <script src="/assets/js/clean-blog.js"></script>
+                <script src="/assets/js/d3.v3.min.js"></script>
+                <script src="/assets/js/trianglify.min.js"></script>
+                <script src="/assets/js/Please-compressed.js"></script>
+                <script src="/assets/js/background-check.min.js"></script>
+
+                <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+                <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+                <!--[if lt IE 9]>
+                        <script src="/assets/js/html5shiv.js"></script>
+                        <script src="/assets/js/respond.min.js"></script>
+                <![endif]-->
+                
+                
+                <script>hljs.initHighlightingOnLoad();</script>
+
+                        <script type="text/javascript">                
+                                // Header background                        
+                                var colors = Please.make_color({
+                                        colors_returned: 3,
+                                        saturation: .6
+                                });
+                                var t = new Trianglify({
+                                        x_gradient: colors,
+                                        y_gradient: ["#FFFFFF"]
+                                });
+                                var header = document.getElementById("intro-header");
+                                var pattern = t.generate(header.clientWidth, header.clientHeight);
+                                header.setAttribute('style', 'background-image: ' + pattern.dataUrl);                        
+                        </script>
+
+                <script>
+                        BackgroundCheck.init({
+                                targets: '.intro-header,.navbar',
+                                images: '.intro-header'
+                        });
+                </script>
+        </body>
+</html>
+
