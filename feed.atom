@@ -4,7 +4,7 @@
 	<title>Ian Bebbington</title>
 	<link rel="self" href="http://ian.bebbs.co.uk/" />
 	<rights>2021</rights>
-	<updated>2021-05-06T21:00:26Z</updated>
+	<updated>2021-05-07T19:15:44Z</updated>
 	<subtitle>IObservable&lt;Opinion&gt;</subtitle>
 	<entry>
 		<id>http://ian.bebbs.co.uk/posts/Unoonnx</id>
@@ -19,7 +19,7 @@
 &lt;p&gt;However, as we move towards promoting engagement, we wanted our smartphone app to be... well... smart. For example, while users were interacting with the app (i.e. contributing to a discussion, searching for additional information, etc) we wanted to be able to perform inferences similar to those we run on the backend on the device itself. Privacy and latency considerations meant calling a hosted endpoint wasn't really a great solution so we started looking round for alternatives.&lt;/p&gt;
 &lt;p&gt;This is what we came up with...&lt;/p&gt;
 &lt;h3 id="a-quick-call-to-arms"&gt;A quick call-to-arms&lt;/h3&gt;
-&lt;p&gt;Bitizen is currently looking for a web-developer and/or designer to help improve our online presence and bring some of our app smarts to the web. If you have an interest in UK politics and like the idea of working with a intrepid, young, bootstrapped start-up, please do &lt;a href="mailto://ian&amp;#64;bitizen.uk"&gt;drop us a line&lt;/a&gt; as we'd love to hear from you.&lt;/p&gt;
+&lt;p&gt;Bitizen is currently looking for a web-developer and/or designer to help improve our online presence and bring some of our app smarts to the web. If you have an interest in UK politics and like the idea of working with a intrepid, young, bootstrapped start-up, please do &lt;a href="mailto:ian&amp;#64;bitizen.uk"&gt;drop us a line&lt;/a&gt; as we'd love to hear from you.&lt;/p&gt;
 &lt;h2 id="ml.net-vs-nlp"&gt;ML.NET vs NLP&lt;/h2&gt;
 &lt;p&gt;Microsoft has a fairly strong ML offering for .NET developers in &lt;a href="https://dotnet.microsoft.com/apps/machinelearning-ai/ml-dotnet"&gt;ML.NET&lt;/a&gt;. Indeed, I illustrated ML.NET's capabilities in a blog post last year titled &lt;a href="https://ian.bebbs.co.uk/posts/MLinUWP"&gt;'State-of-the-art ML in UWP'&lt;/a&gt; which used a recent (at the time) ML model to perform salient object detection and image segmentation; a process very much suited to ML.NET strengths. Unfortunately the story around using ML.NET for NLP wasn't so strong and there were very few examples of how to use modern, &lt;a href="https://en.wikipedia.org/wiki/Transformer_(machine_learning_model)"&gt;'transformer'&lt;/a&gt; based models from within ML.NET.&lt;/p&gt;
 &lt;p&gt;Until, that is, &lt;a href="https://github.com/GerjanVlot"&gt;Gjeran Vlot&lt;/a&gt; published his &lt;a href="https://github.com/GerjanVlot/BERT-ML.NET"&gt;BERT-ML.NET repository on GitHub&lt;/a&gt;. In an incredibly concise and simple implementation, he illustrated how a &lt;a href="https://en.wikipedia.org/wiki/BERT_(language_model)"&gt;BERT based&lt;/a&gt; ONNX model could be used within ML.NET to perform 'Question Answering' (aka machine comprehension) based inference. This was fantastic and exactly what we had been looking for... except... we didn't want to perform (just) 'Question Answering' based inference. BERT - and related transformers - can be used for a broad variety of tasks including (but certainly not limited to) sentiment analysis, text classification and named entity recognition.&lt;/p&gt;
